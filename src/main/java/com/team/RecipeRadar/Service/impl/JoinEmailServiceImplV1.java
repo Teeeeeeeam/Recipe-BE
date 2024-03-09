@@ -20,7 +20,7 @@ public class JoinEmailServiceImplV1 {
     public String sensMailMessage(String email){
         code=createCode();
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("자유 게시판 가입 인증 안내입니다."); // 이메일 제목 설정
+        message.setSubject("나만의 냉장고 호원가입 인증번호 안내."); // 이메일 제목 설정
         message.setText(getText()); // 이메일 내용 설정
         message.setFrom("wlwhsrjaeka@naver.com"); // 발신자 이메일 주소 설정
         message.setTo(email); // 수신자 이메일 주소 설정

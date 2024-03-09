@@ -104,7 +104,7 @@ public class SingUpValidController {
         }
     }
 
-    @PostMapping("/join/mailConfirm")
+    @PostMapping("/api/join/mailConfirm")
     public ResponseEntity<?> mailConfirm(@RequestParam("email") String email){
         try {
             Map<String,String> result= new LinkedHashMap<>();
@@ -118,7 +118,7 @@ public class SingUpValidController {
         }
     }
 
-    @PostMapping("/join/mailConfirm/check")
+    @PostMapping("/api/join/mailConfirm/check")
     public ResponseEntity<Map<String, Boolean>> check(@RequestParam("code")String UserCode){
         try {
             Map<String, Boolean> stringBooleanMap = memberService.verifyCode(UserCode);
