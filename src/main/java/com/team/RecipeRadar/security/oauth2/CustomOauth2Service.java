@@ -1,7 +1,9 @@
 package com.team.RecipeRadar.security.oauth2;
 
 import com.team.RecipeRadar.Entity.Member;
+import com.team.RecipeRadar.security.oauth2.provider.GoogleUserInfo;
 import com.team.RecipeRadar.security.oauth2.provider.KakaoUserInfo;
+import com.team.RecipeRadar.security.oauth2.provider.NaverUserInfo;
 import com.team.RecipeRadar.security.oauth2.provider.Oauth2UserInfo;
 import com.team.RecipeRadar.repository.MemberRepository;
 import com.team.RecipeRadar.security.PrincipalDetails;
@@ -28,18 +30,22 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
 
         OAuth2User user = super.loadUser(userRequest);
         Map<String, Object> attributes = user.getAttributes();
+        log.info("aass={}",attributes);
 
         String requestId = userRequest.getClientRegistration().getRegistrationId();  // 요청한 oath2 사이트 회사명
 
+        log.info("reee={}",requestId);
         Oauth2UserInfo oauth2UserInfo =null;
         Member member=null;
 
         if (requestId.equals("kakao")){
             oauth2UserInfo = new KakaoUserInfo(attributes);
             member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
+        } else if (requestId.equals("google")) {
+            oauth2UserInfo = new GoogleUserInfo(attributes);
+            member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
         }
-        
-        
+
         return new PrincipalDetails(member);
     }
 
@@ -57,6 +63,7 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
                     .email(email)
                     .login_type(requestId)
                     .join_date(LocalDate.now())
+                    .nickName(name)
                     .verified(true).roles("ROLE_USER").build();
             Member save = memberRepository.save(user);
             return save;
