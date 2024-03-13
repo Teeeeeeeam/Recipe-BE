@@ -8,7 +8,6 @@ import com.team.RecipeRadar.Entity.Member;
 import com.team.RecipeRadar.Entity.RefreshToken;
 import com.team.RecipeRadar.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.repository.MemberRepository;
-import com.team.RecipeRadar.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +23,8 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
-    private static final int TOKEN_TIME = 1; //10분
+    private static final int TOKEN_TIME = 10; //10분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
 
     @Value("${security.token}")
@@ -73,7 +71,7 @@ public class JwtProvider {
                 .sign(Algorithm.HMAC512(secret));
 
         RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).build();
-        refreshTokenRepository.save(token);
+//        refreshTokenRepository.save(token);
         return refreshToken;
     }
 
