@@ -44,6 +44,10 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
         } else if (requestId.equals("google")) {
             oauth2UserInfo = new GoogleUserInfo(attributes);
             member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
+        } else if (requestId.equals("naver")) {
+            oauth2UserInfo = new NaverUserInfo(attributes);
+            log.info("aaa={}",oauth2UserInfo.getId());
+            member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
         }
 
         return new PrincipalDetails(member);
