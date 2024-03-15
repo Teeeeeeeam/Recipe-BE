@@ -53,7 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         try {
             Boolean isValid = jwtProvider.TokenExpiration(jwtToken);        //토큰검증 만료시간검증 만료:false 유효:true
             if (isValid) {
-                String loginId = jwtProvider.validateJwtToken(jwtToken);        // 토큰 검증
+                String loginId = jwtProvider.validateAccessToken(jwtToken);        // 토큰 검증
                 if (loginId != null) {
                     Member member = memberRepository.findByLoginId(loginId);
                     PrincipalDetails principalDetails = new PrincipalDetails(member);

@@ -23,6 +23,7 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
 
+    //소셜 로그인 성공시 해당로직을 타게되며 accessToken 과 RefreshToken을 발급해준다.
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("onAuthenticationSuccess실행");
@@ -30,9 +31,12 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
         String loginId = principal.getMember().getLoginId();
 
         String jwtToken = jwtProvider.generateAccessToken(loginId);
+        String refreshToken = jwtProvider.generateRefreshToken(loginId);
 
         response.addHeader("Authorization","Bearer "+ jwtToken);
-        String targetUrl = "/auth/success";
+        response.addHeader("RefreshToken","Bearer "+ refreshToken);
+
+        String targetUrl = "/api/auth/success";
         RequestDispatcher dis = request.getRequestDispatcher(targetUrl);
         dis.forward(request, response);
     }
