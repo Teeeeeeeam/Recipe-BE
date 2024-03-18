@@ -16,15 +16,19 @@ public class Comment {
     @Column(name = "comment_id", updatable = false)
     private Long id;
 
-    @Column(name = "comment_title", nullable = false)
-    private String commentTitle;
-
     @Column(name = "comment_content", nullable = false)
     private String commentContent;
 
     @Builder
-    public Comment(String commentTitle, String commentContent) {
-        this.commentTitle = commentTitle;
+    public Comment(String commentContent) {
+        this.commentContent = commentContent;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    public void update(String commentContent) {
         this.commentContent = commentContent;
     }
 }
