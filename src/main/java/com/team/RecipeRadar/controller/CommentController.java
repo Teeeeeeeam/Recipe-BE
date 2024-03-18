@@ -8,6 +8,7 @@ import com.team.RecipeRadar.payload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,11 +29,22 @@ public class CommentController {
             Comment save = commentService.save(commentDto);
             return ResponseEntity.ok(new ApiResponse(true,save));
         }catch (NoSuchElementException e){
-            throw new CommentException("회원정보나 게시글을 찾을수 없습니다.");
+            throw new CommentException(e.getMessage());
         }catch (Exception e){
             throw new ServerErrorException("서버오류");
         }
-
     }
+
+    @DeleteMapping("/api/user/comment/delete")
+    public ResponseEntity<?> comment_delete(@RequestBody CommentDto commentDto){
+        try{
+           commentService.delete_comment(commentDto);//반환타입 void
+            return ResponseEntity.ok(new ApiResponse(true,"댓글 삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new CommentException(e.getMessage());         //예외처리-> 여기서 처리안하고  @ExceptionHandler로 예외처리함
+        }
+    }
+
+
 
 }

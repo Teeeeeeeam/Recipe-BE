@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 
 @Slf4j
-@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller", "com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
+@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
 public class ApiControllerAdvice {
 
 
@@ -36,7 +36,7 @@ public class ApiControllerAdvice {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(CommentException.class)
     public ResponseEntity<ErrorResponse> commentError(CommentException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

@@ -30,7 +30,6 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
 
         OAuth2User user = super.loadUser(userRequest);
         Map<String, Object> attributes = user.getAttributes();
-        log.info("aass={}",attributes);
 
         String requestId = userRequest.getClientRegistration().getRegistrationId();  // 요청한 oath2 사이트 회사명
 

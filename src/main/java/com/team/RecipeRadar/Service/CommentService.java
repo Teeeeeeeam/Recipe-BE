@@ -5,5 +5,5 @@ import com.team.RecipeRadar.dto.CommentDto;
 
 public interface CommentService {
     Comment save(CommentDto commentDto);
-//    void delete_comment()
+    void delete_comment(CommentDto commentDto);
 }
