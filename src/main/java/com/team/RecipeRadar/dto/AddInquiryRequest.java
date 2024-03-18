@@ -11,9 +11,13 @@ import lombok.NoArgsConstructor;
 public class AddInquiryRequest {
     private String inquiryTitle;
     private String inquiryContent;
+    private String inquiryAnswer;
+    private Boolean inquiryAnswered;
 
     public Inquiry toEntity() {
         return Inquiry.builder()
+                .inquiryAnswered(inquiryAnswered)
+                .inquiryAnswer(inquiryAnswer)
                 .inquiryTitle(inquiryTitle)
                 .inquiryContent(inquiryContent)
                 .build();

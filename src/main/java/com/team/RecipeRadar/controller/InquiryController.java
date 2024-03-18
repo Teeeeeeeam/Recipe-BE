@@ -18,7 +18,7 @@ import java.util.List;
 public class InquiryController {
     private final InquiryService inquiryService;
 
-    @PostMapping("/api/admin/inquires")
+    @PostMapping("/api/inquires")
     public ResponseEntity<Inquiry> addInquiry(@RequestBody AddInquiryRequest request) {
         Inquiry savedInquiry = inquiryService.save(request);
 
@@ -43,7 +43,7 @@ public class InquiryController {
                 .body(new InquiryResponse(inquiry));
     }
 
-    @DeleteMapping("/api/admin/inquires/{id}")
+    @DeleteMapping("/api/inquires/{id}")
     public ResponseEntity<Void> deleteInquiry(@PathVariable long id) {
         inquiryService.delete(id);
 
@@ -58,5 +58,19 @@ public class InquiryController {
         return ResponseEntity.ok()
                 .body(updateInquiry);
     }
-    
+
+    @PostMapping("/api/admin/inquires/{id}/answer")
+    public ResponseEntity<Inquiry> addInquiryAnswer(@PathVariable long id, @RequestBody AddInquiryRequest request) {
+        Inquiry savedInquiryAnswer = inquiryService.saveAnswer(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedInquiryAnswer);
+    }
+    @PostMapping("/api/admin/inquires/{id}/answered")
+    public ResponseEntity<Inquiry> inquiryAnswered(@PathVariable long id, @RequestBody AddInquiryRequest request) {
+        Inquiry savedInquiryAnswered = inquiryService.saveAnswered(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedInquiryAnswered);
+    }
 }

@@ -42,4 +42,13 @@ public class InquiryService {
 
         return inquiry;
     }
+
+    public Inquiry saveAnswer(AddInquiryRequest request) {
+        return inquiryRepository.save(request.toEntity());
+    }
+
+
+    public Inquiry saveAnswered(AddInquiryRequest request) {
+        return inquiryRepository.save(request.toEntity());
+    }
 }
