@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,13 +28,14 @@ public class Member {
     String password;
     String loginId;
     String email;
+    @JsonIgnore
     String roles;
     LocalDate join_date;
     String login_type;
     private boolean verified;
 
     public List<String> getRoleList(){
-        if(this.roles.length() > 0){
+        if(this.roles != null && this.roles.length() > 0){
             return Arrays.asList(this.roles.split(","));
         }
         return new ArrayList<>();
