@@ -1,70 +1,61 @@
 package com.team.RecipeRadar.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import com.team.RecipeRadar.Entity.Article;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
-import com.team.RecipeRadar.Service.CommentService;
 import com.team.RecipeRadar.Service.impl.CommentServiceImpl;
+import com.team.RecipeRadar.dto.ArticleDto;
 import com.team.RecipeRadar.dto.CommentDto;
 import com.team.RecipeRadar.dto.MemberDto;
-import com.team.RecipeRadar.exception.ex.CommentException;
+import com.team.RecipeRadar.filter.jwt.JwtProvider;
+import com.team.RecipeRadar.repository.MemberRepository;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(CommentController.class)
 @Slf4j
 class CommentControllerTest {
 
-    @Mock private CommentServiceImpl commentService;
-    private MockMvc mockMvc;
+
+    @MockBean private CommentServiceImpl commentService;
+    @Autowired private MockMvc mockMvc;
+
+    @MockBean MemberRepository memberRepository;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean CustomOauth2Service customOauth2Service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-
-
-    @InjectMocks
-    private CommentController commentController;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(commentController).build();
-    }
 
     @Test
     @DisplayName("댓글 작성 Controller 테스트")
     void commnet_add_test() throws Exception {
-//        CommentDto commentDto = CommentDto.builder().comment_content("테스트용 댓글").build();
 
         given(commentService.save(CommentDto.builder()
                 .id(1l)
@@ -74,22 +65,15 @@ class CommentControllerTest {
                 .id(1l)
                 .memberDto(MemberDto.builder().id(2l).build())
                 .comment_content("테스트 댓글").build();
-
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/user/comment/add")
+         mockMvc.perform(post("/api/user/comment/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto1)))
                 .andDo(print())
                 .andExpect(jsonPath("$.*", hasSize(2)))
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message.id", greaterThan(0)))
-                .andExpect(jsonPath("$.message.comment_content").value("테스트 댓글"))
-                .andExpect(jsonPath("$.message.updated_at").doesNotExist()) // updated_at 필드는 존재하지 않아야 함
-                .andExpect(status().isOk())
-                .andReturn().getResponse();
+                .andExpect(jsonPath("$.message").value("댓글 등록성공"))
+                .andExpect(status().isOk());
 
-        Integer read = JsonPath.parse(response.getContentAsString()).read("$.message.id");
-        Assertions.assertThat(read).isNotNull();
     }
 
 
@@ -111,6 +95,58 @@ class CommentControllerTest {
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글의 모든 댓글 출력")
+    void comment_getAll() throws Exception {
+
+        //게시글 아이디
+        long postId = Long.parseLong("55");
+
+        MemberDto memberDto = MemberDto.builder().id(1L).build();
+        ArticleDto articleDto = ArticleDto.builder().id(postId).build();
+
+        //페이징 테스트를 위한 객체 생성
+        List<CommentDto> commentDtos = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            CommentDto commentDto = CommentDto.builder()
+                    .id((long) i)
+                    .comment_content("테스트 댓글 내용 " + i)
+                    .memberDto(memberDto)
+                    .articleDto(articleDto)
+                    .build();
+            commentDtos.add(commentDto);
+        }
+        
+        //페이징 객체 직접 생성
+        Page<CommentDto> page = new PageImpl<>(commentDtos);
+
+        // commentService.commentPage() 메서드의 게시글 id가 55일때 page 객체 반환
+        given(commentService.commentPage(eq(postId), any(Pageable.class))).willReturn(page);
+
+        // GET 요청 수행 및 응답 확인
+        mockMvc.perform(get("/api/user/comment")
+                        .param("posts", "55")
+                        .param("page","0")
+                        .param("size","5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()) // 상태 코드 200 확인
+                .andExpect(jsonPath("$.*",hasSize(10)))
+                .andExpect(jsonPath("$.[0].id",is(1)))
+                .andDo(print()); // 결과를 콘솔에 출력하여 확인
+
+        //게시글이 존재하지않았을때 false로 값이 나오는지 확인
+        mockMvc.perform(get("/api/user/comment")
+                        .param("posts", "123")
+                        .param("page","0")
+                        .param("size","5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is5xxServerError()) // 상태 코드 500 확인
+                .andExpect(jsonPath("$.*",hasSize(2)))
+                .andExpect(jsonPath("$.success").value(false))
+                .andDo(print()); // 결과를 콘솔에 출력하여 확인
     }
 
 }

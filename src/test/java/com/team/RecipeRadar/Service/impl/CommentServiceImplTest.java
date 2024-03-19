@@ -20,9 +20,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -42,8 +48,6 @@ class CommentServiceImplTest {
 
     @InjectMocks CommentServiceImpl commentService;
 
-    @Mock
-    EntityManager entityManager;
 
     @Test
     @DisplayName("Comment_save 저장테스트")
@@ -150,5 +154,58 @@ class CommentServiceImplTest {
         Assertions.assertThatThrownBy(() -> commentService.delete_comment(commentDto))
                 .isInstanceOf(CommentException.class);
 
+    }
+
+    @Test
+    @DisplayName("댓글 모두조회 페이징 처리 테스트")
+    void page_comment_test(){
+        //게시글 아이디
+        long postId = Long.parseLong("55");
+
+        MemberDto memberDto = MemberDto.builder().id(1L).build();
+        ArticleDto articleDto = ArticleDto.builder().id(postId).build();
+
+        // 페이징 테스트를 위한 객체 생성
+        List<CommentDto> commentDtos = new ArrayList<>();
+
+        //더미 데이터 10개 생성
+        for (int i = 1; i <= 10; i++) {
+            CommentDto commentDto = CommentDto.builder()
+                    .id((long) i)
+                    .comment_content("테스트 댓글 내용 " + i)
+                    .memberDto(memberDto)
+                    .articleDto(articleDto)
+                    .build();
+            commentDtos.add(commentDto);
+        }
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<Comment> comments = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            Comment comment = Comment.builder()
+                    .id((long) i)
+                    .comment_content("테스트 댓글 내용 " + i)
+                    .member(Member.builder().id(1L).build())
+                    .article(Article.builder().id(postId).build())
+                    .build();
+            comments.add(comment);
+        }
+
+        PageImpl<Comment> commentPage = new PageImpl<>(comments);
+
+        //Comment 객체의 데이터 반환
+        when(commentRepository.findAllByArticle_Id(postId,pageable)).thenReturn(commentPage);
+
+        //테스트 실행
+        Page<CommentDto> result = commentService.commentPage(postId, pageable);
+        assertThat(result.getTotalElements()).isEqualTo(10);
+        assertThat(result.getTotalPages()).isEqualTo(1);        //jpa는 0부터 1페이지 2개시 ->(0,2) 두개
+        for (int i = 0; i < 10; i++) {
+            assertThat(result.getContent().get(i).getComment_content()).isEqualTo("테스트 댓글 내용 " + (i + 1));
+        }
+        assertThat(result.getContent().size()).isEqualTo(10);
+        assertThat(result.getNumber()).isEqualTo(0);
     }
 }
