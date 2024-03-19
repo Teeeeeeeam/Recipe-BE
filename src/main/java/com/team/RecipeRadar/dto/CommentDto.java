@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class CommentDto {
 
     private MemberDto memberDto;
 
+    @JsonIgnore
     private ArticleDto articleDto;
 
     private LocalDateTime create_at;        //등록일
@@ -29,6 +31,7 @@ public class CommentDto {
     public void setLocalDateTime(){
         this.create_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
+
 
 
 

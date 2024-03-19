@@ -5,12 +5,15 @@ import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
 import com.team.RecipeRadar.Service.CommentService;
 import com.team.RecipeRadar.dto.CommentDto;
+import com.team.RecipeRadar.dto.MemberDto;
 import com.team.RecipeRadar.exception.ex.CommentException;
 import com.team.RecipeRadar.repository.ArticleRepository;
 import com.team.RecipeRadar.repository.CommentRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,5 +79,19 @@ public class CommentServiceImpl implements CommentService {
         }else
             throw new CommentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
     }
+
+    @Transactional(readOnly = true)
+    public Page<CommentDto> commentPage(Long article_id,Pageable pageable){
+
+        Page<Comment> comments = commentRepository.findAllByArticle_Id(article_id, pageable);
+        if (!comments.getContent().isEmpty()) {
+            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getComment_content()).create_at(comment.getLocDateTime())
+                    .memberDto(MemberDto.builder().id(comment.getMember().getId()).nickName(comment.getMember().getNickName()).loginId(comment.getMember().getLoginId()).build())
+                    .build());
+        }else
+            throw new CommentException("게시글이 존재하지 않습니다.");
+    }
+
+
 
 }

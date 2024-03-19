@@ -36,12 +36,11 @@ public class Comment {
 
     private LocalDateTime updated_at;
 
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id")
     private Article article;
@@ -50,6 +49,9 @@ public class Comment {
     public LocalDateTime getLocDateTime(){
         return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
-
+    @JsonIgnore
+    public LocalDateTime getUpdate_LocDateTime(){
+        return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
+    }
 
 }
