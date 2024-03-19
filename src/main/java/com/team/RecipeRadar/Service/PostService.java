@@ -3,42 +3,17 @@ package com.team.RecipeRadar.service;
 import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.dto.AddPostRequest;
 import com.team.RecipeRadar.dto.UpdatePostRequest;
-import com.team.RecipeRadar.repository.PostRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Service
-public class PostService {
-    private final PostRepository postRepository;
+public interface PostService {
+    Post save(AddPostRequest request);
 
-    public Post save(AddPostRequest request) {
-        return postRepository.save(request.toEntity());
-    }
+    List<Post> findAll();
 
-    public List<Post> findAll() {
-        return postRepository.findAll();
-    }
+    Post findById(long id);
 
-    public Post findById(long id) {
-        return postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-    }
+    void delete(long id);
 
-    public void delete(long id) {
-        postRepository.deleteById(id);
-    }
-
-    @Transactional
-    public Post update(long id, UpdatePostRequest request) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-
-        post.update(request.getPostTitle(), request.getPostContent(), request.getPostServing(), request.getPostCookingTime(), request.getPostCookingLevel());
-
-        return post;
-    }
+    Post update(long id, UpdatePostRequest request);
 }

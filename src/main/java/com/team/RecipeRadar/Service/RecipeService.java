@@ -3,51 +3,20 @@ package com.team.RecipeRadar.service;
 import com.team.RecipeRadar.Entity.Recipe;
 import com.team.RecipeRadar.dto.AddRecipeRequest;
 import com.team.RecipeRadar.dto.UpdateRecipeRequest;
-import com.team.RecipeRadar.repository.RecipeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Service
-public class RecipeService {
+public interface RecipeService {
+    Recipe save(AddRecipeRequest request);
 
-    private final RecipeRepository recipeRepository;
+    List<Recipe> findAll();
 
-    public Recipe save(AddRecipeRequest request) {
-        return recipeRepository.save(request.toEntity());
-    }
+    Recipe findById(long id);
 
-    public List<Recipe> findAll() {
-        return recipeRepository.findAll();
-    }
+    void delete(long id);
 
-    public Recipe findById(long id) {
-        return recipeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-    }
+    Recipe update(long id, UpdateRecipeRequest request);
 
-    public void delete(long id) {
-        recipeRepository.deleteById(id);
-    }
+    List<Recipe> searchRecipes(String query);
 
-    @Transactional
-    public Recipe update(long id, UpdateRecipeRequest request) {
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-
-        recipe.update(request.getRecipeTitle(), request.getRecipeContent(), request.getRecipeServing(), request.getCookingTime(), request.getIngredientsAmount(), request.getCookingStep(), request.getRecipeLevel());
-
-        return recipe;
-    }
-    public List<Recipe> searchRecipes(String query) { // 레시피조회 메서드
-        return recipeRepository.findByRecipeTitleContainingIgnoreCase(query);
-    }
-
-    public long getPublishedRecipeCount() { // 레시피수 카운트메서드
-        return recipeRepository.countByRecipeTitleIsNotNull();
-    }
+    long getRecipeCount();
 }

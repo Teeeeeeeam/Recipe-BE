@@ -3,52 +3,21 @@ package com.team.RecipeRadar.service;
 import com.team.RecipeRadar.Entity.Inquiry;
 import com.team.RecipeRadar.dto.AddInquiryRequest;
 import com.team.RecipeRadar.dto.UpdateInquiryRequest;
-import com.team.RecipeRadar.repository.InquiryRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Service
-public class InquiryService {
+public interface InquiryService {
+    Inquiry save(AddInquiryRequest request);
 
-    private final InquiryRepository inquiryRepository;
+    List<Inquiry> findAll();
 
-    public Inquiry save(AddInquiryRequest request) {
-        return inquiryRepository.save(request.toEntity());
-    }
+    Inquiry findById(long id);
 
-    public List<Inquiry> findAll() {
-        return inquiryRepository.findAll();
-    }
+    void delete(long id);
 
-    public Inquiry findById(long id) {
-        return inquiryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-    }
+    Inquiry update(long id, UpdateInquiryRequest request);
 
-    public void delete(long id) {
-        inquiryRepository.deleteById(id);
-    }
+    Inquiry saveAnswer(AddInquiryRequest request);
 
-    @Transactional
-    public Inquiry update(long id, UpdateInquiryRequest request) {
-        Inquiry inquiry = inquiryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-
-        inquiry.update(request.getInquiryTitle(), request.getInquiryContent());
-
-        return inquiry;
-    }
-
-    public Inquiry saveAnswer(AddInquiryRequest request) {
-        return inquiryRepository.save(request.toEntity());
-    }
-
-
-    public Inquiry saveAnswered(AddInquiryRequest request) {
-        return inquiryRepository.save(request.toEntity());
-    }
+    Inquiry saveAnswered(AddInquiryRequest request);
 }
