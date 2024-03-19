@@ -43,7 +43,11 @@ public class RecipeService {
 
         return recipe;
     }
-    public List<Recipe> searchRecipes(String query) {
+    public List<Recipe> searchRecipes(String query) { // 레시피조회 메서드
         return recipeRepository.findByRecipeTitleContainingIgnoreCase(query);
+    }
+
+    public long getPublishedRecipeCount() { // 레시피수 카운트메서드
+        return recipeRepository.countByRecipeTitleIsNotNull();
     }
 }
