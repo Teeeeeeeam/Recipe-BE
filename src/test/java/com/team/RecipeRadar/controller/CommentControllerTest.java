@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
 import com.team.RecipeRadar.Service.impl.CommentServiceImpl;
-import com.team.RecipeRadar.dto.ArticleDto;
+import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
 import com.team.RecipeRadar.dto.MemberDto;
 import com.team.RecipeRadar.filter.jwt.JwtProvider;
@@ -109,7 +109,7 @@ class CommentControllerTest {
         long postId = Long.parseLong("55");
 
         MemberDto memberDto = MemberDto.builder().id(1L).build();
-        ArticleDto articleDto = ArticleDto.builder().id(postId).build();
+        PostDto articleDto = PostDto.builder().id(postId).build();
 
         //페이징 테스트를 위한 객체 생성
         List<CommentDto> commentDtos = new ArrayList<>();

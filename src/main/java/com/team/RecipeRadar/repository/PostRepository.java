@@ -1,9 +1,9 @@
 package com.team.RecipeRadar.repository;
 
-import com.team.RecipeRadar.Entity.Article;
+import com.team.RecipeRadar.Entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ArticleRepository extends JpaRepository<Article,Long> {
+public interface PostRepository extends JpaRepository<Post,Long> {
 }

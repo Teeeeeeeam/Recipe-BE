@@ -1,12 +1,12 @@
 package com.team.RecipeRadar.Service.impl;
 
-import com.team.RecipeRadar.Entity.Article;
+import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
-import com.team.RecipeRadar.dto.ArticleDto;
+import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
 import com.team.RecipeRadar.dto.MemberDto;
-import com.team.RecipeRadar.repository.ArticleRepository;
+import com.team.RecipeRadar.repository.PostRepository;
 import com.team.RecipeRadar.repository.CommentRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class CommentIntegrationTest {
     CommentServiceImpl commentService;
 
     @Autowired
-    ArticleRepository articleRepository;
+    PostRepository articleRepository;
 
     @Autowired
     CommentRepository commentRepository;
@@ -49,13 +49,13 @@ public class CommentIntegrationTest {
     void test(){
         //when
         Member member = Member.builder().username("test").build();
-        Article article = Article.builder().build();
+        Post article = Post.builder().build();
         Member member1 = Member.builder().username("test2").build();
 
         Member saveMember = memberRepository.save(member);
         Member saveMember1 = memberRepository.save(member1);
 
-        Article saveArticle = articleRepository.save(article);
+        Post saveArticle = articleRepository.save(article);
 
         MemberDto memberDto = MemberDto.builder().
                 id(saveMember.getId()).
@@ -65,7 +65,7 @@ public class CommentIntegrationTest {
                 id(saveMember1.getId()).
                 username("test1").build();
 
-        ArticleDto articleDto = ArticleDto.builder()
+        PostDto articleDto = PostDto.builder()
                 .id(saveArticle.getId())
                 .build();
 

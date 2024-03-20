@@ -6,24 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Article {
+public class Post {
 
     @Id@GeneratedValue(strategy =  GenerationType.IDENTITY)
-    @Column(name = "article_id")
+    @Column(name = "post_id", updatable = false)
     private Long id;
 
-//    @OneToMany(mappedBy = "article")
-//    private List<Comment> comments = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
 }

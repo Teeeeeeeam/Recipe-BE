@@ -1,13 +1,13 @@
 package com.team.RecipeRadar.Service.impl;
 
-import com.team.RecipeRadar.Entity.Article;
+import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
 import com.team.RecipeRadar.Service.CommentService;
 import com.team.RecipeRadar.dto.CommentDto;
 import com.team.RecipeRadar.dto.MemberDto;
 import com.team.RecipeRadar.exception.ex.CommentException;
-import com.team.RecipeRadar.repository.ArticleRepository;
+import com.team.RecipeRadar.repository.PostRepository;
 import com.team.RecipeRadar.repository.CommentRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
-    private final ArticleRepository articleRepository;
+    private final PostRepository articleRepository;
 
 
     /**
@@ -42,11 +42,11 @@ public class CommentServiceImpl implements CommentService {
         Long article_id = commentDto.getArticleDto().getId();
 
         Optional<Member> member = memberRepository.findById(member_id);
-        Optional<Article> article = articleRepository.findById(article_id);
+        Optional<Post> article = articleRepository.findById(article_id);
 
         if (member.isPresent() && article.isPresent()) {        //사용자 정보와 게시글의 정보가 존재할시에만 통과
             Member member1 = member.get();
-            Article article1 = article.get();
+            Post article1 = article.get();
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);        //yyy-dd-mm:hh-MM으로 저장 밀리세컨트는 모두 0초
             Comment build = Comment.builder()                               //댓글 저장
                     .comment_content(commentDto.getComment_content())

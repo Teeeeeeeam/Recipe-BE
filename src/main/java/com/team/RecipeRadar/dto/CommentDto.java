@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +22,7 @@ public class CommentDto {
 
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private ArticleDto articleDto;
+    private PostDto articleDto;
 
     private LocalDateTime create_at;        //등록일
     

@@ -1,4 +1,4 @@
 package com.team.RecipeRadar.Service;
 
-public interface ArticleService {
+public interface PostService {
 }

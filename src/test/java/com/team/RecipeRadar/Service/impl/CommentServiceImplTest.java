@@ -1,13 +1,13 @@
 package com.team.RecipeRadar.Service.impl;
 
-import com.team.RecipeRadar.Entity.Article;
+import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
-import com.team.RecipeRadar.dto.ArticleDto;
+import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
 import com.team.RecipeRadar.dto.MemberDto;
 import com.team.RecipeRadar.exception.ex.CommentException;
-import com.team.RecipeRadar.repository.ArticleRepository;
+import com.team.RecipeRadar.repository.PostRepository;
 import com.team.RecipeRadar.repository.CommentRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,8 @@ import static org.mockito.Mockito.*;
 class CommentServiceImplTest {
 
     @Mock MemberRepository memberRepository;
-    @Mock ArticleRepository articleRepository;
+    @Mock
+    PostRepository articleRepository;
     @Mock CommentRepository commentRepository;
 
     @InjectMocks CommentServiceImpl commentService;
@@ -50,7 +51,7 @@ class CommentServiceImplTest {
     public void testSave_ValidMemberAndArticle_ReturnsSavedComment() {
         // 범위
         MemberDto build = MemberDto.builder().id(1l).build();
-        ArticleDto build1 = ArticleDto.builder().id(1l).build();
+        PostDto build1 = PostDto.builder().id(1l).build();
 
         LocalDateTime dateTime = LocalDateTime.of(2024,3,17,2,15);
 
@@ -62,7 +63,7 @@ class CommentServiceImplTest {
 
         Member member = new Member();
         member.setId(1L);
-        Article article = new Article();
+        Post article = new Post();
         article.setId(1L);
 
         // 목 리파지토리
@@ -87,7 +88,7 @@ class CommentServiceImplTest {
     public void testSave_InvalidMemberOrArticle_ThrowsNoSuchElementException() {
         // 범위
         MemberDto build = MemberDto.builder().id(1l).build();
-        ArticleDto build1 = ArticleDto.builder().id(1l).build();
+        PostDto build1 = PostDto.builder().id(1l).build();
 
         CommentDto commentDto = new CommentDto();
         commentDto.setComment_content("Test comment");
@@ -159,7 +160,7 @@ class CommentServiceImplTest {
         long postId = Long.parseLong("55");
 
         MemberDto memberDto = MemberDto.builder().id(1L).build();
-        ArticleDto articleDto = ArticleDto.builder().id(postId).build();
+        PostDto articleDto = PostDto.builder().id(postId).build();
 
         // 페이징 테스트를 위한 객체 생성
         List<CommentDto> commentDtos = new ArrayList<>();
@@ -184,7 +185,7 @@ class CommentServiceImplTest {
                     .id((long) i)
                     .comment_content("테스트 댓글 내용 " + i)
                     .member(Member.builder().id(1L).build())
-                    .article(Article.builder().id(postId).build())
+                    .article(Post.builder().id(postId).build())
                     .build();
             comments.add(comment);
         }

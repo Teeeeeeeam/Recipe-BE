@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.repository;
 
-import com.team.RecipeRadar.Entity.Article;
+import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.Entity.Member;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,8 @@ class CommentRepositoryTest {
 
     @Autowired CommentRepository commentRepository;
     @Autowired MemberRepository memberRepository;
-    @Autowired ArticleRepository articleRepository;
+    @Autowired
+    PostRepository articleRepository;
     @Autowired
     EntityManager entityManager;
 
@@ -39,7 +40,7 @@ class CommentRepositoryTest {
 
         Member member1 = Member.builder().username("test 유저1").build();
 
-        Article article = Article.builder().build();
+        Post article = Post.builder().build();
 
         Comment comment = Comment.builder()
                 .comment_content("test 댓글 작성")
@@ -58,7 +59,7 @@ class CommentRepositoryTest {
         Member saveMember1 = memberRepository.save(member1);
 
 
-        Article saveArticle = articleRepository.save(article);
+        Post saveArticle = articleRepository.save(article);
         Comment saveComment = commentRepository.save(comment);
         Comment saveComment1 = commentRepository.save(comment1);
 
@@ -85,7 +86,7 @@ class CommentRepositoryTest {
         Member member = Member.builder().build();
         memberRepository.save(member);
 
-        Article article = Article.builder().build();
+        Post article = Post.builder().build();
         articleRepository.save(article);
 
         // 첫 번째 게시물에 대한 댓글 10개 생성
@@ -99,7 +100,7 @@ class CommentRepositoryTest {
         }
 
         // 두 번째 게시물 생성
-        Article article2 = Article.builder().build();
+        Post article2 = Post.builder().build();
         articleRepository.save(article2);
 
         // 두 번째 게시물에 대한 댓글 5개 생성
