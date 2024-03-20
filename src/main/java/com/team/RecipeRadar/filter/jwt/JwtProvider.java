@@ -2,13 +2,17 @@ package com.team.RecipeRadar.filter.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.team.RecipeRadar.Entity.Member;
 import com.team.RecipeRadar.Entity.RefreshToken;
+import com.team.RecipeRadar.Service.JwtAuthService;
 import com.team.RecipeRadar.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.payload.ApiResponse;
+import com.team.RecipeRadar.repository.JWTRefreshTokenRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
-import com.team.RecipeRadar.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +28,10 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     private static final int TOKEN_TIME = 1; //10분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
+    private final JwtAuthService jwtAuthService;
 
     @Value("${security.token}")
     private String secret;
@@ -55,15 +59,15 @@ public class JwtProvider {
     }
 
     /**
-     * 아직 리프레쉬 토큰은 구현중 아직 구현 x
-     * @param authentication
+     * 리프레쉬 토큰을 생성해주는 메서드
+     * @param loginId
      * @return
      */
-    public String generateRefreshToken(Authentication authentication) {
-        Member member = getMember(authentication);
-        LocalDateTime expirationDateTime = LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRATION_TIME);
-        Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
+    public String generateRefreshToken(String loginId) {
+        Member member = memberRepository.findByLoginId(loginId);
 
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_EXPIRATION_TIME);
+        Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
 
         String refreshToken = JWT.create()
                 .withSubject("RefreshToken")
@@ -72,8 +76,9 @@ public class JwtProvider {
                 .withClaim("loginId", member.getLoginId())
                 .sign(Algorithm.HMAC512(secret));
 
-        RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).build();
-        refreshTokenRepository.save(token);
+        RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
+
+        jwtAuthService.save(token);
         return refreshToken;
     }
 
@@ -83,12 +88,12 @@ public class JwtProvider {
      * @return  만료되지않았다면 ture 만료되었으면  false
      */
     public Boolean TokenExpiration(String token){
-            DecodedJWT decodedJWT = JWT.decode(token);
-            Date expiresAt = decodedJWT.getExpiresAt();
-            if (expiresAt != null && expiresAt.before(new Date())) {
-                return false;
-            } else
-                return true;
+        DecodedJWT decodedJWT = JWT.decode(token);
+        Date expiresAt = decodedJWT.getExpiresAt();
+        if (expiresAt != null && expiresAt.before(new Date())) {
+            return false;
+        } else
+            return true;
     }
 
     /**
@@ -96,7 +101,7 @@ public class JwtProvider {
      * @param token
      * @return
      */
-    public String validateJwtToken(String token){
+    public String validateAccessToken(String token){
         try {
             String loginId = JWT.require(Algorithm.HMAC512(secret)).build()
                     .verify(token)
@@ -109,6 +114,26 @@ public class JwtProvider {
             throw new JwtTokenException("토큰이 존재하지 않습니다.");
         }
 
+    }
+
+    public String validateRefreshToken(String refreshToke){
+        try{
+            DecodedJWT decodedJWT = JWT.decode(refreshToke);
+
+            String loginId = decodedJWT.getClaim("loginId").asString();
+            RefreshToken refreshToken = jwtAuthService.findRefreshToken(refreshToke);
+
+            Boolean isTokenTIme = TokenExpiration(refreshToke);
+
+            if (loginId.equals(refreshToken.getMember().getLoginId())&&isTokenTIme){
+                String token = generateAccessToken(refreshToken.getMember().getLoginId());
+                return token;
+            }else
+                return null;
+
+        }catch (Exception e){
+            throw new JwtTokenException("잘못된 토큰 형식입니다.");
+        }
     }
 
 

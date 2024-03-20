@@ -4,8 +4,8 @@ import com.team.RecipeRadar.filter.jwt.ExceptionHandlerFilter;
 import com.team.RecipeRadar.filter.jwt.JwtLoginFilter;
 import com.team.RecipeRadar.filter.jwt.JwtAuthorizationFilter;
 import com.team.RecipeRadar.filter.jwt.JwtProvider;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
 import com.team.RecipeRadar.repository.MemberRepository;
-import com.team.RecipeRadar.oauth.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
 
 @Configuration
 @EnableWebSecurity
@@ -27,7 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CorsConfig corsConfig;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomOauth2Handler customOauth2Handler;
+    private final CustomOauth2Service customOauth2Service;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -37,6 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .formLogin().disable()
+
                 .httpBasic().disable();
 
         http
@@ -46,10 +49,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/test/**").access("hasRole('ROLE_USER')or hasRole('ROLE_ADMIN')")
                 .antMatchers("/api/admin/**").access("hasRole('ROLE_ADMIN')")
-                .anyRequest().permitAll();
+                .anyRequest().permitAll()
+                .and()
+                .oauth2Login().loginPage("/login").successHandler(customOauth2Handler).userInfoEndpoint().userService(customOauth2Service);
 
-        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable()
-                .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler);
+        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable();
     }
 
     @Bean
