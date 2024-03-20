@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.service;
+package com.team.RecipeRadar.Service;
 
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.dto.AddCommentRequest;

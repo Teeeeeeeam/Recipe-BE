@@ -1,10 +1,10 @@
-package com.team.RecipeRadar.service.impl;
+package com.team.RecipeRadar.Service.impl;
 
 import com.team.RecipeRadar.Entity.Inquiry;
 import com.team.RecipeRadar.dto.AddInquiryRequest;
 import com.team.RecipeRadar.dto.UpdateInquiryRequest;
 import com.team.RecipeRadar.repository.InquiryRepository;
-import com.team.RecipeRadar.service.InquiryService;
+import com.team.RecipeRadar.Service.InquiryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

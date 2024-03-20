@@ -4,7 +4,7 @@ import com.team.RecipeRadar.Entity.Post;
 import com.team.RecipeRadar.dto.AddPostRequest;
 import com.team.RecipeRadar.dto.PostResponse;
 import com.team.RecipeRadar.dto.UpdatePostRequest;
-import com.team.RecipeRadar.service.PostService;
+import com.team.RecipeRadar.Service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

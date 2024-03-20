@@ -4,7 +4,7 @@ import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.dto.AddCommentRequest;
 import com.team.RecipeRadar.dto.CommentResponse;
 import com.team.RecipeRadar.dto.UpdateCommentRequest;
-import com.team.RecipeRadar.service.CommentService;
+import com.team.RecipeRadar.Service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

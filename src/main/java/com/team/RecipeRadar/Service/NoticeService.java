@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.service;
+package com.team.RecipeRadar.Service;
 
 import com.team.RecipeRadar.Entity.Notice;
 import com.team.RecipeRadar.dto.AddNoticeRequest;

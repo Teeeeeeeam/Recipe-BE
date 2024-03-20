@@ -1,10 +1,10 @@
-package com.team.RecipeRadar.service.impl;
+package com.team.RecipeRadar.Service.impl;
 
 import com.team.RecipeRadar.Entity.Comment;
 import com.team.RecipeRadar.dto.AddCommentRequest;
 import com.team.RecipeRadar.dto.UpdateCommentRequest;
 import com.team.RecipeRadar.repository.CommentRepository;
-import com.team.RecipeRadar.service.CommentService;
+import com.team.RecipeRadar.Service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

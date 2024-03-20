@@ -1,10 +1,10 @@
-package com.team.RecipeRadar.service.impl;
+package com.team.RecipeRadar.Service.impl;
 
 import com.team.RecipeRadar.Entity.Notice;
 import com.team.RecipeRadar.dto.AddNoticeRequest;
 import com.team.RecipeRadar.dto.UpdateNoticeRequest;
 import com.team.RecipeRadar.repository.NoticeRepository;
-import com.team.RecipeRadar.service.NoticeService;
+import com.team.RecipeRadar.Service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
