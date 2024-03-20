@@ -31,7 +31,7 @@ public class ApiControllerAdvice {
     @ExceptionHandler(JwtTokenException.class)
     public ResponseEntity<ErrorResponse> TokenError(JwtTokenException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        log.info("errorMessage={}",e.getMessage());
+        log.error("errorMessage={}",e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 }

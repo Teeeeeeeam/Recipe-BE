@@ -4,6 +4,7 @@ import com.team.RecipeRadar.filter.jwt.ExceptionHandlerFilter;
 import com.team.RecipeRadar.filter.jwt.JwtLoginFilter;
 import com.team.RecipeRadar.filter.jwt.JwtAuthorizationFilter;
 import com.team.RecipeRadar.filter.jwt.JwtProvider;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CorsConfig corsConfig;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+
+    private final CustomOauth2Handler customOauth2Handler;
+    private final CustomOauth2Service customOauth2Service;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -35,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .formLogin().disable()
+
                 .httpBasic().disable();
 
 
