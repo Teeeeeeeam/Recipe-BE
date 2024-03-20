@@ -46,7 +46,7 @@ public class CommentController {
         }
     }
 
-    @GetMapping("/api/user/comment")
+    @GetMapping("/api/comment")
     public ResponseEntity<?> comment_Page(@PageableDefault Pageable pageable,
                                           @RequestParam("posts")String postid){
         try {
@@ -57,6 +57,21 @@ public class CommentController {
         }
     }
 
+    @PutMapping("/api/user/update")
+    public ResponseEntity<?> comment_update(@RequestBody CommentDto commentDto){
+        try {
+            commentService.update(commentDto.getMemberDto().getId(),commentDto.getId(),commentDto.getComment_content());
+            return ResponseEntity.ok(new ApiResponse(true,"댓글 수정 성공"));
+        }catch (NoSuchElementException e){
+            throw new CommentException(e.getMessage());
+        }
+        catch (CommentException e){
+            throw new CommentException(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류 발생");
+        }
+    }
 
 
 }

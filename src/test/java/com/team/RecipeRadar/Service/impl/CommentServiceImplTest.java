@@ -12,20 +12,17 @@ import com.team.RecipeRadar.repository.CommentRepository;
 import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +30,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -207,5 +203,40 @@ class CommentServiceImplTest {
         }
         assertThat(result.getContent().size()).isEqualTo(10);
         assertThat(result.getNumber()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("댓글 작성자가 수정 톄스트")
+    void update_comment(){
+        String update_success="댓글 수정 성공!!";
+
+        Member member = Member.builder().id(1l).build();
+        Comment comment = Comment.builder().id(2l).comment_content("댓글 수정전").member(member).build();
+
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
+
+        commentService.update(member.getId(),comment.getId(),update_success);
+
+        assertThat(comment.getComment_content()).isEqualTo(update_success);
+        assertThat(comment.getComment_content()).isNotEqualTo("댓글 수정전");
+        assertThat(comment.getMember().getId()).isEqualTo(member.getId());
+    }
+
+    @Test
+    @DisplayName("댓글 비작성자가 수정시 오류발생 톄스트")
+    void update_comment_throws(){
+        String update_success="댓글 수정 성공!!";
+
+        Member member = Member.builder().id(1l).build(); //작성자
+        Member member_fail = Member.builder().id(2l).build(); //비 작성자
+        Comment comment = Comment.builder().id(2l).comment_content("댓글 수정전").member(member).build();
+
+        when(memberRepository.findById(member_fail.getId())).thenReturn(Optional.of(member_fail));
+        when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
+
+        assertThrows(CommentException.class ,()-> commentService.update(member_fail.getId(),comment.getId(),update_success));
+        assertThat(comment.getComment_content()).isEqualTo("댓글 수정전");
+
     }
 }

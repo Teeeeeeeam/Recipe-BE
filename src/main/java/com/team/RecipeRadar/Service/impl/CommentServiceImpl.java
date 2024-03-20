@@ -71,7 +71,7 @@ public class CommentServiceImpl implements CommentService {
         Long memberDtoId = commentDto.getMemberDto().getId();
         Long commentDtoId = commentDto.getId();
 
-        Member member = memberRepository.findById(memberDtoId).orElseThrow(() -> new NoSuchElementException("해당 회원을 찾을수 없습니다."));
+        Member member = getMemberThrows(memberDtoId);
         Comment comment = commentRepository.findById(commentDtoId).orElseThrow(() -> new NoSuchElementException("해당 댓글 찾을 수없습니다. " + commentDtoId));
 
         if (comment.getMember().getId().equals(memberDtoId)){           // 댓글을 등록한 사용자 일경우
@@ -80,18 +80,47 @@ public class CommentServiceImpl implements CommentService {
             throw new CommentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
     }
 
+    /**
+     * 댓글을 조회하는 메소드
+     * @param article_id 게시글 아이디
+     * @param pageable
+     * @return Dto를 변환한 값을 반환한다.
+     */
     @Transactional(readOnly = true)
     public Page<CommentDto> commentPage(Long article_id,Pageable pageable){
 
         Page<Comment> comments = commentRepository.findAllByArticle_Id(article_id, pageable);
+
         if (!comments.getContent().isEmpty()) {
             return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getComment_content()).create_at(comment.getLocDateTime())
                     .memberDto(MemberDto.builder().id(comment.getMember().getId()).nickName(comment.getMember().getNickName()).loginId(comment.getMember().getLoginId()).build())
-                    .build());
+                    .build());      //스트림 사용
         }else
             throw new CommentException("게시글이 존재하지 않습니다.");
     }
 
+    /**
+     * 댓글 수정 기능 -> 작성자만 댓글을 수정가능하다.
+     * @param member_id     사용자 id
+     * @param comment_id    댓글 id
+     * @param comment_content 수정할 댓글 내용
+     */
+    @Override
+    public void update(Long member_id,Long comment_id, String comment_content) {
+
+        Member member = getMemberThrows(member_id);
+        Comment comment = commentRepository.findById(comment_id).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
+
+        if (comment.getMember().equals(member)){        //Comment 엔티티에 Mmeber가 있는지 없는지 확인
+            comment.comment_update(comment_content);
+        }else
+            throw new CommentException("작성자만 수정 가능합니다.");
+
+    }
+
+    private Member getMemberThrows(Long member_id) {
+        return memberRepository.findById(member_id).orElseThrow(() -> new NoSuchElementException("해당 회원을 찾을수 없습니다."));
+    }
 
 
 }

@@ -10,4 +10,6 @@ public interface CommentService {
     void delete_comment(CommentDto commentDto);
 
     Page<CommentDto> commentPage(Long id, Pageable pageable);
+
+    void update(Long member_id,Long comment_id,String Content);
 }

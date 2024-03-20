@@ -126,5 +126,21 @@ class CommentRepositoryTest {
         assertThat(allByArticleId2.getContent().size()).isEqualTo(5);   // 현재 페이지의 데이터 갯수는 5개
     }
 
+    @Test
+    @DisplayName("댓글 수정 테스트")
+    void comment_update(){
+        //when
+        Comment comment = Comment.builder().comment_content("테스트 댓글 수정전").member(Member.builder().loginId("테스트아이디").build()).build();
+
+        //given
+        Comment save = commentRepository.save(comment);
+        save.comment_update("테스트 댓글 수정후!");
+
+        //then
+        assertThat(save.getMember().getLoginId()).isEqualTo(comment.getMember().getLoginId());
+        assertThat(save.getComment_content()).isEqualTo("테스트 댓글 수정후!");
+        assertThat(save.getId()).isEqualTo(comment.getId());
+        assertThat(save.getComment_content()).isNotEqualTo("테스트 댓글 수정전");
+    }
 
 }

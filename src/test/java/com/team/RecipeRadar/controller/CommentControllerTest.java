@@ -11,6 +11,7 @@ import com.team.RecipeRadar.filter.jwt.JwtProvider;
 import com.team.RecipeRadar.repository.MemberRepository;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
+import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ class CommentControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
+    @CustomMockUser
     @DisplayName("댓글 작성 Controller 테스트")
     void commnet_add_test() throws Exception {
 
@@ -78,6 +80,7 @@ class CommentControllerTest {
 
 
     @Test
+    @CustomMockUser
     @DisplayName("댓글 삭제 테스트 - 댓글이 존재하는 경우")
     void comment_delete_existing_comment_test() throws Exception {
         // given
@@ -98,6 +101,7 @@ class CommentControllerTest {
     }
 
     @Test
+    @CustomMockUser
     @DisplayName("게시글의 모든 댓글 출력")
     void comment_getAll() throws Exception {
 
@@ -127,7 +131,7 @@ class CommentControllerTest {
         given(commentService.commentPage(eq(postId), any(Pageable.class))).willReturn(page);
 
         // GET 요청 수행 및 응답 확인
-        mockMvc.perform(get("/api/user/comment")
+        mockMvc.perform(get("/api/comment")
                         .param("posts", "55")
                         .param("page","0")
                         .param("size","5")
@@ -138,15 +142,37 @@ class CommentControllerTest {
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
 
         //게시글이 존재하지않았을때 false로 값이 나오는지 확인
-        mockMvc.perform(get("/api/user/comment")
+        mockMvc.perform(get("/api/comment")
                         .param("posts", "123")
-                        .param("page","0")
+                        .param("page","1")
                         .param("size","5")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is5xxServerError()) // 상태 코드 500 확인
+                .andExpect(status().is(500)) // 상태 코드 500 확인
                 .andExpect(jsonPath("$.*",hasSize(2)))
                 .andExpect(jsonPath("$.success").value(false))
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
     }
 
+    @Test
+    @CustomMockUser
+    void test() throws Exception {
+        String update_content = "변경된 댓글";
+        // Member 객체의 ID를 정확히 설정
+        Member member = Member.builder().id(2L).build();
+        Comment comment = Comment.builder().id(1L).comment_content("변경전").member(member).build();
+
+        // MemberDto 객체를 생성할 때 Member 객체의 ID를 사용
+        MemberDto memberDto = MemberDto.builder().id(member.getId()).build();
+        CommentDto commentDto = CommentDto.builder().id(comment.getId()).memberDto(memberDto).comment_content(comment.getComment_content()).build();
+
+        // CommentService의 update 메서드를 호출할 때 memberDto.getId()가 null이 아니도록 함
+        doNothing().when(commentService).update(member.getId(), commentDto.getId(), update_content);
+
+        log.info("comment={}", comment.getComment_content());
+        mockMvc.perform(put("/api/user/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 }
