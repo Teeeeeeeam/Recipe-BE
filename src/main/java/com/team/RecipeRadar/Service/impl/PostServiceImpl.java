@@ -7,12 +7,12 @@ import com.team.RecipeRadar.repository.PostRepository;
 import com.team.RecipeRadar.Service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -48,4 +48,5 @@ public class PostServiceImpl implements PostService {
 
         return post;
     }
+
 }

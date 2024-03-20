@@ -1,13 +1,14 @@
 package com.team.RecipeRadar.Entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Post {
     @Id

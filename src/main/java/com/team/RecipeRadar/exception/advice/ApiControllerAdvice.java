@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.exception.advice;
 
 import com.team.RecipeRadar.exception.ErrorResponse;
+import com.team.RecipeRadar.exception.ex.CommentException;
 import com.team.RecipeRadar.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.exception.ex.UnprocessableException;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 
 @Slf4j
-@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller", "com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
+@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
 public class ApiControllerAdvice {
 
 
@@ -31,7 +32,13 @@ public class ApiControllerAdvice {
     @ExceptionHandler(JwtTokenException.class)
     public ResponseEntity<ErrorResponse> TokenError(JwtTokenException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        log.info("errorMessage={}",e.getMessage());
+        log.error("errorMessage={}",e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<ErrorResponse> commentError(CommentException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
