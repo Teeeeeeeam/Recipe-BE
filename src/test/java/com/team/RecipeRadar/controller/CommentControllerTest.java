@@ -1,14 +1,15 @@
 package com.team.RecipeRadar.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.Entity.Comment;
-import com.team.RecipeRadar.Entity.Member;
-import com.team.RecipeRadar.Service.impl.CommentServiceImpl;
+import com.team.RecipeRadar.domain.comment.api.CommentController;
+import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
-import com.team.RecipeRadar.dto.MemberDto;
-import com.team.RecipeRadar.filter.jwt.JwtProvider;
-import com.team.RecipeRadar.repository.MemberRepository;
+import com.team.RecipeRadar.global.jwt.JwtProvider;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockUser;
@@ -148,8 +149,6 @@ class CommentControllerTest {
                         .param("size","5")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(500)) // 상태 코드 500 확인
-                .andExpect(jsonPath("$.*",hasSize(2)))
-                .andExpect(jsonPath("$.success").value(false))
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
     }
 

@@ -1,10 +1,10 @@
 package com.team.RecipeRadar.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.Entity.Recipe;
-import com.team.RecipeRadar.dto.AddRecipeRequest;
-import com.team.RecipeRadar.dto.UpdateRecipeRequest;
-import com.team.RecipeRadar.repository.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.AddRecipeRequest;
+import com.team.RecipeRadar.domain.recipe.dto.UpdateRecipeRequest;
+import com.team.RecipeRadar.domain.recipe.dao.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

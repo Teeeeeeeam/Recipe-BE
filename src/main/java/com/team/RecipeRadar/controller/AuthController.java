@@ -1,16 +1,15 @@
 package com.team.RecipeRadar.controller;
 
 import com.team.RecipeRadar.Service.JwtAuthService;
-import com.team.RecipeRadar.exception.ex.JwtTokenException;
-import com.team.RecipeRadar.filter.jwt.JwtProvider;
-import com.team.RecipeRadar.payload.ApiResponse;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

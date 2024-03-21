@@ -1,15 +1,16 @@
 package com.team.RecipeRadar.Service.impl;
 
-import com.team.RecipeRadar.Entity.Post;
-import com.team.RecipeRadar.Entity.Comment;
-import com.team.RecipeRadar.Entity.Member;
+import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
+import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.post.dao.PostRepository;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
-import com.team.RecipeRadar.dto.MemberDto;
 import com.team.RecipeRadar.exception.ex.CommentException;
-import com.team.RecipeRadar.repository.PostRepository;
-import com.team.RecipeRadar.repository.CommentRepository;
-import com.team.RecipeRadar.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +40,7 @@ import static org.mockito.Mockito.*;
 class CommentServiceImplTest {
 
     @Mock MemberRepository memberRepository;
-    @Mock
-    PostRepository articleRepository;
+    @Mock PostRepository articleRepository;
     @Mock CommentRepository commentRepository;
 
     @InjectMocks CommentServiceImpl commentService;

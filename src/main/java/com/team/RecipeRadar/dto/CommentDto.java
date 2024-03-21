@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
