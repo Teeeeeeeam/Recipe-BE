@@ -5,6 +5,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Random;
 
@@ -15,14 +16,15 @@ public class JoinEmailServiceImplV1 {
 
     private final JavaMailSender mailSender;
     private String code;
-
+    @Value("${email}")
+    private String emailFrom;
 
     public String sensMailMessage(String email){
         code=createCode();
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("나만의 냉장고 호원가입 인증번호 안내."); // 이메일 제목 설정
         message.setText(getText()); // 이메일 내용 설정
-        message.setFrom("ggambopce@naver.com"); // 발신자 이메일 주소 설정
+        message.setFrom(emailFrom); // 발신자 이메일 주소 설정
         message.setTo(email); // 수신자 이메일 주소 설정
         mailSender.send(message); // 이메일 발송
 
