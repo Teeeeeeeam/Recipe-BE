@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.member.exception;
+package com.team.RecipeRadar.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

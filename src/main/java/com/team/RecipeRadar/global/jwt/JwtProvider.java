@@ -2,12 +2,12 @@ package com.team.RecipeRadar.global.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.team.RecipeRadar.Entity.RefreshToken;
+import com.team.RecipeRadar.Service.JwtAuthService;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

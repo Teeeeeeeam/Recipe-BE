@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.member.exception.ex;
+package com.team.RecipeRadar.global.exception.ex;
 
 public class UnprocessableException extends RuntimeException{
     public UnprocessableException() {

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.global.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.member.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

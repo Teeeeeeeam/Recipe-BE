@@ -3,7 +3,7 @@ package com.team.RecipeRadar.global.jwt;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.security.PrincipalDetails;
 import lombok.extern.slf4j.Slf4j;

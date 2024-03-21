@@ -1,11 +1,11 @@
 package com.team.RecipeRadar.security.oauth2;
 
-import com.team.RecipeRadar.filter.jwt.JwtProvider;
-import com.team.RecipeRadar.security.PrincipalDetails;
+
+import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,7 @@ package com.team.RecipeRadar.Service.impl;
 
 import com.team.RecipeRadar.Entity.RefreshToken;
 import com.team.RecipeRadar.Service.JwtAuthService;
-import com.team.RecipeRadar.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -5,6 +5,8 @@ import com.team.RecipeRadar.global.jwt.JwtLoginFilter;
 import com.team.RecipeRadar.global.jwt.JwtAuthorizationFilter;
 import com.team.RecipeRadar.global.jwt.JwtProvider;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
+import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
 
 @Configuration
 @EnableWebSecurity

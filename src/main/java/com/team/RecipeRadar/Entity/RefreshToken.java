@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.Entity;
 
+import com.team.RecipeRadar.domain.member.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,6 @@ public class RefreshToken {
 
     @OneToOne
     @JoinColumn(name = "member_id")
-
     private Member member;
 
     private LocalDateTime tokenTIme;
