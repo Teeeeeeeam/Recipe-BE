@@ -2,14 +2,17 @@ package com.team.RecipeRadar.domain.post.dto;
 
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 public class AddPostRequest {
 
+    private Long id;
     private String postTitle;
     private String postContent;
     private String postServing;
@@ -18,6 +21,7 @@ public class AddPostRequest {
 
     public Post toEntity() {
         return Post.builder()
+                .id(id)
                 .postTitle(postTitle)
                 .postContent(postContent)
                 .postServing(postServing)

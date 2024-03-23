@@ -1,9 +1,11 @@
 package com.team.RecipeRadar.global.exception.advice;
 
 
+import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.exception.ex.CommentException;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 
 @Slf4j
-@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
+@RestControllerAdvice
 public class ApiControllerAdvice {
 
 
@@ -38,6 +40,12 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler(CommentException.class)
     public ResponseEntity<ErrorResponse> commentError(CommentException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> LikeError(LikeException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
