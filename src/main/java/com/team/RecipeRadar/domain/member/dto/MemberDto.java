@@ -21,6 +21,7 @@ public class MemberDto {
 
 
     @NotEmpty(message = "이름을 입력주세요")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String username;
     
     @NotEmpty(message = "별명을 입력해주세요")
@@ -28,10 +29,12 @@ public class MemberDto {
 
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String password;
 
 
     @NotEmpty(message = "비밀번호를 다시한번 입력해주세요")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String passwordRe;
 
     @NotEmpty(message = "아이디를 입력해주세요")

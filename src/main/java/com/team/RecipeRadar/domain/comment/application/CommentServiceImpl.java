@@ -10,6 +10,7 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Service
+@Slf4j
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -120,14 +122,15 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 댓글을 조회하는 메소드
-     * @param article_id 게시글 아이디
+     * @param postId 게시글 아이디
      * @param pageable
      * @return Dto를 변환한 값을 반환한다.
      */
     @Transactional(readOnly = true)
-    public Page<CommentDto> commentPage(Long article_id,Pageable pageable){
+    public Page<CommentDto> commentPage(Long postId,Pageable pageable){
 
-        Page<Comment> comments = commentRepository.findAllByPost_Id(article_id, pageable);
+        Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
+        log.info("as={}",comments);
 
         if (!comments.getContent().isEmpty()) {
             return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())

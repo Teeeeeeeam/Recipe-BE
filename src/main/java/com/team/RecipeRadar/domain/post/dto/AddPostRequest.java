@@ -18,6 +18,7 @@ public class AddPostRequest {
     private String postServing;
     private String postCookingTime;
     private String postCookingLevel;
+    private Integer postLikeCount;
 
     public Post toEntity() {
         return Post.builder()
@@ -27,6 +28,7 @@ public class AddPostRequest {
                 .postServing(postServing)
                 .postCookingTime(postCookingTime)
                 .postCookingLevel(postCookingLevel)
+                .postLikeCount(postLikeCount)
                 .build();
     }
 }

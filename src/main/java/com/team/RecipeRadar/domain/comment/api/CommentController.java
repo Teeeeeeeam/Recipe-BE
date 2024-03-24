@@ -105,10 +105,10 @@ public class CommentController {
 
     @GetMapping("/api/comment")
     public ResponseEntity<?> comment_Page(@PageableDefault Pageable pageable,
-                                          @RequestParam("posts")String postid){
+                                          @RequestParam(value = "posts",required = false)String postid){
         try {
             Page<CommentDto> comments = commentService.commentPage(Long.parseLong(postid), pageable);
-            return ResponseEntity.ok(comments.getContent());
+            return ResponseEntity.ok(comments);
         }catch (Exception e){
             throw new ServerErrorException(e.getMessage());
         }

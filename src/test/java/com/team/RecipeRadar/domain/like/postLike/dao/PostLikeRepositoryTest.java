@@ -17,11 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -60,7 +62,6 @@ class PostLikeRepositoryTest {
 
     @Test
     @DisplayName("게시글 좋아요 엔티티 저장")
-    @Rollback(value = false)
     void save(){
         for (int i =0;i<10;i++) {
             PostLike postLike = ary.get(i);
@@ -79,7 +80,6 @@ class PostLikeRepositoryTest {
 
     
     @Test
-    @Rollback(value = false)
     @DisplayName("좋아여 삭제 테스트")
     void delete_postLikes(){
 

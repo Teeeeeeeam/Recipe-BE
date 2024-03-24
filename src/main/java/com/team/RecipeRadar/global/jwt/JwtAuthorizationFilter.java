@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.global.jwt;
 
 
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
@@ -18,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
@@ -41,7 +43,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @throws ServletException
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String jwtHeader = request.getHeader("Authorization");
         if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
@@ -49,10 +51,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         String jwtToken = request.getHeader("Authorization").replace("Bearer ", "");
-
         try {
             Boolean isValid = jwtProvider.TokenExpiration(jwtToken);        //토큰검증 만료시간검증 만료:false 유효:true
-            if (isValid) {
+            if (!isValid) {
                 String loginId = jwtProvider.validateAccessToken(jwtToken);        // 토큰 검증
                 if (loginId != null) {
                     Member member = memberRepository.findByLoginId(loginId);
