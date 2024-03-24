@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.Duration;
+import java.util.List;
 
 @Entity
 @Getter
@@ -14,51 +14,46 @@ public class Recipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recipe_id", updatable = false)
     private Long id;
 
-    @Column(name = "recipe_title", nullable = false)
-    private String recipeTitle;
+    //@NotNull
+    private String postNumber;
 
-    @Column(name = "recipe_content", nullable = false)
-    private String recipeContent;
+    //@NotNull
+    private String imageUrl;
 
-    @Column(name = "recipe_serving", nullable = false)
-    private String recipeServing;
+    //@NotNull
+    private  String title;
 
-    @Column(name = "cooking_time", nullable = false)
+    // @NotNull
+    @Column(length = 3000)
+    private String content;
+
+    // @NotNull
+    private  String servings;
+
+    //@NotNull
     private String cookingTime;
 
-    @Column(name = "ingredients_amount", nullable = false)
-    private String ingredientsAmount;
+    //@NotNull
+    private  String cookingLevel;
 
-    @Column(name = "cooking_step", nullable = false)
-    private String cookingStep;
+    //TODO:레시피 크롤링 완료 후  재료를 가지고 검색할떄 어떤식으로 검색할껀지 결정후 연관관계 결정
+    //일단은 재료에서 다대일 맵핑
+    //private String recipeIngredients;
 
-    @Column(name = "recipe_level", nullable = false)
-    private String recipeLevel;
-
-
+  /*  @OneToMany
+    @JoinColumn(name = "recipe_id")
+    private List<CookingStep> cookingStep*/;
 
     @Builder
-    public Recipe(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel) {
-        this.recipeTitle = recipeTitle;
-        this.recipeContent = recipeContent;
-        this.recipeServing = recipeServing;
+    public Recipe(String postNumber, String imageUrl, String title, String content, String servings, String cookingTime, String cookingLevel, List<CookingStep> cookingStep) {
+        this.postNumber = postNumber;
+        this.imageUrl = imageUrl;
+        this.title = title;
+        this.content = content;
+        this.servings = servings;
         this.cookingTime = cookingTime;
-        this.ingredientsAmount = ingredientsAmount;
-        this.cookingStep = cookingStep;
-        this.recipeLevel = recipeLevel;
-
-    }
-
-    public void update(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel) {
-        this.recipeTitle = recipeTitle;
-        this.recipeContent = recipeContent;
-        this.recipeServing = recipeServing;
-        this.cookingTime = cookingTime;
-        this.ingredientsAmount = ingredientsAmount;
-        this.cookingStep = cookingStep;
-        this.recipeLevel = recipeLevel;
+        this.cookingLevel = cookingLevel;
     }
 }
