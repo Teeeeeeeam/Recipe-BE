@@ -36,5 +36,4 @@ public class NoticeExceptionHandler {
         ErrorResponse response = ErrorResponse.from(HttpStatus.UNAUTHORIZED, "Unauthorized", 401, ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
-
 }

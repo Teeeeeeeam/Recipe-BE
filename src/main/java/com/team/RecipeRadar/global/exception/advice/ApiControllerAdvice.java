@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.global.exception.advice;
 
 
-import com.team.RecipeRadar.exception.ex.CommentException;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
