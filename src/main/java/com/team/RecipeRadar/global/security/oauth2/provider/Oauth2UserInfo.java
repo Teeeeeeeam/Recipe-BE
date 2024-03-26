@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.security.oauth2.provider;
+package com.team.RecipeRadar.global.security.oauth2.provider;
 
 public interface Oauth2UserInfo {
 

@@ -1,11 +1,11 @@
-package com.team.RecipeRadar.global.jwt;
+package com.team.RecipeRadar.global.jwt.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.team.RecipeRadar.Entity.RefreshToken;
-import com.team.RecipeRadar.Service.JwtAuthService;
+import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
+import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;

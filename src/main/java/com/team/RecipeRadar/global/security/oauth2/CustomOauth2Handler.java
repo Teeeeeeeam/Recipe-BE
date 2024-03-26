@@ -1,8 +1,8 @@
-package com.team.RecipeRadar.security.oauth2;
+package com.team.RecipeRadar.global.security.oauth2;
 
 
-import com.team.RecipeRadar.global.jwt.JwtProvider;
-import com.team.RecipeRadar.global.security.PrincipalDetails;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

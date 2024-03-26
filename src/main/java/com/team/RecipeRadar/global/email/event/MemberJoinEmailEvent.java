@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.global.event;
+package com.team.RecipeRadar.global.email.event;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import org.springframework.context.ApplicationEvent;

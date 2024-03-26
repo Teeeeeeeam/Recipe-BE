@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.like.postLike.application;
 
-import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.domain.like.postLike.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.postLike.domain.PostLike;
 import com.team.RecipeRadar.domain.like.postLike.dto.PostLikeDto;
@@ -8,7 +7,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

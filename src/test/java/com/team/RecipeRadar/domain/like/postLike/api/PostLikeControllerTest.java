@@ -6,11 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.postLike.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.postLike.dto.PostLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.jwt.JwtAuthorizationFilter;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -21,19 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.servlet.http.HttpServletRequest;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.anyString;

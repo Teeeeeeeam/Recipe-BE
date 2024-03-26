@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.global.controller;
+package com.team.RecipeRadar.domain.member.api;
 
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.global.email.application.JoinEmailServiceImplV1;

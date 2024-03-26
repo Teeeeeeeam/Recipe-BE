@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.Service;
+package com.team.RecipeRadar.global.jwt.Service;
 
-import com.team.RecipeRadar.Entity.RefreshToken;
+import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 
 public interface JwtAuthService {
 

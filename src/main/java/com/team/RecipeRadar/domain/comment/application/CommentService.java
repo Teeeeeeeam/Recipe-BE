@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.comment.application;
 
 
-import com.team.RecipeRadar.dto.CommentDto;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.team.RecipeRadar.domain.comment.domain.Comment;

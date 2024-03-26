@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.team.RecipeRadar.dto.CommentDto;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.exception.ex.CommentException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

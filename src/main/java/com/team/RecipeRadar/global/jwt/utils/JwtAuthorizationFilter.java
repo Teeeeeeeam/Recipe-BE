@@ -1,12 +1,11 @@
-package com.team.RecipeRadar.global.jwt;
+package com.team.RecipeRadar.global.jwt.utils;
 
 
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.global.security.PrincipalDetails;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {

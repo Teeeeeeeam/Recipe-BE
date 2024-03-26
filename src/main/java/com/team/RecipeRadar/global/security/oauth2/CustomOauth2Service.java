@@ -1,12 +1,12 @@
-package com.team.RecipeRadar.security.oauth2;
+package com.team.RecipeRadar.global.security.oauth2;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.security.PrincipalDetails;
-import com.team.RecipeRadar.security.oauth2.provider.GoogleUserInfo;
-import com.team.RecipeRadar.security.oauth2.provider.KakaoUserInfo;
-import com.team.RecipeRadar.security.oauth2.provider.NaverUserInfo;
-import com.team.RecipeRadar.security.oauth2.provider.Oauth2UserInfo;
+import com.team.RecipeRadar.global.security.oauth2.provider.GoogleUserInfo;
+import com.team.RecipeRadar.global.security.oauth2.provider.KakaoUserInfo;
+import com.team.RecipeRadar.global.security.oauth2.provider.NaverUserInfo;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UserInfo;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

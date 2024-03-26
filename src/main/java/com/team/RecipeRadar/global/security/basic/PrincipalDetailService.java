@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.global.security;
+package com.team.RecipeRadar.global.security.basic;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;

@@ -1,7 +1,8 @@
-package com.team.RecipeRadar.dto;
+package com.team.RecipeRadar.domain.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.post.dto.PostDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

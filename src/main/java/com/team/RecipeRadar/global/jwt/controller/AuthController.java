@@ -1,8 +1,8 @@
-package com.team.RecipeRadar.controller;
+package com.team.RecipeRadar.global.jwt.controller;
 
-import com.team.RecipeRadar.Service.JwtAuthService;
+import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

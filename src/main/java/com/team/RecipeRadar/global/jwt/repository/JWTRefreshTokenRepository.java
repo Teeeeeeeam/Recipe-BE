@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.repository;
+package com.team.RecipeRadar.global.jwt.repository;
 
-import com.team.RecipeRadar.Entity.RefreshToken;
+import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

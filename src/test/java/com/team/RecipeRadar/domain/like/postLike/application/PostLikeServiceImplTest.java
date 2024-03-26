@@ -9,7 +9,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

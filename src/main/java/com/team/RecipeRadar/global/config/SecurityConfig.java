@@ -1,12 +1,12 @@
 package com.team.RecipeRadar.global.config;
 
-import com.team.RecipeRadar.global.jwt.ExceptionHandlerFilter;
-import com.team.RecipeRadar.global.jwt.JwtLoginFilter;
-import com.team.RecipeRadar.global.jwt.JwtAuthorizationFilter;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.ExceptionHandlerFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtLoginFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtAuthorizationFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

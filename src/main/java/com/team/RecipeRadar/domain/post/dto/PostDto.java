@@ -1,6 +1,5 @@
-package com.team.RecipeRadar.dto;
+package com.team.RecipeRadar.domain.post.dto;
 
-import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

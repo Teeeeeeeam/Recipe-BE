@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.Entity;
+package com.team.RecipeRadar.global.jwt.Entity;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import lombok.AllArgsConstructor;

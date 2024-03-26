@@ -1,8 +1,8 @@
-package com.team.RecipeRadar.global.jwt;
+package com.team.RecipeRadar.global.jwt.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.security.PrincipalDetails;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

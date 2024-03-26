@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.global.jwt;
+package com.team.RecipeRadar.global.jwt.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
