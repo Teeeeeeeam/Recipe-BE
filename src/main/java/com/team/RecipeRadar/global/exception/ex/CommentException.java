@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.exception.ex;
+package com.team.RecipeRadar.global.exception.ex;
 
 public class CommentException extends RuntimeException{
     public CommentException() {

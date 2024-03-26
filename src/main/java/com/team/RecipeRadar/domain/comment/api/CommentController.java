@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.team.RecipeRadar.dto.CommentDto;
-import com.team.RecipeRadar.exception.ex.CommentException;
+import com.team.RecipeRadar.global.exception.ex.CommentException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -109,7 +109,9 @@ public class CommentController {
         try {
             Page<CommentDto> comments = commentService.commentPage(Long.parseLong(postid), pageable);
             return ResponseEntity.ok(comments);
-        }catch (Exception e){
+        }catch (CommentException e){
+          throw new CommentException(e.getMessage());
+        } catch (Exception e){
             throw new ServerErrorException(e.getMessage());
         }
     }

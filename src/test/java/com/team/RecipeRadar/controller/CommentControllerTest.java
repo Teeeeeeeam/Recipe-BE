@@ -9,6 +9,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.dto.PostDto;
 import com.team.RecipeRadar.dto.CommentDto;
+import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.jwt.JwtProvider;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
@@ -108,6 +109,7 @@ class CommentControllerTest {
 
         //게시글 아이디
         long postId = Long.parseLong("55");
+        long postIdNo = Long.parseLong("111");
 
         MemberDto memberDto = MemberDto.builder().id(1L).build();
         PostDto articleDto = PostDto.builder().id(postId).build();
@@ -131,6 +133,9 @@ class CommentControllerTest {
         // commentService.commentPage() 메서드의 게시글 id가 55일때 page 객체 반환
         given(commentService.commentPage(eq(postId), any(Pageable.class))).willReturn(page);
 
+        given(commentService.commentPage(eq(postIdNo), any(Pageable.class))).willThrow(CommentException.class);
+
+
         // GET 요청 수행 및 응답 확인
         mockMvc.perform(get("/api/comment")
                         .param("posts", "55")
@@ -138,17 +143,15 @@ class CommentControllerTest {
                         .param("size","5")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()) // 상태 코드 200 확인
-                .andExpect(jsonPath("$.*",hasSize(10)))
-                .andExpect(jsonPath("$.[0].id",is(1)))
+                .andExpect(jsonPath("$.*",hasSize(11)))
+                .andExpect(jsonPath("$.content[0].id",is(1)))
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
 
         //게시글이 존재하지않았을때 false로 값이 나오는지 확인
         mockMvc.perform(get("/api/comment")
-                        .param("posts", "123")
-                        .param("page","1")
-                        .param("size","5")
+                        .param("posts","111")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(500)) // 상태 코드 500 확인
+                .andExpect(status().is(400)) // 상태 코드 400 확인
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
     }
 

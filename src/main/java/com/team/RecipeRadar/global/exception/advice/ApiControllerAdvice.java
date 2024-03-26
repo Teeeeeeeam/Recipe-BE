@@ -2,7 +2,7 @@ package com.team.RecipeRadar.global.exception.advice;
 
 
 import com.team.RecipeRadar.domain.like.ex.LikeException;
-import com.team.RecipeRadar.exception.ex.CommentException;
+import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ApiResponse;
