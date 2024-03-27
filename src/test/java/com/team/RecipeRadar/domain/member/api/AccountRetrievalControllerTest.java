@@ -2,8 +2,11 @@ package com.team.RecipeRadar.domain.member.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
+import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -41,7 +44,11 @@ class AccountRetrievalControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
+    AccountRetrievalEmailServiceImpl mailService;
+    @MockBean
     MemberRepository memberRepository;
+    @MockBean
+    MemberService memberService;
     @MockBean
     JwtProvider jwtProvider;
     @MockBean

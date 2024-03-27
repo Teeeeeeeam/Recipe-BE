@@ -1,10 +1,11 @@
 package com.team.RecipeRadar.domain.member.api;
 
 import com.team.RecipeRadar.domain.member.application.MemberService;
-import com.team.RecipeRadar.global.email.application.JoinEmailServiceImplV1;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.global.email.application.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
@@ -13,12 +14,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class SingUpValidController {
 
     private final MemberService memberService;
-    private final JoinEmailServiceImplV1 joinEmailServiceImpl1;
+
+    @Qualifier("JoinEmail")
+    private final MailService mailService;
 
     @PostMapping("/api/members/register/id/validate")
     public ResponseEntity<Map<String,Boolean>> LoginIdValid(@RequestBody MemberDto memberDto){
@@ -107,7 +110,7 @@ public class SingUpValidController {
     public ResponseEntity<?> mailConfirm(@RequestParam("email") String email){
         try {
             Map<String,String> result= new LinkedHashMap<>();
-            String code = joinEmailServiceImpl1.sensMailMessage(email);
+            String code = mailService.sensMailMessage(email);
 
             result.put("인증번호",code);
             return ResponseEntity.ok(result);
@@ -120,7 +123,7 @@ public class SingUpValidController {
     @PostMapping("/api/join/mailConfirm/check")
     public ResponseEntity<Map<String, Boolean>> check(@RequestParam("code")String UserCode){
         try {
-            Map<String, Boolean> stringBooleanMap = memberService.verifyCode(UserCode);
+            Map<String, Boolean> stringBooleanMap = mailService.verifyCode(UserCode);
             return ResponseEntity.ok(stringBooleanMap);
         }catch (Exception e){
             e.printStackTrace();

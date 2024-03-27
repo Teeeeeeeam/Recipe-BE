@@ -2,9 +2,10 @@ package com.team.RecipeRadar.domain.member.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.email.application.JoinEmailServiceImplV1;
+import com.team.RecipeRadar.global.email.application.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +21,26 @@ import java.util.Map;
 public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
     private final MemberRepository memberRepository;
-    private final JoinEmailServiceImplV1 joinEmailServiceImplV1;
+    @Qualifier("AccountEmail")
+    private final MailService mailService;
 
-public List<Map<String ,String>> findLoginId(String username, String email, String code) {
+    /**
+     * 아이디 찾기시에 사용되는 로직
+     * @param username  가입한 사용자 이름
+     * @param email     가입했던 이메일
+     * @param code      이메일로 전송된 인증번호
+     * @return      List로 반환
+     */
+    public List<Map<String ,String>> findLoginId(String username, String email, String code) {
     List<Member> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email);
-    log.info("bbb={}",byUsernameAndEmail);
+    
+    List<Map<String,String>> list = new LinkedList<>();     //순서를 보장하기 위해 LinkedList 사용
 
-    List<Map<String,String>> list = new LinkedList<>();
-
-    Boolean emailCode = emailCode(code);
+    Boolean emailCode = emailCode(code);        //인증번호
 
     Map<String, String> errorMap = new LinkedHashMap<>();
 
-    if (emailCode) {
+    if (emailCode) {            //인증번호 검증
         if (byUsernameAndEmail.isEmpty()) {
             errorMap.put("가입 정보", "해당 정보로 가입된 회원은 없습니다.");
             list.add(errorMap);
@@ -58,7 +66,7 @@ public List<Map<String ,String>> findLoginId(String username, String email, Stri
      * @return  일치시 -> true 불일치 false
      */
     public Boolean emailCode(String code){
-        String realCode = joinEmailServiceImplV1.getCode();
+        String realCode = mailService.getCode();
         if (realCode.equals(code)){
             return true;
         }

@@ -1,11 +1,12 @@
 package com.team.RecipeRadar.domain.member.application;
 
-import com.team.RecipeRadar.global.email.application.JoinEmailServiceImplV1;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.global.email.application.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
@@ -25,7 +26,10 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JoinEmailServiceImplV1 joinEmailServiceImplV1;
+
+    @Qualifier("JoinEmail")
+    private final MailService mailService;
+
 
     @Override
     public Member saveEntity(Member member) {
@@ -243,16 +247,8 @@ public class MemberServiceImpl implements MemberService {
      * @return 인증 성공시 true, 실패시 false
      */
     public Map<String, Boolean> verifyCode(String code){
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        String realCode = getCode();
-        if (realCode.equals(code)){
-            result.put("isVerifyCode",true);
-        }else result.put("isVerifyCode",false);
-
-        return result;
+        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(code);
+        return stringBooleanMap;
     }
 
-    private String getCode(){
-        return joinEmailServiceImplV1.getCode();
-    }
 }
