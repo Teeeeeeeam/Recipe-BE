@@ -1,29 +1,37 @@
 package com.team.RecipeRadar.domain.member.application;
 
+import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.email.application.JoinEmailServiceImplV1;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class AccountRetrievalServiceImplTest {
 
     @Mock MemberRepository memberRepository;
-    @Mock JoinEmailServiceImplV1 joinEmailServiceImplV1;
+    @Mock AccountRetrievalEmailServiceImpl emailService;
+    @Mock MemberService memberService;
+    @Mock PasswordEncoder passwordEncoder;
+    @Mock AccountRetrievalRepository accountRetrievalRepository;
 
     @InjectMocks AccountRetrievalServiceImpl accountRetrievalService;
 
@@ -44,7 +52,7 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
         String realCode = "code";
-        when(joinEmailServiceImplV1.getCode()).thenReturn(realCode);        // 이메일인증코드
+        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, realCode);     //반환
 
@@ -72,7 +80,7 @@ class AccountRetrievalServiceImplTest {
 
         String realCode = "code";
         String fakeCode = "fake";
-        when(joinEmailServiceImplV1.getCode()).thenReturn(realCode);        // 이메일인증코드
+        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, fakeCode);     //반환
 
@@ -96,10 +104,144 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq("등록되지 않은 사용자"), eq(email))).thenReturn(Collections.emptyList());
 
         String realCode = "code";
-        when(joinEmailServiceImplV1.getCode()).thenReturn(realCode);        // 이메일인증코드
+        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId("등록되지 않은 사용자", email, realCode);     //반환
         assertThat(loginId.get(0).get("가입 정보")).isEqualTo("해당 정보로 가입된 회원은 없습니다.");
         assertThat(loginId.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("비밀번호 찾기 성공시")
+    void find_pwd_success(){
+        String email = "test@email.com";
+        String username = "username";
+        String loginId = "loginId";
+        String code= "code";
+
+        // 가짜 회원이 존재함을 설정
+        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username,loginId,email)).thenReturn(true);
+
+        // 이메일 서비스가 가짜 코드를 반환하도록 설정
+        when(emailService.getCode()).thenReturn(code);
+
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId("accountRetrieval").loginId(loginId).build();
+
+        // accountRetrievalRepository.save 메서드에 대한 스텁 설정
+        when(accountRetrievalRepository.save(any(AccountRetrieval.class))).thenReturn(accountRetrieval);
+
+        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email,code);
+
+        // 회원 정보와 이메일 인증이 모두 true인지 확인
+
+        log.info("pwd={}",pwd);
+        assertThat(pwd.get("회원 정보")).isEqualTo(true);
+        assertThat(pwd.get("이메일 인증")).isEqualTo(true);
+        assertThat(pwd.get("token")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("비밀번호 찾기 실패시")
+    void find_pwd_false(){
+        String email = "test@email.com";
+        String username = "username";
+        String loginId = "loginId";
+        String code= "code";
+
+        //아이디와 사용자 이름과 이메일로 등록된 회원이 있는지 검사
+        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username,loginId,email)).thenReturn(false);
+
+        when(emailService.getCode()).thenReturn(code);
+
+        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email,"fakeCode");
+
+        assertThat(pwd.get("회원 정보")).isEqualTo(false);
+        assertThat(pwd.get("이메일 인증")).isEqualTo(false);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 성공시")
+    void update_password_success(){
+        String verificationId = UUID.randomUUID().toString();
+        String password = "asd123QWE!@";
+        String passwordRe = "asd123QWE!@";
+        String loginId = "loginId";
+
+        String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
+        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
+
+        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+
+        Member member = Member.builder().id(1l).username("username").password("asd").build();
+        when(memberService.findByLoginId(loginId)).thenReturn(member);
+
+        Map<String, Boolean> passwordStrengthMap = new HashMap<>();
+        passwordStrengthMap.put("passwordStrength", true);
+        Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
+        duplicatePasswordMap.put("duplicate_password", true);
+        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
+
+        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+
+        assertThat(apiResponse.isSuccess()).isTrue();
+        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호 변경 성공");
+    }
+
+    @Test
+    @DisplayName("비밀번호 실패 - 안전한 비밀번호 아닐시")
+    void update_password_fail(){
+        String verificationId = UUID.randomUUID().toString();
+        String password = "asd123QWE!@";
+        String passwordRe = "asd123QWE!@";
+        String loginId = "loginId";
+
+        String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
+        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
+
+        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+
+        Member member = Member.builder().id(1l).username("username").password("asd").build();
+        when(memberService.findByLoginId(loginId)).thenReturn(member);
+
+        Map<String, Boolean> passwordStrengthMap = new HashMap<>();
+        passwordStrengthMap.put("passwordStrength", false);
+        Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
+        duplicatePasswordMap.put("duplicate_password", true);
+        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
+
+        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+
+        assertThat(apiResponse.isSuccess()).isFalse();
+        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 안전하지 않습니다.");
+    }
+    @Test
+    @DisplayName("비밀번호 실패 - 비밀번호가 일치하지 않을시")
+    void update_password_fail2(){
+        String verificationId = UUID.randomUUID().toString();
+        String password = "asd123QWE!@";
+        String passwordRe = "asd123QWE!";
+        String loginId = "loginId";
+
+        String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
+        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
+
+        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+
+        Member member = Member.builder().id(1l).username("username").password("asd").build();
+        when(memberService.findByLoginId(loginId)).thenReturn(member);
+
+        Map<String, Boolean> passwordStrengthMap = new HashMap<>();
+        passwordStrengthMap.put("passwordStrength", true);
+        Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
+        duplicatePasswordMap.put("duplicate_password", false);
+        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
+
+        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+
+        assertThat(apiResponse.isSuccess()).isFalse();
+        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");
     }
 }

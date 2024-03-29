@@ -11,7 +11,7 @@ public interface MemberService {
 
     Member saveDto(MemberDto memberDto);
 
-    Member findByLoginId(String username);
+    Member findByLoginId(String loginId);
 
      Map<String, Boolean> LoginIdValid(MemberDto memberDto);
 
