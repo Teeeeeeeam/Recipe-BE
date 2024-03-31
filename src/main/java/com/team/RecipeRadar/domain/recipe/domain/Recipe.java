@@ -3,62 +3,55 @@ package com.team.RecipeRadar.domain.recipe.domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.Duration;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@ToString(includeFieldNames = false, of = {"id", "title","imageUrl" ,"servings", "cookingTime", "cookingLevel"})
 public class Recipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recipe_id", updatable = false)
     private Long id;
 
-    @Column(name = "recipe_title", nullable = false)
-    private String recipeTitle;
+    //@NotNull
+    private String postNumber;
 
-    @Column(name = "recipe_content", nullable = false)
-    private String recipeContent;
+    //@NotNull
+    private String imageUrl;
 
-    @Column(name = "recipe_serving", nullable = false)
-    private String recipeServing;
+    //@NotNull
+    private  String title;
 
-    @Column(name = "cooking_time", nullable = false)
+    // @NotNull
+    @Column(length = 3000)
+    private String content;
+
+    // @NotNull
+    private  String servings;
+
+    //@NotNull
     private String cookingTime;
 
-    @Column(name = "ingredients_amount", nullable = false)
-    private String ingredientsAmount;
+    //@NotNull
+    private  String cookingLevel;
 
-    @Column(name = "cooking_step", nullable = false)
-    private String cookingStep;
-
-    @Column(name = "recipe_level", nullable = false)
-    private String recipeLevel;
-
-
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    private List<Ingredient> ingredients;
 
     @Builder
-    public Recipe(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel) {
-        this.recipeTitle = recipeTitle;
-        this.recipeContent = recipeContent;
-        this.recipeServing = recipeServing;
+    public Recipe(String postNumber, String imageUrl, String title, String content, String servings, String cookingTime, String cookingLevel, List<Ingredient> ingredients) {
+        this.postNumber = postNumber;
+        this.imageUrl = imageUrl;
+        this.title = title;
+        this.content = content;
+        this.servings = servings;
         this.cookingTime = cookingTime;
-        this.ingredientsAmount = ingredientsAmount;
-        this.cookingStep = cookingStep;
-        this.recipeLevel = recipeLevel;
-
-    }
-
-    public void update(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel) {
-        this.recipeTitle = recipeTitle;
-        this.recipeContent = recipeContent;
-        this.recipeServing = recipeServing;
-        this.cookingTime = cookingTime;
-        this.ingredientsAmount = ingredientsAmount;
-        this.cookingStep = cookingStep;
-        this.recipeLevel = recipeLevel;
+        this.cookingLevel = cookingLevel;
+        this.ingredients = ingredients;
     }
 }
