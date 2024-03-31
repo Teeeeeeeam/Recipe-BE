@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
 
+import com.team.RecipeRadar.domain.recipe.dto.RecipeSearchedDto;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -10,7 +11,7 @@ import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"content"})
 public class Ingredient {
 
     @Id
@@ -18,7 +19,6 @@ public class Ingredient {
     private Long id;
     private String postNumber;
 
-    private Long recipeId;
 
     private  String ingredientTitle;
 
@@ -27,9 +27,16 @@ public class Ingredient {
     private  String ingredientAndQuantity;
 
 
+    @ManyToOne
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
+
+    public RecipeSearchedDto getRecipeForSearch() {
+        return new RecipeSearchedDto(recipe.getPostNumber(), recipe.getImageUrl(), recipe.getTitle());
+    }
+
     @Builder
-    public Ingredient(String ingredientTitle,String ingredientAndQuantity, String postNumber, Long recipeId) {
-        this.recipeId = recipeId;
+    public Ingredient(String ingredientTitle,String ingredientAndQuantity, String postNumber) {
         this.ingredientAndQuantity = ingredientAndQuantity;
         this.ingredientTitle = ingredientTitle;
         this.postNumber = postNumber;
