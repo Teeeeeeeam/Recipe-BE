@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -179,10 +179,10 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", true);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", true);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
 
         assertThat(apiResponse.isSuccess()).isTrue();
         assertThat(apiResponse.getMessage()).isEqualTo("비밀번호 변경 성공");
@@ -208,10 +208,10 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", false);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", true);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
 
         assertThat(apiResponse.isSuccess()).isFalse();
         assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 안전하지 않습니다.");
@@ -236,10 +236,10 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", true);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", false);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
 
         assertThat(apiResponse.isSuccess()).isFalse();
         assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");

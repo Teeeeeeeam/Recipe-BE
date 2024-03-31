@@ -2,7 +2,7 @@ package com.team.RecipeRadar.global.jwt.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +42,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             response.setCharacterEncoding("UTF-8");
             response.setStatus(unauthorized.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            ApiResponse errorResponse = new ApiResponse(false, message);
+            ControllerApiResponse errorResponse = new ControllerApiResponse(false, message);
             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         }catch (IOException e){
             e.printStackTrace();

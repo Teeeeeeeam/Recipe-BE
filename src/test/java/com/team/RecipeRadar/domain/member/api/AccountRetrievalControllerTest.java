@@ -7,7 +7,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import lombok.extern.slf4j.Slf4j;
@@ -119,7 +119,7 @@ class AccountRetrievalControllerTest {
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
         MemberDto memberDto = MemberDto.builder().id(1l).username(username).loginId(loginId).email(email).build();
 
-        ApiResponse apiResponse = new ApiResponse(true, "비밀번호 변경 성공");
+        ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
         given(accountRetrievalService.updatePassword(memberDto,token)).willReturn(apiResponse);
 
         mockMvc.perform(put("/api/pwd/update")

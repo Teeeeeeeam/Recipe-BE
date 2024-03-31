@@ -5,10 +5,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
-import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +23,13 @@ import java.util.Date;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtProvider {
-    private final MemberRepository memberRepository;
 
     private static final int TOKEN_TIME = 1; //10분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
-    private final JwtAuthService jwtAuthService;
+
+    private final MemberRepository memberRepository;
+    private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
+
 
     @Value("${security.token}")
     private String secret;
@@ -75,7 +77,7 @@ public class JwtProvider {
 
         RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
 
-        jwtAuthService.save(token);
+        jwtRefreshTokenRepository.save(token);
         return refreshToken;
     }
 
@@ -123,7 +125,9 @@ public class JwtProvider {
             DecodedJWT decodedJWT = JWT.decode(refreshToke);
 
             String loginId = decodedJWT.getClaim("loginId").asString();
-            RefreshToken refreshToken = jwtAuthService.findRefreshToken(refreshToke);
+
+            RefreshToken refreshToken = jwtRefreshTokenRepository.findByMemberLoginId(refreshToke);
+            if (refreshToken == null) throw new JwtTokenException("토큰이 존재하지 않습니다.");
 
             Boolean isTokenTIme = TokenExpiration(refreshToke);
 
