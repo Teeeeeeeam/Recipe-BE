@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.global.email.application;
 
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,8 +78,7 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
         String realCode = getCode();
         if (realCode.equals(code)){
             result.put("isVerifyCode",true);
-        }else result.put("isVerifyCode",false);
-
+        }else throw new BadRequestException("인증번호가 일치하지 않습니다.");
         return result;
     }
 

@@ -64,12 +64,15 @@ public class PostLikeServiceImpl implements PostLikeService{
     public Boolean checkLike(String jwtToken, Long postId) {
 
         String loginId = jwtProvider.validateAccessToken(jwtToken);
+        log.info("로그인아이디={}",loginId);
         Member byLoginId = memberRepository.findByLoginId(loginId);
+        log.info("멤바={}",byLoginId);
         Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(byLoginId.getId(),postId );
+        log.info("aaasdad={}",aBoolean);
         if (aBoolean){
             return true;
-        }
-        return false;
+        }else
+            return false;
     }
 
 }

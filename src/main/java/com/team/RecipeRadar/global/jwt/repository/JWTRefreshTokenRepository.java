@@ -12,7 +12,7 @@ public interface JWTRefreshTokenRepository extends JpaRepository<RefreshToken, L
 
 
     @Query("SELECT rt from RefreshToken rt where rt.refreshToken=:refreshToken")
-    RefreshToken findByMemberLoginId(@Param("refreshToken")String refreshToken);
+    RefreshToken findByRefreshToken(@Param("refreshToken")String refreshToken);
 
     @Modifying
     @Query("delete from RefreshToken rt where rt.member.id=:member_id")

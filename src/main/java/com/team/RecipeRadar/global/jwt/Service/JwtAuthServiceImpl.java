@@ -10,6 +10,7 @@ import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -59,9 +60,9 @@ public class JwtAuthServiceImpl implements JwtAuthService {
                 result.put("refreshToken", refreshToken);
                 return result;
             }
-            throw new BadRequestException("로그인 실패");
+            throw new AccessDeniedException("로그인 실패");
         } else {
-            throw new BadRequestException("로그인 실패");
+            throw new AccessDeniedException("로그인 실패");
         }
     }
 

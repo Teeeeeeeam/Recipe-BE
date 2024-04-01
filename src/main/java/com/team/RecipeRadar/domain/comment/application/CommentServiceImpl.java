@@ -4,6 +4,8 @@ import com.team.RecipeRadar.domain.comment.dto.AddCommentRequest;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.dto.UpdateCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -74,22 +76,22 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 댓글 저장하는 기능 -> 게시글과 사용자의 정보를 이요해 Commnet 객체를 생성후 저장
-     * @param commentDto
+     * @param userAddCommentDto
      * @return 저장된 Commnet객체
      */
-    public Comment save(CommentDto commentDto) {
-        Long member_id = commentDto.getMemberDto().getId();
-        Long article_id = commentDto.getArticleDto().getId();
+    public Comment save(UserAddCommentDto userAddCommentDto) {
+        Long memberId = userAddCommentDto.getMemberId();
+        Long postId = userAddCommentDto.getPostId();
 
-        Optional<Member> member = memberRepository.findById(member_id);
-        Optional<Post> postOptional = postRepository.findById(article_id);
+        Optional<Member> member = memberRepository.findById(memberId);
+        Optional<Post> postOptional = postRepository.findById(postId);
 
         if (member.isPresent() && postOptional.isPresent()) {        //사용자 정보와 게시글의 정보가 존재할시에만 통과
             Member member1 = member.get();
             Post post = postOptional.get();
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);        //yyy-dd-mm:hh-MM으로 저장 밀리세컨트는 모두 0초
             Comment build = Comment.builder()                               //댓글 저장
-                    .commentContent(commentDto.getComment_content())
+                    .commentContent(userAddCommentDto.getCommentContent())
                     .member(member1)
                     .post(post)
                     .created_at(localDateTime)
@@ -103,13 +105,13 @@ public class CommentServiceImpl implements CommentService {
     /**
      * 댓글의 Id와 사용자의 Id를 사용해서 댓글을 삭제한다.
      * 댓글의 작성자가 아닐경우 삭제시에는 ->CommentException 예외를 날린다.
-     * @param commentDto
+     * @param userDeleteCommentDto
      */
     @Override
-    public void delete_comment(CommentDto commentDto) {
+    public void delete_comment(UserDeleteCommentDto userDeleteCommentDto) {
 
-        Long memberDtoId = commentDto.getMemberDto().getId();
-        Long commentDtoId = commentDto.getId();
+        Long memberDtoId = userDeleteCommentDto.getMemberId();
+        Long commentDtoId = userDeleteCommentDto.getCommentId();
 
         Member member = getMemberThrows(memberDtoId);
         Comment comment = commentRepository.findById(commentDtoId).orElseThrow(() -> new NoSuchElementException("해당 댓글 찾을 수없습니다. " + commentDtoId));
@@ -151,9 +153,11 @@ public class CommentServiceImpl implements CommentService {
 
         Member member = getMemberThrows(member_id);
         Comment comment = commentRepository.findById(comment_id).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
+        LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);
 
         if (comment.getMember().equals(member)){        //Comment 엔티티에 Mmeber가 있는지 없는지 확인
             comment.update(comment_content);
+            comment.updateTime(localDateTime);
         }else
             throw new CommentException("작성자만 수정 가능합니다.");
 

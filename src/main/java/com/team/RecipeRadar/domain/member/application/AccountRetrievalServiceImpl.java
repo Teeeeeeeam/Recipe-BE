@@ -4,10 +4,11 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -96,33 +97,33 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
     /**
      * 비밀번호 수정 API DB-> 10분마다 스케쥴 이벤트 발생
-     * @param memberDto MemberDto 객체(username, loginId, password, passwordRe)
+     * @param updatePasswordDto MemberDto 객체(username, loginId, password, passwordRe)
      * @param id        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
-     * @return ApiResponse 객체
+     * @return ControllerApiResponse 객체
      */
-    public ApiResponse updatePassword(MemberDto memberDto,String id){
+    public ControllerApiResponse updatePassword(UpdatePasswordDto updatePasswordDto, String id){
 
         String validId = new String(Base64.getDecoder().decode(id.getBytes()));
 
         Boolean aBoolean = accountRetrievalRepository.existsByVerificationId(validId);              // 해당 ID가 있는지 체크
 
-        Member byLoginId = memberService.findByLoginId(memberDto.getLoginId());
+        Member byLoginId = memberService.findByLoginId(updatePasswordDto.getLoginId());
         if (byLoginId==null) throw new NoSuchElementException("가입된 아이디를 찾을수 없습니다.");
 
-        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(memberDto);     //성공시 true , 실패시 false
-        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(memberDto);        //성공시 true , 실패시 false
+        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(updatePasswordDto.getPassword());     //성공시 true , 실패시 false
+        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(updatePasswordDto.getPassword(), updatePasswordDto.getPasswordRe());        //성공시 true , 실패시 false
 
-        ApiResponse apiResponse = null;
+        ControllerApiResponse apiResponse = null;
 
         if (aBoolean) {
             if (stringBooleanMap.get("passwordStrength")) {
                 if (stringBooleanMap1.get("duplicate_password")) {
-                    byLoginId.update(passwordEncoder.encode(memberDto.getPassword()));
-                    apiResponse = new ApiResponse(true, "비밀번호 변경 성공");
+                    byLoginId.update(passwordEncoder.encode(updatePasswordDto.getPassword()));
+                    apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
                 } else
-                    apiResponse = new ApiResponse(false, "비밀번호가 일치하지 않습니다.");
+                   throw new BadRequestException("비밀번호가 일치하지 않습니다.");
             } else
-                apiResponse = new ApiResponse(false, "비밀번호가 안전하지 않습니다.");
+                throw new BadRequestException("비밀번호가 안전하지 않습니다.");
         }else
             throw new BadRequestException("잘못된 접근");
 

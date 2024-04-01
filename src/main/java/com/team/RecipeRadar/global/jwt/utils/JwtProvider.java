@@ -24,7 +24,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
 
-    private static final int TOKEN_TIME = 1; //10분
+    private static final int TOKEN_TIME = 10; //10분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
 
     private final MemberRepository memberRepository;
@@ -120,24 +120,25 @@ public class JwtProvider {
 
     }
 
-    public String validateRefreshToken(String refreshToke){
+    public String validateRefreshToken(String refreshToken){
         try{
-            DecodedJWT decodedJWT = JWT.decode(refreshToke);
+            DecodedJWT decodedJWT = JWT.decode(refreshToken);
 
             String loginId = decodedJWT.getClaim("loginId").asString();
 
-            RefreshToken refreshToken = jwtRefreshTokenRepository.findByMemberLoginId(refreshToke);
+            RefreshToken rerefreshToken = jwtRefreshTokenRepository.findByRefreshToken(refreshToken);
             if (refreshToken == null) throw new JwtTokenException("토큰이 존재하지 않습니다.");
 
-            Boolean isTokenTIme = TokenExpiration(refreshToke);
+            Boolean isTokenTIme = TokenExpiration(refreshToken);
 
-            if (loginId.equals(refreshToken.getMember().getLoginId())&&isTokenTIme){
-                String token = generateAccessToken(refreshToken.getMember().getLoginId());
+            if (loginId.equals(rerefreshToken.getMember().getLoginId())&&!isTokenTIme){
+                String token = generateAccessToken(rerefreshToken.getMember().getLoginId());
                 return token;
             }else
                 return null;
 
         }catch (Exception e){
+            e.printStackTrace();
           throw new JwtTokenException("잘못된 토큰 형식입니다.");
         }
     }
