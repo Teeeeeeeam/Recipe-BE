@@ -41,4 +41,8 @@ public class Member {
         return new ArrayList<>();
     }
 
+    public void update(String password){
+        this.password = password;
+    }
+
 }

@@ -1,18 +1,21 @@
 package com.team.RecipeRadar.domain.member.application;
 
+import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.MailService;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.payload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -23,6 +26,10 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
     private final MemberRepository memberRepository;
     @Qualifier("AccountEmail")
     private final MailService mailService;
+    private final MemberService memberService;
+    private final PasswordEncoder passwordEncoder;
+    private final AccountRetrievalRepository accountRetrievalRepository;
+
 
     /**
      * 아이디 찾기시에 사용되는 로직
@@ -61,6 +68,68 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 }
 
     /**
+     * 비밀번호 찾기 로직
+     * @param username  가입한 사용자이름
+     * @param loginId   가입한 로그인 아이디
+     * @param email     가입한 이메일
+     * @return
+     */
+    @Override
+    public Map<String, Object> findPwd(String username, String loginId, String email,String code) {
+        Boolean memberExists = memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email);
+        Boolean emailedCode = emailCode(code);
+
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        if (memberExists&&emailedCode){
+            AccountRetrieval save = accountRetrievalRepository.save(AccountRetrieval.builder().loginId(loginId).build());
+            String verificationId = save.getVerificationId();
+            String token = new String(Base64.getEncoder().encode(verificationId.getBytes()));
+            map.put("token",token);
+        }
+
+        map.put("회원 정보", memberExists);
+        map.put("이메일 인증", emailedCode);
+
+        return map;
+    }
+
+    /**
+     * 비밀번호 수정 API DB-> 10분마다 스케쥴 이벤트 발생
+     * @param memberDto MemberDto 객체(username, loginId, password, passwordRe)
+     * @param id        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
+     * @return ApiResponse 객체
+     */
+    public ApiResponse updatePassword(MemberDto memberDto,String id){
+
+        String validId = new String(Base64.getDecoder().decode(id.getBytes()));
+
+        Boolean aBoolean = accountRetrievalRepository.existsByVerificationId(validId);              // 해당 ID가 있는지 체크
+
+        Member byLoginId = memberService.findByLoginId(memberDto.getLoginId());
+        if (byLoginId==null) throw new NoSuchElementException("가입된 아이디를 찾을수 없습니다.");
+
+        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(memberDto);     //성공시 true , 실패시 false
+        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(memberDto);        //성공시 true , 실패시 false
+
+        ApiResponse apiResponse = null;
+
+        if (aBoolean) {
+            if (stringBooleanMap.get("passwordStrength")) {
+                if (stringBooleanMap1.get("duplicate_password")) {
+                    byLoginId.update(passwordEncoder.encode(memberDto.getPassword()));
+                    apiResponse = new ApiResponse(true, "비밀번호 변경 성공");
+                } else
+                    apiResponse = new ApiResponse(false, "비밀번호가 일치하지 않습니다.");
+            } else
+                apiResponse = new ApiResponse(false, "비밀번호가 안전하지 않습니다.");
+        }else
+            throw new BadRequestException("잘못된 접근");
+
+        return apiResponse;
+    }
+
+    /**
      * 이메일 인증시 인증번호가 유효한지 체크
      * @param code  사용자가 입력한 인증번호
      * @return  일치시 -> true 불일치 false
@@ -72,4 +141,5 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         }
         return false;
     }
+
 }

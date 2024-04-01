@@ -2,6 +2,7 @@ package com.team.RecipeRadar.global.exception.advice;
 
 
 import com.team.RecipeRadar.domain.like.ex.LikeException;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
@@ -46,6 +47,12 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> LikeError(LikeException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> BadRequest(BadRequestException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
