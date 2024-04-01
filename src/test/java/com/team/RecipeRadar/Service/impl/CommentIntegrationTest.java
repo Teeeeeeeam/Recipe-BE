@@ -4,6 +4,7 @@ package com.team.RecipeRadar.Service.impl;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -71,16 +72,8 @@ public class CommentIntegrationTest {
                 .id(saveArticle.getId())
                 .build();
 
-        CommentDto commentDto = CommentDto.builder()
-                .comment_content("테스트 댓글")
-                .memberDto(memberDto)
-                .articleDto(articleDto).build();
-
-        CommentDto commentDto1 = CommentDto.builder()
-                .comment_content("테스트 댓글")
-                .memberDto(memberDto1)
-                .articleDto(articleDto).build();
-
+        UserAddCommentDto commentDto = new UserAddCommentDto("테스트 댓글", memberDto.getId(), articleDto.getId(), LocalDateTime.now());
+        UserAddCommentDto commentDto1 = new UserAddCommentDto("테스트 댓글", memberDto1.getId(), articleDto.getId(), LocalDateTime.now());
 
         //실행
         Comment save = commentService.save(commentDto);
