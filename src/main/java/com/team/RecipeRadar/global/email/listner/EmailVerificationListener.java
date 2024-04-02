@@ -2,7 +2,7 @@ package com.team.RecipeRadar.global.email.listner;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.email.application.JoinEmailService;
-import com.team.RecipeRadar.global.event.MemberJoinEmailEvent;
+import com.team.RecipeRadar.global.email.event.MemberJoinEmailEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;

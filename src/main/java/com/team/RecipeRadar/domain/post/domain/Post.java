@@ -31,6 +31,8 @@ public class Post {
     @Column(name = "post_cooking_level", nullable = false)
     private String postCookingLevel;
 
+    private Integer postLikeCount;
+
     @Builder
     public Post(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel) {
         this.postTitle = postTitle;

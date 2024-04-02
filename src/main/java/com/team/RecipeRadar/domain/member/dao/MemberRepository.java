@@ -17,4 +17,10 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Member findByCaseSensitiveLoginId(@Param("loginId") String loginId);
 
     List<Member> findByEmail(String email);
+
+    List<Member> findByUsernameAndEmail(String username, String email);
+
+    Boolean existsByUsernameAndLoginIdAndEmail(String username, String loginId, String email);
+
+    Boolean existsByLoginIdAndPassword(String loginId, String password);
 }

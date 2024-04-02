@@ -1,6 +1,9 @@
 package com.team.RecipeRadar.global.exception.advice;
 
 
+import com.team.RecipeRadar.domain.like.ex.LikeException;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 
 @Slf4j
-@RestControllerAdvice(basePackages = {"com.team.RecipeRadar.controller","com.team.RecipeRadar.filter.jwt"})
+@RestControllerAdvice
 public class ApiControllerAdvice {
 
 
@@ -33,5 +36,23 @@ public class ApiControllerAdvice {
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         log.error("errorMessage={}",e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<ErrorResponse> commentError(CommentException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> LikeError(LikeException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> BadRequest(BadRequestException e){
+        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }

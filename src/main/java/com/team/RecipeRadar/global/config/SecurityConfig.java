@@ -1,12 +1,12 @@
 package com.team.RecipeRadar.global.config;
 
-import com.team.RecipeRadar.global.jwt.ExceptionHandlerFilter;
-import com.team.RecipeRadar.global.jwt.JwtLoginFilter;
-import com.team.RecipeRadar.global.jwt.JwtAuthorizationFilter;
-import com.team.RecipeRadar.global.jwt.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.ExceptionHandlerFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtLoginFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtAuthorizationFilter;
+import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Handler;
-import com.team.RecipeRadar.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
+import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,7 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        config.setAllowedOrigins(Arrays.asList("*"));       //모든 요청의 허용
         config.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT"));
         config.setAllowedHeaders(Arrays.asList("*"));
 

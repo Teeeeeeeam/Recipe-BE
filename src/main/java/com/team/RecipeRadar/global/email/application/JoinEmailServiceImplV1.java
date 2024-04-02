@@ -1,28 +1,35 @@
 package com.team.RecipeRadar.global.email.application;
 
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class JoinEmailServiceImplV1 {
+@Qualifier("JoinEmail")
+public class JoinEmailServiceImplV1 implements MailService{
 
     private final JavaMailSender mailSender;
     private String code;
-
+    @Value("${email}")
+    private String emailFrom;
 
     public String sensMailMessage(String email){
         code=createCode();
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("나만의 냉장고 호원가입 인증번호 안내."); // 이메일 제목 설정
+        message.setSubject("나만의 냉장고 회원가입 인증번호 안내."); // 이메일 제목 설정
         message.setText(getText()); // 이메일 내용 설정
-        message.setFrom("ggambopce@naver.com"); // 발신자 이메일 주소 설정
+        message.setFrom(emailFrom); // 발신자 이메일 주소 설정
         message.setTo(email); // 수신자 이메일 주소 설정
         mailSender.send(message); // 이메일 발송
 
@@ -47,5 +54,21 @@ public class JoinEmailServiceImplV1 {
 
     public String getCode(){
         return String.valueOf(code);
+    }
+
+
+    /**
+     * 회원가입시 이메일 인증번호 유호성 검사
+     * @param code
+     * @return 인증 성공시 true, 실패시 false
+     */
+    public Map<String, Boolean> verifyCode(String code){
+        Map<String, Boolean> result = new LinkedHashMap<>();
+        String realCode = getCode();
+        if (realCode.equals(code)){
+            result.put("isVerifyCode",true);
+        }else throw new BadRequestException("인증번호가 일치하지 않습니다.");
+
+        return result;
     }
 }
