@@ -28,7 +28,7 @@ public class NoticeServiceImpl implements NoticeService {
             return noticeRepository.save(request.toEntity());
         } catch (DataAccessException e) {
             // 데이터베이스 저장 중에 문제가 발생한 경우
-            throw new InvalidNoticeRequestException("Failed to save notice", e);
+            throw new InvalidNoticeRequestException("공지사항 저장에 실패했습니다.", e);
         }
     }
 
@@ -38,14 +38,14 @@ public class NoticeServiceImpl implements NoticeService {
             return noticeRepository.findAll();
         } catch (DataAccessException e) {
             // 데이터베이스에서 모든 공지사항을 가져오는 중에 문제가 발생한 경우
-            throw new NoticeNotFoundException("Failed to retrieve notices", e);
+            throw new NoticeNotFoundException("공지사항 조회에 실패했습니다.", e);
         }
     }
 
     @Override
     public Notice findById(long id) {
         return noticeRepository.findById(id)
-                .orElseThrow(() -> new NoticeNotFoundException("not found: " + id));
+                .orElseThrow(() -> new NoticeNotFoundException("찾을 수 없습니다." + id));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class NoticeServiceImpl implements NoticeService {
             noticeRepository.deleteById(id);
         } catch (DataAccessException e) {
             // 데이터베이스에서 공지사항을 삭제하는 중에 문제가 발생한 경우
-            throw new AccessDeniedNoticeException("Failed to delete notice with id: " + id, e);
+            throw new AccessDeniedNoticeException("공지사항 삭제에 실패했습니다." + id, e);
         }
     }
 
@@ -62,14 +62,14 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public Notice update(long id, UpdateNoticeRequest request) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new NoticeNotFoundException(("not found: " + id)));
+                .orElseThrow(() -> new NoticeNotFoundException(("찾을 수 없습니다." + id)));
 
         try {
             notice.update(request.getNoticeTitle(), request.getNoticeContent());
             return notice;
         } catch (Exception e) {
             // 업데이트하는 중에 문제가 발생한 경우
-            throw new UnauthorizedNoticeException("Failed to update notice with id: " + id, e);
+            throw new UnauthorizedNoticeException("공지사항 수정에 실패했습니다." + id, e);
         }
     }
 }

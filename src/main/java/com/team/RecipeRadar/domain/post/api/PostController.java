@@ -17,7 +17,7 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-    @PostMapping("/api/admin/posts")
+    @PostMapping("/api/posts")
     public ResponseEntity<Post> addPost(@RequestBody AddPostRequest request) {
         Post savedPost = postService.save(request);
 
@@ -25,7 +25,7 @@ public class PostController {
                 .body(savedPost);
     }
 
-    @GetMapping("/api/admin/posts")
+    @GetMapping("/api/posts")
     public  ResponseEntity<List<PostResponse>> findAllPosts() {
         List<PostResponse> posts = postService.findAll()
                 .stream()
@@ -34,7 +34,7 @@ public class PostController {
         return ResponseEntity.ok()
                 .body(posts);
     }
-    @GetMapping("api/admin/posts/{id}")
+    @GetMapping("api/posts/{id}")
     public  ResponseEntity<PostResponse> findPost(@PathVariable long id) {
         Post post = postService.findById(id);
 
@@ -42,7 +42,7 @@ public class PostController {
                 .body(new PostResponse(post));
     }
 
-    @DeleteMapping("/api/admin/posts/{id}")
+    @DeleteMapping("/api/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable long id) {
         postService.delete(id);
 
@@ -50,7 +50,15 @@ public class PostController {
                 .build();
     }
 
-    @PutMapping("/api/admin/posts/{id}")
+    @DeleteMapping("/api/admin/posts/{id}")
+    public ResponseEntity<Void> adminDeletePost(@PathVariable long id) {
+        postService.delete(id);
+
+        return ResponseEntity.ok()
+                .build();
+    }
+
+    @PutMapping("/api/posts/{id}")
     public  ResponseEntity<Post> updatePost(@PathVariable long id, @RequestBody UpdatePostRequest request){
         Post updatePost = postService.update(id, request);
 

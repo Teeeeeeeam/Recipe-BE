@@ -34,10 +34,4 @@ public class ApiControllerAdvice {
         log.error("errorMessage={}",e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
-
-    @ExceptionHandler(CommentException.class)
-    public ResponseEntity<ErrorResponse> commentError(CommentException e){
-        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
 }
