@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.comment.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,10 +33,12 @@ public class Comment {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Schema(hidden = true)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Schema(hidden = true)
     @JoinColumn(name = "post_id")
     private Post post;
 
@@ -50,5 +53,9 @@ public class Comment {
 
     public void update(String commentContent) {
         this.commentContent = commentContent;
+    }
+
+    public void updateTime(LocalDateTime updated_at) {
+        this.updated_at = updated_at;
     }
 }

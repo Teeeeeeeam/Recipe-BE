@@ -4,9 +4,11 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -168,8 +171,8 @@ class AccountRetrievalServiceImplTest {
         String loginId = "loginId";
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
-        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
 
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
         Member member = Member.builder().id(1l).username("username").password("asd").build();
@@ -179,10 +182,10 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", true);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", true);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto, token);
 
         assertThat(apiResponse.isSuccess()).isTrue();
         assertThat(apiResponse.getMessage()).isEqualTo("비밀번호 변경 성공");
@@ -197,7 +200,7 @@ class AccountRetrievalServiceImplTest {
         String loginId = "loginId";
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
-        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
 
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
@@ -208,13 +211,15 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", false);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", true);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            accountRetrievalService.updatePassword(updatePasswordDto, token);
+        });
 
-        assertThat(apiResponse.isSuccess()).isFalse();
-        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 안전하지 않습니다.");
+        // 예외 메시지가 일치하는지 확인
+        assertThat(exception.getMessage()).isEqualTo("비밀번호가 안전하지 않습니다.");
     }
     @Test
     @DisplayName("비밀번호 실패 - 비밀번호가 일치하지 않을시")
@@ -225,7 +230,7 @@ class AccountRetrievalServiceImplTest {
         String loginId = "loginId";
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
-        MemberDto memberDto = MemberDto.builder().id(1l).password(password).passwordRe(passwordRe).loginId(loginId).build();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
 
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
@@ -236,12 +241,14 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", true);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", false);
-        when(memberService.duplicatePassword(any())).thenReturn(duplicatePasswordMap);
+        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ApiResponse apiResponse = accountRetrievalService.updatePassword(memberDto, token);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            accountRetrievalService.updatePassword(updatePasswordDto, token);
+        });
 
-        assertThat(apiResponse.isSuccess()).isFalse();
-        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");
+        // 예외 메시지가 일치하는지 확인
+        assertThat(exception.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");
     }
 }

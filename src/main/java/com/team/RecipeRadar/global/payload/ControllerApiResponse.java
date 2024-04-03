@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.global.payload;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +9,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse {
+public class ControllerApiResponse<T> {
 
+    @Schema(example = "true")
     private boolean success;
-    private Object message;
+
+    @Schema(description = "응답 데이터")
+    private T message;
 }

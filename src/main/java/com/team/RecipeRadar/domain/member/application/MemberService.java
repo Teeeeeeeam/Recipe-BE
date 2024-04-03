@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.member.application;
 
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.valid.PasswordStrengthDto;
 
 import java.util.Map;
 
@@ -13,15 +14,15 @@ public interface MemberService {
 
     Member findByLoginId(String loginId);
 
-     Map<String, Boolean> LoginIdValid(MemberDto memberDto);
+     Map<String, Boolean> LoginIdValid(String loginId);
 
-    Map<String, Boolean> emailValid(MemberDto memberDto);
-    Map<String, Boolean> userNameValid(MemberDto memberDto);
-    Map<String, Boolean> checkPasswordStrength(MemberDto memberDto);
+    Map<String, Boolean> emailValid(String email);
+    Map<String, Boolean> userNameValid(String username);
+    Map<String, Boolean> checkPasswordStrength(String password);
     boolean ValidationOfSignUp(MemberDto memberDto,String code);
-    Map<String, Boolean> duplicatePassword(MemberDto memberDto);
+    Map<String, Boolean> duplicatePassword(String password,String passwordRe);
 
-    Map<String,Boolean> nickNameValid(MemberDto memberDto);
+    Map<String,Boolean> nickNameValid(String nickName);
     Map<String, Boolean> verifyCode(String code);
 
 

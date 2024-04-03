@@ -40,51 +40,43 @@ class CommentRepositoryTest {
     EntityManager entityManager;
 
     @Test
-    @Rollback
-    @DisplayName("회원id와 댓글 id와 를 통해 데이터 삭제")
-    void delete_CommentEntity(){
+    @DisplayName("댓글 삭제 테스트")
+    void delete_comment() {
         Member member = Member.builder().username("test 유저").build();
-
         Member member1 = Member.builder().username("test 유저1").build();
 
         Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").build();
 
-        Comment comment = Comment.builder()
-                .commentContent("test 댓글 작성")
-                .member(member)
-                .post(article)
-                .build();
-
-        Comment comment1 = Comment.builder()
-                .id(2l)
-                .commentContent("test 댓글 작성1")
-                .member(member1)
-                .post(article)
-                .build();
+        Comment comment = Comment.builder().commentContent("test 댓글 작성").member(member).post(article).build();
+        Comment comment1 = Comment.builder().commentContent("test 댓글 작성1").member(member1).post(article).build();
 
         Member saveMember = memberRepository.save(member);
-        Member saveMember1 = memberRepository.save(member1);
-
+        memberRepository.save(member1);
 
         Post saveArticle = articleRepository.save(article);
+
         Comment saveComment = commentRepository.save(comment);
-        Comment saveComment1 = commentRepository.save(comment1);
+        Comment save = commentRepository.save(comment1);
 
         assertThat(saveMember).isNotNull();
         assertThat(saveArticle).isNotNull();
         assertThat(saveComment).isNotNull();
 
-        commentRepository.deleteMemberId(member.getId(),comment.getId());
+        // 댓글 삭제
+        commentRepository.deleteMemberId(saveMember.getId(), saveComment.getId());
 
-        //원래는 JPQL 을 사용하면 실행시에 플러쉬가 되어야하는데 왜 영속성 컨텍스트가 적용이안되는지 잘모르겟음... 그래서 강제로 flush 및 clear 을 사용하여 영속성 컨텍스트 초기화
-        entityManager.flush();
         entityManager.clear();
-
-        Optional<Comment> byId = commentRepository.findById(1l);
+        // 댓글이 삭제되었는지 확인
+        Optional<Comment> byId = commentRepository.findById(comment.getId());
         assertThat(byId).isEmpty();
-        Optional<Comment> byId1 = commentRepository.findById(2l);
+
+        // 삭제되지 않은 댓글 확인
+        Optional<Comment> byId1 = commentRepository.findById(save.getId());
+        log.info("log={}",byId1);
         assertThat(byId1).isNotEmpty();
     }
+
+
 
     @Test
     @DisplayName("댓글 모두조회 페이징")

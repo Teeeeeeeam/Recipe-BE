@@ -1,13 +1,17 @@
 package com.team.RecipeRadar.domain.member.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentDto;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +67,8 @@ class AccountRetrievalControllerTest {
         String email="test@email.com";
         String code = "code";
 
-        MemberDto build = MemberDto.builder().email(email).username(username).build();
+
+        FindLoginIdDto findLoginIdDto = new FindLoginIdDto(username, email, code);
 
         List<Map<String, String>> mapList = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
@@ -73,41 +78,44 @@ class AccountRetrievalControllerTest {
 
         given(accountRetrievalService.findLoginId(eq(username),eq(email),eq(code))).willReturn(mapList);
 
-        mockMvc.perform(get("/api/loginid/find")
+        mockMvc.perform(post("/api/loginid/find")
                 .param("code",code)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(build)))
+                .content(objectMapper.writeValueAsString(findLoginIdDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0]['로그인 타입']").value("keuye0638"));
+                .andExpect(jsonPath("$.message[0]['로그인 타입']").value("keuye0638"));
     }
 
     @Test
     @DisplayName("비밀번호 찾기 엔드포인트")
     void find_password() throws Exception {
         String username = "test";
-        String loginId="loginId";
-        String email="test@email.com";
+        String loginId = "loginId";
+        String email = "test@email.com";
         String code = "code";
 
-        MemberDto memberDto = MemberDto.builder().id(1l).username(username).loginId(loginId).email(email).build();
+        FindPasswordDto findPasswordDto = new FindPasswordDto(username, loginId, email, code);
 
+        // 반환할 맵 설정
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("token","test_TOken");
-        map.put("회원 정보",true);
+        map.put("token", "test_TOken");
+        map.put("회원 정보", true);
         map.put("이메일 인증", true);
 
-        given(accountRetrievalService.findPwd(memberDto.getUsername(),memberDto.getLoginId(),memberDto.getEmail(),code)).willReturn(map);
+        // accountRetrievalService.findPwd() 메서드가 호출될 때 반환할 값 설정
+        given(accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode())).willReturn(map);
 
-        mockMvc.perform(get("/api/pwd/find")
-                .param("code",code)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberDto)))
+        // 요청 및 응답 확인
+        mockMvc.perform(post("/api/pwd/find")
+                        .param("code", code)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(findPasswordDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("test_TOken"))
-                .andExpect(jsonPath("$.['회원 정보']").value(true))
-                .andExpect(jsonPath("$.['이메일 인증']").value(true));
+                .andExpect(jsonPath("$.message.token").value("test_TOken"))
+                .andExpect(jsonPath("$.message['회원 정보']").value(true))
+                .andExpect(jsonPath("$.message['이메일 인증']").value(true));
     }
 
     @Test
@@ -117,14 +125,14 @@ class AccountRetrievalControllerTest {
         String loginId="loginId";
         String email="test@email.com";
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
-        MemberDto memberDto = MemberDto.builder().id(1l).username(username).loginId(loginId).email(email).build();
 
-        ApiResponse apiResponse = new ApiResponse(true, "비밀번호 변경 성공");
-        given(accountRetrievalService.updatePassword(memberDto,token)).willReturn(apiResponse);
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, "asdQWE123!@", "asdQWE123!@");
+        ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
+        given(accountRetrievalService.updatePassword(updatePasswordDto,token)).willReturn(apiResponse);
 
         mockMvc.perform(put("/api/pwd/update")
                 .param("id",token)
-                .content(objectMapper.writeValueAsString(memberDto))
+                .content(objectMapper.writeValueAsString(updatePasswordDto))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())

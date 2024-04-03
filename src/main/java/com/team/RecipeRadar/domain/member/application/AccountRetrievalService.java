@@ -1,7 +1,8 @@
 package com.team.RecipeRadar.domain.member.application;
 
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.payload.ApiResponse;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -12,5 +13,5 @@ public interface AccountRetrievalService {
 
     Map<String,Object> findPwd(String username, String loginId, String email,String code);
 
-    ApiResponse updatePassword(MemberDto memberDto,String uuid);
+    ControllerApiResponse updatePassword(UpdatePasswordDto memberDto, String uuid);
 }

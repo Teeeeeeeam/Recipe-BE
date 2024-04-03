@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.comment.application;
 
 
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
@@ -23,8 +25,8 @@ public interface CommentService {
 
     List<Comment> searchComments(String query);
 
-    Comment save(CommentDto commentDto);
-    void delete_comment(CommentDto commentDto);
+    Comment save(UserAddCommentDto userAddCommentDto);
+    void delete_comment(UserDeleteCommentDto userDeleteCommentDto);
 
     Page<CommentDto> commentPage(Long id, Pageable pageable);
 
