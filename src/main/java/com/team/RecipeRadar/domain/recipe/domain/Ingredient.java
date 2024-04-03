@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
-@ToString(exclude = {"content"})
+@ToString(exclude = {"ingredientAndQuantity"})
 public class Ingredient {
 
     @Id

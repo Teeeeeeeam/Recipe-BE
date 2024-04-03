@@ -1,15 +1,18 @@
-package com.team.RecipeRadar.domain.like.postLike.dao;
+package com.team.RecipeRadar.domain.like.dao;
 
-import com.team.RecipeRadar.domain.like.postLike.domain.PostLike;
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(QueryDslConfig.class)
 @Transactional
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

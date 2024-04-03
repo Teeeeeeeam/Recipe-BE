@@ -1,8 +1,8 @@
-package com.team.RecipeRadar.domain.like.postLike.api;
+package com.team.RecipeRadar.domain.like.api;
 
 import com.team.RecipeRadar.domain.like.ex.LikeException;
-import com.team.RecipeRadar.domain.like.postLike.application.PostLikeService;
-import com.team.RecipeRadar.domain.like.postLike.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.application.LikeService;
+import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
@@ -29,7 +30,8 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class PostLikeController {
 
-    private final PostLikeService postLikeService;
+    @Qualifier("PostLikeServiceImpl")
+    private final LikeService postLikeService;
 
     @Operation(summary = "좋아요를 API",
             description = "로그인한 사용자만 좋아요를 할수있으며, 기본값으로는 좋아여가 되어 있지않다. 최초 요청시 좋아요가 되며 좋아요가된 상태에서 다시 요청을하면 좋아요를 해제한다.")
@@ -42,7 +44,7 @@ public class PostLikeController {
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
     })
     @PostMapping("/api/user/postLike")
-    public ResponseEntity<?> addLike(@RequestBody PostLikeDto postLikeDto,HttpServletRequest request){
+    public ResponseEntity<?> addLike(@RequestBody PostLikeDto postLikeDto){
         try {
             Boolean aBoolean = postLikeService.addLike(postLikeDto);
             ControllerApiResponse response;
@@ -77,12 +79,8 @@ public class PostLikeController {
             Boolean aBoolean = false;
             if (header!=null) {
                 String jwtToken = header.replace("Bearer ", "");
-                log.info("jwt={}",jwtToken);
-                log.info("여기실행");
               aBoolean = postLikeService.checkLike(jwtToken, Long.parseLong(postId));
-              log.info("aaa={}",aBoolean);
             }
-            log.info("header={}",header);
             return ResponseEntity.ok(new ControllerApiResponse(aBoolean,"좋아요 상태"));
         }catch (Exception e){
             throw new ServerErrorException("서버 오류 발생");

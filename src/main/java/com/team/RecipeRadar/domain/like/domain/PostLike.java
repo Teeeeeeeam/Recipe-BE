@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.like.postLike.domain;
+package com.team.RecipeRadar.domain.like.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;

@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.like.postLike.dao;
+package com.team.RecipeRadar.domain.like.dao;
 
-import com.team.RecipeRadar.domain.like.postLike.domain.PostLike;
+import com.team.RecipeRadar.domain.like.domain.PostLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

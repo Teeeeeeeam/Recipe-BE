@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @ToString(includeFieldNames = false, of = {"id", "title","imageUrl" ,"servings", "cookingTime", "cookingLevel"})
 public class Recipe {
@@ -40,6 +43,8 @@ public class Recipe {
     //@NotNull
     private  String cookingLevel;
 
+    private Integer likeCount;      // 좋아요 수
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Ingredient> ingredients;
 
@@ -53,5 +58,10 @@ public class Recipe {
         this.cookingTime = cookingTime;
         this.cookingLevel = cookingLevel;
         this.ingredients = ingredients;
+        this.likeCount=0;
+
+    }
+    public void setLikeCount(int count){            //좋아요 증가 set
+        this.likeCount = count;
     }
 }
