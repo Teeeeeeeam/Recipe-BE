@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.like.postLike.dto;
+package com.team.RecipeRadar.domain.like.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

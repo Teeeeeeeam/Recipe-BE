@@ -1,9 +1,10 @@
-package com.team.RecipeRadar.domain.like.postLike.application;
+package com.team.RecipeRadar.domain.like.application;
 
 
-import com.team.RecipeRadar.domain.like.postLike.dao.PostLikeRepository;
-import com.team.RecipeRadar.domain.like.postLike.domain.PostLike;
-import com.team.RecipeRadar.domain.like.postLike.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.domain.PostLike;
+import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -36,7 +37,8 @@ class PostLikeServiceImplTest {
     @Mock
     JwtProvider jwtProvider;
 
-    @InjectMocks PostLikeServiceImpl postLikeService;;
+    @InjectMocks
+    PostLikeServiceImpl postLikeService;;
 
     @Test
     @DisplayName("게시물 좋아요")

@@ -1,8 +1,8 @@
-package com.team.RecipeRadar.domain.like.postLike.application;
+package com.team.RecipeRadar.domain.like.application;
 
-import com.team.RecipeRadar.domain.like.postLike.dao.PostLikeRepository;
-import com.team.RecipeRadar.domain.like.postLike.domain.PostLike;
-import com.team.RecipeRadar.domain.like.postLike.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.domain.PostLike;
+import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
@@ -10,6 +10,7 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,9 +18,10 @@ import java.util.NoSuchElementException;
 
 @Transactional
 @RequiredArgsConstructor
+@Qualifier("PostLikeServiceImpl")
 @Service
 @Slf4j
-public class PostLikeServiceImpl implements PostLikeService{
+public class PostLikeServiceImpl<T extends PostLikeDto> implements LikeService<T> {
 
     private final PostLikeRepository postLikeRepository;
     private final MemberRepository memberRepository;

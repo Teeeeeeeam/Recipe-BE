@@ -27,6 +27,7 @@ public class AddRecipeRequest {
                 .ingredientsAmount(ingredientsAmount)
                 .cookingStep(cookingStep)
                 .recipeLevel(recipeLevel)
+                .likeCount(0)
                 .build();
     }
 }

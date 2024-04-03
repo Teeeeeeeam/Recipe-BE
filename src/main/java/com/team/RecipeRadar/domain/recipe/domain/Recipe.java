@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,8 @@ import java.time.Duration;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Recipe {
 
@@ -38,10 +41,11 @@ public class Recipe {
     @Column(name = "recipe_level", nullable = false)
     private String recipeLevel;
 
+    private Integer likeCount;      // 좋아요 수
 
 
     @Builder
-    public Recipe(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel) {
+    public Recipe(String recipeTitle, String recipeContent, String recipeServing, String cookingTime, String ingredientsAmount, String cookingStep, String recipeLevel,int count) {
         this.recipeTitle = recipeTitle;
         this.recipeContent = recipeContent;
         this.recipeServing = recipeServing;
@@ -49,6 +53,7 @@ public class Recipe {
         this.ingredientsAmount = ingredientsAmount;
         this.cookingStep = cookingStep;
         this.recipeLevel = recipeLevel;
+        this.likeCount = count;
 
     }
 
@@ -60,5 +65,9 @@ public class Recipe {
         this.ingredientsAmount = ingredientsAmount;
         this.cookingStep = cookingStep;
         this.recipeLevel = recipeLevel;
+    }
+
+    public void setLikeCount(int count){
+        this.likeCount = count;
     }
 }
