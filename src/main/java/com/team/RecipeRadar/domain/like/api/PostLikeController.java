@@ -1,9 +1,13 @@
 package com.team.RecipeRadar.domain.like.api;
 
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.domain.like.application.LikeService;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +20,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
@@ -84,6 +91,36 @@ public class PostLikeController {
             return ResponseEntity.ok(new ControllerApiResponse(aBoolean,"좋아요 상태"));
         }catch (Exception e){
             throw new ServerErrorException("서버 오류 발생");
+        }
+    }
+
+    @Operation(summary = "사용자 페이지의 게시글 페이징",description = "사용자가 좋아요한 게시글의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
+            "nextPage의 존재여부로 다음 페이지 호출",tags = {"사용자 페이지 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                content = @Content(schema = @Schema(implementation = UserInfoPostLikeResponse.class))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"해당 회원을 찾을수 없습니다.\"}"))),
+            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @GetMapping("/api/user/info/{login-id}/likes")
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable,HttpServletRequest request){
+        String header = request.getHeader("Authorization");
+        try{
+            String jwtToken = header.replace("Bearer ", "");
+            UserInfoPostLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
+            return ResponseEntity.ok(userLikesByPage);
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (BadRequestException e){
+            throw new AccessDeniedException(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버오류");
         }
     }
 }

@@ -3,7 +3,6 @@ package com.team.RecipeRadar.domain.like.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.like.api.PostLikeController;
 import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -124,4 +123,5 @@ class PostLikeControllerTest {
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인/
                 .andDo(print()); // 테스트 결과 출력
     }
+
 }

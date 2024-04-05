@@ -1,26 +1,38 @@
 package com.team.RecipeRadar.domain.like.application;
 
 
-import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -149,4 +161,67 @@ class PostLikeServiceImplTest {
         // 메서드 호출 및 결과 확인
         assertFalse(postLikeService.checkLike(fakeJwtToken, id));
     }
+
+    @Test
+    @DisplayName("정상적으로 회원의 좋아요 정보를 페이지별로 가져오는지 확인")
+    void Test_Get_User_LikesByPage() {
+        // 테스트에 필요한 가짜 데이터 생성
+        String fakeToken=  "fakeToken";
+        String validToken = "test";
+        Member member = Member.builder().id(1l).loginId("test").build();
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "Content 1", "Title 1"));
+        userLikeDtos.add(new UserLikeDto(2L, "Content 2", "Title 2"));
+
+        Slice<UserLikeDto> userDtoSlice = new SliceImpl<>(userLikeDtos);
+
+
+        when(jwtProvider.validateAccessToken(fakeToken)).thenReturn(validToken);
+        Pageable pageable = PageRequest.of(0, 1);
+        // memberRepository.findById() 메소드가 호출될 때 반환할 가짜 회원 데이터 설정
+        when(memberRepository.findByLoginId("test")).thenReturn(member);
+        // postLikeRepository.userInfoLikes() 메소드가 호출될 때 반환할 가짜 좋아요 정보 설정
+        when(postLikeRepository.userInfoLikes(member.getId(), pageable)).thenReturn(userDtoSlice);
+
+
+        // 테스트 대상 메소드 호출
+        UserInfoPostLikeResponse response = postLikeService.getUserLikesByPage(fakeToken,member.getLoginId(),pageable);
+
+        // 결과 검증
+        assertThat(response.getContent()).hasSize(2);
+        assertThat(response.isNextPage()).isFalse();
+
+        // memberRepository.findById() 메소드가 한 번 호출되었는지 확인
+        verify(memberRepository, times(1)).findByLoginId(member.getLoginId());
+        // postLikeRepository.userInfoLikes() 메소드가 한 번 호출되었는지 확인
+        verify(postLikeRepository, times(1)).userInfoLikes(member.getId(), pageable);
+    }
+
+    @Test
+    @DisplayName("접근할수 없는 사용자가 해당페이지를 접근하려고 할때")
+    void No_Valid_User_Approach() {
+        // 테스트에 필요한 가짜 데이터 생성
+        String fakeToken = "fakeToken";
+        String validToken = "noId";
+        Member member = Member.builder().id(1L).loginId("test").build();
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "Content 1", "Title 1"));
+        userLikeDtos.add(new UserLikeDto(2L, "Content 2", "Title 2"));
+
+        Slice<UserLikeDto> userDtoSlice = new SliceImpl<>(userLikeDtos);
+
+        // 가짜 토큰을 유효한 토큰으로 대체하도록 설정
+        when(jwtProvider.validateAccessToken(fakeToken)).thenReturn(validToken);
+        Pageable pageable = PageRequest.of(0, 1);
+        // memberRepository.findById() 메소드가 호출될 때 반환할 가짜 회원 데이터 설정
+        when(memberRepository.findByLoginId("test")).thenReturn(member);
+
+        // getUserLikesByPage 메소드를 호출하면 BadRequestException이 발생해야 합니다.
+        assertThatThrownBy(() -> postLikeService.getUserLikesByPage(fakeToken, member.getLoginId(), pageable))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("접근할 수 없는 사용자입니다.");
+    }
+
 }

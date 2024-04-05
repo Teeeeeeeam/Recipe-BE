@@ -1,20 +1,28 @@
 package com.team.RecipeRadar.domain.like.application;
 
+import com.auth0.jwt.JWT;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.NoSuchElementException;
+
+import static com.team.RecipeRadar.domain.member.domain.QMember.member;
 
 @Transactional
 @RequiredArgsConstructor
@@ -66,15 +74,43 @@ public class PostLikeServiceImpl<T extends PostLikeDto> implements LikeService<T
     public Boolean checkLike(String jwtToken, Long postId) {
 
         String loginId = jwtProvider.validateAccessToken(jwtToken);
-        log.info("로그인아이디={}",loginId);
         Member byLoginId = memberRepository.findByLoginId(loginId);
-        log.info("멤바={}",byLoginId);
         Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(byLoginId.getId(),postId );
-        log.info("aaasdad={}",aBoolean);
+
         if (aBoolean){
             return true;
         }else
             return false;
     }
+
+    /**
+     * 커스텀한 response로 변환해서 전달
+     * @param loginId 조회할 회원의 ID
+     * @param pageable 페이징 정보
+     * @return  페이지별로 조회된 회원의 좋아요 정보를 포함하는 UserInfoPostLikeResponse 객체 반환
+     */
+    public UserInfoPostLikeResponse getUserLikesByPage(String jwtToken,String loginId, Pageable pageable) {
+
+        String accessToken_loginId = jwtProvider.validateAccessToken(jwtToken);
+
+        Member member = memberRepository.findByLoginId(loginId);
+        if (member==null){
+            throw new NoSuchElementException("해당 회원을 찾을수 없습니다.");
+        }
+        if (!member.getLoginId().equals(accessToken_loginId)){
+            throw new BadRequestException("접근할 수 없는 사용자입니다.");
+        }
+
+        Slice<UserLikeDto> userDtoSlice = postLikeRepository.userInfoLikes(member.getId(), pageable);
+
+        boolean hasNext = userDtoSlice.hasNext();
+        UserInfoPostLikeResponse likeResponse = UserInfoPostLikeResponse.builder()
+                .content(userDtoSlice.getContent())
+                .nextPage(hasNext)
+                .build();
+
+        return likeResponse;
+    }
+
 
 }

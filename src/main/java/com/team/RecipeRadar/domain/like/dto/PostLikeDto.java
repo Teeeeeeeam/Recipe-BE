@@ -15,5 +15,4 @@ public class PostLikeDto {
     private Long memberId;
     private Long postId;
 
-
 }
