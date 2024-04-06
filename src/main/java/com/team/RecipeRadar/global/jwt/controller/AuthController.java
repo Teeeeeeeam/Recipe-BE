@@ -63,7 +63,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500" ,description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/auth/refreshToken/valid")
+    @PostMapping("/auth/refresh-token/validate")
     public ResponseEntity<?> RefreshToke(HttpServletRequest request, HttpServletResponse response){
         try {
             String refreshToken = request.getHeader("RefreshToken");
@@ -98,7 +98,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500" ,description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/singin")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, BindingResult result){
         try {
             if (result.hasErrors()){
