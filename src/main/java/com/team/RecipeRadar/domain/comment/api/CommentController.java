@@ -112,7 +112,7 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @PostMapping("/api/user/comment/add")
+    @PostMapping("/api/user/comments")
     public ResponseEntity<?> comment_add(@RequestBody UserAddCommentDto userAddCommentDto){
         try {
             Comment save = commentService.save(userAddCommentDto);
@@ -137,7 +137,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 
     })
-    @DeleteMapping("/api/user/comment/delete")
+    @DeleteMapping("/api/user/comments")
     public ResponseEntity<?> comment_delete(@RequestBody UserDeleteCommentDto userDeleteCommentDto){
         try{
            commentService.delete_comment(userDeleteCommentDto);//반환타입 void
@@ -154,7 +154,7 @@ public class CommentController {
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/api/comment")
+    @GetMapping("/api/comments")
     public ResponseEntity<?> comment_Page(@PageableDefault Pageable pageable,
                                           @Parameter(description = "게시글 Id")@RequestParam(value = "posts",required = false)String postid){
         try {
@@ -176,7 +176,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 
     })
-    @PutMapping("/api/user/update")
+    @PutMapping("/api/user/comments")
     public ResponseEntity<?> comment_update(@RequestBody UserUpdateCommentDto updateCommentDto){
         try {
             commentService.update(updateCommentDto.getMemberId(),updateCommentDto.getCommentId(),updateCommentDto.getCommentContent());
