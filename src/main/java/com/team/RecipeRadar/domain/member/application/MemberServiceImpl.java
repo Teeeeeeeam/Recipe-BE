@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.member.dto.valid.PasswordStrengthDto;
 import com.team.RecipeRadar.global.email.application.MailService;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,15 +70,13 @@ public class MemberServiceImpl implements MemberService {
      */
     public Map<String, Boolean> LoginIdValid(String loginId) {
         Map<String, Boolean> result = new LinkedHashMap<>();
-        try {
             boolean isLoginIdValid = isLoginIdValid(loginId);
             Member member = memberRepository.findByCaseSensitiveLoginId(loginId);
-            result.put("use_loginId", member==null && isLoginIdValid);
+            if (member==null && isLoginIdValid) {
+                result.put("use_loginId", true);
+            }else
+                throw new BadRequestException("사용할수 없는 아이디입니다.");
             return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServerErrorException("오류");
-        }
     }
 
     /**
@@ -132,15 +131,18 @@ public class MemberServiceImpl implements MemberService {
      * @param memberDto 회원가입의 정보
      * @return  모두 사용시 true, 하나라도 검사 안했을시 false
      */
-    public boolean ValidationOfSignUp(MemberDto memberDto,String code) {
+    public boolean ValidationOfSignUp(MemberDto memberDto,int code) {
         Map<String, Boolean> validationResult = validateSignUp(memberDto,code);
 
-        for (Map.Entry<String, Boolean> entry : validationResult.entrySet()) {
+        for (Map.Entry<String, Boolean> entry : validationResult.entrySet   ()) {
             if (!entry.getValue()) {
+                log.info("entry={}",entry.getKey());
                 log.error("Failed validation: {}", entry.getKey());
                 return false;
             }
         }
+        mailService.deleteCode(memberDto.getEmail(),code);
+
         return true;
     }
 
@@ -182,7 +184,7 @@ public class MemberServiceImpl implements MemberService {
 
     /**
      * 이메일주소가 올바른 주소인지 확인
-     * @param memberDto 회원가입시의 이메일정보
+     * @param email 회원가입시의 이메일정보
      * @return  올바른이메일 주소시 true, 아닐시 false
      */
     public Map<String, Boolean> emailValid(String email) {
@@ -221,7 +223,7 @@ public class MemberServiceImpl implements MemberService {
      @param memberDto 검증할 회원 정보가 포함된 MemberDto 객체
      @return 각 검증 항목의 이름과 해당 검증 결과로 이루어진 맵
      */
-    private Map<String, Boolean> validateSignUp(MemberDto memberDto,String code) {
+    private Map<String, Boolean> validateSignUp(MemberDto memberDto,int code) {
         Map<String, Boolean> validationResult = new LinkedHashMap<>();
 
         validationResult.put("isLoginValid",isLoginIdValid(memberDto.getLoginId()));
@@ -230,7 +232,7 @@ public class MemberServiceImpl implements MemberService {
         validationResult.putAll(userNameValid(memberDto.getUsername()));
         validationResult.putAll(emailValid(memberDto.getEmail()));
         validationResult.putAll(nickNameValid(memberDto.getNickName()));
-        validationResult.putAll(verifyCode(code));
+        validationResult.putAll(verifyCode(memberDto.getEmail(),code));
 
         return validationResult;
     }
@@ -240,8 +242,9 @@ public class MemberServiceImpl implements MemberService {
      * @param code
      * @return 인증 성공시 true, 실패시 false
      */
-    public Map<String, Boolean> verifyCode(String code){
-        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(code);
+    public Map<String, Boolean> verifyCode(String email, int code){
+        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,code);
+        log.info("str={}",stringBooleanMap);
         return stringBooleanMap;
     }
 

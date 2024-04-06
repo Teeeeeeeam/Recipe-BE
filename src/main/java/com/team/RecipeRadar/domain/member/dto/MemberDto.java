@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 @Data
@@ -23,32 +24,34 @@ public class MemberDto {
 
 
     @NotEmpty(message = "이름을 입력주세요")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Pattern(regexp = "^[가-힣]+.{1,}$",message = "이름을 정확이 입력해주세요")
     @Schema(description = "사용자 실명",example = "홍길동")
     String username;
     
     @NotEmpty(message = "별명을 입력해주세요")
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣]{4,}$",message = "사용할수 없는 별명입니다.")
     @Schema(description = "사용자의 별명",example = "나만냉")
     String nickName;
 
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Pattern(regexp = "^(?=.*[`~!@#$%^&*()_+])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,16}$",message = "사용할수 없는 비밀번호 입니다.")
     @Schema(description = "비밀번호",example = "asdASD12!@")
     String password;
 
 
     @NotEmpty(message = "비밀번호를 다시한번 입력해주세요")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "비밀번호 재입력",example = "asdASD12!@")
     String passwordRe;
 
     @NotEmpty(message = "아이디를 입력해주세요")
+    @Pattern(regexp = "^[a-zA-Z0-9]{5,16}$", message = "올바른 아이디를 입력해주세요")
     @Schema(description = "로그인 아이디",example = "exampleId")
     String loginId;
 
 
     @NotEmpty(message = "이메일을 입력해주세요.")
+    @Pattern(regexp = "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$", message = "올바른 이메일 형식이어야 합니다.")
     @Schema(description = "이메일",example = "test@naver.com")
     String email;
 

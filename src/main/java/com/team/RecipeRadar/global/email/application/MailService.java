@@ -7,10 +7,12 @@ public interface MailService {
 
     String sensMailMessage(String email);
 
-    String createCode();
+    Integer createCode();
 
-    String getCode();
+    Integer getCode(String email,int code);
 
-    Map<String, Boolean> verifyCode(String code);
+    Map<String, Boolean> verifyCode(String email, int code);
+
+    void deleteCode(String email,int code);
 
 }

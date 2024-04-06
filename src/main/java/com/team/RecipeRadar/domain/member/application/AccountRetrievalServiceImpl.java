@@ -39,12 +39,12 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @param code      이메일로 전송된 인증번호
      * @return      List로 반환
      */
-    public List<Map<String ,String>> findLoginId(String username, String email, String code) {
+    public List<Map<String ,String>> findLoginId(String username, String email, int code) {
     List<Member> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email);
     
     List<Map<String,String>> list = new LinkedList<>();     //순서를 보장하기 위해 LinkedList 사용
 
-    Boolean emailCode = emailCode(code);        //인증번호
+    Boolean emailCode = emailCode(email,code);        //인증번호
 
     Map<String, String> errorMap = new LinkedHashMap<>();
 
@@ -59,6 +59,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
                 loginInfo.put("로그인 정보", member.getLoginId());
                 list.add(loginInfo);
             }
+            mailService.deleteCode(email,code);
         }
     } else {
         errorMap.put("인증 번호", "인증번호가 일치하지 않습니다.");
@@ -76,9 +77,10 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @return
      */
     @Override
-    public Map<String, Object> findPwd(String username, String loginId, String email,String code) {
+    public Map<String, Object> findPwd(String username, String loginId, String email,int code) {
         Boolean memberExists = memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email);
-        Boolean emailedCode = emailCode(code);
+
+        Boolean emailedCode = emailCode(email,code);
 
         Map<String, Object> map = new LinkedHashMap<>();
 
@@ -87,6 +89,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
             String verificationId = save.getVerificationId();
             String token = new String(Base64.getEncoder().encode(verificationId.getBytes()));
             map.put("token",token);
+            mailService.deleteCode(email,code);
         }
 
         map.put("회원 정보", memberExists);
@@ -120,6 +123,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
                 if (stringBooleanMap1.get("duplicate_password")) {
                     byLoginId.update(passwordEncoder.encode(updatePasswordDto.getPassword()));
                     apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
+                    accountRetrievalRepository.deleteByVerificationId(validId);
                 } else
                    throw new BadRequestException("비밀번호가 일치하지 않습니다.");
             } else
@@ -135,9 +139,9 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @param code  사용자가 입력한 인증번호
      * @return  일치시 -> true 불일치 false
      */
-    public Boolean emailCode(String code){
-        String realCode = mailService.getCode();
-        if (realCode.equals(code)){
+    public Boolean emailCode(String email, int code){
+        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email, code);
+        if (stringBooleanMap.get("isVerifyCode")){
             return true;
         }
         return false;

@@ -123,5 +123,5 @@ class PostLikeControllerTest {
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인/
                 .andDo(print()); // 테스트 결과 출력
     }
-
+    
 }

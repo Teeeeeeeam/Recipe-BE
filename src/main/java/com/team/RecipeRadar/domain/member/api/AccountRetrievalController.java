@@ -24,10 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.parameters.P;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,16 +61,26 @@ public class AccountRetrievalController {
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/api/loginid/find")
-    public ResponseEntity<?> test(@RequestBody FindLoginIdDto findLoginIdDto){
+    @PostMapping("/api/search/login-id")
+    public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdDto findLoginIdDto,BindingResult bindingResult){
         try {
+            if (bindingResult.hasErrors()){
+                Map<String, String> result = new LinkedHashMap<>();
+                for (FieldError error : bindingResult.getFieldErrors()) {
+                    result.put(error.getField(),error.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+            }
             String username = findLoginIdDto.getUsername();
             String email = findLoginIdDto.getEmail();
-            String code = findLoginIdDto.getCode();
+            Integer code = findLoginIdDto.getCode();
 
             List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email,code);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,loginId));
-        }catch (Exception e){
+        }catch (BadRequestException e){
+            throw new BadRequestException(e.getMessage());
+        }
+        catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("오류발생");
         }
@@ -77,16 +91,29 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": [{\"token\": \"[생성된 토큰값]\", \"회원 정보\": \"true\"}, {\"이메일 인증\": \"true\"}]}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": [{\"token\": \"[생성된 토큰값]\", \"회원 정보\": \"true\", \"이메일 인증\": \"true\"}]}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "[{\"success\": false, \"message\": {\"[필드명]\": \"[필드명에 대한 오류 메시지]\"}},    {\"success\": false, \"message\": \"인증번호가 일치하지 않습니다.\"}]"
+                            ))),
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/api/pwd/find")
-    public ResponseEntity<?> findPwd(@RequestBody FindPasswordDto findPasswordDto){
+    @PostMapping("/api/search/password")
+    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordDto findPasswordDto,BindingResult bindingResult){
         try {
+            if (bindingResult.hasErrors()){
+                Map<String, String> result = new LinkedHashMap<>();
+                for (FieldError error : bindingResult.getFieldErrors()) {
+                    result.put(error.getField(),error.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+            }
             Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
             return ResponseEntity.ok(new ControllerApiResponse<>(true,pwd));
-        }catch (Exception e){
+        } catch (BadRequestException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
         }
@@ -103,9 +130,16 @@ public class AccountRetrievalController {
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PutMapping("/api/pwd/update")
-    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id ,@RequestBody UpdatePasswordDto updatePasswordDto){
+    @PutMapping("/api/password/update")
+    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordDto updatePasswordDto, BindingResult bindingResult){
         try {
+            if (bindingResult.hasErrors()){
+                Map<String, String> result = new LinkedHashMap<>();
+                for (FieldError error : bindingResult.getFieldErrors()) {
+                    result.put(error.getField(),error.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+            }
             ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
@@ -131,7 +165,7 @@ public class AccountRetrievalController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/api/find/mailConfirm")
+    @PostMapping("/api/search/email-confirmation/send")
     public ResponseEntity<?> mailConfirm(@Parameter(description ="이메일") @RequestParam("email") String email){
         try {
 
@@ -157,15 +191,16 @@ public class AccountRetrievalController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/api/find/mailConfirm/check")
-    public ResponseEntity<?> check(@RequestParam("code")String UserCode){
+    @PostMapping("/api/search/email-confirmation/check")
+    public ResponseEntity<?> check(@RequestParam("email")String email, @RequestParam("code")String userCode){
         try {
-            Map<String, Boolean> stringBooleanMap = mailService.verifyCode(UserCode);
+            Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,Integer.parseInt(userCode));
             return ResponseEntity.ok(new ControllerApiResponse<>(true,stringBooleanMap));
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
-        }
-        catch (Exception e){
+        }catch (NumberFormatException e){
+            throw new BadRequestException("숫자만 입력해주세요");
+        } catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
         }

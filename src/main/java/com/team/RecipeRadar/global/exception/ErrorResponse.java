@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorResponse {
+public class ErrorResponse<T> {
 
     @Schema(defaultValue = "false")
     private boolean success;
-    private String message;
+    private T message;
 }

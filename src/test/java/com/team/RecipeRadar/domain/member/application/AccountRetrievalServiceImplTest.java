@@ -54,8 +54,9 @@ class AccountRetrievalServiceImplTest {
 
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
-        String realCode = "code";
-        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
+        Integer realCode = 1234;
+        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
+
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, realCode);     //반환
 
@@ -80,16 +81,19 @@ class AccountRetrievalServiceImplTest {
 
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
+        int fakeCode = 12;
+        int realCode = 1234;
 
-        String realCode = "code";
-        String fakeCode = "fake";
-        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
+        // 잘못된 코드로 verifyCode를 호출하는 대신, 올바른 코드를 사용하여 호출해야 합니다.
+        when(emailService.verifyCode(email, fakeCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
+        // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, fakeCode);     //반환
 
         assertThat(loginId.get(0).get("인증 번호")).isEqualTo("인증번호가 일치하지 않습니다.");
         assertThat(loginId.size()).isEqualTo(1);
     }
+
 
     @Test
     @DisplayName("사용자 정보가 없을때")
@@ -106,8 +110,8 @@ class AccountRetrievalServiceImplTest {
 
         when(memberRepository.findByUsernameAndEmail(eq("등록되지 않은 사용자"), eq(email))).thenReturn(Collections.emptyList());
 
-        String realCode = "code";
-        when(emailService.getCode()).thenReturn(realCode);        // 이메일인증코드
+        int realCode = 1234;
+        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId("등록되지 않은 사용자", email, realCode);     //반환
         assertThat(loginId.get(0).get("가입 정보")).isEqualTo("해당 정보로 가입된 회원은 없습니다.");
@@ -120,28 +124,27 @@ class AccountRetrievalServiceImplTest {
         String email = "test@email.com";
         String username = "username";
         String loginId = "loginId";
-        String code= "code";
+        int code= 1234; // 코드는 int 형태로 설정되어 있는 것으로 보입니다.
 
         // 가짜 회원이 존재함을 설정
-        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username,loginId,email)).thenReturn(true);
+        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email)).thenReturn(true);
 
-        // 이메일 서비스가 가짜 코드를 반환하도록 설정
-        when(emailService.getCode()).thenReturn(code);
+        // 이메일 서비스가 인증 코드를 확인하여 true를 반환하도록 설정
+        when(emailService.verifyCode(email, code)).thenReturn(Collections.singletonMap("isVerifyCode", true));
 
         AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId("accountRetrieval").loginId(loginId).build();
 
         // accountRetrievalRepository.save 메서드에 대한 스텁 설정
         when(accountRetrievalRepository.save(any(AccountRetrieval.class))).thenReturn(accountRetrieval);
 
-        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email,code);
+        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email, code);
 
         // 회원 정보와 이메일 인증이 모두 true인지 확인
-
-        log.info("pwd={}",pwd);
         assertThat(pwd.get("회원 정보")).isEqualTo(true);
         assertThat(pwd.get("이메일 인증")).isEqualTo(true);
         assertThat(pwd.get("token")).isNotNull();
     }
+
 
     @Test
     @DisplayName("비밀번호 찾기 실패시")
@@ -149,18 +152,21 @@ class AccountRetrievalServiceImplTest {
         String email = "test@email.com";
         String username = "username";
         String loginId = "loginId";
-        String code= "code";
+        int code = 1234; // 코드는 int 형식으로 설정되어 있는 것으로 보입니다.
 
-        //아이디와 사용자 이름과 이메일로 등록된 회원이 있는지 검사
-        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username,loginId,email)).thenReturn(false);
+        // 아이디와 사용자 이름과 이메일로 등록된 회원이 없음을 설정
+        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email)).thenReturn(false);
 
-        when(emailService.getCode()).thenReturn(code);
+        // 임의의 코드 반환
+        int realCode = 1234;
+        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
 
-        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email,"fakeCode");
+        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email, code);
 
         assertThat(pwd.get("회원 정보")).isEqualTo(false);
         assertThat(pwd.get("이메일 인증")).isEqualTo(false);
     }
+
 
     @Test
     @DisplayName("비밀번호 변경 성공시")
