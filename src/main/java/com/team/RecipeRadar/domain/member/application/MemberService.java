@@ -25,5 +25,4 @@ public interface MemberService {
     Map<String,Boolean> nickNameValid(String nickName);
     Map<String, Boolean> verifyCode(String email,int code);
 
-
 }

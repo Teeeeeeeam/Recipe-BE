@@ -90,8 +90,8 @@ public class MemberController {
             e.printStackTrace();
             throw new ServerErrorException("서버오류 발생");
         }
-
     }
+
 }
 
 
