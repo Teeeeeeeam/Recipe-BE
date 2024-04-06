@@ -71,7 +71,7 @@ class CommentControllerTest {
         given(commentService.save(commentDto))
                 .willReturn(Comment.builder().id(1l).commentContent("테스트 댓글").member(Member.builder().id(2l).build()).post(Post.builder().id(3l).build()).build());
 
-        mockMvc.perform(post("/api/user/comment/add")
+        mockMvc.perform(post("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andDo(print())
@@ -100,7 +100,7 @@ class CommentControllerTest {
 //        given(commentService.delete_comment(commentDto)).willReturn(comment);
 
         // when, then
-        mockMvc.perform(delete("/api/user/comment/delete")
+        mockMvc.perform(delete("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ class CommentControllerTest {
 
 
         // GET 요청 수행 및 응답 확인
-        mockMvc.perform(get("/api/comment")
+        mockMvc.perform(get("/api/comments")
                         .param("posts", "55")
                         .param("page","0")
                         .param("size","5")
@@ -153,7 +153,7 @@ class CommentControllerTest {
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
 
         //게시글이 존재하지않았을때 false로 값이 나오는지 확인
-        mockMvc.perform(get("/api/comment")
+        mockMvc.perform(get("/api/comments")
                         .param("posts","111")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(400)) // 상태 코드 400 확인
@@ -184,7 +184,7 @@ class CommentControllerTest {
                 .memberId(memberId)
                 .build();
 
-        mockMvc.perform(put("/api/user/update")
+        mockMvc.perform(put("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateCommentDto)))
                 .andExpect(status().isOk())
