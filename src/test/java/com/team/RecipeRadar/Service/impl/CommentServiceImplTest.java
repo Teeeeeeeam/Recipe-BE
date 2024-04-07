@@ -158,7 +158,7 @@ class CommentServiceImplTest {
         //게시글 아이디
         long postId = Long.parseLong("55");
 
-        MemberDto memberDto = MemberDto.builder().id(1L).build();
+        String nickName = "testNickName";
         PostDto articleDto = PostDto.builder().id(postId).build();
 
         // 페이징 테스트를 위한 객체 생성
@@ -169,7 +169,7 @@ class CommentServiceImplTest {
             CommentDto commentDto = CommentDto.builder()
                     .id((long) i)
                     .comment_content("테스트 댓글 내용 " + i)
-                    .memberDto(memberDto)
+                    .nickName(nickName)
                     .articleDto(articleDto)
                     .build();
             commentDtos.add(commentDto);

@@ -84,7 +84,8 @@ class AccountRetrievalControllerTest {
                 .content(objectMapper.writeValueAsString(findLoginIdDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message[0]['로그인 타입']").value("keuye0638"));
+                .andExpect(jsonPath("$.message").value("성공"))
+                .andExpect(jsonPath("$.data[0]['로그인 타입']").value("keuye0638"));
     }
 
     @Test
@@ -113,9 +114,9 @@ class AccountRetrievalControllerTest {
                         .content(objectMapper.writeValueAsString(findPasswordDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message.token").value("test_TOken"))
-                .andExpect(jsonPath("$.message['회원 정보']").value(true))
-                .andExpect(jsonPath("$.message['이메일 인증']").value(true));
+                .andExpect(jsonPath("$.data.token").value("test_TOken"))
+                .andExpect(jsonPath("$.data['회원 정보']").value(true))
+                .andExpect(jsonPath("$.data['이메일 인증']").value(true));
     }
 
     @Test

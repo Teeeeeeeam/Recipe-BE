@@ -71,7 +71,7 @@ class PostLikeControllerTest {
                 .content(objectMapper.writeValueAsString(postLikeDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("좋아요 해제"));
     }
     
