@@ -7,11 +7,14 @@ import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
-public class UserInfoPostLikeResponse {
+public class UserInfoLikeResponse {
 
     private boolean nextPage;
 
     private List<UserLikeDto> content;
+
+
+
 
 
 }

@@ -1,8 +1,6 @@
 package com.team.RecipeRadar.domain.like.api;
 
-import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
-import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.domain.like.application.LikeService;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
@@ -21,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
@@ -108,12 +105,12 @@ public class PostLikeController {
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
-    @GetMapping("/api/user/info/{login-id}/likes")
+    @GetMapping("/api/user/info/{login-id}/posts/likes")
     public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable,HttpServletRequest request){
         String header = request.getHeader("Authorization");
         try{
             String jwtToken = header.replace("Bearer ", "");
-            UserInfoPostLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
+            UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());

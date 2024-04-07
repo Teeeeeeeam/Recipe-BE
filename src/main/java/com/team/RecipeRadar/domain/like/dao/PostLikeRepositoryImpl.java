@@ -23,6 +23,12 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
         this.queryFactory = jpaQueryFactory;
     }
 
+    /**
+     * Slice 이용한 무한 페이징 querydsl
+     * @param memberId  사용자의 id
+     * @param pageable
+     * @return  new SliceImpl<> 페이지 정보 반환
+     */
     @Override
     public Slice<UserLikeDto> userInfoLikes(Long memberId, Pageable pageable) {
         List<PostLike> result = queryFactory
@@ -36,7 +42,7 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
 
 
         List<UserLikeDto> content = result.stream()
-                .map(p -> new UserLikeDto(p.getId(), p.getPost().getPostContent(), p.getPost().getPostTitle()))
+                .map(UserLikeDto::Post_of)
                 .collect(Collectors.toList());
 
         boolean hasNext =false;
