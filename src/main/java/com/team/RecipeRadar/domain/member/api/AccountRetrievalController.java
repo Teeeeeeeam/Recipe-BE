@@ -48,16 +48,14 @@ public class AccountRetrievalController {
     @Qualifier("AccountEmail")
     private final MailService mailService;
 
-    /*
-    아이디 찾기시 사용되는 엔드포인트
-     */
-
-
     @Operation(summary = "아이디찾기", description = "사용자의 이름과 이메일을통해 인증코드를 통한 아이디찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": [{\"로그인 타입\": \"normal\", \"로그인 정보\": \"[로그인 아이디]\"}, {\"로그인 타입\": \"naver\", \"로그인 정보\": \"[소셜 로그인 아이디]\"}]}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":[{\"로그인 타입\":\"normal\",\"로그인 정보\":\"[로그인 아이디]\"},  {\"로그인 타입\": \"naver\", \"로그인 정보\": \"[소셜 로그인 아이디]\"}]}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -69,14 +67,20 @@ public class AccountRetrievalController {
                 for (FieldError error : bindingResult.getFieldErrors()) {
                     result.put(error.getField(),error.getDefaultMessage());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
             }
             String username = findLoginIdDto.getUsername();
             String email = findLoginIdDto.getEmail();
             Integer code = findLoginIdDto.getCode();
 
             List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email,code);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,loginId));
+
+            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
+                    .success(true)
+                    .message("성공")
+                    .data(loginId).build();
+
+            return ResponseEntity.ok(response);
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         }
@@ -91,11 +95,10 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": [{\"token\": \"[생성된 토큰값]\", \"회원 정보\": \"true\", \"이메일 인증\": \"true\"}]}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"token\":\"[토큰 값]\",\"회원 정보\":true,\"이메일 인증\":true}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\": false, \"message\": {\"[필드명]\": \"[필드명에 대한 오류 메시지]\"}},    {\"success\": false, \"message\": \"인증번호가 일치하지 않습니다.\"}]"
-                            ))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -107,10 +110,16 @@ public class AccountRetrievalController {
                 for (FieldError error : bindingResult.getFieldErrors()) {
                     result.put(error.getField(),error.getDefaultMessage());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
             }
             Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,pwd));
+
+            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
+                    .success(true)
+                    .message("성공")
+                    .data(pwd).build();
+
+            return ResponseEntity.ok(response);
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         } catch (Exception e){
@@ -126,7 +135,7 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"비밀번호 변경 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 안습니다.]\"}"))),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]"))),
             @ApiResponse(responseCode = "500", description = "SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -138,17 +147,17 @@ public class AccountRetrievalController {
                 for (FieldError error : bindingResult.getFieldErrors()) {
                     result.put(error.getField(),error.getDefaultMessage());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,result));
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
             }
             ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ControllerApiResponse(false,e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));
         }
         catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         }catch (IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ControllerApiResponse(false, "잘못된 접근"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false, "잘못된 접근"));
         }
         catch (Exception e){
             throw new ServerErrorException("서버 오류");
@@ -161,19 +170,15 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"인증번호\": \"[요청된 인증번호]\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"메일 전송 성공\"}"))),
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/api/search/email-confirmation/send")
     public ResponseEntity<?> mailConfirm(@Parameter(description ="이메일") @RequestParam("email") String email){
         try {
-
-            Map<String,String> result= new LinkedHashMap<>();
-            String code = mailService.sensMailMessage(email);
-            result.put("인증번호",code);
-
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,result));
+            mailService.sensMailMessage(email);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"메일 전송 성공"));
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
@@ -184,7 +189,7 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"isVerifyCode\": \"[true]\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"성공\" ,\"data\" : {\"isVerifyCode\": \"true\"}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\": \"인증번호가 일치하지 않습니다.\"}"))),
@@ -194,8 +199,14 @@ public class AccountRetrievalController {
     @PostMapping("/api/search/email-confirmation/check")
     public ResponseEntity<?> check(@RequestParam("email")String email, @RequestParam("code")String userCode){
         try {
+            
             Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,Integer.parseInt(userCode));
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,stringBooleanMap));
+            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
+                    .success(true)
+                    .message("성공")
+                    .data(stringBooleanMap).build();
+            
+            return ResponseEntity.ok(response);
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         }catch (NumberFormatException e){

@@ -47,7 +47,7 @@ public class AuthController {
             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"JWT 발행 성공\"}")))
     })
     @GetMapping("/auth/success")
-    public ResponseEntity<?> signinSuccess() {;
+    public ResponseEntity<?> signinSuccess() {
         return ResponseEntity.ok(new ControllerApiResponse(true, "JWT 발행 성공"));
     }
 
@@ -67,18 +67,15 @@ public class AuthController {
     public ResponseEntity<?> RefreshToke(HttpServletRequest request, HttpServletResponse response){
         try {
             String refreshToken = request.getHeader("RefreshToken");
-            log.info("aaasda={}",refreshToken);
             String substring = refreshToken.substring(refreshToken.indexOf("Bearer ") + 7);
-            log.info("sb={}",substring);
             String token = jwtProvider.validateRefreshToken(substring);
-            log.info("token={}",token);
 
             if (token!=null){
                 response.addHeader("Authorization","Bearer "+ token);
                 return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급"));
             }
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ControllerApiResponse(false,"토큰이 만료되었거나 일치하지않습니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));
         }catch (JwtTokenException e){
             throw new JwtTokenException(e.getMessage());
         }
@@ -88,10 +85,10 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":{\"accessToken\":\"[AccessToken]\",\"refreshToken\":\"[RefreshToken]\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\" :\"로그인성공\", \"data\": {\"accessToken\":\"[AccessToken]\",\"refreshToken\":\"[RefreshToken]\"}}"))),
             @ApiResponse(responseCode = "400" ,description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value = "{\"success\":false,\"message\":{\"password\":\"비밀번호를 입력해주세요\",\"loginId\":\"아이디를 입력해주세요\"}}"))),
+                    examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"password\":\"비밀번호를 입력해주세요\",\"loginId\":\"아이디를 입력해주세요\"}}"))),
             @ApiResponse(responseCode = "401" ,description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"로그인 실패\"}"))),
@@ -106,11 +103,21 @@ public class AuthController {
                 for (FieldError error : result.getFieldErrors()){
                     errorMap.put(error.getField(),error.getDefaultMessage());
                 }
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ControllerApiResponse(false,errorMap));
+
+                ControllerApiResponse<Object> failResponse = ControllerApiResponse.builder()
+                        .success(false)
+                        .message("실패")
+                        .data(errorMap).build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(failResponse);
             }
             Map<String, String> login = jwtAuthService.login(loginDto);
 
-            return ResponseEntity.ok(new ControllerApiResponse(true, login));
+            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
+                    .success(true)
+                    .message("성공")
+                    .data(login).build();
+
+            return ResponseEntity.ok(response);
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         }catch (AccessDeniedException e){
@@ -134,12 +141,13 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/logout")
-    public ResponseEntity<?> LogOut(@RequestParam("memberid")String memberId) {
+    public ResponseEntity<?> LogOut(@RequestParam("member-id")String memberId) {
         try {
             long longId = Long.parseLong(memberId);
             jwtAuthService.logout(longId);
             SecurityContextHolder.clearContext();
-            return ResponseEntity.ok(new ControllerApiResponse(true, "로그아웃 성공"));
+            
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"로그아웃 성공"));
         } catch (Exception e) {
             throw new JwtTokenException(e.getMessage());
         }

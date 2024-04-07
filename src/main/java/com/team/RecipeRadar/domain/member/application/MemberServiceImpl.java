@@ -191,7 +191,7 @@ public class MemberServiceImpl implements MemberService {
         try {
             Map<String, Boolean> result = new LinkedHashMap<>();
 
-            boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$").matcher(email).matches();
+            boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
 
             if (valid) {
                 // 이메일이 데이터베이스에 존재하는지 확인

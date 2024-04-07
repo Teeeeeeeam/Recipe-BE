@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 public class UserAddCommentDto {
 
     @Schema(description = "댓글 내용", example = "댓글 작성!")
+    @NotBlank(message = "댓글을 입력해주세요")
     private String commentContent;
 
     @Schema(description = "사용자 id", example = "1")

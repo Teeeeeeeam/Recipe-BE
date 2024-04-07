@@ -45,7 +45,7 @@ public class PostLikeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\" : true, \"message\" : \"좋아요 성공\"}, {\"success\" : true, \"message\" : \"좋아요 해제\"}]"))),
+                            examples = @ExampleObject(value = "[{\"success\" : true, \"message\" : \"좋아요 성공\"}, {\"success\" : false, \"message\" : \"좋아요 해제\"}]"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
@@ -58,7 +58,7 @@ public class PostLikeController {
             if (!aBoolean){
                 response = new ControllerApiResponse(true,"좋아요 성공");
             }else
-                response = new ControllerApiResponse(true, "좋아요 해제");
+                response = new ControllerApiResponse(false, "좋아요 해제");
             return ResponseEntity.ok(response);
         }catch (NoSuchElementException e){
             e.printStackTrace();
@@ -98,7 +98,8 @@ public class PostLikeController {
             "nextPage의 존재여부로 다음 페이지 호출",tags = {"사용자 페이지 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
-                content = @Content(schema = @Schema(implementation = UserInfoPostLikeResponse.class))),
+                content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":\"boolean\",\"content\":[{\"id\":\"[게시글 id]\", \"content\" :\"[게시글 내용]\", \"title\":\"[게시글 제목]\"}]}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                         examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"해당 회원을 찾을수 없습니다.\"}"))),
@@ -113,7 +114,7 @@ public class PostLikeController {
         try{
             String jwtToken = header.replace("Bearer ", "");
             UserInfoPostLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
-            return ResponseEntity.ok(userLikesByPage);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());
         } catch (BadRequestException e){

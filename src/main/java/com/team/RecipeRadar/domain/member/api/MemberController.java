@@ -47,7 +47,7 @@ public class MemberController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"회원가입 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\": false, \"message\": \"인증번호가 일치하지 않습니다.\"}, {\"success\": false, \"message\": {\"[필드 명]\": \"[필드 오류 내용]\", \"globalError\": \"모든 검사를 검증해주세요\"}}]"))),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\", \"globalError\": \"모든 검사를 검증해주세요\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -65,22 +65,27 @@ public class MemberController {
             if (result.hasErrors()) {
 
                 Map<String,String> errorMessage=new HashMap<>();
-                ErrorResponse errorResponse = new ErrorResponse();
                 for (FieldError error : result.getFieldErrors()) {
                     errorMessage.put(error.getField(),error.getDefaultMessage());
                 }
 
                 ObjectError globalError = result.getGlobalError();
+
                 errorMessage.put(globalError.getObjectName(), globalError.getDefaultMessage());
-                errorResponse.setSuccess(false);
-                errorResponse.setMessage(errorMessage);
+                ErrorResponse<Object> errorResponse = ErrorResponse.builder()
+                        .success(false)
+                        .message("실패")
+                        .data(errorMessage).build();
 
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
 
              memberService.saveDto(memberDto);
 
-            return ResponseEntity.ok(new ControllerApiResponse(true,"회원가입 성공"));
+            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
+                    .success(true)
+                    .message("회원가입 성공").build();
+            return ResponseEntity.ok(response);
 
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());

@@ -38,7 +38,7 @@ public class RecipeLikeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\" : true, \"message\" : \"좋아요 성공\"}, {\"success\" : true, \"message\" : \"좋아요 해제\"}]"))),
+                            examples = @ExampleObject(value = "[{\"success\" : true, \"message\" : \"좋아요 성공\"}, {\"success\" : false, \"message\" : \"좋아요 해제\"}]"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
@@ -51,7 +51,7 @@ public class RecipeLikeController {
             if (!aBoolean){
                 response = new ControllerApiResponse(true,"좋아요 성공");
             }else
-                response = new ControllerApiResponse(true, "좋아요 해제");
+                response = new ControllerApiResponse(false, "좋아요 해제");
             return ResponseEntity.ok(response);
         }catch (NoSuchElementException e){
             e.printStackTrace();
