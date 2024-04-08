@@ -36,44 +36,6 @@ public class CommentServiceImpl implements CommentService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
-    @Override
-    public Comment save(AddCommentRequest request) {
-        return commentRepository.save(request.toEntity());
-    }
-
-    @Override
-    public List<Comment> findAll() {
-        return commentRepository.findAll();
-    }
-
-    @Override
-    public Comment findById(long id) {
-        return commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-    }
-
-    @Override
-    public void delete(long id) {
-        commentRepository.deleteById(id);
-    }
-
-
-    @Override
-    public Comment update(long id, UpdateCommentRequest request) {
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-
-        comment.update(request.getCommentContent());
-
-        return comment;
-    }
-
-    @Override
-    public List<Comment> searchComments(String query) {
-        return commentRepository.findByCommentContentContainingIgnoreCase(query);
-    }
-
-
     /**
      * 댓글 저장하는 기능 -> 게시글과 사용자의 정보를 이요해 Commnet 객체를 생성후 저장
      * @param userAddCommentDto

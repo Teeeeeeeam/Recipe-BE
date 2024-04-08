@@ -51,10 +51,6 @@ public class Comment {
         return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
 
-    public void update(String commentContent) {
-        this.commentContent = commentContent;
-    }
-
     public void updateTime(LocalDateTime updated_at) {
         this.updated_at = updated_at;
     }

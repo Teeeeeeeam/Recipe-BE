@@ -1,8 +1,12 @@
 package com.team.RecipeRadar.domain.post.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team.RecipeRadar.domain.member.domain.Member;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,6 +26,10 @@ public class Post {
     @Column(name = "post_content", nullable = false)
     private String postContent;
 
+    private LocalDateTime created_at;
+
+    private LocalDateTime updated_at;
+
     @Column(name = "post_serving", nullable = false)
     private String postServing;
 
@@ -31,21 +39,29 @@ public class Post {
     @Column(name = "post_cooking_level", nullable = false)
     private String postCookingLevel;
 
+    @Column(name = "post_like_count", nullable = false)
     private Integer postLikeCount;
 
-    @Builder
-    public Post(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel) {
-        this.postTitle = postTitle;
-        this.postContent = postContent;
-        this.postServing = postServing;
-        this.postCookingTime = postCookingTime;
-        this.postCookingLevel = postCookingLevel;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Schema(hidden = true)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Schema(hidden = true)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @JsonIgnore
+    public LocalDateTime getLocDateTime(){
+        return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
-    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel) {
-        this.postTitle = postTitle;
-        this.postContent = postContent;
-        this.postServing = postServing;
-        this.postCookingTime = postCookingTime;
-        this.postCookingLevel = postCookingLevel;
+    @JsonIgnore
+    public LocalDateTime getUpdate_LocDateTime(){
+        return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
+    }
+
+    public void updateTime(LocalDateTime updated_at) {
+        this.updated_at = updated_at;
     }
 }

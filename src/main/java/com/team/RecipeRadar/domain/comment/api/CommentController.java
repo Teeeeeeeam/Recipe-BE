@@ -45,17 +45,6 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-
-
-    @Operation(description = "[설명 추가]", tags = {"어드민 댓글 컨트롤러"})
-    @PostMapping("/api/admin/comments")
-    public ResponseEntity<Comment> addComment(@RequestBody AddCommentRequest request) {
-        Comment savedComment = commentService.save(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedComment);
-    }
-
     @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
     @GetMapping("/api/admin/comments")
     public  ResponseEntity<List<CommentResponse>> findAllComments() {
