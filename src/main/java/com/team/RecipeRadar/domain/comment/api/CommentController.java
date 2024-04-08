@@ -45,53 +45,6 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-    @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
-    @GetMapping("/api/admin/comments")
-    public  ResponseEntity<List<CommentResponse>> findAllComments() {
-        List<CommentResponse> comments = commentService.findAll()
-                .stream()
-                .map(CommentResponse::new)
-                .toList();
-        return ResponseEntity.ok()
-                .body(comments);
-    }
-    @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
-    @GetMapping("api/admin/comments/{id}")
-    public  ResponseEntity<CommentResponse> findComment(@PathVariable long id) {
-        Comment comment = commentService.findById(id);
-
-        return  ResponseEntity.ok()
-                .body(new CommentResponse(comment));
-    }
-
-    @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
-    @DeleteMapping("/api/admin/comments/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable long id) {
-        commentService.delete(id);
-
-        return ResponseEntity.ok()
-                .build();
-    }
-
-    @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
-    @PutMapping("/api/admin/comments/{id}")
-    public  ResponseEntity<Comment> updateComment(@PathVariable long id, @RequestBody UpdateCommentRequest request){
-        Comment updateComment = commentService.update(id, request);
-
-        return ResponseEntity.ok()
-                .body(updateComment);
-    }
-
-    @Operation(description = "설명작성",tags = {"어드민 댓글 컨트롤러"})
-    @GetMapping("/api/comments/search")
-    public ResponseEntity<List<CommentResponse>> searchComment(@RequestParam String query) {
-        List<Comment> comments = commentService.searchComments(query);
-        List<CommentResponse> commentResponses = comments.stream()
-                .map(CommentResponse::new)
-                .toList();
-        return ResponseEntity.ok()
-                .body(commentResponses);
-    }
 
     @Operation(summary = "댓글 작성 API", description = "로그인한 사용자만 댓글을 작성 가능", tags = {"일반 사용자 댓글 컨트롤러"})
     @ApiResponses(value = {
