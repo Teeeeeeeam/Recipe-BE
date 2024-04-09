@@ -53,6 +53,7 @@ public class JwtProvider {
                 .withExpiresAt(date)
                 .withClaim("id", member.getId())
                 .withClaim("loginId", member.getLoginId())
+                .withClaim("nickName",member.getNickName())
                 .sign(Algorithm.HMAC512(secret));
         return token;
     }
@@ -73,6 +74,7 @@ public class JwtProvider {
                 .withExpiresAt(expirationDate)
                 .withClaim("id", member.getId())
                 .withClaim("loginId", member.getLoginId())
+                .withClaim("nickName",member.getNickName())
                 .sign(Algorithm.HMAC512(secret));
 
         RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
