@@ -1,5 +1,7 @@
 package com.team.mock;
 
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
