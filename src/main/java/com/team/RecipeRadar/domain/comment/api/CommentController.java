@@ -116,7 +116,6 @@ public class CommentController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"commentContent\": \"[수정한 댓글]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"update_At\": \"LocalDateTime\"}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-
     })
     @PutMapping("/api/user/update")
     public ResponseEntity<?> comment_update(@RequestBody UserUpdateCommentDto updateCommentDto){

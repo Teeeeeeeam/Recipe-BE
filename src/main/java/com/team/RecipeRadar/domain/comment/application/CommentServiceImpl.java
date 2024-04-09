@@ -1,9 +1,7 @@
 package com.team.RecipeRadar.domain.comment.application;
 
-import com.team.RecipeRadar.domain.comment.dto.AddCommentRequest;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
-import com.team.RecipeRadar.domain.comment.dto.UpdateCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -122,7 +120,6 @@ public class CommentServiceImpl implements CommentService {
             comment.updateTime(localDateTime);
         }else
             throw new CommentException("작성자만 수정 가능합니다.");
-
     }
 
     private Member getMemberThrows(Long member_id) {

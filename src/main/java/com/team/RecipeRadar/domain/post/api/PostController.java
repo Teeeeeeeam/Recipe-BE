@@ -113,8 +113,9 @@ public class PostController {
     @PutMapping("/api/user/post/update")
     public  ResponseEntity<?> update_post(@RequestBody UserUpdatePostDto updatePostDto){
         try{
-            postService.update_post((updatePostDto.getMemberId(), updatePostDto.getPostId()));
-            UserUpdatePostDto userUpdatePostDto = new UserUpdatePostDto(post.getPostTitle(), post.getMember.getId(), post.getId(), post.getUpdated_at());
+            postService.update_post(updatePostDto.getMemberId(), updatePostDto.getPostId(), updatePostDto.getPostTitle(), updatePostDto.getPostContent());
+            Post post = postService.findById(updatePostDto.getPostId());
+            UserUpdatePostDto userUpdatePostDto = new UserUpdatePostDto(post.getPostTitle(), post.getPostContent(), post.getMember().getId(), post.getId(), post.getUpdated_at());
 
             return ResponseEntity.ok(new ControllerApiResponse(true,userUpdatePostDto));
         }catch (NoSuchElementException e){
@@ -122,7 +123,7 @@ public class PostController {
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버 오류 발생");
+        }
     }
 }
-    }
-}
+

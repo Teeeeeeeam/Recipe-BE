@@ -13,9 +13,12 @@ import com.team.RecipeRadar.domain.comment.dto.UpdateCommentRequest;
 import java.util.List;
 
 public interface CommentService {
-
-
     Comment save(UserAddCommentDto userAddCommentDto);
+
+    List<Comment> findAll();
+
+    Comment findById(long id);
+
     void delete_comment(UserDeleteCommentDto userDeleteCommentDto);
 
     Page<CommentDto> commentPage(Long id, Pageable pageable);
