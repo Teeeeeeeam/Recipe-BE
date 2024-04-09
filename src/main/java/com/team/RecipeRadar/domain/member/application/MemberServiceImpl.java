@@ -3,12 +3,15 @@ package com.team.RecipeRadar.domain.member.application;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dto.UserInfoResponse;
 import com.team.RecipeRadar.domain.member.dto.valid.PasswordStrengthDto;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
@@ -248,5 +251,27 @@ public class MemberServiceImpl implements MemberService {
         return stringBooleanMap;
     }
 
+    /**
+     * 사용자의 정보(이름,이메일,닉네임,로그인 타입)등을 조회하는 로직
+     * @param loginId   로그인아이디
+     * @param scHolderUsername  시큐리티 컨텍스트의 저장된 이름
+     * @return  userInfoResponse 데이터 반환
+     */
+    @Override
+    public UserInfoResponse getMembers(String loginId,String authName) {
+        Member member = findByLoginId(loginId);
+
+        if (member==null||!member.getUsername().equals(authName)){
+            throw new AccessDeniedException("잘못된 접근입니다.");
+        }
+
+        UserInfoResponse userInfoResponse = UserInfoResponse.builder()
+                .nickName(member.getNickName())
+                .username(member.getUsername())
+                .email(member.getEmail())
+                .loginType(member.getLogin_type()).build();
+
+        return userInfoResponse;
+    }
 
 }

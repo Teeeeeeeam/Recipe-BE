@@ -1,9 +1,11 @@
 package com.team.RecipeRadar.domain.like.api;
 
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.domain.like.application.LikeService;
 import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +18,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
@@ -30,7 +34,7 @@ import java.util.NoSuchElementException;
 public class RecipeLikeController {
 
     @Qualifier("RecipeLikeServiceImpl")
-    private final LikeService postLikeService;
+    private final LikeService recipeLikeService;
 
 
     @Operation(summary = "좋아요를 API",
@@ -46,7 +50,7 @@ public class RecipeLikeController {
     @PostMapping("/api/user/recipe/like")
     public ResponseEntity<?> addLike(@RequestBody RecipeLikeDto recipeLikeDto){
         try {
-            Boolean aBoolean = postLikeService.addLike(recipeLikeDto);
+            Boolean aBoolean = recipeLikeService.addLike(recipeLikeDto);
             ControllerApiResponse response;
             if (!aBoolean){
                 response = new ControllerApiResponse(true,"좋아요 성공");
@@ -81,11 +85,42 @@ public class RecipeLikeController {
             Boolean aBoolean = false;
             if (header!=null) {
                 String jwtToken = header.replace("Bearer ", "");
-                aBoolean = postLikeService.checkLike(jwtToken, Long.parseLong(recipeId));
+                aBoolean = recipeLikeService.checkLike(jwtToken, Long.parseLong(recipeId));
             }
             return ResponseEntity.ok(new ControllerApiResponse(aBoolean,"좋아요 상태"));
         }catch (Exception e){
             throw new ServerErrorException("서버 오류 발생");
+        }
+    }
+
+    @Operation(summary = "사용자 페이지의 레시피 페이징",description = "사용자가 좋아요한 레시피의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
+            "nextPage의 존재여부로 다음 페이지 호출",tags = {"사용자 페이지 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":\"boolean\",\"content\":[{\"id\":\"[레시피 id]\", \"content\" :\"[레시피 내용]\", \"title\":\"[레시피 제목]\"}]}}"))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"해당 회원을 찾을수 없습니다.\"}"))),
+            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @GetMapping("/api/user/info/{login-id}/recipes/likes")
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable, HttpServletRequest request){
+        String header = request.getHeader("Authorization");
+        try{
+            String jwtToken = header.replace("Bearer ", "");
+            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (BadRequestException e){
+            throw new AccessDeniedException(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버오류");
         }
     }
 }

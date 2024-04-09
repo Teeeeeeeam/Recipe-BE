@@ -39,8 +39,7 @@ public class Post {
     @Column(name = "post_cooking_level", nullable = false)
     private String postCookingLevel;
 
-    @Column(name = "post_like_count", nullable = false)
-    private Integer postLikeCount;
+    private Integer postLikeCount;      
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Schema(hidden = true)

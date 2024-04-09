@@ -1,11 +1,10 @@
 package com.team.RecipeRadar.domain.like.application;
 
-import com.auth0.jwt.JWT;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
-import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
@@ -22,14 +21,12 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.NoSuchElementException;
 
-import static com.team.RecipeRadar.domain.member.domain.QMember.member;
-
 @Transactional
 @RequiredArgsConstructor
 @Qualifier("PostLikeServiceImpl")
 @Service
 @Slf4j
-public class PostLikeServiceImpl<T extends PostLikeDto> implements LikeService<T> {
+public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService<T> {
 
     private final PostLikeRepository postLikeRepository;
     private final MemberRepository memberRepository;
@@ -85,11 +82,12 @@ public class PostLikeServiceImpl<T extends PostLikeDto> implements LikeService<T
 
     /**
      * 커스텀한 response로 변환해서 전달
-     * @param loginId 조회할 회원의 ID
+     *
+     * @param loginId  조회할 회원의 ID
      * @param pageable 페이징 정보
-     * @return  페이지별로 조회된 회원의 좋아요 정보를 포함하는 UserInfoPostLikeResponse 객체 반환
+     * @return 페이지별로 조회된 회원의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체 반환
      */
-    public UserInfoPostLikeResponse getUserLikesByPage(String jwtToken,String loginId, Pageable pageable) {
+    public UserInfoLikeResponse getUserLikesByPage(String jwtToken, String loginId, Pageable pageable) {
 
         String accessToken_loginId = jwtProvider.validateAccessToken(jwtToken);
 
@@ -104,11 +102,11 @@ public class PostLikeServiceImpl<T extends PostLikeDto> implements LikeService<T
         Slice<UserLikeDto> userDtoSlice = postLikeRepository.userInfoLikes(member.getId(), pageable);
 
         boolean hasNext = userDtoSlice.hasNext();
-        UserInfoPostLikeResponse likeResponse = UserInfoPostLikeResponse.builder()
+
+        UserInfoLikeResponse likeResponse = UserInfoLikeResponse.builder()
                 .content(userDtoSlice.getContent())
                 .nextPage(hasNext)
                 .build();
-
         return likeResponse;
     }
 

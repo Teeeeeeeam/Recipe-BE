@@ -43,6 +43,7 @@ public class PostServiceImpl implements PostService {
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);        //yyy-dd-mm:hh-MM으로 저장 밀리세컨트는 모두 0초
             Post build = Post.builder()
                     .postTitle(userAddPostDto.getPostTitle())
+                    .postLikeCount(0)
                     .postContent(userAddPostDto.getPostContent())
                     .member(member1)
                     .created_at(localDateTime)

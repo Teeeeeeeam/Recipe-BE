@@ -48,7 +48,7 @@ class CommentRepositoryTest {
         Member member = Member.builder().username("test 유저").build();
         Member member1 = Member.builder().username("test 유저1").build();
 
-        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").build();
+        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postLikeCount(0).postTitle("123").build();
 
         Comment comment = Comment.builder().commentContent("test 댓글 작성").member(member).post(article).build();
         Comment comment1 = Comment.builder().commentContent("test 댓글 작성1").member(member1).post(article).build();
@@ -88,7 +88,7 @@ class CommentRepositoryTest {
         Member member = Member.builder().build();
         memberRepository.save(member);
 
-        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").build();
+        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").postLikeCount(0).build();
         articleRepository.save(article);
 
         // 첫 번째 게시물에 대한 댓글 10개 생성
@@ -102,7 +102,7 @@ class CommentRepositoryTest {
         }
 
         // 두 번째 게시물 생성
-        Post article2 = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").build();
+        Post article2 = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postLikeCount(0).postTitle("123").build();
         articleRepository.save(article2);
 
         // 두 번째 게시물에 대한 댓글 5개 생성

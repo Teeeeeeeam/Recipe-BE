@@ -82,8 +82,8 @@ class PostLikeRepositoryTest {
     @DisplayName("사용자 좋아요 정보를 무한 스크롤 조회")
     void testUserInfoLikesPaging() {
         Member member = memberRepository.save(Member.builder().loginId("testId").build());
-        Post post1 = postRepository.save(Post.builder().postContent("테스트 게시글1").postTitle("타이틀1").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").build());
-        Post post2 = postRepository.save(Post.builder().postContent("테스트 게시글2").postTitle("타이틀2").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").build());
+        Post post1 = postRepository.save(Post.builder().postContent("테스트 게시글1").postTitle("타이틀1").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").postLikeCount(0).build());
+        Post post2 = postRepository.save(Post.builder().postContent("테스트 게시글2").postTitle("타이틀2").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").postLikeCount(0).build());
 
         postLikeRepository.save(PostLike.builder().member(member).post(post1).build());
         postLikeRepository.save(PostLike.builder().member(member).post(post2).build());

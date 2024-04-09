@@ -52,7 +52,7 @@ public class CommentIntegrationTest {
     void test(){
         //when
         Member member = Member.builder().username("test").build();
-        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").build();
+        Post article = Post.builder().postContent("aaa").postServing("aaa").postCookingTime("aaa").postContent("asda").postCookingLevel("11").postTitle("123").postLikeCount(0).build();
         Member member1 = Member.builder().username("test2").build();
 
         Member saveMember = memberRepository.save(member);
