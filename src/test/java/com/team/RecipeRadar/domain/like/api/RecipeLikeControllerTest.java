@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.api.RecipeLikeController;
 import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -17,14 +19,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -100,7 +105,7 @@ class RecipeLikeControllerTest {
     }
 
     @Test
-    @DisplayName("jwt 토큰 테스트")
+    @DisplayName("레시피 좋아요 테스트")
     void getLikes() throws Exception {
         // JWT 토큰 생성
         String sign = JWT.create()
@@ -119,4 +124,5 @@ class RecipeLikeControllerTest {
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인
                 .andDo(print()); // 테스트 결과 출력
     }
+
 }

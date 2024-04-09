@@ -1,8 +1,11 @@
 package com.team.RecipeRadar.domain.like.dao;
 
+import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
@@ -13,10 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -100,4 +106,34 @@ class RecipeLikeRepositoryTest {
 
     }
 
+    @Test
+    @DisplayName("사용자페이지의 레시피 좋아요 정보를 무한 스크롤 조회")
+    void testUserInfoLikesPaging() {
+        Member member = memberRepository.save(Member.builder().loginId("testId").build());
+        Recipe recipe = recipeRepository.save(Recipe.builder().content("테스트 레시피1").title("타이틀1").postNumber("넘버").cookingTime("쿠킹 시간").likeCount(1).build());
+        Recipe recipe1 = recipeRepository.save(Recipe.builder().content("테스트 레시피2").title("타이틀2").postNumber("넘버").cookingTime("쿠킹 시간").likeCount(1).build());
+
+        recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe).build());
+        recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe1).build());
+
+        int pageSize = 1; // 페이지당 크기
+        int pageNumber = 0; // 페이지 번호
+
+        // 사용자의 좋아요 정보를 첫 번째 페이지로 조회
+        Slice<UserLikeDto> result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
+        List<UserLikeDto> content = result.getContent();
+        log.info("res={}",result.hasNext());
+        log.info("res={}",result.getContent().stream().toList());
+
+        assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
+        assertThat(result.hasNext()).isTrue(); // 다음 페이지가 있는지 확인
+
+        // 다음 페이지로 넘어가기
+        pageNumber++;
+        result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
+        content = result.getContent();
+
+        assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
+        assertThat(result.hasNext()).isFalse(); // 다음 페이지가 없는지 확인
+    }
 }

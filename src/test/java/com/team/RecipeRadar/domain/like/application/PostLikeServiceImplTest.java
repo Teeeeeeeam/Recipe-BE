@@ -4,7 +4,7 @@ package com.team.RecipeRadar.domain.like.application;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
-import com.team.RecipeRadar.domain.like.dto.UserInfoPostLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
@@ -14,8 +14,6 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -186,7 +184,7 @@ class PostLikeServiceImplTest {
 
 
         // 테스트 대상 메소드 호출
-        UserInfoPostLikeResponse response = postLikeService.getUserLikesByPage(fakeToken,member.getLoginId(),pageable);
+        UserInfoLikeResponse response = postLikeService.getUserLikesByPage(fakeToken,member.getLoginId(),pageable);
 
         // 결과 검증
         assertThat(response.getContent()).hasSize(2);
