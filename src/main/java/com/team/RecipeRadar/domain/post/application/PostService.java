@@ -13,16 +13,16 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface PostService {
-    Post save_post(UserAddPostDto userAddPostDto);
+    Post save(UserAddPostDto userAddPostDto);
 
     List<Post> findAll();
 
     Post findById(long id);
 
-    void delete_post(UserDeletePostDto userDeletePostDto);
+    void delete(UserDeletePostDto userDeletePostDto);
 
 
-    void update_post(Long memeber_id, Long post_id, String postTitle, String postContent);
+    void update(Long memeber_id, Long post_id, String postTitle, String postContent);
 
 
 }

@@ -15,9 +15,6 @@ import java.util.List;
 public interface CommentService {
     Comment save(UserAddCommentDto userAddCommentDto);
 
-    List<Comment> findAll();
-
-    Comment findById(long id);
 
     void delete_comment(UserDeleteCommentDto userDeleteCommentDto);
 
@@ -25,4 +22,5 @@ public interface CommentService {
 
     void update(Long member_id,Long comment_id,String Content);
 
+    Comment findById(long id);
 }

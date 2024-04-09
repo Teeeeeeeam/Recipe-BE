@@ -61,6 +61,10 @@ public class CommentServiceImpl implements CommentService {
             throw new NoSuchElementException("회원정보나 게시글을 찾을수 없습니다.");     //사용자 및 게시글이 없을시에는 해당 예외발생
         }
     }
+    @Override
+    public Comment findById(long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new CommentException("찾을 수 없습니다."));
+    }
 
     /**
      * 댓글의 Id와 사용자의 Id를 사용해서 댓글을 삭제한다.

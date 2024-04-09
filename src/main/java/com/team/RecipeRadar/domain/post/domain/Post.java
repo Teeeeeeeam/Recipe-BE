@@ -47,11 +47,6 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Schema(hidden = true)
-    @JoinColumn(name = "post_id")
-    private Post post;
-
     @JsonIgnore
     public LocalDateTime getLocDateTime(){
         return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
@@ -59,6 +54,11 @@ public class Post {
     @JsonIgnore
     public LocalDateTime getUpdate_LocDateTime(){
         return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
+    }
+
+    public void update(String postTitle, String postContent) {
+        this.postTitle = postTitle;
+        this.postContent = postContent;
     }
 
     public void updateTime(LocalDateTime updated_at) {

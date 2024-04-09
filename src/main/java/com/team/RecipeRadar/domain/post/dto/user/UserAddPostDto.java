@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,6 +20,7 @@ public class UserAddPostDto {
     private String postTitle;
 
     @Schema(description = "요리글 내용", example = "요리글 작성!")
+    @NotBlank(message = "요리글을 입력해주세요")
     private String postContent;
 
     @Schema(description = "사용자 id", example = "1")
