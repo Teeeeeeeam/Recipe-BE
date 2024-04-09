@@ -1,5 +1,7 @@
 package com.team.RecipeRadar.global.email.application;
 
+import com.team.RecipeRadar.global.email.dao.EmailVerificationRepository;
+import com.team.RecipeRadar.global.email.domain.EmailVerification;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
@@ -25,8 +28,8 @@ import java.util.Random;
 public class AccountRetrievalEmailServiceImpl implements MailService{
 
     private final JavaMailSender mailSender;
-
-    private String code;
+    private final EmailVerificationRepository emailVerificationRepository;
+    private int code;
 
     @Value("${email}")
     private String emailFrom;
@@ -34,6 +37,15 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
     @Override
     public String sensMailMessage(String email) {
         code=createCode();
+
+        LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(3);
+        EmailVerification emailVerification = EmailVerification.builder()
+                .createTime(LocalDateTime.now())
+                .lastTime(localDateTime)
+                .email(email)
+                .code(code).build();
+        emailVerificationRepository.save(emailVerification);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("나만의 냉장고 이메일 인증 안내."); // 이메일 제목 설정
         message.setText(getText()); // 이메일 내용 설정
@@ -41,7 +53,7 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
         message.setTo(email); // 수신자 이메일 주소 설정
         mailSender.send(message); // 이메일 발송
 
-        return code;
+        return String.valueOf(code);
     }
 
     private String getText() {
@@ -57,29 +69,42 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
 
 
     @Override
-    public String createCode() {
+    public Integer createCode() {
         Random random = new Random();
         int key =100000 + random.nextInt(900000);
-        return String.valueOf(key);
+        return key;
     }
 
     @Override
-    public String getCode() {
-        return String.valueOf(code);
+    public Integer getCode(String email, int code) {
+        return null;
     }
 
-    /**
-     * 아이디찾기  이메일 인증번호 유호성 검사
-     * @param code
-     * @return 인증 성공시 true, 실패시 false
-     */
-    public Map<String, Boolean> verifyCode(String code){
+    @Override
+    public Map<String, Boolean> verifyCode(String email, int code) {
         Map<String, Boolean> result = new LinkedHashMap<>();
-        String realCode = getCode();
-        if (realCode.equals(code)){
-            result.put("isVerifyCode",true);
-        }else throw new BadRequestException("인증번호가 일치하지 않습니다.");
+        boolean isVerifyCode = false; // 기본값은 false.
+
+        EmailVerification byEmailAndCode = emailVerificationRepository.findByEmailAndCode(email, code);
+
+        if (byEmailAndCode != null) {
+            LocalDateTime lastTime = byEmailAndCode.getLastTime();
+            LocalDateTime now = LocalDateTime.now();
+
+            if (now.isBefore(lastTime)) {
+                isVerifyCode = true; // 인증번호가 일치하고 시간이 만료되지 않았을 경우에만 true
+            }
+        } else {
+            throw new BadRequestException("인증번호가 일치하지 않습니다.");
+        }
+
+        result.put("isVerifyCode", isVerifyCode);
         return result;
+    }
+
+    @Override
+    public void deleteCode(String email, int code) {
+        emailVerificationRepository.deleteByEmailAndCode(email,code);
     }
 
 }

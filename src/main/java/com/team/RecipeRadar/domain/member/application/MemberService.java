@@ -19,11 +19,10 @@ public interface MemberService {
     Map<String, Boolean> emailValid(String email);
     Map<String, Boolean> userNameValid(String username);
     Map<String, Boolean> checkPasswordStrength(String password);
-    boolean ValidationOfSignUp(MemberDto memberDto,String code);
+    boolean ValidationOfSignUp(MemberDto memberDto,int code);
     Map<String, Boolean> duplicatePassword(String password,String passwordRe);
 
     Map<String,Boolean> nickNameValid(String nickName);
-    Map<String, Boolean> verifyCode(String code);
-
+    Map<String, Boolean> verifyCode(String email,int code);
 
 }

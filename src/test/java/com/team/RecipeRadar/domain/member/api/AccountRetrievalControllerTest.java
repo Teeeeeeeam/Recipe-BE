@@ -63,9 +63,9 @@ class AccountRetrievalControllerTest {
     @DisplayName("아이디 찾기 컨트롤러 테스트")
     void test() throws Exception{
 
-        String username = "test";
+        String username = "홍길동";
         String email="test@email.com";
-        String code = "code";
+        int code = 123456;
 
 
         FindLoginIdDto findLoginIdDto = new FindLoginIdDto(username, email, code);
@@ -78,22 +78,23 @@ class AccountRetrievalControllerTest {
 
         given(accountRetrievalService.findLoginId(eq(username),eq(email),eq(code))).willReturn(mapList);
 
-        mockMvc.perform(post("/api/loginid/find")
-                .param("code",code)
+        mockMvc.perform(post("/api/search/login-id")
+                .param("code",String.valueOf(code))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(findLoginIdDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message[0]['로그인 타입']").value("keuye0638"));
+                .andExpect(jsonPath("$.message").value("성공"))
+                .andExpect(jsonPath("$.data[0]['로그인 타입']").value("keuye0638"));
     }
 
     @Test
     @DisplayName("비밀번호 찾기 엔드포인트")
     void find_password() throws Exception {
-        String username = "test";
+        String username = "홍길동";
         String loginId = "loginId";
         String email = "test@email.com";
-        String code = "code";
+        int code = 123456;
 
         FindPasswordDto findPasswordDto = new FindPasswordDto(username, loginId, email, code);
 
@@ -107,15 +108,15 @@ class AccountRetrievalControllerTest {
         given(accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode())).willReturn(map);
 
         // 요청 및 응답 확인
-        mockMvc.perform(post("/api/pwd/find")
-                        .param("code", code)
+        mockMvc.perform(post("/api/search/password")
+                        .param("code",String.valueOf(code))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(findPasswordDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message.token").value("test_TOken"))
-                .andExpect(jsonPath("$.message['회원 정보']").value(true))
-                .andExpect(jsonPath("$.message['이메일 인증']").value(true));
+                .andExpect(jsonPath("$.data.token").value("test_TOken"))
+                .andExpect(jsonPath("$.data['회원 정보']").value(true))
+                .andExpect(jsonPath("$.data['이메일 인증']").value(true));
     }
 
     @Test
@@ -130,7 +131,7 @@ class AccountRetrievalControllerTest {
         ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
         given(accountRetrievalService.updatePassword(updatePasswordDto,token)).willReturn(apiResponse);
 
-        mockMvc.perform(put("/api/pwd/update")
+        mockMvc.perform(put("/api/password/update")
                 .param("id",token)
                 .content(objectMapper.writeValueAsString(updatePasswordDto))
                 .contentType(MediaType.APPLICATION_JSON))

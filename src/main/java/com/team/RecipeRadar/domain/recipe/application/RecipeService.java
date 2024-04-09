@@ -1,23 +1,33 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
-import com.team.RecipeRadar.domain.recipe.dto.AddRecipeRequest;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.dto.UpdateRecipeRequest;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeSearchedDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public interface RecipeService {
-    Recipe save(AddRecipeRequest request);
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class RecipeService {
 
-    List<Recipe> findAll();
+    private final RecipeRepository recipeRepository;
 
-    Recipe findById(long id);
+    public List<RecipeSearchedDto>  searchRecipe(List<String> ingredientTitles, Pageable pageable) {
 
-    void delete(long id);
+       Page<Recipe> recipePage = recipeRepository.findRecipeByIngredient(ingredientTitles, pageable);
 
-    Recipe update(long id, UpdateRecipeRequest request);
+        List<RecipeSearchedDto> recipeDtos = recipePage.getContent().stream()
+                .map(RecipeSearchedDto::of)
+                .collect(Collectors.toList());
+       return recipeDtos;
+    }
 
-    List<Recipe> searchRecipes(String query);
-
-    long getRecipeCount();
 }
+

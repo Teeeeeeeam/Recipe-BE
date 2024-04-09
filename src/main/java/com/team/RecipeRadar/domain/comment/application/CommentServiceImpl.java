@@ -94,10 +94,10 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
         log.info("as={}",comments);
 
+
         if (!comments.getContent().isEmpty()) {
             return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())
-                    .memberDto(MemberDto.builder().id(comment.getMember().getId()).nickName(comment.getMember().getNickName()).loginId(comment.getMember().getLoginId()).build())
-                    .build());      //스트림 사용
+                    .nickName(comment.getMember().getNickName()).build());      //스트림 사용
         }else
             throw new CommentException("게시글이 존재하지 않습니다.");
     }

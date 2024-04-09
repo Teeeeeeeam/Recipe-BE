@@ -10,4 +10,6 @@ public interface AccountRetrievalRepository extends JpaRepository<AccountRetriev
     AccountRetrieval findByLoginId(String loginId);
 
     Boolean existsByVerificationId(String verificationId);
+
+    void deleteByVerificationId(String verificationId);
 }
