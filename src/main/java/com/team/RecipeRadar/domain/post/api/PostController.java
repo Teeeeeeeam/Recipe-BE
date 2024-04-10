@@ -3,6 +3,7 @@ package com.team.RecipeRadar.domain.post.api;
 import com.team.RecipeRadar.domain.post.application.PostService;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostResponse;
+import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddPostDto;
 import com.team.RecipeRadar.domain.post.dto.user.UserDeletePostDto;
 import com.team.RecipeRadar.domain.post.dto.user.UserUpdatePostDto;
@@ -20,7 +21,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
@@ -128,6 +133,28 @@ public class PostController {
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버 오류 발생");
+        }
+    }
+
+    @Operation(summary = "작성한 게시글 조회",description = "사용자가 작성한 게시글을 조회하는 API, 기본으로 작성한 게시글을 최신순으로 DESC 정렬, SORT 사용X  (현재 총 작성한 게시물 수의 대해서는 적용x  필요시에 추가 가능)",tags = {"사용자 페이지 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                    examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":\"boolean\",\"content\":[{\"id\":\"[게시글 id]\", \"postTitle\" :\"[게시글 제목]\"}]}}"))),
+            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                    examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @GetMapping("/api/user/info/{login-id}/posts")
+    public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId, Pageable pageable){
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String authenticationName = authentication.getName();
+            UserInfoPostResponse userInfoPostResponse = postService.userPostPage(authenticationName, loginId, pageable);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userInfoPostResponse));
+        }catch (AccessDeniedException e){
+            throw new AccessDeniedException(e.getMessage());
         }
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post,Long> {
+public interface PostRepository extends JpaRepository<Post,Long>, PostRepositoryCustom {
     List<Post> findByPostContentContainingIgnoreCase(String postTitle);
     @Modifying
     @Query("delete from Post c where c.member.id=:member_id and c.id=:post_id")

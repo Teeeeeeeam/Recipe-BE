@@ -1,20 +1,22 @@
 package com.team.RecipeRadar.domain.post.application;
 
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
+import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddPostDto;
 import com.team.RecipeRadar.domain.post.dto.user.UserDeletePostDto;
 import com.team.RecipeRadar.domain.post.exception.PostException;
-import com.team.RecipeRadar.domain.post.exception.ex.AccessDeniedPostException;
-import com.team.RecipeRadar.domain.post.exception.ex.InvalidPostRequestException;
-import com.team.RecipeRadar.domain.post.exception.ex.PostNotFoundException;
-import com.team.RecipeRadar.domain.post.exception.ex.UnauthorizedPostException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -97,6 +99,21 @@ public class PostServiceImpl implements PostService {
         // 업데이트하는 중에 문제가 발생한 경우
             throw new PostException("작성자만 수정 가능합니다.");
 
+    }
+
+    @Override
+    public UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable) {
+        Member member = memberRepository.findByLoginId(loginId);
+
+        if (member==null||!member.getUsername().equals(authenticationName)){
+            throw new AccessDeniedException("접근할 수 없는 사용자입니다.");
+        }
+
+        Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(), pageable);
+
+        return UserInfoPostResponse.builder()
+                .nextPage(userInfoPostDto.hasNext())
+                .content(userInfoPostDto.getContent()).build();
     }
 
     private Member getMemberThrows(Long member_id) {
