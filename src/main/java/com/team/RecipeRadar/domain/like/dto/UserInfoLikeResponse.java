@@ -13,8 +13,4 @@ public class UserInfoLikeResponse {
 
     private List<UserLikeDto> content;
 
-
-
-
-
 }

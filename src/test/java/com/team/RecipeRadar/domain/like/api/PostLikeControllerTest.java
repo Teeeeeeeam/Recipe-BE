@@ -5,6 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -18,11 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Date;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -51,9 +54,6 @@ class PostLikeControllerTest {
     CustomOauth2Handler customOauth2Handler;
     @MockBean
     CustomOauth2Service customOauth2Service;
-
-    @Value("${security.token}")
-    private String key;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -101,7 +101,10 @@ class PostLikeControllerTest {
         mockMvc.perform(get("/api/likeCheck")
                         .param("postId","1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print());
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("좋아요 상태"));
 
     }
 
@@ -122,6 +125,52 @@ class PostLikeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인/
                 .andDo(print()); // 테스트 결과 출력
+    }
+
+    @Test
+    @DisplayName("사용자페이지- 좋아요한 게시글의 대한 페이징 성공시")
+    @CustomMockUser
+    public void getUserLike_page_success() throws Exception {
+        String loginId = "test";
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+
+        UserInfoLikeResponse response = UserInfoLikeResponse.builder()
+                .nextPage(true)
+                .content(userLikeDtos)
+                .build();
+
+        given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willReturn(response);
+
+        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("조회 성공"))
+                .andExpect(jsonPath("$.data.nextPage").value(true))
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("사용자페이지- 좋아요한 게시글의 대한 페이징 실패시")
+    @CustomMockUser
+    public void getUserLike_page_fail() throws Exception {
+        String loginId = "test";
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+
+        given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
+
+        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("접근 할 수 없는 페이지입니다."));
     }
     
 }
