@@ -8,6 +8,6 @@ public interface LikeService<T> {
     Boolean addLike(T postLikeDto);
     Boolean checkLike(String JwtToken, Long postId);
 
-    UserInfoLikeResponse getUserLikesByPage(String jwtToken, String  loginId, Pageable pageable);
+    UserInfoLikeResponse getUserLikesByPage(String authenticationName, String  loginId, Pageable pageable);
 
 }

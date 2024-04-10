@@ -85,14 +85,13 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
 
     /**
      * 좋아요한 레시피의 정보를 페이지의 정보를 Response로 반환하며, 해당 사용자만이 조회가능
-     * @param jwtToken JWT 토큰
+     * @param authenticationName 시큐리티 홀더에 저장된 로그인한 사용자 이름
      * @param loginId 로그인 아이디
      * @param pageable 페이지 정보
      * @return 사용자의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체
      */
     @Override
-    public UserInfoLikeResponse getUserLikesByPage(String jwtToken, String loginId, Pageable pageable) {
-        String accessToken_loginId = jwtProvider.validateAccessToken(jwtToken);
+    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId, Pageable pageable) {
 
         Member member = memberRepository.findByLoginId(loginId);
 
@@ -100,7 +99,7 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
             throw new NoSuchElementException("해당 회원을 찾을수 없습니다.");
         }
 
-        if (!member.getLoginId().equals(accessToken_loginId)){   // 로그인 아이디와 JWT 토큰으로 인증된 아이디가 다를 경우 접근 권한 예외 처리
+        if (!member.getUsername().equals(authenticationName)){   // 로그인 아이디와 JWT 토큰으로 인증된 아이디가 다를 경우 접근 권한 예외 처리
             throw new BadRequestException("접근할 수 없는 사용자입니다.");
         }
 

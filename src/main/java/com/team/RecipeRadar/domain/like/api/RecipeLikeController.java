@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
@@ -108,11 +110,10 @@ public class RecipeLikeController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/recipes/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable, HttpServletRequest request){
-        String header = request.getHeader("Authorization");
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable){
         try{
-            String jwtToken = header.replace("Bearer ", "");
-            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(jwtToken,loginId, pageable);
+            String authenticationName = getAuthenticationName();
+            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());
@@ -122,5 +123,11 @@ public class RecipeLikeController {
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
         }
+    }
+
+    private static String getAuthenticationName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticationName = authentication.getName();
+        return authenticationName;
     }
 }

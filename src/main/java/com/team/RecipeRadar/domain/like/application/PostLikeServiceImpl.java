@@ -82,20 +82,20 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
 
     /**
      * 커스텀한 response로 변환해서 전달
-     *
+     * 
+     * @param authenticationName 시큐리티 홀더에 저장된 로그인한 사용자 이름
      * @param loginId  조회할 회원의 ID
      * @param pageable 페이징 정보
      * @return 페이지별로 조회된 회원의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체 반환
      */
-    public UserInfoLikeResponse getUserLikesByPage(String jwtToken, String loginId, Pageable pageable) {
+    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId, Pageable pageable) {
 
-        String accessToken_loginId = jwtProvider.validateAccessToken(jwtToken);
 
         Member member = memberRepository.findByLoginId(loginId);
         if (member==null){
             throw new NoSuchElementException("해당 회원을 찾을수 없습니다.");
         }
-        if (!member.getLoginId().equals(accessToken_loginId)){
+        if (!member.getUsername().equals(authenticationName)){
             throw new BadRequestException("접근할 수 없는 사용자입니다.");
         }
 
