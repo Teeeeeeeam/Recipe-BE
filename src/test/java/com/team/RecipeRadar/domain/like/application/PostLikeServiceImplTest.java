@@ -11,6 +11,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -212,5 +213,6 @@ class PostLikeServiceImplTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("접근할 수 없는 사용자입니다.");
     }
+
 
 }
