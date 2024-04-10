@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -100,7 +101,10 @@ class RecipeLikeControllerTest {
 
         mockMvc.perform(get("/api/recipe/like/check/{recipe-id}", 123L)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print());
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("좋아요 상태"));
 
     }
 
@@ -124,5 +128,52 @@ class RecipeLikeControllerTest {
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인
                 .andDo(print()); // 테스트 결과 출력
     }
+
+    @Test
+    @DisplayName("사용자페이지- 좋아요한 레시피의 대한 페이징 성공시")
+    @CustomMockUser
+    public void getUserLike_page_success() throws Exception {
+        String loginId = "test";
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+
+        UserInfoLikeResponse response = UserInfoLikeResponse.builder()
+                .nextPage(true)
+                .content(userLikeDtos)
+                .build();
+
+        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willReturn(response);
+
+        mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("조회 성공"))
+                .andExpect(jsonPath("$.data.nextPage").value(true))
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("사용자페이지- 좋아요한 레시피의 대한 페이징 실패시")
+    @CustomMockUser
+    public void getUserLike_page_fail() throws Exception {
+        String loginId = "test";
+
+        List<UserLikeDto> userLikeDtos = new ArrayList<>();
+        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+
+        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
+
+        mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("접근 할 수 없는 페이지입니다."));
+    }
+
 
 }
