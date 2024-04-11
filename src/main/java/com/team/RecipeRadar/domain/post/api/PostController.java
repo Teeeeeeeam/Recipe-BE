@@ -13,6 +13,7 @@ import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,7 +62,14 @@ public class PostController {
             }
             Post save = postService.save(userAddPostDto);
 
-            UserAddPostDto addResponse = new UserAddPostDto(save.getPostTitle(), save.getPostContent(), save.getMember().getId(), save.getId(), save.getCreated_at());
+            UserAddPostDto addResponse = new UserAddPostDto(
+                    save.getPostTitle(),
+                    save.getPostContent(),
+                    save.getMember().getId(),
+                    save.getPostServing(),
+                    save.getPostCookingTime(),
+                    save.getPostCookingLevel(),
+                    save.getPostImageUrl());
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"성공", addResponse));
         }catch (NoSuchElementException e){
@@ -71,6 +79,15 @@ public class PostController {
             throw new ServerErrorException("서버오류");
         }
     }
+
+    @Operation(summary = "전체 요리글 조회 API", description = "전체 사용자만 전체를 조회할 수 있습니다.", tags = {"사용자 요리글 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                        examples = @ExampleObject(value = "[{\"postId\": \"[게시글 ID]\", \"postTitle\": \"[요리글 제목]\", \"postContent\": \"[요리글 내용]\", \"memberId\": \"[사용자 ID]\", \"created_at\": \"LocalDateTime\"}]"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/api/posts")
     public  ResponseEntity<List<PostResponse>> findAllPosts() {
         List<PostResponse> posts = postService.findAll()
@@ -80,6 +97,17 @@ public class PostController {
         return ResponseEntity.ok()
                 .body(posts);
     }
+
+    @Operation(summary = "요리글 상세 조회 API", description = "사용자가 요리글의 상세 정보를 조회할 수 있습니다.", tags = {"사용자 요리글 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = PostResponse.class),
+                            examples = @ExampleObject(value = "{\"postId\": \"[게시글 ID]\", \"postTitle\": \"[요리글 제목]\", \"postContent\": \"[요리글 내용]\", \"memberId\": \"[사용자 ID]\", \"created_at\": \"LocalDateTime\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("api/posts/{id}")
     public  ResponseEntity<PostResponse> findPost(@PathVariable long id) {
         Post post = postService.findById(id);
@@ -107,14 +135,13 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "요리글 수정 API",description = "로그인, 작성자만 수정가능",tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "요리글 수정 API", description = "로그인, 작성자만 수정가능", tags = {"일반 사용자 댓글 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"postContent\": \"[수정한 요리글]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"update_At\": \"LocalDateTime\"}}"))),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"postTitle\": \"[수정한 요리글 제목]\", \"postContent\": \"[수정한 요리글 내용]\", \"postServing\": \"[수정한 요리 제공 인원]\", \"postCookingTime\": \"[수정한 요리 소요 시간]\", \"postCookingLevel\": \"[수정한 요리 난이도]\", \"postImageUrl\": \"[수정한 이미지 URL]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-
     })
     @PutMapping("/api/user/post/update")
     public  ResponseEntity<?> updatePost(@Valid @RequestBody UserUpdatePostDto updatePostDto, BindingResult bindingResult){
@@ -123,9 +150,27 @@ public class PostController {
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false, bindingResult.getFieldError().getDefaultMessage()));
             }
 
-            postService.update(updatePostDto.getMemberId(), updatePostDto.getPostId(), updatePostDto.getPostTitle(), updatePostDto.getPostContent());
+            postService.update(
+                    updatePostDto.getMemberId(),
+                    updatePostDto.getPostId(),
+                    updatePostDto.getPostTitle(),
+                    updatePostDto.getPostContent(),
+                    updatePostDto.getPostServing(),
+                    updatePostDto.getPostCookingTime(),
+                    updatePostDto.getPostCookingLevel(),
+                    updatePostDto.getPostImageUrl()
+            );
             Post post = postService.findById(updatePostDto.getPostId());
-            UserUpdatePostDto userUpdatePostDto = new UserUpdatePostDto(post.getPostTitle(), post.getPostContent(), post.getMember().getId(), post.getId(), post.getUpdated_at());
+            UserUpdatePostDto userUpdatePostDto = new UserUpdatePostDto(
+                    post.getPostTitle(),
+                    post.getPostContent(),
+                    post.getMember().getId(),
+                    post.getId(),
+                    post.getPostServing(),
+                    post.getPostCookingTime(),
+                    post.getPostCookingLevel(),
+                    post.getPostImageUrl()
+            );
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공", userUpdatePostDto));
         }catch (NoSuchElementException e){

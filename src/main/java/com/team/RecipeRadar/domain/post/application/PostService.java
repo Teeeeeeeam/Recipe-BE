@@ -19,7 +19,8 @@ public interface PostService {
     void delete(UserDeletePostDto userDeletePostDto);
 
 
-    void update(Long memeber_id, Long post_id, String postTitle, String postContent);
+    void update(Long memberId, Long postId, String postTitle, String postContent,
+                String postServing, String postCookingTime, String postCookingLevel, String postImageUrl);
 
     UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable);
 

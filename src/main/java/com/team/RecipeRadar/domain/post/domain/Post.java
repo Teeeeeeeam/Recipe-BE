@@ -39,7 +39,10 @@ public class Post {
     @Column(name = "post_cooking_level", nullable = false)
     private String postCookingLevel;
 
-    private Integer postLikeCount;      
+    private Integer postLikeCount;
+
+    @Column(name = "post_image_url")
+    private String postImageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Schema(hidden = true)
@@ -55,9 +58,13 @@ public class Post {
         return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
 
-    public void update(String postTitle, String postContent) {
+    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel, String postImageUrl) {
         this.postTitle = postTitle;
         this.postContent = postContent;
+        this.postServing = postServing;
+        this.postCookingTime = postCookingTime;
+        this.postCookingLevel = postCookingLevel;
+        this.postImageUrl = postImageUrl;
     }
 
     public void updateTime(LocalDateTime updated_at) {

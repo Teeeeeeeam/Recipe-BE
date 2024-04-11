@@ -19,6 +19,8 @@ public class AddPostRequest {
     private String postCookingTime;
     private String postCookingLevel;
     private Integer postLikeCount;
+    private String postImageUrl;
+
 
     public Post toEntity() {
         return Post.builder()
@@ -29,6 +31,7 @@ public class AddPostRequest {
                 .postCookingTime(postCookingTime)
                 .postCookingLevel(postCookingLevel)
                 .postLikeCount(postLikeCount)
+                .postImageUrl(postImageUrl)
                 .build();
     }
 }

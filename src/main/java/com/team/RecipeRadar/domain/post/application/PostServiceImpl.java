@@ -45,10 +45,14 @@ public class PostServiceImpl implements PostService {
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);        //yyy-dd-mm:hh-MM으로 저장 밀리세컨트는 모두 0초
             Post build = Post.builder()
                     .postTitle(userAddPostDto.getPostTitle())
-                    .postLikeCount(0)
                     .postContent(userAddPostDto.getPostContent())
+                    .postServing(userAddPostDto.getPostServing())
+                    .postCookingTime(userAddPostDto.getPostCookingTime())
+                    .postCookingLevel(userAddPostDto.getPostCookingLevel())
+                    .postLikeCount(0) // 좋아요 초기값 설정
+                    .postImageUrl(userAddPostDto.getPostImageUrl()) // 이미지 URL 추가
                     .member(member1)
-                    .created_at(localDateTime)
+                    .created_at(LocalDateTime.now())
                     .build();
             return postRepository.save(build);
         } else {
@@ -86,14 +90,14 @@ public class PostServiceImpl implements PostService {
             throw new PostException("공지사항 삭제에 실패했습니다.");
     }
     @Override
-    public void update(Long member_id, Long post_id, String postTitle, String postContent ) {
+    public void update(Long memberId, Long postId, String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel, String postImageUrl) {
 
-        Member member = getMemberThrows(member_id);
-        Post post = postRepository.findById(post_id).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
+        Member member = getMemberThrows(memberId);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
         LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);
 
         if(post.getMember().equals(member)){
-            post.update(postTitle, postContent);
+            post.update(postTitle, postContent, postServing, postCookingTime, postCookingLevel, postImageUrl);
             post.updateTime(localDateTime);
         }else
         // 업데이트하는 중에 문제가 발생한 경우
