@@ -45,4 +45,11 @@ public class Member {
         this.password = password;
     }
 
+    public void updateNickName(String nickName){
+        this.nickName = nickName;
+    }
+
+    public void updateEmail(String email){
+        this.email = email;
+    }
 }
