@@ -1,7 +1,9 @@
 package com.team.RecipeRadar.domain.userInfo.application;
 
 import com.team.RecipeRadar.domain.member.application.MemberService;
+import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.MailService;
@@ -10,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -22,6 +26,8 @@ import java.util.Map;
 public class UserInfoServiceImpl implements UserInfoService {
 
     private final MemberRepository memberRepository;
+    private final AccountRetrievalRepository accountRetrievalRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Qualifier("AccountEmail")
     private final MailService mailService;
@@ -85,6 +91,29 @@ public class UserInfoServiceImpl implements UserInfoService {
             mailService.deleteCode(email,Integer.parseInt(code));
         }else
             throw new BadRequestException("인증번호 및 이메일이 잘못되었습니다.");
+    }
+
+    /**
+     * 일반 사용자 페이지 접근시 비밀번호 재 검증후 쿠키생성
+     * @param loginId       로그인 아이디
+     * @param authenticationName    시큐리티 정보
+     * @param password      비밀번호
+     * @return      ID반환
+     */
+    @Override
+    public String userToken(String loginId,String authenticationName, String password) {
+
+        Member member = throwsMember(loginId, authenticationName);
+
+        boolean matches = passwordEncoder.matches(password,member.getPassword());
+        if (!matches){
+            throw new BadRequestException("비밀번호가 일치하지 않습니다.");
+        }
+
+        LocalDateTime expireTime = LocalDateTime.now().plusMinutes(20); //쿠키의 만료 시간을 20분 후로 설정
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().loginId(member.getLoginId()).expireAt(expireTime).build();
+        return accountRetrievalRepository.save(accountRetrieval).getVerificationId();
+
     }
 
     private Member throwsMember(String loginId, String authName) {

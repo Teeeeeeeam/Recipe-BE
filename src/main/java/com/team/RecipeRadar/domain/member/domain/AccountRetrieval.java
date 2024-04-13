@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -24,4 +25,5 @@ public class AccountRetrieval {
 
     private String loginId;
 
+    private LocalDateTime expireAt;
 }

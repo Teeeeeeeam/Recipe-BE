@@ -1,12 +1,16 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.userInfo.dto.info.PasswordDTO;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoUpdateNickNameRequest;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -22,6 +26,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,8 +52,11 @@ public class UserInfoController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/user/info/{login-id}")
-    public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId){
+    public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try{
+            if (cookieLoginId ==null){
+                throw new ForbiddenException("쿠키값이 없을때 접근");
+            }
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String name = authentication.getName();
 
@@ -122,4 +132,38 @@ public class UserInfoController {
         }
     }
 
+    @Operation(summary = "사용자 페이지 접근시 비밀번호 검증", description = "사용자 페이지에서 기능을 사용하기 위해서는 해당 API에서 비밀번호를 통해 사용자 임을 인증을한다. 성공시에는 20분동안 유효한 쿠키를 만들어 발급후 사용자 페이지에서 사용가능, 만약 쿠키가 발급되지않은" +
+            "상태에서 사용자 페이지를 URL로 직접 접근시에는 403 Forbiden 에러발생")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"인증 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"비밀번호가 일치하지 않습니다.\"}"))),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/user/info/valid")
+    public ResponseEntity<?> userInfoValid(@RequestBody PasswordDTO passwordDTO, HttpServletResponse response){
+        try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+            Member member = principal.getMember();
+
+            String userToken = userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword());
+
+            Cookie cookie = new Cookie("login-id", userToken);
+            cookie.setMaxAge(1200); //20분
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(new ControllerApiResponse<>(true, "인증 성공"));
+
+        } catch (BadRequestException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (ServerErrorException e) {
+            throw new ServerErrorException(e.getMessage());
+        }
+    }
 }
