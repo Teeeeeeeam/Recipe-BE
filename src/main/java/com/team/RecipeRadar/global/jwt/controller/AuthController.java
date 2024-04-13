@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -47,8 +48,18 @@ public class AuthController {
             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"JWT 발행 성공\"}")))
     })
     @GetMapping("/auth/success")
-    public ResponseEntity<?> signinSuccess() {
-        return ResponseEntity.ok(new ControllerApiResponse(true, "JWT 발행 성공"));
+    public ResponseEntity<?> signinSuccess(HttpServletResponse response) {
+        String refreshToken = response.getHeader("RefreshToken");
+        String refreshTokenValue = refreshToken.substring(refreshToken.indexOf("Bearer ") + 7);
+
+        String authorization = response.getHeader("Authorization");
+        String accessTokenValue = authorization.substring(authorization.indexOf("Bearer ") + 7);
+
+        Map<String, String> tokenValue= new LinkedHashMap<>();
+        tokenValue.put("AccessToken", accessTokenValue);
+        tokenValue.put("refreshTokenValue",refreshTokenValue);
+
+        return ResponseEntity.ok(new ControllerApiResponse(true, "JWT 발행 성공",tokenValue));
     }
 
     // AcessToken만료시 RefreshToken을 검증하는 url
