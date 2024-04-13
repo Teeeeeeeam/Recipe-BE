@@ -20,12 +20,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
+
+import javax.servlet.http.Cookie;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,6 +58,7 @@ class UserInfoControllerTest {
     public void userInfo_Success() throws Exception {
         // Given
         String loginId = "test";
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
         UserInfoResponse expectedResponse = UserInfoResponse.builder()
                 .nickName("나만냉장고")
                 .username("홍길동")
@@ -66,7 +69,8 @@ class UserInfoControllerTest {
 
         // When, Then
         mockMvc.perform(get("/api/user/info/{login-id}", loginId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(true))
@@ -83,15 +87,19 @@ class UserInfoControllerTest {
     public void userInfo_AccessDeniedException() throws Exception {
         // Given
         String loginId = "testId";
+
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
         when(userInfoService.getMembers(eq(loginId), anyString()))
                 .thenThrow(new AccessDeniedException("Access Denied"));
 
         // When, Then
-        mockMvc.perform(get("/api/user/info/{login-id}", loginId))
+        mockMvc.perform(get("/api/user/info/{login-id}", loginId)
+                        .cookie(cookie))
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Access Denied"));
     }
+
 
     @Test
     @DisplayName("사용자 닉네임 업데이트 API 성공 테스트")
@@ -186,4 +194,23 @@ class UserInfoControllerTest {
         verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString());
         verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString());
     }
+
+//    @Test
+//    @CustomMockUser
+//    void passwordMatch_Success_Cookie() throws Exception {
+//        String password = "password";
+//        String loginId = "loginId";
+//        String auName ="auName";
+//        String uuid = "UUID";
+//
+//        Cookie cookie = new Cookie("login-id", uuid);
+//        given(userInfoService.userToken(loginId,auName,password)).willReturn(uuid);
+//
+//        mockMvc.perform(post("api/user/info/valid")
+//                .cookie(cookie)
+//                .contentType(MediaType.APPLICATION_JSON))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andExpect("")
+//    }
 }

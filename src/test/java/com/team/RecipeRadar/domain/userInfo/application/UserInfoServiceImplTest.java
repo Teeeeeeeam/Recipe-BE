@@ -1,7 +1,9 @@
 package com.team.RecipeRadar.domain.userInfo.application;
 
 import com.team.RecipeRadar.domain.member.application.MemberServiceImpl;
+import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
@@ -14,12 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +40,11 @@ class UserInfoServiceImplTest {
     MemberServiceImpl memberService;
     @Mock
     AccountRetrievalEmailServiceImpl accountRetrievalEmailService;
+    @Mock
+    AccountRetrievalRepository accountRetrievalRepository;
+
+    @Mock
+    PasswordEncoder passwordEncoder;
 
     @InjectMocks
     UserInfoServiceImpl userInfoService;
@@ -173,5 +184,58 @@ class UserInfoServiceImplTest {
         assertThatThrownBy(() -> userInfoService.updateEmail(AfterEmail,"123456",loginId,autName)).isInstanceOf(BadRequestException.class);
     }
 
+    @Test
+    @DisplayName("사용자 페이지 접근시 비밀번호가 일치하면 토큰 생성")
+    void cookie_Token_Access_PasswordMatch() {
+        String loginId = "testId";
+        String autName = "username";
+        Member member = Member.builder()
+                .username("username")
+                .nickName("nickName")
+                .password("1234")
+                .loginId(loginId)
+                .email("test@email.com")
+                .build();
+
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+
+        boolean machPassword = true; // 비밀번호 일치하는 상황
+        when(passwordEncoder.matches("1234", member.getPassword())).thenReturn(machPassword);
+
+        String uuidId = UUID.randomUUID().toString();
+        LocalDateTime plusMinutes = LocalDateTime.now().plusMinutes(20);
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder()
+                .verificationId(uuidId)
+                .loginId(loginId)
+                .expireAt(plusMinutes)
+                .build();
+        when(accountRetrievalRepository.save(any())).thenReturn(accountRetrieval);
+
+        String token = userInfoService.userToken(loginId, autName, "1234");
+
+        assertThat(token).isEqualTo(uuidId);
+    }
+
+
+    @Test
+    @DisplayName("사용자 페이지 접근시 비밀번호가 일치하지않아 예외 발생")
+    void cookie_Token_Access_PasswordMatch_Fail() {
+        String loginId = "testId";
+        String autName = "username";
+        Member member = Member.builder()
+                .username("username")
+                .nickName("nickName")
+                .password("1234")
+                .loginId(loginId)
+                .email("test@email.com")
+                .build();
+
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+
+        boolean machPassword = false; // 비밀번호 일치하는 상황
+        when(passwordEncoder.matches("1111", member.getPassword())).thenReturn(machPassword);
+
+        assertThatThrownBy(() -> userInfoService.userToken(loginId,autName,"1111")).isInstanceOf(BadRequestException.class);
+    }
 
 }
