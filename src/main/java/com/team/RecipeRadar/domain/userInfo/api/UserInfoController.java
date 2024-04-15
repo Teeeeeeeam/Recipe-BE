@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "사용자 페이지 컨트롤러",description = "사용자 페이지 API")
+@Tag(name = "사용자 페이지 컨트롤러",description = "사용자 페이지 API(해당 페이지 접근시 /api/user/info/valid 를 통해 쿠키값을 받고난후에 접근가능 쿠키의 만료시간은 20분으로 설정)")
 @RequestMapping("/api")
 public class UserInfoController {
 
@@ -48,17 +48,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/user/info/{login-id}")
     public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try{
-            if (cookieLoginId ==null){
-                throw new ForbiddenException("쿠키값이 없을때 접근");
-            }
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String name = authentication.getName();
+            cookieValid(cookieLoginId);
+            String name = getAuthenticationName();
 
             UserInfoResponse members = userInfoService.getMembers(loginId,name);
 
@@ -70,6 +70,8 @@ public class UserInfoController {
         }
     }
 
+
+
     @Operation(summary = "회원의 닉네임을 수정", description = "회원의 닉네임을 수정한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -78,14 +80,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/nickname")
-    public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest){
+    public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String authenticationName = authentication.getName();
+            cookieValid(cookieLoginId);
+            String authenticationName = getAuthenticationName();
 
             String nickName = userInfoUpdateNickNameRequest.getNickName();
             String loginId = userInfoUpdateNickNameRequest.getLoginId();
@@ -111,14 +116,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/email")
-    public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest){
+    public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String authenticationName = authentication.getName();
+            cookieValid(cookieLoginId);
+            String authenticationName = getAuthenticationName();
 
             userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),authenticationName);
 
@@ -165,5 +173,17 @@ public class UserInfoController {
         } catch (ServerErrorException e) {
             throw new ServerErrorException(e.getMessage());
         }
+    }
+
+    private static void cookieValid(String cookieLoginId) {
+        if (cookieLoginId ==null){
+            throw new ForbiddenException("쿠키값이 없을때 접근");
+        }
+    }
+
+    private static String getAuthenticationName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticationName = authentication.getName();
+        return authenticationName;
     }
 }
