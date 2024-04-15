@@ -5,11 +5,12 @@ import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,9 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
 
+    @Value("${host.path}")
+    private String successUrl;
+
     //소셜 로그인 성공시 해당로직을 타게되며 accessToken 과 RefreshToken을 발급해준다.
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -33,11 +37,20 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
         String jwtToken = jwtProvider.generateAccessToken(loginId);
         String refreshToken = jwtProvider.generateRefreshToken(loginId);
 
-        response.addHeader("Authorization","Bearer "+ jwtToken);
-        response.addHeader("RefreshToken","Bearer "+ refreshToken);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(successUrl);
 
-        String targetUrl = "/api/auth/success";
-        RequestDispatcher dis = request.getRequestDispatcher(targetUrl);
-        dis.forward(request, response);
+        String redirectURI = builder
+                .queryParam("access-token", jwtToken)
+                .queryParam("refresh-token",refreshToken)
+                .build().toString();
+
+        if (jwtToken != null) {
+            String jsonResponse = "{\"success\": true, \"message\": \"로그인에 성공했습니다.\"}";
+            response.setContentType("application/json");
+            response.getWriter().write(jsonResponse);
+            response.sendRedirect(redirectURI);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "페이지를 찾을 수 없습니다.");
+        }
     }
 }

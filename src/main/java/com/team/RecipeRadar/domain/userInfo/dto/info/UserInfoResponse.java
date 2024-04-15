@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.member.dto;
+package com.team.RecipeRadar.domain.userInfo.dto.info;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

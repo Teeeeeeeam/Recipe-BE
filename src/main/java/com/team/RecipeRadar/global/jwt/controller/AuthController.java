@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.global.jwt.controller;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -40,16 +42,32 @@ public class AuthController {
     private final JwtAuthService  jwtAuthService;
     private final JwtProvider jwtProvider;
 
-    @Operation(summary = "소셜 로그인시 성공시 리다이렉트", description = "소셜 로그인을 성공하면 해당 앤드포인트로 리다이렉트됩니다. 응답 헤더에 Authorization과 Refreshtoken이 존재")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-            content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"JWT 발행 성공\"}")))
-    })
-    @GetMapping("/auth/success")
-    public ResponseEntity<?> signinSuccess() {
-        return ResponseEntity.ok(new ControllerApiResponse(true, "JWT 발행 성공"));
-    }
+//    @Operation(summary = "소셜 로그인시 성공시 리다이렉트", description = "소셜 로그인을 성공하면 해당 앤드포인트로 리다이렉트됩니다. 해당 쿼리 스트링에 AccessToken과 Refresh 토큰이 존재 해당 방법도 사용할수 없다면, " +
+//            "스프링 시큐리티가 지원하는 'Spring-security oauth2 client' 라이브러리를 사용하지 않고 직접 서비스 로직을 변경 해야함 응답 헤더에 Authorization과 Refreshtoken이 존재")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200",description = "OK",
+//            content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+//            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"JWT 발행 성공\"}")))
+//    })
+//    @GetMapping("/auth/success")
+//    public ResponseEntity<?> signinSuccess(@RequestParam("access-token") String accessToken,@RequestParam("refresh-token")String refreshToken,HttpServletResponse response) {
+//
+//        try {
+//
+//            response.addHeader("Authorization",accessToken);
+//            response.addHeader("RefreshToken",refreshToken);
+//            log.warn("여기사요ㅗㅇ x");
+//
+//            return ResponseEntity.ok(new ControllerApiResponse(true, "JWT 발행 성공"));
+//        }catch (JWTDecodeException e){
+//            throw new BadRequestException("토큰이 현재 없습니다.");
+//        } catch (JwtTokenException e){
+//            throw new BadRequestException(e.getMessage());
+//        }catch (Exception e){
+//            throw new ServerErrorException(e.getMessage());
+//        }
+//
+//    }
 
     // AcessToken만료시 RefreshToken을 검증하는 url
     @Operation(summary = "AccessToken만료시 요청 API", description = "기존의 AccessToken만료 되었을때 해당 엔드포인트로 RefreshToken을 요청애 AccessToken을 재발급 , 헤더에 AccessToken 발급" +
