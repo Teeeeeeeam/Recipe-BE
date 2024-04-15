@@ -87,7 +87,7 @@ public class PostServiceImpl implements PostService {
             postRepository.deleteById(member.getId());
         } else
             // 데이터베이스에서 공지사항을 삭제하는 중에 문제가 발생한 경우
-            throw new PostException("공지사항 삭제에 실패했습니다.");
+            throw new PostException("요리글 삭제에 실패했습니다.");
     }
     @Override
     public void update(Long memberId, Long postId, String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel, String postImageUrl) {

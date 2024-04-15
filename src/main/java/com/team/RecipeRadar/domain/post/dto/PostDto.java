@@ -17,6 +17,8 @@ public class PostDto {
 
     private Long id;
 
+    private String postTitle;
+
     private String postContent;     //요리글 내용
 
     private MemberDto memberDto;        //요리글 작성자 정보
