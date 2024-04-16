@@ -1,19 +1,19 @@
 package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.notice.domain.Notice;
-import com.team.RecipeRadar.domain.notice.dto.UpdateNoticeRequest;
-import com.team.RecipeRadar.domain.notice.dto.AddNoticeRequest;
+import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddNoticeDto;
+import com.team.RecipeRadar.domain.notice.dto.admin.AdminDeleteNoticeDto;
 
 import java.util.List;
 
 public interface NoticeService {
-    Notice save(AddNoticeRequest request);
+    Notice save(AdminAddNoticeDto adminAddNoticeDto);
 
     List<Notice> findAll();
 
     Notice findById(long id);
 
-    void delete(long id);
+    void delete(AdminDeleteNoticeDto admindeleteNoticeDto);
 
-    Notice update(long id, UpdateNoticeRequest request);
+    void update(Long memberId, Long noticeId, String noticeTitle);
 }

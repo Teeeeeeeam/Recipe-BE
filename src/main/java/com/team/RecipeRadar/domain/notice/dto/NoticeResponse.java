@@ -7,10 +7,8 @@ import lombok.Getter;
 public class NoticeResponse {
 
     private final String noticeTitle;
-    private final String noticeContent;
 
     public  NoticeResponse(Notice notice) {
         this.noticeTitle = notice.getNoticeTitle();
-        this.noticeContent = notice.getNoticeContent();
     }
 }

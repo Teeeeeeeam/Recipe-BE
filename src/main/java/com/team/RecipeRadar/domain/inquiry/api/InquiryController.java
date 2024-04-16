@@ -42,15 +42,14 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 @RestController
 @OpenAPIDefinition(tags = {
-        @Tag(name = "어드민 문의사항 컨트롤러", description = "어드민 관련 문의사항 작업"),
-        @Tag(name = "일반 사용자 문의사항 컨트롤러", description = "일반 사용자 문의사항 요리글 작업")
+        @Tag(name = "일반 사용자 문의사항 컨트롤러", description = "일반 사용자 문의사항 작업")
 })
 @Slf4j
 public class InquiryController {
 
     private final InquiryService inquiryService;
 
-    @Operation(summary = "문의사항 작성 API", description = "로그인한 사용자만 문의사항 작성 가능", tags = {"사용자 문의사항 컨트롤러"} )
+    @Operation(summary = "문의사항 작성 API", description = "로그인한 사용자만 문의사항 작성 가능", tags = {"일반 사용자 문의사항 컨트롤러"} )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -58,8 +57,8 @@ public class InquiryController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @PostMapping("/api/user/inquire/add")
-    public ResponseEntity<?> inquiryAdd(@Valid @RequestBody UserAddInquiryDto userAddInquiryDto, BindingResult bindingResult) {
+    @PostMapping("/api/user/inquires")
+    public ResponseEntity<?> addInquiry(@Valid @RequestBody UserAddInquiryDto userAddInquiryDto, BindingResult bindingResult) {
         try {
             if (bindingResult.hasErrors()){
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false, bindingResult.getFieldError().getDefaultMessage()));
@@ -79,7 +78,7 @@ public class InquiryController {
         }
     }
 
-    @Operation(summary = "전체 문의사항 조회 API", description = "전체 사용자만 전체를 조회할 수 있습니다.", tags = {"사용자 문의사항 컨트롤러"})
+    @Operation(summary = "전체 문의사항 조회 API", description = "전체 사용자만 전체를 조회할 수 있습니다.", tags = {"일반 사용자 문의사항 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = InquiryResponse.class)),
@@ -97,7 +96,7 @@ public class InquiryController {
                 .body(inquires);
     }
 
-    @Operation(summary = "문의사항 상세 조회 API", description = "사용자가 문의사항의 상세 정보를 조회할 수 있습니다.", tags = {"사용자 문의사항 컨트롤러"})
+    @Operation(summary = "문의사항 상세 조회 API", description = "사용자가 문의사항의 상세 정보를 조회할 수 있습니다.", tags = {"일반 사용자 문의사항 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = InquiryResponse.class),
@@ -138,11 +137,11 @@ public class InquiryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"InquiryTitle\": \"[수정한 문의사항 제목]\", \"memberId\": \"[사용자 ID]\", \"inquiryId\": \"[문의사항 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"inquiryTitle\": \"[수정한 문의사항 제목]\", \"memberId\": \"[사용자 ID]\", \"inquiryId\": \"[문의사항 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PutMapping("/api/user/inquire/update")
+    @PutMapping("/api/user/inquires/{id}")
     public  ResponseEntity<?> updateInquiry(@Valid @RequestBody UserUpdateInquiryDto updateInquiryDto, BindingResult bindingResult){
         try{
             if (bindingResult.hasErrors()) {

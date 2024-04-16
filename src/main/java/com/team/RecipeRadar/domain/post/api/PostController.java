@@ -38,7 +38,6 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 @RestController
 @OpenAPIDefinition(tags = {
-        @Tag(name = "어드민 요리글 컨트롤러", description = "어드민 관련 요리글 작업"),
         @Tag(name = "일반 사용자 요리글 컨트롤러", description = "일반 사용자 관련 요리글 작업")
 })
 @Slf4j
@@ -46,7 +45,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @Operation(summary = "요리글 작성 API", description = "로그인한 사용자만 요리글 작성 가능", tags = {"사용자 요리글 컨트롤러"} )
+    @Operation(summary = "요리글 작성 API", description = "로그인한 사용자만 요리글 작성 가능", tags = {"일반 사용자 요리글 컨트롤러"} )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -54,7 +53,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @PostMapping("/api/user/post/add")
+    @PostMapping("/api/user/posts")
     public ResponseEntity<?> postAdd(@Valid @RequestBody UserAddPostDto userAddPostDto, BindingResult bindingResult) {
         try {
             if (bindingResult.hasErrors()){
@@ -88,7 +87,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/api/posts")
+    @GetMapping("/api/user/posts")
     public  ResponseEntity<List<PostResponse>> findAllPosts() {
         List<PostResponse> posts = postService.findAll()
                 .stream()
@@ -108,7 +107,7 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "NOT FOUND",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("api/posts/{id}")
+    @GetMapping("api/user/posts/{id}")
     public  ResponseEntity<PostResponse> findPost(@PathVariable long id) {
         Post post = postService.findById(id);
 
@@ -125,7 +124,7 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 
     })
-    @DeleteMapping("/api/user/post/delete")
+    @DeleteMapping("/api/user/posts/{id}")
     public ResponseEntity<?> deletePost(@RequestBody UserDeletePostDto userDeletePostDto){
         try{
             postService.delete(userDeletePostDto);
@@ -135,7 +134,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "요리글 수정 API", description = "로그인, 작성자만 수정가능", tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "요리글 수정 API", description = "로그인, 작성자만 수정가능", tags = {"일반 사용자 요리글 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -143,7 +142,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PutMapping("/api/user/post/update")
+    @PutMapping("/api/user/posts/{id}")
     public  ResponseEntity<?> updatePost(@Valid @RequestBody UserUpdatePostDto updatePostDto, BindingResult bindingResult){
         try{
             if (bindingResult.hasErrors()) {

@@ -23,7 +23,7 @@ public class UserUpdateInquiryDto {
     private Long inquiryId;
 
     @Schema(hidden = true)
-    private LocalDateTime update_At;
+    private LocalDateTime update_at;
 
     @JsonIgnore
     @JsonCreator
