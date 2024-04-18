@@ -33,6 +33,8 @@ public class Oauth2UrlProvider{
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     String naverClientId;
 
+    @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
+    String naverSecretId;
 
     public String getRedirectUrl(String loginType) {
         String url = null;

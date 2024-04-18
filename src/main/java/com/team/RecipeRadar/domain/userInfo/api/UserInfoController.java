@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -45,7 +46,11 @@ public class UserInfoController {
 
 
     private final UserInfoService userInfoService;
-    private final UserDisConnectService userDisConnectService;
+
+    @Qualifier("kakao")
+    private final UserDisConnectService kakaoDisConnectService;
+    @Qualifier("naver")
+    private final UserDisConnectService naverDisConnectService;
     private final Oauth2UrlProvider urlProvider;
 
     @Operation(summary = "회원정보 조회", description = "회원의 회원정보(이름,닉네임,이메일,로그인타입)을 조회 한다.")
@@ -192,10 +197,19 @@ public class UserInfoController {
     @RequestMapping(value = "/oauth2/unlink/kakao",method = {RequestMethod.GET, RequestMethod.POST})
     @Hidden
     public ResponseEntity<?> kakaoUnlink(@RequestParam("code")String auth2Code){
-        String accessToken = userDisConnectService.getAccessToken(auth2Code);
-        Boolean disconnected = userDisConnectService.disconnect(accessToken);
+        String accessToken = kakaoDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = kakaoDisConnectService.disconnect(accessToken);
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create("http://localhost:3000/success?logot="+disconnected)).build();
+                    .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+    }
+
+    @RequestMapping(value = "/oauth2/unlink/naver",method = {RequestMethod.GET, RequestMethod.POST})
+    @Hidden
+    public ResponseEntity<?> naverUnlink(@RequestParam("code")String auth2Code){
+        String accessToken = naverDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = naverDisConnectService.disconnect(accessToken);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
     }
 
     private static void cookieValid(String cookieLoginId) {

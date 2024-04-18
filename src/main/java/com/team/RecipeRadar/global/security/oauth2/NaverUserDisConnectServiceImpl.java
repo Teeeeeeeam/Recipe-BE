@@ -17,27 +17,35 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerErrorException;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Qualifier("kakao")
-public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
+@Qualifier("naver")
+public class NaverUserDisConnectServiceImpl implements UserDisConnectService{
 
     private final ObjectMapper objectMapper;
     private final Oauth2UrlProvider oauth2UrlProvider;
     private final MemberService memberService;
 
+    /*
+    엑세스 토큰 발급 로직
+     */
     @Override
     public String getAccessToken(String auth2Code) {
         try {
-            String tokenUrl = "https://kauth.kakao.com/oauth/token";
+            String tokenUrl = "https://nid.naver.com/oauth2.0/token";
 
+            SecureRandom secureRandom = new SecureRandom();
+            String state = new BigInteger(130, secureRandom).toString();
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add("grant_type", "authorization_code");
-            requestBody.add("client_id", oauth2UrlProvider.getKakaoClientId());
-            requestBody.add("client_secret", oauth2UrlProvider.getSecretId());
-            requestBody.add("redirect_uri", oauth2UrlProvider.getKakaoRedirectUrl());
+            requestBody.add("client_id", oauth2UrlProvider.getNaverClientId());
+            requestBody.add("client_secret", oauth2UrlProvider.getNaverSecretId());
+            requestBody.add("state",state);
             requestBody.add("code", auth2Code);
 
             HttpHeaders headers = new HttpHeaders();
@@ -49,14 +57,12 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(tokenUrl, requestEntity, String.class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                log.info("aaasdasda={}",responseEntity.getBody());
 
                 JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-                log.info("js={}",jsonNode);
                 String accessToken = jsonNode.get("access_token").asText();
                 return accessToken;
             } else {
-                log.error("Failed to get access token. Response: " + responseEntity.getBody());
+                log.error("엑세스 토큰 가져오기 실패: " + responseEntity.getBody());
                 return null;
             }
         } catch (Exception e) {
@@ -65,26 +71,29 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
         }
     }
 
+    /*
+     회원 탈퇴 로직
+     */
     @Override
     public Boolean disconnect(String accessToken) {
         try {
+            String requestUrl = "https://nid.naver.com/oauth2.0/token";
+            String naverId = getUserNumber(accessToken);
 
-            String requestUrl = "https://kapi.kakao.com/v1/user/unlink";
-            String memberId = getUserNumber(accessToken);
-            log.info("member={}",memberId);
-
-            MemberDto memberDto = MemberDto.of(memberService.findByLoginId(memberId));
+            //dto로 변환
+            MemberDto memberDto = MemberDto.of(memberService.findByLoginId(naverId));
 
             memberService.deleteMember(memberDto.getId());
-
-            log.info("사용자 정보={}",memberDto);
+            
             RestTemplate restTemplate = new RestTemplate();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.set("Authorization", "Bearer " + accessToken);
-            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("grant_type","delete ");
+            requestBody.add("client_id",oauth2UrlProvider.getNaverClientId());
+            requestBody.add("client_secret",oauth2UrlProvider.getNaverSecretId());
+            requestBody.add("access_token",accessToken);
 
+            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody);
             ResponseEntity<String> responseEntity = restTemplate.exchange(
                     requestUrl,
                     HttpMethod.POST,
@@ -104,10 +113,10 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
         }
     }
 
+    //oauth2 리소스 서버에서 토큰의 값을 이용해 사용자 정보 가져오기
     private String getUserNumber(String accessToken){
-
         try {
-            String request= "https://kapi.kakao.com/v1/user/access_token_info";
+            String request= "https://openapi.naver.com/v1/nid/me";
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + accessToken);
@@ -124,8 +133,8 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
 
             if (responseEntity.getStatusCode().is2xxSuccessful()){;
                 JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-                String member_id = jsonNode.get("id").asText();
-                return member_id;
+                String naverId = jsonNode.get("response").get("id").asText();
+                return naverId;
             }else
                 throw new ServerErrorException("정보 가저오기 실패");
         }catch (Exception e){
