@@ -10,6 +10,9 @@ import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.security.oauth2.KakaoUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.NaverUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -38,9 +41,15 @@ class UserInfoControllerTest {
 
     @MockBean
     private UserInfoService userInfoService;
+    @MockBean
+    KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
+    @MockBean
+    NaverUserDisConnectServiceImpl naverUserDisConnectService;
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    Oauth2UrlProvider oauth2UrlProvider;
     @MockBean
     JwtProvider jwtProvider;
     @MockBean
