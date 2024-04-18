@@ -101,19 +101,30 @@ public class UserInfoServiceImpl implements UserInfoService {
      * @return      ID반환
      */
     @Override
-    public String userToken(String loginId,String authenticationName, String password) {
+    public String userToken(String loginId,String authenticationName, String password,String loginType) {
 
         Member member = throwsMember(loginId, authenticationName);
 
-        boolean matches = passwordEncoder.matches(password,member.getPassword());
-        if (!matches){
-            throw new BadRequestException("비밀번호가 일치하지 않습니다.");
+        if (loginType.equals("normal")) {
+            boolean matches = passwordEncoder.matches(password, member.getPassword());
+            if (!matches) {
+                throw new BadRequestException("비밀번호가 일치하지 않습니다.");
+            }
         }
 
         LocalDateTime expireTime = LocalDateTime.now().plusMinutes(20); //쿠키의 만료 시간을 20분 후로 설정
         AccountRetrieval accountRetrieval = AccountRetrieval.builder().loginId(member.getLoginId()).expireAt(expireTime).build();
         return accountRetrievalRepository.save(accountRetrieval).getVerificationId();
 
+    }
+
+    @Override
+    public String socialUserToken(String loginId, String authenticationName) {
+        Member member = throwsMember(loginId, authenticationName);
+
+        LocalDateTime expireTime = LocalDateTime.now().plusMinutes(20); //쿠키의 만료 시간을 20분 후로 설정
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().loginId(member.getLoginId()).expireAt(expireTime).build();
+        return accountRetrievalRepository.save(accountRetrieval).getVerificationId();
     }
 
     private Member throwsMember(String loginId, String authName) {

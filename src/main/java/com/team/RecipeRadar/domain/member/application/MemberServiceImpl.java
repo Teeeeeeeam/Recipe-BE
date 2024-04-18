@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +27,8 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
+
 
     @Qualifier("JoinEmail")
     private final MailService mailService;
@@ -244,6 +247,12 @@ public class MemberServiceImpl implements MemberService {
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,code);
         log.info("str={}",stringBooleanMap);
         return stringBooleanMap;
+    }
+
+    @Override
+    public void deleteMember(Long memberId) {
+        jwtRefreshTokenRepository.DeleteByMemberId(memberId);
+        memberRepository.deleteById(memberId);
     }
 
 }

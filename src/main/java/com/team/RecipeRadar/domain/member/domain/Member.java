@@ -1,6 +1,11 @@
 package com.team.RecipeRadar.domain.member.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.inquiry.domain.Inquiry;
+import com.team.RecipeRadar.domain.like.domain.PostLike;
+import com.team.RecipeRadar.domain.like.domain.RecipeLike;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +38,21 @@ public class Member {
     LocalDate join_date;
     String login_type;
     private boolean verified;
+
+    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
+    List<Inquiry> inquiries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    List<RecipeLike> recipeLikes = new ArrayList<>();
 
     public List<String> getRoleList(){
         if(this.roles != null && this.roles.length() > 0){

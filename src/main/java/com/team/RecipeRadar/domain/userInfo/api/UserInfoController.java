@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.userInfo.dto.info.PasswordDTO;
+import com.team.RecipeRadar.domain.userInfo.dto.info.UserValidRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoUpdateNickNameRequest;
@@ -11,6 +11,9 @@ import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
+import com.team.RecipeRadar.global.security.oauth2.UserDisConnectService;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -29,6 +33,8 @@ import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +45,8 @@ public class UserInfoController {
 
 
     private final UserInfoService userInfoService;
+    private final UserDisConnectService userDisConnectService;
+    private final Oauth2UrlProvider urlProvider;
 
     @Operation(summary = "회원정보 조회", description = "회원의 회원정보(이름,닉네임,이메일,로그인타입)을 조회 한다.")
     @ApiResponses(value = {
@@ -153,14 +161,14 @@ public class UserInfoController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody PasswordDTO passwordDTO, HttpServletResponse response){
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO, HttpServletResponse response){
         try {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
             Member member = principal.getMember();
 
-            String userToken = userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword());
+            String userToken=userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
 
             Cookie cookie = new Cookie("login-id", userToken);
             cookie.setMaxAge(1200); //20분
@@ -173,6 +181,21 @@ public class UserInfoController {
         } catch (ServerErrorException e) {
             throw new ServerErrorException(e.getMessage());
         }
+    }
+
+    @GetMapping ("/oauth2/social/unlink")
+    public void socialUnlink(@RequestParam(value = "social-id") String loginType, HttpServletResponse response) throws IOException {
+        String redirectUrl = urlProvider.getRedirectUrl(loginType);
+        response.sendRedirect(redirectUrl);
+    }
+
+    @RequestMapping(value = "/oauth2/unlink/kakao",method = {RequestMethod.GET, RequestMethod.POST})
+    @Hidden
+    public ResponseEntity<?> kakaoUnlink(@RequestParam("code")String auth2Code){
+        String accessToken = userDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = userDisConnectService.disconnect(accessToken);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("http://localhost:3000/success?logot="+disconnected)).build();
     }
 
     private static void cookieValid(String cookieLoginId) {
