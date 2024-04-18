@@ -83,4 +83,16 @@ public class MemberDto {
                 .nickName(nickName).build();
     }
 
+    private MemberDto(Long id, String username, String nickName, String password, String loginId, String email) {
+        this.id = id;
+        this.username = username;
+        this.nickName = nickName;
+        this.password = password;
+        this.loginId = loginId;
+        this.email = email;
+    }
+
+    public static MemberDto of(Member member){
+        return new MemberDto(member.getId(), member.getUsername(), member.getNickName(), member.getPassword(), member.getLoginId(), member.getEmail());
+    }
 }

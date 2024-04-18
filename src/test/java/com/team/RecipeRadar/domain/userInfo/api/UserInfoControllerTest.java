@@ -10,6 +10,9 @@ import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.security.oauth2.KakaoUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.NaverUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -38,9 +41,15 @@ class UserInfoControllerTest {
 
     @MockBean
     private UserInfoService userInfoService;
+    @MockBean
+    KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
+    @MockBean
+    NaverUserDisConnectServiceImpl naverUserDisConnectService;
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    Oauth2UrlProvider oauth2UrlProvider;
     @MockBean
     JwtProvider jwtProvider;
     @MockBean
@@ -111,10 +120,11 @@ class UserInfoControllerTest {
         UserInfoUpdateNickNameRequest request = new UserInfoUpdateNickNameRequest();
         request.setNickName(nickName);
         request.setLoginId(loginId);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(true))
@@ -132,14 +142,17 @@ class UserInfoControllerTest {
         String loginId = "testId";
 
         UserInfoUpdateNickNameRequest request = new UserInfoUpdateNickNameRequest();
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         request.setNickName(nickName);
         request.setLoginId(loginId);
+
 
         doThrow(new AccessDeniedException("접근 불가한 페이지")).when(userInfoService).updateNickName(eq(nickName), eq(loginId), anyString());
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
+                        .cookie(cookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is(401))
@@ -156,11 +169,12 @@ class UserInfoControllerTest {
         String loginId = "loginId";
         String code = "123456";
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("변경 성공"));
@@ -179,13 +193,14 @@ class UserInfoControllerTest {
         String loginId = "loginId";
         String code = "123456";
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString());
 
         // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.userInfo.dto.info.PasswordDTO;
+import com.team.RecipeRadar.domain.userInfo.dto.info.UserValidRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoUpdateNickNameRequest;
@@ -11,6 +11,9 @@ import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
+import com.team.RecipeRadar.global.security.oauth2.UserDisConnectService;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,6 +23,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -29,16 +34,24 @@ import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "사용자 페이지 컨트롤러",description = "사용자 페이지 API")
+@Tag(name = "사용자 페이지 컨트롤러",description = "사용자 페이지 API(해당 페이지 접근시 /api/user/info/valid 를 통해 쿠키값을 받고난후에 접근가능 쿠키의 만료시간은 20분으로 설정)")
 @RequestMapping("/api")
 public class UserInfoController {
 
 
     private final UserInfoService userInfoService;
+
+    @Qualifier("kakao")
+    private final UserDisConnectService kakaoDisConnectService;
+    @Qualifier("naver")
+    private final UserDisConnectService naverDisConnectService;
+    private final Oauth2UrlProvider urlProvider;
 
     @Operation(summary = "회원정보 조회", description = "회원의 회원정보(이름,닉네임,이메일,로그인타입)을 조회 한다.")
     @ApiResponses(value = {
@@ -48,17 +61,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/user/info/{login-id}")
     public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try{
-            if (cookieLoginId ==null){
-                throw new ForbiddenException("쿠키값이 없을때 접근");
-            }
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String name = authentication.getName();
+            cookieValid(cookieLoginId);
+            String name = getAuthenticationName();
 
             UserInfoResponse members = userInfoService.getMembers(loginId,name);
 
@@ -70,6 +83,8 @@ public class UserInfoController {
         }
     }
 
+
+
     @Operation(summary = "회원의 닉네임을 수정", description = "회원의 닉네임을 수정한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -78,14 +93,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/nickname")
-    public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest){
+    public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String authenticationName = authentication.getName();
+            cookieValid(cookieLoginId);
+            String authenticationName = getAuthenticationName();
 
             String nickName = userInfoUpdateNickNameRequest.getNickName();
             String loginId = userInfoUpdateNickNameRequest.getLoginId();
@@ -111,14 +129,17 @@ public class UserInfoController {
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/email")
-    public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest){
+    public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String authenticationName = authentication.getName();
+            cookieValid(cookieLoginId);
+            String authenticationName = getAuthenticationName();
 
             userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),authenticationName);
 
@@ -145,14 +166,14 @@ public class UserInfoController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody PasswordDTO passwordDTO, HttpServletResponse response){
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO, HttpServletResponse response){
         try {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
             Member member = principal.getMember();
 
-            String userToken = userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword());
+            String userToken=userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
 
             Cookie cookie = new Cookie("login-id", userToken);
             cookie.setMaxAge(1200); //20분
@@ -165,5 +186,42 @@ public class UserInfoController {
         } catch (ServerErrorException e) {
             throw new ServerErrorException(e.getMessage());
         }
+    }
+
+    @GetMapping ("/oauth2/social/unlink")
+    @Hidden
+    public void socialUnlink(@RequestParam(value = "social-id") String loginType, HttpServletResponse response) throws IOException {
+        String redirectUrl = urlProvider.getRedirectUrl(loginType);
+        response.sendRedirect(redirectUrl);
+    }
+
+    @RequestMapping(value = "/oauth2/unlink/kakao",method = {RequestMethod.GET, RequestMethod.POST})
+    @Hidden
+    public ResponseEntity<?> kakaoUnlink(@RequestParam("code")String auth2Code){
+        String accessToken = kakaoDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = kakaoDisConnectService.disconnect(accessToken);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+    }
+
+    @RequestMapping(value = "/oauth2/unlink/naver",method = {RequestMethod.GET, RequestMethod.POST})
+    @Hidden
+    public ResponseEntity<?> naverUnlink(@RequestParam("code")String auth2Code){
+        String accessToken = naverDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = naverDisConnectService.disconnect(accessToken);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+    }
+
+    private static void cookieValid(String cookieLoginId) {
+        if (cookieLoginId ==null){
+            throw new ForbiddenException("쿠키값이 없을때 접근");
+        }
+    }
+
+    private static String getAuthenticationName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticationName = authentication.getName();
+        return authenticationName;
     }
 }

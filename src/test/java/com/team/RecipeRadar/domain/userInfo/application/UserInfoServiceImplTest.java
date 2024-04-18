@@ -195,6 +195,7 @@ class UserInfoServiceImplTest {
                 .password("1234")
                 .loginId(loginId)
                 .email("test@email.com")
+                .login_type("normal")
                 .build();
 
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
@@ -211,7 +212,7 @@ class UserInfoServiceImplTest {
                 .build();
         when(accountRetrievalRepository.save(any())).thenReturn(accountRetrieval);
 
-        String token = userInfoService.userToken(loginId, autName, "1234");
+        String token = userInfoService.userToken(loginId, autName, "1234","normal");
 
         assertThat(token).isEqualTo(uuidId);
     }
@@ -235,7 +236,7 @@ class UserInfoServiceImplTest {
         boolean machPassword = false; // 비밀번호 일치하는 상황
         when(passwordEncoder.matches("1111", member.getPassword())).thenReturn(machPassword);
 
-        assertThatThrownBy(() -> userInfoService.userToken(loginId,autName,"1111")).isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> userInfoService.userToken(loginId,autName,"1111","normal")).isInstanceOf(BadRequestException.class);
     }
 
 }

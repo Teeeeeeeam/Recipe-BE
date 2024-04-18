@@ -11,5 +11,6 @@ public interface UserInfoService {
 
     void updateEmail(String email,String code,String loginId,String authName);
 
-    String userToken(String loginId,String authenticationName, String password);
+    String userToken(String loginId,String authenticationName, String password,String loginType);
+    String socialUserToken(String loginId,String authenticationName);
 }

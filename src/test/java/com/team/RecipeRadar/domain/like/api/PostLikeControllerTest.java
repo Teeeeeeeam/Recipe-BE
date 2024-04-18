@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.servlet.http.Cookie;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -132,6 +133,7 @@ class PostLikeControllerTest {
     @CustomMockUser
     public void getUserLike_page_success() throws Exception {
         String loginId = "test";
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
         userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
@@ -144,7 +146,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willReturn(response);
 
-        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId))
+        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId).cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("조회 성공"))
@@ -159,6 +161,7 @@ class PostLikeControllerTest {
     @CustomMockUser
     public void getUserLike_page_fail() throws Exception {
         String loginId = "test";
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
         userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
@@ -166,7 +169,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
 
-        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId))
+        mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId).cookie(cookie))
                 .andExpect(status().isBadRequest())
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(false))

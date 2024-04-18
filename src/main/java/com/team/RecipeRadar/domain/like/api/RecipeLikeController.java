@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.like.application.LikeService;
 import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -107,11 +108,18 @@ public class RecipeLikeController {
             @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/recipes/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, Pageable pageable){
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
         try{
+
+            if (cookieLoginId ==null){
+                throw new ForbiddenException("쿠키값이 없을때 접근");
+            }
             String authenticationName = getAuthenticationName();
             UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));

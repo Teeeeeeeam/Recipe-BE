@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,7 @@ class PostControllerTest {
     @CustomMockUser
     void postTitlePage_success() throws Exception {
 
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
         String loginId= "test";
 
         List<UserInfoPostRequest > requests = new ArrayList<>();
@@ -67,7 +69,8 @@ class PostControllerTest {
         given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(true))
@@ -88,11 +91,12 @@ class PostControllerTest {
     void postTitlePage_fail() throws Exception {
 
         String loginId= "test";
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andDo(print())
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.success").value(false))
