@@ -189,6 +189,7 @@ public class UserInfoController {
     }
 
     @GetMapping ("/oauth2/social/unlink")
+    @Hidden
     public void socialUnlink(@RequestParam(value = "social-id") String loginType, HttpServletResponse response) throws IOException {
         String redirectUrl = urlProvider.getRedirectUrl(loginType);
         response.sendRedirect(redirectUrl);
