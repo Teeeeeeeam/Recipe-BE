@@ -168,7 +168,8 @@ class UserInfoControllerTest {
         String email = "test@email.com";
         String loginId = "loginId";
         String code = "123456";
-        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId);
+        String loginType = "normal";
+        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         // When, Then
@@ -179,8 +180,8 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("변경 성공"));
 
-        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString());
-        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString());
+        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
     }
 
 
@@ -192,10 +193,11 @@ class UserInfoControllerTest {
         String email = "test@email.com";
         String loginId = "loginId";
         String code = "123456";
-        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId);
+        String loginType = "normal";
+        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString());
+        doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
 
         // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
@@ -206,26 +208,7 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("접근할수 없는 페이지 입니다."));
 
-        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString());
-        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString());
+        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
     }
-
-//    @Test
-//    @CustomMockUser
-//    void passwordMatch_Success_Cookie() throws Exception {
-//        String password = "password";
-//        String loginId = "loginId";
-//        String auName ="auName";
-//        String uuid = "UUID";
-//
-//        Cookie cookie = new Cookie("login-id", uuid);
-//        given(userInfoService.userToken(loginId,auName,password)).willReturn(uuid);
-//
-//        mockMvc.perform(post("api/user/info/valid")
-//                .cookie(cookie)
-//                .contentType(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect("")
-//    }
 }

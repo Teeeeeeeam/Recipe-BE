@@ -110,7 +110,7 @@ class UserInfoServiceImplTest {
         String authName = "username";
 
 
-        Member member = Member.builder().id(1l).loginId(loginId).username("username").nickName("before").build();
+        Member member = Member.builder().id(1l).loginId(loginId).username("username").nickName("before").login_type("normal").build();
 
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
@@ -140,7 +140,7 @@ class UserInfoServiceImplTest {
         String loginId = "testId";
         String AfterEmail = "afEmail@email.com";
         String autName = "username";
-        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").build();
+        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
 
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
@@ -155,7 +155,7 @@ class UserInfoServiceImplTest {
 
         when(memberService.verifyCode(AfterEmail,123456)).thenReturn(verifyCodeMap);
 
-        userInfoService.updateEmail(AfterEmail,"123456",loginId,autName);
+        userInfoService.updateEmail(AfterEmail,"123456",loginId,autName,"normal");
 
         assertThat(member.getEmail()).isEqualTo(AfterEmail);
     }
@@ -166,7 +166,7 @@ class UserInfoServiceImplTest {
         String loginId = "testId";
         String AfterEmail = "afEmail@email.com";
         String autName = "username";
-        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").build();
+        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
 
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
@@ -181,7 +181,7 @@ class UserInfoServiceImplTest {
 
         when(memberService.verifyCode(AfterEmail,123456)).thenReturn(verifyCodeMap);
 
-        assertThatThrownBy(() -> userInfoService.updateEmail(AfterEmail,"123456",loginId,autName)).isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> userInfoService.updateEmail(AfterEmail,"123456",loginId,autName,"normal")).isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -229,6 +229,7 @@ class UserInfoServiceImplTest {
                 .password("1234")
                 .loginId(loginId)
                 .email("test@email.com")
+                .login_type("normal")
                 .build();
 
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
