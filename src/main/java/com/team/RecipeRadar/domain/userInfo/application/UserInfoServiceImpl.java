@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class UserInfoServiceImpl implements UserInfoService {
 
     private final MemberRepository memberRepository;
+    private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final AccountRetrievalRepository accountRetrievalRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -118,20 +120,28 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     }
 
+    /**
+     * 회원 탈퇴 로직
+     * @param loginId 사용자 아이디
+     * @param checkType 약관 동의
+     * @param authenticationName 현재 로그인한 사용자 이름
+     */
     @Override
-    public String socialUserToken(String loginId, String authenticationName) {
+    public void deleteMember(String loginId, boolean checkType, String authenticationName) {
         Member member = throwsMember(loginId, authenticationName);
 
-        LocalDateTime expireTime = LocalDateTime.now().plusMinutes(20); //쿠키의 만료 시간을 20분 후로 설정
-        AccountRetrieval accountRetrieval = AccountRetrieval.builder().loginId(member.getLoginId()).expireAt(expireTime).build();
-        return accountRetrievalRepository.save(accountRetrieval).getVerificationId();
+        if (!checkType){
+            throw new BadRequestException("약관 동의를 주세요");
+        }
+        jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
+        memberRepository.deleteById(member.getId());
     }
 
     private Member throwsMember(String loginId, String authName) {
         Member member = memberRepository.findByLoginId(loginId);
 
         if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
-            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 변경 가능합니다.");
+            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
         }
         return member;
     }

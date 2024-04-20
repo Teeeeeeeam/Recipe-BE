@@ -1,10 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserValidRequest;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoUpdateNickNameRequest;
+import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -29,11 +26,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 
@@ -187,6 +186,45 @@ public class UserInfoController {
             throw new ServerErrorException(e.getMessage());
         }
     }
+
+
+    @Operation(summary = "일반 사용자 회원 탈퇴", description = "일반 사용자가 해당 사이트를 탈퇴한다. 간단한 동의하는 버튼을 만들어 체크를 할경우에 회원 탈퇴 가능")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"탈퇴 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"약관 동의를 해주세요\"}"))),
+            @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 가능합니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @DeleteMapping("/user/info/disconnect")
+    public ResponseEntity<?> deleteMember(@RequestBody UserDeleteIdRequest userDeleteIdRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
+        try {
+            cookieValid(cookieLoginId);
+            String authenticationName = getAuthenticationName();
+            userInfoService.deleteMember(userDeleteIdRequest.getLoginId(),userDeleteIdRequest.isCheckBox(),authenticationName);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"탈퇴 성공"));
+        }catch (BadRequestException e){
+            throw new BadRequestException(e.getMessage());
+        }catch (ForbiddenException e){
+            throw new ForbiddenException(e.getMessage());
+        } catch (AccessDeniedException e){
+            throw new AccessDeniedException(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException(e.getMessage());
+        }
+
+    }
+
 
     @GetMapping ("/oauth2/social/unlink")
     @Hidden
