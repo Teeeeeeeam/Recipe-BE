@@ -79,8 +79,12 @@ public class UserInfoServiceImpl implements UserInfoService {
      */
     @Override
     public void updateEmail(String email, String code, String loginId, String authName,String loginType) {
+        Member member = memberRepository.findByLoginId(loginId);;
 
-        Member member = throwsMember(loginId, authName);
+        if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
+            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
+        }
+
         Map<String, Boolean> emailValid = memberService.emailValid(email);      //이메일 유효성검사
         Boolean duplicateEmail = emailValid.get("duplicateEmail");
         Boolean useEmail = emailValid.get("useEmail");
@@ -105,7 +109,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public String userToken(String loginId,String authenticationName, String password,String loginType) {
 
-        Member member = throwsMember(loginId, authenticationName);
+        Member member = memberRepository.findByLoginId(loginId);
+        if (member == null || !member.getUsername().equals(authenticationName)) {
+            throw new AccessDeniedException("잘못된 접근입니다.");
+        }
 
         if (loginType.equals("normal")) {
             boolean matches = passwordEncoder.matches(password, member.getPassword());
@@ -128,11 +135,14 @@ public class UserInfoServiceImpl implements UserInfoService {
      */
     @Override
     public void deleteMember(String loginId, boolean checkType, String authenticationName) {
-        Member member = throwsMember(loginId, authenticationName);
+        Member member = memberRepository.findByLoginId(loginId);;
 
-        if (!checkType){
+        if (member == null || !member.getUsername().equals(authenticationName)||!member.getLogin_type().equals("normal"))
+            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
+
+        if (!checkType)
             throw new BadRequestException("약관 동의를 주세요");
-        }
+
         jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
         memberRepository.deleteById(member.getId());
     }
@@ -140,9 +150,11 @@ public class UserInfoServiceImpl implements UserInfoService {
     private Member throwsMember(String loginId, String authName) {
         Member member = memberRepository.findByLoginId(loginId);
 
-        if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
-            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
+        if (member == null || !member.getUsername().equals(authName)) {
+            throw new AccessDeniedException("잘못된 접근입니다.");
         }
+
+
         return member;
     }
 }
