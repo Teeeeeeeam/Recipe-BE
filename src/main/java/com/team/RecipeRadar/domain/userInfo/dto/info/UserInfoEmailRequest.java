@@ -12,4 +12,6 @@ public class UserInfoEmailRequest {
     private String email;
     private String code;
     private String loginId;
+    private String loginType;
+
 }

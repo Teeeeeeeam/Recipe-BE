@@ -128,7 +128,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"인증번호 및 이메일이 잘못되었습니다.\"}"))),
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 변경 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
@@ -141,7 +141,7 @@ public class UserInfoController {
             cookieValid(cookieLoginId);
             String authenticationName = getAuthenticationName();
 
-            userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),authenticationName);
+            userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),authenticationName,userInfoEmailRequest.getLoginType());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
         }catch (BadRequestException e){

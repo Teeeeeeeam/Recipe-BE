@@ -9,7 +9,7 @@ public interface UserInfoService {
 
     void updateNickName(String nickName,String loginId,String authName);
 
-    void updateEmail(String email,String code,String loginId,String authName);
+    void updateEmail(String email,String code,String loginId,String authName,String loginType);
 
     String userToken(String loginId,String authenticationName, String password,String loginType);
     String socialUserToken(String loginId,String authenticationName);

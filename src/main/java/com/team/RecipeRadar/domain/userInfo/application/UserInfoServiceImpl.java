@@ -76,7 +76,7 @@ public class UserInfoServiceImpl implements UserInfoService {
      * @param authName  로그인한 사용자 정보
      */
     @Override
-    public void updateEmail(String email, String code, String loginId, String authName) {
+    public void updateEmail(String email, String code, String loginId, String authName,String loginType) {
 
         Member member = throwsMember(loginId, authName);
         Map<String, Boolean> emailValid = memberService.emailValid(email);      //이메일 유효성검사
@@ -130,8 +130,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     private Member throwsMember(String loginId, String authName) {
         Member member = memberRepository.findByLoginId(loginId);
 
-        if (member == null || !member.getUsername().equals(authName)) {
-            throw new AccessDeniedException("잘못된 접근입니다.");
+        if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
+            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 변경 가능합니다.");
         }
         return member;
     }
