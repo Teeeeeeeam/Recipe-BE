@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.userInfo.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.userInfo.dto.info.UserDeleteIdRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
@@ -210,5 +211,71 @@ class UserInfoControllerTest {
 
         verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
         verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+    }
+
+    @Test
+    @CustomMockUser
+    @DisplayName("회원 탈퇴 성공 테스트")
+    void Delete_Member_Site_SUCCESS() throws Exception {
+        String loginId = "loginId";
+
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, true);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
+
+        doNothing().when(userInfoService).deleteMember(loginId,true,"test");
+
+        mockMvc.perform(delete("/api/user/info/disconnect")
+                .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookie)
+                .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("탈퇴 성공"));
+
+        //void 반환타입 1회 실행되었는지 확인
+        verify(userInfoService,times(1)).deleteMember(anyString(),anyBoolean(),anyString());
+    }
+    
+    @Test
+    @CustomMockUser
+    @DisplayName("약관 미체크시 예외")
+    void none_MissCheck_throw()throws Exception{
+        String loginId = "loginId";
+
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
+
+        doThrow(new BadRequestException("약관 미체크")).when(userInfoService).deleteMember(loginId,false,"test");
+
+        mockMvc.perform(delete("/api/user/info/disconnect")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookie)
+                        .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("약관 미체크"))
+                .andDo(print());
+    }
+
+    @Test
+    @CustomMockUser
+    @DisplayName("잘못된 사용자 접근시 예외")
+    void no_accessMember_throw()throws Exception{
+        String loginId = "loginId";
+
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
+        Cookie cookie = new Cookie("login-id", "fakeCookie");
+
+        doThrow(new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(userInfoService).deleteMember(loginId,false,"test");
+
+        mockMvc.perform(delete("/api/user/info/disconnect")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookie)
+                        .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
+                .andExpect(status().is(401))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("잘못된 접근 이거나 일반 사용자만 가능합니다."))
+                .andDo(print());
     }
 }

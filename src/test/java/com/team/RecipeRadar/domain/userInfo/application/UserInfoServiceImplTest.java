@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -43,6 +44,8 @@ class UserInfoServiceImplTest {
     @Mock
     AccountRetrievalRepository accountRetrievalRepository;
 
+    @Mock
+    JWTRefreshTokenRepository jwtRefreshTokenRepository;
     @Mock
     PasswordEncoder passwordEncoder;
 
@@ -240,4 +243,29 @@ class UserInfoServiceImplTest {
         assertThatThrownBy(() -> userInfoService.userToken(loginId,autName,"1111","normal")).isInstanceOf(BadRequestException.class);
     }
 
+    @Test
+    @DisplayName("회원 탈퇴 테스트")
+    void delete_Member(){
+        Member member = Member.builder()
+                .id(1l)
+                .login_type("normal")
+                .username("test")
+                .loginId("loginId").build();
+
+        when(memberRepository.findByLoginId("loginId")).thenReturn(member);
+
+        userInfoService.deleteMember("loginId",true,"test");
+
+        verify(memberRepository, times(1)).deleteById(member.getId());
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴시 예외 발생 테스트")
+    void delete_Member_throws(){
+
+       when(memberRepository.findByLoginId("loginid")).thenThrow(AccessDeniedException.class);
+
+       assertThatThrownBy(() -> userInfoService.deleteMember("loginid",true,"test")).isInstanceOf(AccessDeniedException.class);
+
+    }
 }
