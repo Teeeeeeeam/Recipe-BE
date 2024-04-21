@@ -13,4 +13,6 @@ public interface UserInfoService {
 
     String userToken(String loginId,String authenticationName, String password,String loginType);
     void deleteMember(String loginId, boolean checkType ,String authenticationName);
+
+    boolean validUserToken(String encodeToken,String loginId);
 }

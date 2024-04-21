@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
-import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
@@ -26,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
@@ -35,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Base64;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,17 +62,18 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/user/info/{login-id}")
     public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try{
-            cookieValid(cookieLoginId);
-            String name = getAuthenticationName();
+            MemberDto memberDto = getMemberDto();
+            cookieValid(cookieLoginId,memberDto.getLoginId());
+//            boolean b = userInfoService.validUserToken(cookieLoginId);
 
-            UserInfoResponse members = userInfoService.getMembers(loginId,name);
+            UserInfoResponse members = userInfoService.getMembers(loginId,memberDto.getUsername());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",members));
         }catch (AccessDeniedException e){
@@ -94,20 +95,20 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/nickname")
     public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            cookieValid(cookieLoginId);
-            String authenticationName = getAuthenticationName();
+            MemberDto memberDto = getMemberDto();
+            cookieValid(cookieLoginId,memberDto.getLoginId());
 
             String nickName = userInfoUpdateNickNameRequest.getNickName();
             String loginId = userInfoUpdateNickNameRequest.getLoginId();
 
-            userInfoService.updateNickName(nickName,loginId,authenticationName);
+            userInfoService.updateNickName(nickName,loginId,memberDto.getUsername());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
         }catch (AccessDeniedException e){
@@ -130,17 +131,17 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 변경 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/user/info/update/email")
     public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            cookieValid(cookieLoginId);
-            String authenticationName = getAuthenticationName();
+            MemberDto memberDto = getMemberDto();
+            cookieValid(cookieLoginId,memberDto.getLoginId());
 
-            userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),authenticationName,userInfoEmailRequest.getLoginType());
+            userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),memberDto.getUsername(),userInfoEmailRequest.getLoginType());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
         }catch (BadRequestException e){
@@ -167,14 +168,12 @@ public class UserInfoController {
     @PostMapping("/user/info/valid")
     public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO, HttpServletResponse response){
         try {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            MemberDto memberDto = getMemberDto();
 
-            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-            Member member = principal.getMember();
+            String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
+            String userEncodeToken = new String(Base64.getEncoder().encode(userToken.getBytes()));
 
-            String userToken=userInfoService.userToken(member.getLoginId(), member.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
-
-            Cookie cookie = new Cookie("login-id", userToken);
+            Cookie cookie = new Cookie("login-id", userEncodeToken);
             cookie.setMaxAge(1200); //20분
             response.addCookie(cookie);
 
@@ -201,16 +200,16 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/user/info/disconnect")
     public ResponseEntity<?> deleteMember(@RequestBody UserDeleteIdRequest userDeleteIdRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
         try {
-            cookieValid(cookieLoginId);
-            String authenticationName = getAuthenticationName();
-            userInfoService.deleteMember(userDeleteIdRequest.getLoginId(),userDeleteIdRequest.isCheckBox(),authenticationName);
+            MemberDto memberDto = getMemberDto();
+            cookieValid(cookieLoginId,memberDto.getLoginId());
+            userInfoService.deleteMember(userDeleteIdRequest.getLoginId(),userDeleteIdRequest.isCheckBox(),memberDto.getUsername());
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"탈퇴 성공"));
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
@@ -251,15 +250,28 @@ public class UserInfoController {
                 .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
     }
 
-    private static void cookieValid(String cookieLoginId) {
-        if (cookieLoginId ==null){
-            throw new ForbiddenException("쿠키값이 없을때 접근");
+    private void cookieValid(String cookieLoginId,String loginId ) {
+
+        boolean validUserToken = userInfoService.validUserToken(cookieLoginId, loginId);
+        if (cookieLoginId ==null||!validUserToken){
+            throw new ForbiddenException("올바르지 않은 쿠키값으로 접근");
         }
+
     }
 
     private static String getAuthenticationName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticationName = authentication.getName();
+        log.info("au={}",authentication);
         return authenticationName;
+    }
+
+    private static MemberDto getMemberDto() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+        MemberDto memberDto = principal.getMemberDto(principal.getMember());
+        log.info("memberDot={}",memberDto);
+        return memberDto;
     }
 }

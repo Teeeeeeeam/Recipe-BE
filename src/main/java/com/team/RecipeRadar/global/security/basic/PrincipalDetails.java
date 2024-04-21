@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.global.security.basic;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,9 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         this.member = member;
     }
 
+    public  MemberDto getMemberDto(Member member){
+        return MemberDto.from(member);
+    }
 
     @Override
     public Map<String, Object> getAttributes() {

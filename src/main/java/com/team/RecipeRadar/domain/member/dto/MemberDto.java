@@ -96,6 +96,7 @@ public class MemberDto {
         return MemberDto.builder()
                 .id(member.getId())
                 .loginId(member.getLoginId())
+                .username(member.getUsername())
                 .nickName(member.getNickName())
                 .password(member.getPassword())
                 .email(member.getEmail())

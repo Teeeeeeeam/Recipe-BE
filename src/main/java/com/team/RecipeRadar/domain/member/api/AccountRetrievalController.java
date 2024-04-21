@@ -99,7 +99,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/api/search/password")
-    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){
+    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordDto, BindingResult bindingResult){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -108,7 +108,7 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
             }
-            Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordRequest.getUsername(), findPasswordRequest.getLoginId(), findPasswordRequest.getEmail(),findPasswordRequest.getCode());
+            Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
 
             ControllerApiResponse<Object> response = ControllerApiResponse.builder()
                     .success(true)
@@ -136,7 +136,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/api/password/update")
-    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, BindingResult bindingResult){
+    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -145,7 +145,7 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
             }
-            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordRequest,id);
+            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));

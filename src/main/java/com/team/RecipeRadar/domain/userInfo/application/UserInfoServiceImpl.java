@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -110,6 +112,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     public String userToken(String loginId,String authenticationName, String password,String loginType) {
 
         Member member = memberRepository.findByLoginId(loginId);
+        log.info("member={}",member.getUsername());
+        log.info("name={}",authenticationName);
         if (member == null || !member.getUsername().equals(authenticationName)) {
             throw new AccessDeniedException("잘못된 접근입니다.");
         }
@@ -145,6 +149,19 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
         memberRepository.deleteById(member.getId());
+    }
+
+    @Override
+    public boolean validUserToken(String encodeToken,String loginId) {
+        String decodeToken = new String(Base64.getDecoder().decode(encodeToken.getBytes()));
+        AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(decodeToken).orElseThrow(() -> new AccessDeniedException("잘못된 접근입니다."));
+        Member byLoginId = memberRepository.findByLoginId(loginId);
+        log.info("ac={}",accountRetrieval.getLoginId());
+        log.info("mem={}",byLoginId.getLoginId());
+        if (byLoginId==null||!accountRetrieval.getLoginId().equals(byLoginId.getLoginId())){
+            return false;
+        }
+        return true;
     }
 
     private Member throwsMember(String loginId, String authName) {
