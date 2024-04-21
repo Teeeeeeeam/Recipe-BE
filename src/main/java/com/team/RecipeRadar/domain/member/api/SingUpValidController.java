@@ -64,83 +64,6 @@ public class SingUpValidController {
 
     }
 
-//    @Operation(summary = "비밀번호 일치 검증", description = "비밀번호가 서로 일치하는지 검증하는 API(먼저 강력한 비밀번호 검증 성공후 입력가능)")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK",
-//                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-//                            examples = @ExampleObject(value = "{\"duplicate_password\": \"[true] or [false].\"}"))),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/api/members/checkPasswordDuplication")
-//    public ResponseEntity<Map<String,Boolean>> duplicatePassword(@RequestBody PasswordDuplicatedDto passwordDuplicatedDto){
-//        try{
-//            Map<String, Boolean> stringBooleanMap = memberService.duplicatePassword(passwordDuplicatedDto.getPassword(),passwordDuplicatedDto.getPasswordRe());
-//            return ResponseEntity.ok(stringBooleanMap);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            throw new ServerErrorException("서버오류");
-//        }
-//
-//    }
-//    @Operation(summary = "사용자 비밀번호 강력도 검증", description = "입력한 비밀번호가 규칙에 맞게 사용된 비밀번호인지 확인(\"특수문자\",\"0~9\",\"소문자\",\"대문자\",\"8자리이상\")")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK",
-//                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-//                            examples = @ExampleObject(value = "{\"passwordStrength\": \"[true] or [false].\"}"))),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/api/members/checkPasswordStrength")
-//    public ResponseEntity<Map<String,Boolean>> checkPasswordStrength(@RequestBody PasswordStrengthDto passwordStrengthDto){
-//        try {
-//            Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(passwordStrengthDto.getPassword());
-//            return ResponseEntity.ok(stringBooleanMap);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            throw new ServerErrorException("서버오류");
-//
-//        }
-//    }
-//
-//    @Operation(summary = "사용자 닉네임 검증", description = "사용가능 닉네임인지 검증(한글,영어,숫자 4글자 이상")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK",
-//                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-//                            examples = @ExampleObject(value = "{\"nickNameValid\": \"[true] or [false].\"}"))),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/api/members/checkNickNameValidity")
-//    public ResponseEntity<Map<String,Boolean>> nickNameValid(@RequestBody NicknameValidDto usernameValidDto){
-//        try {
-//            Map<String, Boolean> stringBooleanMap = memberService.nickNameValid(usernameValidDto.getNickName());
-//            return ResponseEntity.ok(stringBooleanMap);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            throw new ServerErrorException("서버오류");
-//        }
-//    }
-//
-//    @Operation(summary = "사용자 실명 검증", description = "사용 가능한 실명인지 검증(한글 2글자 이상)")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK",
-//                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-//                            examples = @ExampleObject(value = "{\"isKorean\": \"[true] or [false].\"}"))),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/api/members/checkUserNameValidity")
-//    public ResponseEntity<Map<String,Boolean>> userNameValid(@RequestBody UsernameValidDto usernameValidDto){
-//        try {
-//            Map<String, Boolean> stringBooleanMap = memberService.userNameValid(usernameValidDto.getUsername());
-//            return ResponseEntity.ok(stringBooleanMap);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            throw new ServerErrorException("서버오류");
-//        }
-//    }
-
     @Operation(summary = "이메일 검증", description = "사용 가능한 이메일인지 검증하는 API(이메일형식으로만 가입가능,com,net만 가능), duplicateEmail,useEmail이 모두 ture 일때만 사용 가능 ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -161,32 +84,6 @@ public class SingUpValidController {
             throw new ServerErrorException("서버오류");
         }
     }
-    
-//    @Operation(summary = "모든 필드값 검증", description = "모든 필드값의 유효성 검증을 체크후 true 가 나온다면  회원가입 앤드포인트로 회원가입 진행")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK",
-//                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-//                            examples = @ExampleObject(value = "{\"isValidateSignUp\": \"[true] or [false].\"}"))),
-//            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-//            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-//                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/api/members/validateSignUp")
-//    public ResponseEntity<Map<String,Boolean>> ValidationOfSignUp(@RequestBody MemberDto memberDto, @Parameter(description = "인증 번호")@RequestParam String code){
-//        try {
-//            Map<String, Boolean> map = new LinkedHashMap<>();
-//            boolean valid = memberService.ValidationOfSignUp(memberDto,Integer.parseInt(code));
-//            map.put("isValidateSignUp", valid);
-//            return ResponseEntity.ok(map);
-//        }catch (BadRequestException e){
-//            throw new BadRequestException(e.getMessage());
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//            throw new ServerErrorException("서버오류");
-//        }
-//    }
 
     @Operation(summary = "이메일 인증번호 전송", description = "이메일 인증을 위한 인증코드 전송(일반 회원가입시 이미 가입된 이메일이있다면 false , 소셜로그인은 제외)")
     @ApiResponses(value = {

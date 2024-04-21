@@ -22,7 +22,5 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     Boolean existsByUsernameAndLoginIdAndEmail(String username, String loginId, String email);
 
-    Boolean existsByLoginIdAndPassword(String loginId, String password);
-
     void deleteById(Long memberId);
 }
