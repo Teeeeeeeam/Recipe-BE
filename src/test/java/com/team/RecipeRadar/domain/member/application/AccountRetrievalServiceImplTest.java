@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -180,8 +181,8 @@ class AccountRetrievalServiceImplTest {
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
-        Member member = Member.builder().id(1l).username("username").password("asd").build();
-        when(memberService.findByLoginId(loginId)).thenReturn(member);
+        Member member = Member.builder().id(1l).loginId(loginId).username("username").password("asd").build();
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
         Map<String, Boolean> passwordStrengthMap = new HashMap<>();
         passwordStrengthMap.put("passwordStrength", true);
@@ -210,7 +211,7 @@ class AccountRetrievalServiceImplTest {
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
         Member member = Member.builder().id(1l).username("username").password("asd").build();
-        when(memberService.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
         Map<String, Boolean> passwordStrengthMap = new HashMap<>();
         passwordStrengthMap.put("passwordStrength", false);
@@ -239,8 +240,8 @@ class AccountRetrievalServiceImplTest {
 
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
-        Member member = Member.builder().id(1l).username("username").password("asd").build();
-        when(memberService.findByLoginId(loginId)).thenReturn(member);
+        Member member = Member.builder().id(1l).loginId(loginId).username("username").password("asd").build();
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
 
         Map<String, Boolean> passwordStrengthMap = new HashMap<>();
         passwordStrengthMap.put("passwordStrength", true);
