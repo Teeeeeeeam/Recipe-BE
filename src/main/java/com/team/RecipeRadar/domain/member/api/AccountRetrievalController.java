@@ -2,17 +2,15 @@ package com.team.RecipeRadar.domain.member.api;
 
 
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdDto;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordDto;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,8 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +56,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/api/search/login-id")
-    public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdDto findLoginIdDto,BindingResult bindingResult){
+    public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdRequest findLoginIdRequest, BindingResult bindingResult){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -69,9 +65,9 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
             }
-            String username = findLoginIdDto.getUsername();
-            String email = findLoginIdDto.getEmail();
-            Integer code = findLoginIdDto.getCode();
+            String username = findLoginIdRequest.getUsername();
+            String email = findLoginIdRequest.getEmail();
+            Integer code = findLoginIdRequest.getCode();
 
             List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email,code);
 
@@ -103,7 +99,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/api/search/password")
-    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordDto findPasswordDto,BindingResult bindingResult){
+    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -112,7 +108,7 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
             }
-            Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
+            Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordRequest.getUsername(), findPasswordRequest.getLoginId(), findPasswordRequest.getEmail(),findPasswordRequest.getCode());
 
             ControllerApiResponse<Object> response = ControllerApiResponse.builder()
                     .success(true)
@@ -140,7 +136,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/api/password/update")
-    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordDto updatePasswordDto, BindingResult bindingResult){
+    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, BindingResult bindingResult){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -149,7 +145,7 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
             }
-            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
+            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordRequest,id);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));

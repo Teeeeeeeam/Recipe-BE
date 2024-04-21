@@ -4,8 +4,7 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -178,7 +177,7 @@ class AccountRetrievalServiceImplTest {
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
 
-        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
+        UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
         Member member = Member.builder().id(1l).username("username").password("asd").build();
@@ -206,7 +205,7 @@ class AccountRetrievalServiceImplTest {
         String loginId = "loginId";
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
-        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
+        UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
 
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 
@@ -236,7 +235,7 @@ class AccountRetrievalServiceImplTest {
         String loginId = "loginId";
 
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
-        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, password, passwordRe);
+        UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
 
         when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
 

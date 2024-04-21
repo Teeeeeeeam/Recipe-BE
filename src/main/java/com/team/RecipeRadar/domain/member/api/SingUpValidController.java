@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.member.api;
 
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dto.valid.*;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -19,11 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -51,7 +48,7 @@ public class SingUpValidController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/register/validation")
-    public ResponseEntity<ErrorResponse> LoginIdValid(@RequestBody LoginIdValidDto loginIdValidDto){
+    public ResponseEntity<ErrorResponse> LoginIdValid(@RequestBody LoginIdValidRequest loginIdValidDto){
         try {
             Map<String, Boolean> stringBooleanMap = memberService.LoginIdValid(loginIdValidDto.getLoginId());
             return ResponseEntity.ok(new ErrorResponse<>(stringBooleanMap.get("use_loginId"),"사용 가능한 아이디"));
@@ -73,7 +70,7 @@ public class SingUpValidController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/email/validation")
-    public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidDto emailValidDto){
+    public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidRequest emailValidDto){
         try {
 
             Map<String, Boolean> stringBooleanMap = memberService.emailValid(emailValidDto.getEmail());

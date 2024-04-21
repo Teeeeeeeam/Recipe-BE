@@ -10,7 +10,7 @@ import javax.validation.constraints.Pattern;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatePasswordDto {
+public class UpdatePasswordRequest {
 
     @Schema(description = "가입한 아이디", example = "testId")
     @Pattern(regexp = "^[a-zA-Z0-9]{5,16}$", message = "올바른 아이디를 입력해주세요")

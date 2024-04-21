@@ -1,14 +1,12 @@
 package com.team.RecipeRadar.domain.member.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentDto;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdDto;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordDto;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -68,7 +66,7 @@ class AccountRetrievalControllerTest {
         int code = 123456;
 
 
-        FindLoginIdDto findLoginIdDto = new FindLoginIdDto(username, email, code);
+        FindLoginIdRequest findLoginIdDto = new FindLoginIdRequest(username, email, code);
 
         List<Map<String, String>> mapList = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
@@ -96,7 +94,7 @@ class AccountRetrievalControllerTest {
         String email = "test@email.com";
         int code = 123456;
 
-        FindPasswordDto findPasswordDto = new FindPasswordDto(username, loginId, email, code);
+        FindPasswordRequest findPasswordDto = new FindPasswordRequest(username, loginId, email, code);
 
         // 반환할 맵 설정
         Map<String, Object> map = new LinkedHashMap<>();
@@ -127,7 +125,7 @@ class AccountRetrievalControllerTest {
         String email="test@email.com";
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
 
-        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto(loginId, "asdQWE123!@", "asdQWE123!@");
+        UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
         ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
         given(accountRetrievalService.updatePassword(updatePasswordDto,token)).willReturn(apiResponse);
 

@@ -10,7 +10,7 @@ import javax.validation.constraints.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindPasswordDto {
+public class FindPasswordRequest {
 
     @Schema(description = "가입한 사용자 실명",example = "홍길동")
     @Pattern(regexp = "^[가-힣]+.{1,}$",message = "이름을 정확이 입력해주세요")

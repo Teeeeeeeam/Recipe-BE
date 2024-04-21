@@ -4,8 +4,7 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordDto;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -41,7 +40,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      */
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
     List<Member> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email);
-    
+
     List<Map<String,String>> list = new LinkedList<>();     //순서를 보장하기 위해 LinkedList 사용
 
     Boolean emailCode = emailCode(email,code);        //인증번호
@@ -104,7 +103,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @param id        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
      * @return ControllerApiResponse 객체
      */
-    public ControllerApiResponse updatePassword(UpdatePasswordDto updatePasswordDto, String id){
+    public ControllerApiResponse updatePassword(UpdatePasswordRequest updatePasswordDto, String id){
 
         String validId = new String(Base64.getDecoder().decode(id.getBytes()));
 

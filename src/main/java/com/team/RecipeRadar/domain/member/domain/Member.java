@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.inquiry.domain.Inquiry;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,6 +62,16 @@ public class Member {
         return new ArrayList<>();
     }
 
+    public static MemberDto of(Member member){
+        return MemberDto
+                .builder()
+                .id(member.getId())
+                .loginId(member.getLoginId())
+                .username(member.getUsername())
+                .nickName(member.getNickName())
+                .email(member.getEmail())
+                .login_type(member.login_type).build();
+    }
     public void update(String password){
         this.password = password;
     }
