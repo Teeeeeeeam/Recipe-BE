@@ -74,13 +74,16 @@ public class MemberDto {
     @JsonIgnore
     String code;
 
-    public Member toEntity() {
+    public Member toEntity(MemberDto memberDto) {
         return Member.builder()
-                .id(id)
-                .loginId(loginId)
-                .email(email)
-                .join_date(join_date)
-                .nickName(nickName).build();
+                .id(memberDto.getId())
+                .loginId(memberDto.loginId)
+                .email(memberDto.email)
+                .join_date(memberDto.join_date)
+                .nickName(memberDto.nickName)
+                .username(memberDto.getUsername())
+                .login_type(memberDto.getLogin_type())
+                .build();
     }
 
     private MemberDto(Long id, String username, String nickName, String password, String loginId, String email) {
