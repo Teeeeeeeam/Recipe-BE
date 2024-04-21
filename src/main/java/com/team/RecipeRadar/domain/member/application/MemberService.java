@@ -9,11 +9,11 @@ public interface MemberService {
 
     Member saveEntity(Member member);
 
-    Member saveDto(MemberDto memberDto);
+    void saveDto(MemberDto memberDto);
 
-    Member findByLoginId(String loginId);
+    MemberDto findByLoginId(String loginId);
 
-     Map<String, Boolean> LoginIdValid(String loginId);
+    Map<String, Boolean> LoginIdValid(String loginId);
 
     Map<String, Boolean> emailValid(String email);
     Map<String, Boolean> userNameValid(String username);

@@ -92,7 +92,14 @@ public class MemberDto {
         this.email = email;
     }
 
-    public static MemberDto of(Member member){
-        return new MemberDto(member.getId(), member.getUsername(), member.getNickName(), member.getPassword(), member.getLoginId(), member.getEmail());
+    public static MemberDto from(Member member){
+        return MemberDto.builder()
+                .id(member.getId())
+                .loginId(member.getLoginId())
+                .nickName(member.getNickName())
+                .password(member.getPassword())
+                .email(member.getEmail())
+                .loginId(member.getLoginId())
+                .login_type(member.getLogin_type()).build();
     }
 }

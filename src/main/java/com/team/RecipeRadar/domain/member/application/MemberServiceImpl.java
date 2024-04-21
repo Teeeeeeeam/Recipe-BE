@@ -40,7 +40,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Member saveDto(MemberDto memberDto) {
+    public void saveDto(MemberDto memberDto) {
         Member memberEntity = Member.builder()
                 .loginId(memberDto.getLoginId())
                 .password(passwordEncoder.encode(memberDto.getPassword()))
@@ -52,16 +52,16 @@ public class MemberServiceImpl implements MemberService {
                 .roles("ROLE_USER")
                 .verified(true)
                 .build();
-        return memberRepository.save(memberEntity);
+        memberRepository.save(memberEntity);
     }
 
     @Override
-    public Member findByLoginId(String loginId) {
+    public MemberDto findByLoginId(String loginId) {
         Member byLoginId = memberRepository.findByLoginId(loginId);
         if (byLoginId == null) {
            log.info("오류발생");
         }
-        return byLoginId;
+        return MemberDto.from(byLoginId);
     }
 
     /**

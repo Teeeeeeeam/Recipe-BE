@@ -81,7 +81,7 @@ public class NaverUserDisConnectServiceImpl implements UserDisConnectService{
             String naverId = getUserNumber(accessToken);
 
             //dto로 변환
-            MemberDto memberDto = MemberDto.of(memberService.findByLoginId(naverId));
+            MemberDto memberDto = memberService.findByLoginId(naverId);
 
             memberService.deleteMember(memberDto.getId());
             

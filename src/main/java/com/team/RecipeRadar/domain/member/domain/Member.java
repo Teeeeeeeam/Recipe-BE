@@ -61,17 +61,6 @@ public class Member {
         }
         return new ArrayList<>();
     }
-
-    public static MemberDto of(Member member){
-        return MemberDto
-                .builder()
-                .id(member.getId())
-                .loginId(member.getLoginId())
-                .username(member.getUsername())
-                .nickName(member.getNickName())
-                .email(member.getEmail())
-                .login_type(member.login_type).build();
-    }
     public void update(String password){
         this.password = password;
     }

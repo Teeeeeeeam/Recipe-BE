@@ -73,7 +73,7 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
             String memberId = getUserNumber(accessToken);
             log.info("member={}",memberId);
 
-            MemberDto memberDto = MemberDto.of(memberService.findByLoginId(memberId));
+            MemberDto memberDto = memberService.findByLoginId(memberId);
 
             memberService.deleteMember(memberDto.getId());
 

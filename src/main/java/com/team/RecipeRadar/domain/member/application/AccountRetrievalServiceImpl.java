@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,9 +26,9 @@ import java.util.*;
 public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
     @Qualifier("AccountEmail")
     private final MailService mailService;
-    private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
     private final AccountRetrievalRepository accountRetrievalRepository;
 
@@ -39,7 +41,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @return      List로 반환
      */
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
-    List<Member> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email);
+        List<MemberDto> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
 
     List<Map<String,String>> list = new LinkedList<>();     //순서를 보장하기 위해 LinkedList 사용
 
@@ -52,10 +54,10 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
             errorMap.put("가입 정보", "해당 정보로 가입된 회원은 없습니다.");
             list.add(errorMap);
         } else{
-            for (Member member : byUsernameAndEmail) {
+            for (MemberDto memberDto : byUsernameAndEmail) {
                 Map<String, String> loginInfo = new LinkedHashMap<>();
-                loginInfo.put("로그인 타입", member.getLogin_type());
-                loginInfo.put("로그인 정보", member.getLoginId());
+                loginInfo.put("로그인 타입", memberDto.getLogin_type());
+                loginInfo.put("로그인 정보", memberDto.getLoginId());
                 list.add(loginInfo);
             }
             mailService.deleteCode(email,code);
@@ -99,28 +101,28 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
     /**
      * 비밀번호 수정 API DB-> 10분마다 스케쥴 이벤트 발생
-     * @param updatePasswordDto MemberDto 객체(username, loginId, password, passwordRe)
+     * @param updatePasswordRequest MemberDto 객체(username, loginId, password, passwordRe)
      * @param id        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
      * @return ControllerApiResponse 객체
      */
-    public ControllerApiResponse updatePassword(UpdatePasswordRequest updatePasswordDto, String id){
+    public ControllerApiResponse updatePassword(UpdatePasswordRequest updatePasswordRequest, String id){
 
         String validId = new String(Base64.getDecoder().decode(id.getBytes()));
 
         Boolean aBoolean = accountRetrievalRepository.existsByVerificationId(validId);              // 해당 ID가 있는지 체크
 
-        Member byLoginId = memberService.findByLoginId(updatePasswordDto.getLoginId());
+        Member byLoginId = memberRepository.findByLoginId(updatePasswordRequest.getLoginId());
         if (byLoginId==null) throw new NoSuchElementException("가입된 아이디를 찾을수 없습니다.");
 
-        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(updatePasswordDto.getPassword());     //성공시 true , 실패시 false
-        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(updatePasswordDto.getPassword(), updatePasswordDto.getPasswordRe());        //성공시 true , 실패시 false
+        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(updatePasswordRequest.getPassword());     //성공시 true , 실패시 false
+        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(updatePasswordRequest.getPassword(), updatePasswordRequest.getPasswordRe());        //성공시 true , 실패시 false
 
         ControllerApiResponse apiResponse = null;
 
         if (aBoolean) {
             if (stringBooleanMap.get("passwordStrength")) {
                 if (stringBooleanMap1.get("duplicate_password")) {
-                    byLoginId.update(passwordEncoder.encode(updatePasswordDto.getPassword()));
+                    byLoginId.update(passwordEncoder.encode(updatePasswordRequest.getPassword()));
                     apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
                     accountRetrievalRepository.deleteByVerificationId(validId);
                 } else
