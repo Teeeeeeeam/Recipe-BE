@@ -75,6 +75,8 @@ class UserInfoControllerTest {
                 .loginType("normal")
                 .email("test@naver.com").build();
 
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
+
         given(userInfoService.getMembers(eq(loginId), anyString())).willReturn(expectedResponse);
 
         // When, Then
@@ -99,6 +101,7 @@ class UserInfoControllerTest {
         String loginId = "testId";
 
         Cookie cookie = new Cookie("login-id", "fakeCookie");
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         when(userInfoService.getMembers(eq(loginId), anyString()))
                 .thenThrow(new AccessDeniedException("Access Denied"));
 
@@ -122,6 +125,7 @@ class UserInfoControllerTest {
         request.setNickName(nickName);
         request.setLoginId(loginId);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
@@ -144,11 +148,10 @@ class UserInfoControllerTest {
 
         UserInfoUpdateNickNameRequest request = new UserInfoUpdateNickNameRequest();
         Cookie cookie = new Cookie("login-id", "fakeCookie");
-
         request.setNickName(nickName);
         request.setLoginId(loginId);
 
-
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new AccessDeniedException("접근 불가한 페이지")).when(userInfoService).updateNickName(eq(nickName), eq(loginId), anyString());
 
         mockMvc.perform(put("/api/user/info/update/nickname")
@@ -173,6 +176,7 @@ class UserInfoControllerTest {
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
@@ -198,6 +202,7 @@ class UserInfoControllerTest {
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
 
         // When, Then
@@ -218,34 +223,38 @@ class UserInfoControllerTest {
     @DisplayName("회원 탈퇴 성공 테스트")
     void Delete_Member_Site_SUCCESS() throws Exception {
         String loginId = "loginId";
+        String username = "test";
 
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, true);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
-        doNothing().when(userInfoService).deleteMember(loginId,true,"test");
+        doNothing().when(userInfoService).deleteMember(loginId, true, username); // username 값 설정
 
         mockMvc.perform(delete("/api/user/info/disconnect")
-                .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .cookie(cookie)
-                .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
+                        .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("탈퇴 성공"));
 
         //void 반환타입 1회 실행되었는지 확인
-        verify(userInfoService,times(1)).deleteMember(anyString(),anyBoolean(),anyString());
+        verify(userInfoService, times(1)).deleteMember(anyString(), anyBoolean(), eq(username));
     }
-    
+
+
     @Test
     @CustomMockUser
     @DisplayName("약관 미체크시 예외")
     void none_MissCheck_throw()throws Exception{
-        String loginId = "loginId";
+        String loginId = "test";
 
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new BadRequestException("약관 미체크")).when(userInfoService).deleteMember(loginId,false,"test");
 
         mockMvc.perform(delete("/api/user/info/disconnect")
@@ -267,6 +276,7 @@ class UserInfoControllerTest {
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
+        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(userInfoService).deleteMember(loginId,false,"test");
 
         mockMvc.perform(delete("/api/user/info/disconnect")

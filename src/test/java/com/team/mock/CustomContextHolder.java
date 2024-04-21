@@ -1,6 +1,8 @@
 package com.team.mock;
 
 
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +18,9 @@ public class CustomContextHolder implements WithSecurityContextFactory<CustomMoc
     @Override
     public SecurityContext createSecurityContext(CustomMockUser annotation) {
         String loginId = annotation.loginId();
-        Authentication token = new UsernamePasswordAuthenticationToken(loginId, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        Member member = Member.builder().loginId(loginId).username("test").password("1234").email("test@email.com").build();
+        PrincipalDetails principalDetails = new PrincipalDetails(member);
+        Authentication token = new UsernamePasswordAuthenticationToken(principalDetails, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(token);
         return context;
