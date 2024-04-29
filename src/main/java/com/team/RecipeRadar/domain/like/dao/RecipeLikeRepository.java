@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecipeLikeRepository extends JpaRepository<RecipeLike,Long>, RecipeLikeRepositoryCustom {
 
-    boolean existsByMemberIdAndRecipeId(Long memberId,Long RecipeId);
+    boolean existsByMemberIdAndRecipeId(Long memberId,String RecipeId);
 
-    void deleteByMemberIdAndRecipeId(Long memberId,Long RecipeId);
+    void deleteByMemberIdAndRecipeId(Long memberId,String RecipeId);
 
 }

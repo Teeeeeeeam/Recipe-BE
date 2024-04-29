@@ -72,7 +72,7 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
 
         String loginId = jwtProvider.validateAccessToken(jwtToken);
         Member byLoginId = memberRepository.findByLoginId(loginId);
-        Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(byLoginId.getId(),postId );
+        Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(byLoginId.getId(), postId);
 
         if (aBoolean){
             return true;

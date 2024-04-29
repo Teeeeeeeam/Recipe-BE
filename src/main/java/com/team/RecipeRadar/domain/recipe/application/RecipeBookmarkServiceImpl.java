@@ -30,7 +30,7 @@ public class RecipeBookmarkServiceImpl implements RecipeBookmarkService{
      * @return
      */
     @Override
-    public Boolean saveBookmark(Long memberId, Long recipeId) {
+    public Boolean saveBookmark(Long memberId, String recipeId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
 

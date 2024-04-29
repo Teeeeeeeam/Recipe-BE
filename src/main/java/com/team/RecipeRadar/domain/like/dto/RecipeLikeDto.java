@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class RecipeLikeDto {
 
     private Long memberId;
-    private Long recipeId;
+    private String recipeId;
 }

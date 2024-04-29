@@ -1,39 +1,28 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Column;
+import javax.persistence.*;
 
 @Entity
+@Data
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class CookingStep {
 
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id@GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @Column(name = "cook_step_id")
     private Long id;
 
-    private String postNumber;
-    private Integer stepNumber;
+    @Column(length = 5000)
+    private String steps;
 
-    private Long recipeId;
-    @Column(length = 3000)
-    private String explanation;
-
-    private String imageUrl;
-
-
-    @Builder
-    public CookingStep(String postNumber, Integer stepNumber, String explanation, String imageUrl, Long recipeId) {
-        this.recipeId = recipeId;
-        this.postNumber = postNumber;
-        this.stepNumber = stepNumber;
-        this.explanation = explanation;
-        this.imageUrl = imageUrl;
-    }
+    @OneToOne
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
 }

@@ -17,10 +17,15 @@ public class UserLikeDto {
         this.title = title;
     }
 
+    public UserLikeDto(Long id, String title) {
+        this.id = id;
+        this.title = title;
+    }
+
     public static UserLikeDto Post_of(PostLike postLike){
         return new UserLikeDto(postLike.getId(),postLike.getPost().getPostContent(),postLike.getPost().getPostTitle());
     }
     public static UserLikeDto Recipe_of(RecipeLike recipeLike){
-        return new UserLikeDto(recipeLike.getId(),recipeLike.getRecipe().getContent(),recipeLike.getRecipe().getTitle());
+        return new UserLikeDto(recipeLike.getId(),recipeLike.getRecipe().getTitle());
     }
 }
