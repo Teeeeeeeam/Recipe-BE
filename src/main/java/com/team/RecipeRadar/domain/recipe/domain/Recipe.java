@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(includeFieldNames = false, of = {"title","imageUrl" ,"servings", "cookingTime", "cookingLevel"})
+@ToString(includeFieldNames = false, of = {"title","imageUrl" , "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "likeCount"),
         @Index(columnList = "title")

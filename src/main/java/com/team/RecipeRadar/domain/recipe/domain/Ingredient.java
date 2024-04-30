@@ -10,7 +10,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-@ToString(exclude = {"ingredientAndQuantity"})
 @Table(indexes = @Index(columnList = "ingredients"))
 public class Ingredient {
 

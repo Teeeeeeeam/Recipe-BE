@@ -40,18 +40,23 @@ public class Member {
     String login_type;
     private boolean verified;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
     List<Inquiry> inquiries = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     List<Post> posts = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     List<PostLike> postLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     List<RecipeLike> recipeLikes = new ArrayList<>();
 
