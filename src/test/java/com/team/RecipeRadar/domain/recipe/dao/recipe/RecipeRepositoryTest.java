@@ -35,19 +35,24 @@ class RecipeRepositoryTest {
     @Test
     @DisplayName("무한 페이징(Slice) 테스트 ")
     void findIng(){
-        List<Recipe> recipes = new ArrayList<>();
-        for (int i=1;i<=5;i++) {
-             recipes.add(Recipe.builder().id((long) i).title("제목"+i).cookingTime("시간"+i).build());      // id value = [0, 1, 2, 3, 4]
-        }
 
-        recipeRepository.saveAll(recipes);
+        Recipe build1 = Recipe.builder().id(1l).title("제목1").cookingTime("시간1").build();
+        Recipe build2 = Recipe.builder().id(2l).title("제목2").cookingTime("시간2").build();
+        Recipe build3 = Recipe.builder().id(3l).title("제목3").cookingTime("시간3").build();
+        Recipe build4 = Recipe.builder().id(4l).title("제목4").cookingTime("시간4").build();
+        Recipe build5 = Recipe.builder().id(5l).title("제목5").cookingTime("시간5").build();
 
+        Recipe save1 = recipeRepository.save(build1);
+        Recipe save2 = recipeRepository.save(build2);
+        Recipe save3 = recipeRepository.save(build3);
+        Recipe save4 = recipeRepository.save(build4);
+        Recipe save5 = recipeRepository.save(build5);
 
-        Ingredient ingredient = Ingredient.builder().recipe(recipeRepository.findById(1l).get()).ingredients("밥").build();
-        Ingredient ingredient1 = Ingredient.builder().recipe(recipeRepository.findById(2l).get()).ingredients("밥|고기").build();
-        Ingredient ingredient2 = Ingredient.builder().recipe(recipeRepository.findById(3l).get()).ingredients("밥|김치").build();
-        Ingredient ingredient3 = Ingredient.builder().recipe(recipeRepository.findById(4l).get()).ingredients("밥|돼지고기|밑반찬").build();
-        Ingredient ingredient4 = Ingredient.builder().recipe(recipeRepository.findById(5l).get()).ingredients("밥|물김치|닭고기").build();
+        Ingredient ingredient = Ingredient.builder().recipe(save1).ingredients("밥").build();
+        Ingredient ingredient1 = Ingredient.builder().recipe(save2).ingredients("밥|고기").build();
+        Ingredient ingredient2 = Ingredient.builder().recipe(save3).ingredients("밥|김치").build();
+        Ingredient ingredient3 = Ingredient.builder().recipe(save4).ingredients("밥|돼지고기|밑반찬").build();
+        Ingredient ingredient4 = Ingredient.builder().recipe(save5).ingredients("밥|물김치|닭고기").build();
 
         ingredientRepository.save(ingredient);
         ingredientRepository.save(ingredient1);
