@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @Table(indexes = @Index(columnList = "ingredients"))
+@Getter
 public class Ingredient {
 
     @Id

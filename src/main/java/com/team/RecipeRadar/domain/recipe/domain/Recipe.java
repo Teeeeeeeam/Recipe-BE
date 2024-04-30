@@ -16,9 +16,8 @@ import javax.persistence.*;
 })
 public class Recipe {
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;              // 요리 값
 
     @Setter
