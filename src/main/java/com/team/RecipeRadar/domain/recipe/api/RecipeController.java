@@ -1,7 +1,9 @@
 package com.team.RecipeRadar.domain.recipe.api;
 
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
+import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.BookMarkRequest;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -14,11 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -30,6 +34,19 @@ import java.util.NoSuchElementException;
 public class RecipeController {
 
     private final RecipeBookmarkService recipeBookmarkService;
+    private final RecipeService recipeService;
+
+    @Operation(summary = "레시피 검색 API", description = "재료값을 통해 레시파안에 해당 재료가 하나라도 포함된 레시피를 검색하는 API(무한스크롤) size를 지정하지않으면 Defualt로 20개를 불러옴")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
+    })
+    @GetMapping("/recipe")
+    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients, Pageable pageable){
+        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
+    }
 
 
     @Operation(summary = "즐겨찾기 API",description = "사용자가 좋아요한 게시글의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
