@@ -46,13 +46,14 @@ class RecipeLikeServiceImplTest {
     @Test
     @DisplayName("레시피 좋아요")
     void add_recipe_like(){
-        Member member = Member.builder().id(2l).loginId("testId").build();
-        Recipe recipe = Recipe.builder().id(3l).content("content").likeCount(0).build();
+        Long recipe_id= 3l;
+        Member member = Member.builder().id(2l).loginId("testId").username("testuserName").build();
+        Recipe recipe = Recipe.builder().id(recipe_id).title("title").cookingLevel("1").likeCount(0).build();
 
-        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(3l).build();
+        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(recipe_id).build();
 
 
-        when(recipeLikeRepository.existsByMemberIdAndRecipeId(build.getMemberId(),build.getRecipeId())).thenReturn(false);
+        when(recipeLikeRepository.existsByMemberIdAndRecipeId(build.getMemberId(),build.getRecipeId())).thenReturn(false);      // 좋아요가 되어있지않음
         when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
         when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
 
@@ -60,7 +61,7 @@ class RecipeLikeServiceImplTest {
         Boolean aBoolean = recipeLikeService.addLike(build);
 
         assertThat(aBoolean).isFalse();
-        assertThat(recipe.getLikeCount()).isEqualTo(1);
+        assertThat(recipe.getLikeCount()).isEqualTo(1);         //결국은 0 에서 하나증간된 1로 변경
 
         verify(recipeLikeRepository, times(0)).deleteByMemberIdAndRecipeId(anyLong(), anyLong());
     }
@@ -68,10 +69,11 @@ class RecipeLikeServiceImplTest {
     @Test
     @DisplayName("레시피 좋아요되어있을때")
     void add_recipe_like_delete(){
+        Long recipe_id= 3l;
         Member.builder().id(2l).loginId("testId").build();
-        Recipe recipe = Recipe.builder().id(3l).content("content").likeCount(0).build();
+        Recipe recipe = Recipe.builder().id(recipe_id).likeCount(1).build();
 
-        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(3l).build();
+        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(recipe_id).build();
 
         when(recipeLikeRepository.existsByMemberIdAndRecipeId(build.getMemberId(),build.getRecipeId())).thenReturn(true);
         when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
@@ -79,6 +81,7 @@ class RecipeLikeServiceImplTest {
         Boolean aBoolean = recipeLikeService.addLike(build);
 
         assertThat(aBoolean).isTrue();
+        assertThat(recipe.getLikeCount()).isEqualTo(0);
         verify(recipeLikeRepository, times(1)).deleteByMemberIdAndRecipeId(anyLong(), anyLong());
     }
 

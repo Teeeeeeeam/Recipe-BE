@@ -1,11 +1,9 @@
 package com.team.RecipeRadar.domain.like.dao;
 
-import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
@@ -44,9 +42,10 @@ class RecipeLikeRepositoryTest {
     @DisplayName("필드값이 존재하는지 테스트")
     @Rollback(value = false)
     void save(){
+        Long recipe_id= 3l;
         Member member = Member.builder().loginId("loginId").build();
         Member member1 = Member.builder().loginId("loginId1").build();
-        Recipe recipe = Recipe.builder().id(3l).content("content").likeCount(0).build();
+        Recipe recipe = Recipe.builder().id(recipe_id).likeCount(0).build();
 
 
         Member saveMember = memberRepository.save(member);
@@ -78,9 +77,11 @@ class RecipeLikeRepositoryTest {
     @DisplayName("삭제 테스트")
     @Rollback(value = false)
     void delete(){
+        Long recipe_id= 3l;
+
         Member member = Member.builder().loginId("loginId").build();
         Member member1 = Member.builder().loginId("loginId1").build();
-        Recipe recipe = Recipe.builder().id(3l).content("content").likeCount(0).build();
+        Recipe recipe = Recipe.builder().id(recipe_id).likeCount(0).build();
 
 
         Member saveMember = memberRepository.save(member);
@@ -110,8 +111,8 @@ class RecipeLikeRepositoryTest {
     @DisplayName("사용자페이지의 레시피 좋아요 정보를 무한 스크롤 조회")
     void testUserInfoLikesPaging() {
         Member member = memberRepository.save(Member.builder().loginId("testId").build());
-        Recipe recipe = recipeRepository.save(Recipe.builder().content("테스트 레시피1").title("타이틀1").postNumber("넘버").cookingTime("쿠킹 시간").likeCount(1).build());
-        Recipe recipe1 = recipeRepository.save(Recipe.builder().content("테스트 레시피2").title("타이틀2").postNumber("넘버").cookingTime("쿠킹 시간").likeCount(1).build());
+        Recipe recipe = recipeRepository.save(Recipe.builder().title("타이틀1").cookingTime("쿠킹 시간").likeCount(1).build());
+        Recipe recipe1 = recipeRepository.save(Recipe.builder().title("타이틀2").cookingTime("쿠킹 시간").likeCount(1).build());
 
         recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe).build());
         recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe1).build());

@@ -37,7 +37,7 @@ class RecipeBookmarkRepositoryTest {
     @DisplayName("즐겨찾기에 사용자와 해당 레시피가 존재하는지 확인하는 테스트")
     void exist_memberANDRecipe(){
         Member member = Member.builder().loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().likeCount(1).content("content").title("title").build();
+        Recipe recipe = Recipe.builder().likeCount(1).title("title").build();
 
         Member saveMember = memberRepository.save(member);
         Recipe saveRecipe = recipeRepository.save(recipe);
@@ -54,7 +54,7 @@ class RecipeBookmarkRepositoryTest {
     @DisplayName("즐겨찾기에 사용자와 해당 레시피가 존재하지 않을때")
     void exist_memberANDRecipe_fails(){
         Member member = Member.builder().loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().likeCount(1).content("content").title("title").build();
+        Recipe recipe = Recipe.builder().likeCount(1).title("title").build();
         Member saveMember = memberRepository.save(member);
         Recipe saveRecipe = recipeRepository.save(recipe);
 
@@ -69,7 +69,7 @@ class RecipeBookmarkRepositoryTest {
     @DisplayName("즐겨찾기에서 즐겨찾기 삭제(해제)")
     void unBookMark_test(){
         Member member = Member.builder().loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().likeCount(1).content("content").title("title").build();
+        Recipe recipe = Recipe.builder().likeCount(1).title("title").build();
         Member saveMember = memberRepository.save(member);
         Recipe saveRecipe = recipeRepository.save(recipe);
 

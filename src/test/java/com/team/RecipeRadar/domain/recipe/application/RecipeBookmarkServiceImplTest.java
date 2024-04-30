@@ -35,12 +35,12 @@ class RecipeBookmarkServiceImplTest {
     @Test
     @DisplayName("북마크 성공 테스트")
     void bookMark_Save_Success_Test(){
-
+        Long recipe_id= 3l;
         Member member = Member.builder().id(1l).loginId("testId").username("testuserName").build();
-        Recipe recipe = Recipe.builder().id(2l).title("title").cookingLevel("1").likeCount(1).content("내용").build();
-
+        Recipe recipe = Recipe.builder().id(recipe_id).title("title").cookingLevel("1").likeCount(1).build();
+        
         when(memberRepository.findById(eq(1l))).thenReturn(Optional.of(member));
-        when(recipeRepository.findById(eq(2l))).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findById(eq(3l))).thenReturn(Optional.of(recipe));
         when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(true);
 
         recipeBookmarkService.saveBookmark(member.getId(),recipe.getId());
@@ -53,11 +53,12 @@ class RecipeBookmarkServiceImplTest {
     @Test
     @DisplayName("이미 북마크한 레피시가 존재할때 삭제 메서드가 실행되는지 테스트")
     void unBookMark_success_Test(){
+        Long recipe_id= 3l;
         Member member = Member.builder().id(1l).loginId("testId").username("testuserName").build();
-        Recipe recipe = Recipe.builder().id(2l).title("title").cookingLevel("1").likeCount(1).content("내용").build();
+        Recipe recipe = Recipe.builder().id(recipe_id).title("title").cookingLevel("1").likeCount(1).build();
 
         when(memberRepository.findById(eq(1l))).thenReturn(Optional.of(member));
-        when(recipeRepository.findById(eq(2l))).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findById(eq(recipe_id))).thenReturn(Optional.of(recipe));
         when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(false);
 
         Boolean aBoolean = recipeBookmarkService.saveBookmark(member.getId(), recipe.getId());
@@ -68,9 +69,9 @@ class RecipeBookmarkServiceImplTest {
     @Test
     @DisplayName("북마크 실패 예외 발생 테스트")
     void bookMark_Save_fail_Test(){
-
+        Long recipe_id= 3l;
         Member member = Member.builder().id(1l).loginId("testId").username("testuserName").build();
-        Recipe recipe = Recipe.builder().id(2l).title("title").cookingLevel("1").likeCount(1).content("내용").build();
+        Recipe recipe = Recipe.builder().id(recipe_id).title("title").cookingLevel("1").likeCount(1).build();
 
         when(memberRepository.findById(eq(1l))).thenThrow(new NoSuchElementException("사용자및 레시피를 찾을수 없습니다."));
 
