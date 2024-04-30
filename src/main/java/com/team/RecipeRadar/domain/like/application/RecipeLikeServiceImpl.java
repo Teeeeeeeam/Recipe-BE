@@ -68,14 +68,14 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
     /**
      * 해당 사용자가 해당 레시피의 좋아요를 했는지 확인하는 로직
      * @param jwtToken jwt토큰
-     * @param postId   게시글 id
+     * @param Id   레시피 id
      * @return 좋아요가되어있다면 true. 되어있지 않다면 false
      */
     @Override
-    public Boolean checkLike(String jwtToken, Long postId) {
+    public Boolean checkLike(String jwtToken, Long Id) {
         String loginId = jwtProvider.validateAccessToken(jwtToken);     //jwt 토큰 검증
         Member byLoginId = memberRepository.findByLoginId(loginId);
-        Boolean aBoolean = recipeLikeRepository.existsByMemberIdAndRecipeId(byLoginId.getId(),postId );
+        Boolean aBoolean = recipeLikeRepository.existsByMemberIdAndRecipeId(byLoginId.getId(),Id );
 
         if (aBoolean){
             return true;

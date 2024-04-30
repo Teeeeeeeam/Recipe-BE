@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class BookMarkRequest {
 
     private String memberId;
-    private String recipeId;
+    private Long recipeId;
 }

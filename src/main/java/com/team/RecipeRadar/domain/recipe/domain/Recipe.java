@@ -1,67 +1,40 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(includeFieldNames = false, of = {"id", "title","imageUrl" ,"servings", "cookingTime", "cookingLevel"})
+@ToString(includeFieldNames = false, of = {"title","imageUrl" ,"servings", "cookingTime", "cookingLevel"})
+@Table(indexes = {
+        @Index(columnList = "likeCount"),
+        @Index(columnList = "title")
+})
 public class Recipe {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;              // 요리 값
 
-    //@NotNull
-    private String postNumber;
-
-    //@NotNull
+    @Setter
     private String imageUrl;
 
-    //@NotNull
-    private  String title;
+    private String title;           // 요리제목
 
-    // @NotNull
-    @Column(length = 3000)
-    private String content;
+    private String cookingLevel;   // 난이도
 
-    // @NotNull
-    private  String servings;
+    private String people;         // 인원 수
 
-    //@NotNull
-    private String cookingTime;
-
-    //@NotNull
-    private  String cookingLevel;
+    private String cookingTime;     // 요리시간
 
     private Integer likeCount;      // 좋아요 수
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
-    private List<Ingredient> ingredients;
 
-    @Builder
-    public Recipe(String postNumber, String imageUrl, String title, String content, String servings, String cookingTime, String cookingLevel, List<Ingredient> ingredients) {
-        this.postNumber = postNumber;
-        this.imageUrl = imageUrl;
-        this.title = title;
-        this.content = content;
-        this.servings = servings;
-        this.cookingTime = cookingTime;
-        this.cookingLevel = cookingLevel;
-        this.ingredients = ingredients;
-        this.likeCount=0;
-
-    }
     public void setLikeCount(int count){            //좋아요 증가 set
         this.likeCount = count;
     }
