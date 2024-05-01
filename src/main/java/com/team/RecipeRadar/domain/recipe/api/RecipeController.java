@@ -3,6 +3,7 @@ package com.team.RecipeRadar.domain.recipe.api;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.BookMarkRequest;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -73,5 +74,20 @@ public class RecipeController {
             log.error("즐겨찾기 api 예외 발생");
             throw new ServerErrorException("서버 오류 발생");
         }
+    }
+
+    @Operation(summary = "레시피 정보 API", description = "해당 레시피의 자세한 정보를 보기위한 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\"," +
+                                    "\"data\":{\"recipeDtoList\":{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}," +
+                                    "\"ingredients\":[\"어묵 2개\",\"재료 데이터\"],\"cookStep\":[\"당근과 양파는 깨끗히 씻으신 후에 채썰어 준비한 후 후라이팬에 기름을 두르고 팬을 달군 후 당근| 양파를 살짝 볶아주세요\", \"조리 순서 데이터\"] }}")))
+    })
+    @GetMapping("/recipe/{id}")
+    public ResponseEntity<?> getDetials(@PathVariable("id")Long recipe_id){
+        RecipeDetailsResponse recipeDetails = recipeService.getRecipeDetails(recipe_id);
+
+        return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
     }
 }

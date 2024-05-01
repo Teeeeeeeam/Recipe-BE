@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 @Slf4j
 @Service
@@ -33,5 +36,32 @@ public class RecipeServiceImpl implements RecipeService{
         Slice<RecipeDto> recipe = recipeRepository.getRecipe(ingredients, pageable);
 
         return new RecipeResponse(recipe.getContent(),recipe.hasNext());
+    }
+
+    /**
+     * 레시피의 상세정보를 보는 로직,
+     * @param recipeId  찾을 레시피 번호
+     * @return      Response로 변환해 해당 레시피의 상세 정보를 반환
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public RecipeDetailsResponse getRecipeDetails(Long recipeId) {
+        RecipeDto recipeDetails = recipeRepository.getRecipeDetails(recipeId);
+
+        List<String> cookingSteps = recipeDetails.getCookingSteps();
+
+        String ingredient = recipeDetails.getIngredient();
+        StringTokenizer st = new StringTokenizer(ingredient, "|");
+        List<String> ingredients =new ArrayList<>();
+
+        while (st.hasMoreTokens()){                     // 문자열로 저장된 레시시피 데이터를 | 기준으로 데이터를 배열로 변환
+            String ingred_token = st.nextToken();
+            if (ingred_token.charAt(0) == ' ') {        // 첫번째 인덱스가 빈 공간일때
+                ingred_token = ingred_token.substring(1);       // 다음 인덱스부터 출력
+            }
+            ingredients.add(ingred_token);
+        }
+
+        return RecipeDetailsResponse.of(recipeDetails.toDto(),ingredients,cookingSteps);
     }
 }

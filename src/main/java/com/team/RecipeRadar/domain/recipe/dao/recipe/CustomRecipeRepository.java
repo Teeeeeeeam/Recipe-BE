@@ -10,5 +10,6 @@ public interface CustomRecipeRepository {
 
     Slice<RecipeDto> getRecipe(List<String> ingredient, Pageable pageable);
 
+    RecipeDto getRecipeDetails(Long recipeId);
 
 }
