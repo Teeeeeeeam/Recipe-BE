@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.dao.recipe;
 
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
@@ -31,6 +32,7 @@ class RecipeRepositoryTest {
 
     @Autowired RecipeRepository recipeRepository;
     @Autowired IngredientRepository ingredientRepository;
+    @Autowired CookStepRepository cookStepRepository;
     
     @Test
     @DisplayName("무한 페이징(Slice) 테스트 ")
@@ -80,4 +82,26 @@ class RecipeRepositoryTest {
         assertThat(recipe_lastPage.hasNext()).isFalse();
     }
 
+    @Test
+    @DisplayName("레시피의 상세 조회 테스트")
+    void getDetails_recipe(){
+        Recipe recipe = Recipe.builder().id(1l).title("레시피 1").people("인원수").build();
+        Recipe save = recipeRepository.save(recipe);
+        Ingredient ingredient = Ingredient.builder().recipe(save).ingredients("김치|밥|고가").build();
+        CookingStep cookingStep = CookingStep.builder().recipe(save).steps("김치를 넣는다").build();
+
+
+        Ingredient ingredient1 = ingredientRepository.save(ingredient);
+        CookingStep save1 = cookStepRepository.save(cookingStep);
+
+        RecipeDto recipeDetails = recipeRepository.getRecipeDetails(save.getId());
+        RecipeDto dto = recipeDetails.toDto();
+        String ing = recipeDetails.getIngredient();
+        List<String> cookingSteps = recipeDetails.getCookingSteps();
+
+        assertThat(dto.getTitle()).isEqualTo(save.getTitle());
+        assertThat(ing).isEqualTo(ingredient1.getIngredients());
+        assertThat(cookingSteps.get(0)).isEqualTo(save1.getSteps());
+        
+    }
 }

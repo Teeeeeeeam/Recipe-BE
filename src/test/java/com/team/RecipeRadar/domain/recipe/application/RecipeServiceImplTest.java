@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -55,5 +56,24 @@ class RecipeServiceImplTest {
         assertThat(recipeResponse.getRecipeDtoList().get(0).getTitle()).isEqualTo("레시피1");
     }
 
+    @Test
+    @DisplayName("레시피 상세 페이지")
+    void get_Details_Recipe(){
+        RecipeDto fakeRecipeDto = new RecipeDto();
+        fakeRecipeDto.setId(1L);
+        fakeRecipeDto.setTitle("title");
+        fakeRecipeDto.setIngredient("재료1|재료2");
+        fakeRecipeDto.setCookingSteps(List.of("순서 1", "순서 2"));
+
+        when(recipeRepository.getRecipeDetails(1L)).thenReturn(fakeRecipeDto);
+
+        RecipeDetailsResponse response = recipeService.getRecipeDetails(1L);
+
+        assertThat(response.getRecipe().getTitle()).isEqualTo(fakeRecipeDto.getTitle());
+        assertThat(response.getIngredients().get(0)).isEqualTo("재료1");
+        assertThat(response.getCookStep().get(0)).isEqualTo("순서 1");
+        assertThat(response.getCookStep().size()).isEqualTo(2);
+
+    }
 
 }

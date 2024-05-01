@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.BookMarkRequest;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
@@ -149,6 +150,26 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipeDtoList.[0].people").value("1인분"))
                 .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
                 .andExpect(jsonPath("$.data.recipeDtoList.size()").value(2));
-        ;
+    }
+
+    @Test
+    @DisplayName("레시피 상세 페이지 조회 테스트")
+    void getDetails_Recipe() throws Exception {
+
+        Long id = 1l;
+        RecipeDto recipeDto = RecipeDto.builder().id(id).cookingLevel("11").title("title").build();
+        List<String> ing= Arrays.asList("밥","고기","김치");
+        List<String> cookSetp = Arrays.asList("조리1","조리2","조리3");
+        RecipeDetailsResponse recipeDetailsResponse = RecipeDetailsResponse.of(recipeDto, ing, cookSetp);
+        given(recipeService.getRecipeDetails(eq(1l))).willReturn(recipeDetailsResponse);
+
+        mockMvc.perform(get("/api/recipe/"+id)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.recipe.id").value("1"))
+                .andExpect(jsonPath("$.data.recipe.title").value("title"))
+                .andExpect(jsonPath("$.data.ingredients.size()").value(3))
+                .andExpect(jsonPath("$.data.cookStep.size()").value(3));
     }
 }
