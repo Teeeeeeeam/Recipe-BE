@@ -31,9 +31,9 @@ public class RecipeServiceImpl implements RecipeService{
      */
     @Override
     @Transactional(readOnly = true)
-    public RecipeResponse searchRecipesByIngredients(List<String> ingredients, Pageable pageable) {
+    public RecipeResponse searchRecipesByIngredients(List<String> ingredients,Long lastRecipeId, Pageable pageable) {
 
-        Slice<RecipeDto> recipe = recipeRepository.getRecipe(ingredients, pageable);
+        Slice<RecipeDto> recipe = recipeRepository.getRecipe(ingredients,lastRecipeId, pageable);
 
         return new RecipeResponse(recipe.getContent(),recipe.hasNext());
     }

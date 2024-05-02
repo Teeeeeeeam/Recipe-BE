@@ -33,19 +33,23 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
      * @return                  Slice반환
      */
     @Override
-    public Slice<RecipeDto> getRecipe(List<String> ingredients, Pageable pageable) {
+    public Slice<RecipeDto> getRecipe(List<String> ingredients,Long lastRecipeId,Pageable pageable) {
         
         //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
         BooleanBuilder builder = new BooleanBuilder();
         for (String ingredientList : ingredients) {
             builder.or(ingredient.ingredients.like("%"+ingredientList+"%"));
         }
+        // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
+        if (lastRecipeId!=null){
+            builder.and(recipe.id.gt(lastRecipeId));
+        }
 
         List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
                 .where(builder)
-                .offset(pageable.getOffset())
+                .orderBy(recipe.id.asc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 

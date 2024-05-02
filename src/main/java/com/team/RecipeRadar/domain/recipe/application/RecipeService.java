@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface RecipeService {
 
-    RecipeResponse searchRecipesByIngredients(List<String> ingredients, Pageable pageable);
+    RecipeResponse searchRecipesByIngredients(List<String> ingredients, Long lastRecipeId,Pageable pageable);
 
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
 }

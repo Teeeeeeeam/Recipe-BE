@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CustomRecipeRepository {
 
-    Slice<RecipeDto> getRecipe(List<String> ingredient, Pageable pageable);
+    Slice<RecipeDto> getRecipe(List<String> ingredient, Long lastRecipeId,Pageable pageable);
 
     RecipeDto getRecipeDetails(Long recipeId);
 

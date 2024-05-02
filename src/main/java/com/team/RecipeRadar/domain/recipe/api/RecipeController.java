@@ -37,15 +37,15 @@ public class RecipeController {
     private final RecipeBookmarkService recipeBookmarkService;
     private final RecipeService recipeService;
 
-    @Operation(summary = "레시피 검색 API", description = "재료값을 통해 레시파안에 해당 재료가 하나라도 포함된 레시피를 검색하는 API(무한스크롤) size를 지정하지않으면 Defualt로 20개를 불러옴")
+    @Operation(summary = "레시피 검색 API", description = "조회된 마지막 레시피의 Id값을 통해 다음페이지 여부를 판단 ('lastId'는 조회된 마지막 페이지 작성 값을 넣지않고 보내면 첫번째의 데이터만 출력 , page에 대한 쿼리스트링 작동 x)" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
     })
     @GetMapping("/recipe")
-    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients, Pageable pageable){
-        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients, pageable);
+    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients, @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
+        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients,lastRecipeId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
 
