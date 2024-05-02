@@ -2,10 +2,7 @@ package com.team.RecipeRadar.domain.recipe.api;
 
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
-import com.team.RecipeRadar.domain.recipe.dto.BookMarkRequest;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -103,5 +100,11 @@ public class RecipeController {
         RecipeDetailsResponse recipeDetails = recipeService.getRecipeDetails(recipe_id);
 
         return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
+    }
+
+    @GetMapping("/main/recipe")
+    public ResponseEntity<?> mainRecipe(){
+        MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",mainPageRecipeResponse));
     }
 }

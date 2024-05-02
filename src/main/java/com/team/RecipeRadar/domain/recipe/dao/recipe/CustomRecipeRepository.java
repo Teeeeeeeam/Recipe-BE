@@ -15,4 +15,6 @@ public interface CustomRecipeRepository {
 
     RecipeDto getRecipeDetails(Long recipeId);
 
+    List<RecipeDto> mainPageRecipe();
+
 }

@@ -126,4 +126,16 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
         return RecipeDto.of(recipeEntity,cookStep,ingredients);
     }
+
+    @Override
+    public List<RecipeDto> mainPageRecipe() {
+
+        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+                .from(recipe)
+                .orderBy(recipe.likeCount.desc())
+                .limit(10).fetch();
+
+        return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
+                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+    }
 }

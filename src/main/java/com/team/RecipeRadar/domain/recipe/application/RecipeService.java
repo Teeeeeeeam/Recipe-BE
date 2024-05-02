@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
@@ -15,4 +16,6 @@ public interface RecipeService {
      Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable);
 
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
+
+    MainPageRecipeResponse mainPageRecipe();
 }

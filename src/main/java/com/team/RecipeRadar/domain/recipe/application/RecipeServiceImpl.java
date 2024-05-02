@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
@@ -69,5 +70,12 @@ public class RecipeServiceImpl implements RecipeService{
         }
 
         return RecipeDetailsResponse.of(recipeDetails.toDto(),ingredients,cookingSteps);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MainPageRecipeResponse mainPageRecipe() {
+        List<RecipeDto> recipeDtoList = recipeRepository.mainPageRecipe();
+        return MainPageRecipeResponse.of(recipeDtoList);
     }
 }
