@@ -60,7 +60,7 @@ class RecipeRepositoryTest {
         ingredientRepository.save(ingredient1);
         ingredientRepository.save(ingredient2);
         ingredientRepository.save(ingredient3);
-        ingredientRepository.save(ingredient4);
+        Ingredient save = ingredientRepository.save(ingredient4);
 
 
         List<String>  ingredients = new ArrayList<>();
@@ -68,7 +68,7 @@ class RecipeRepositoryTest {
 
         Pageable pageRequest_nextPageTrue = PageRequest.of(0, 2);
 
-        Slice<RecipeDto> recipe_FirstPage = recipeRepository.getRecipe(ingredients, pageRequest_nextPageTrue);
+        Slice<RecipeDto> recipe_FirstPage = recipeRepository.getRecipe(ingredients, null,pageRequest_nextPageTrue);
 
         List<RecipeDto> content = recipe_FirstPage.getContent();
         assertThat(content.get(0).getId()).isEqualTo(1l);
@@ -77,8 +77,8 @@ class RecipeRepositoryTest {
 
         Pageable pageRequest_nextPageFail = PageRequest.of(2, 2);
 
-        Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, pageRequest_nextPageFail);
-        assertThat(recipe_lastPage.getContent().size()).isEqualTo(1);
+        Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, save.getId(),pageRequest_nextPageFail);
+        assertThat(recipe_lastPage.getContent().size()).isEqualTo(0);
         assertThat(recipe_lastPage.hasNext()).isFalse();
     }
 

@@ -29,8 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -136,10 +135,10 @@ class RecipeControllerTest {
 
         RecipeResponse recipeResponse = new RecipeResponse(recipeDtoList, paged);
 
-        given(recipeService.searchRecipesByIngredients(eq(ingredients), any(Pageable.class)))
+        given(recipeService.searchRecipesByIngredients(eq(ingredients), eq(1l),any(Pageable.class)))
                 .willReturn(recipeResponse);
 
-        mockMvc.perform(get("/api/recipe?ingredients=밥")
+        mockMvc.perform(get("/api/recipe?ingredients=밥&lastId=1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())

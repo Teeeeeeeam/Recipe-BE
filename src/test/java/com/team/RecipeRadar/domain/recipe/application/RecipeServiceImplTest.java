@@ -1,18 +1,15 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
-import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,9 +44,9 @@ class RecipeServiceImplTest {
 
         SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
 
-        when(recipeRepository.getRecipe(eq(ingLists),eq(pageRequest))).thenReturn(recipeDtoSlice);
+        when(recipeRepository.getRecipe(eq(ingLists),eq(1l),eq(pageRequest))).thenReturn(recipeDtoSlice);
 
-        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingLists, pageRequest);
+        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingLists, 1l, pageRequest);
 
         assertThat(recipeResponse.getNextPage()).isFalse();
         assertThat(recipeResponse.getRecipeDtoList().size()).isEqualTo(2);
