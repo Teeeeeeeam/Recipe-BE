@@ -150,4 +150,23 @@ class RecipeRepositoryTest {
         Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, pageable1);
         assertThat(NorecipeDtoPage.getContent()).hasSize(0);
     }
+    
+    
+    @Test
+    @DisplayName("메인페이지의 레시피 좋아요가 많은순 출력")
+    void main_Page_like_desc(){
+        Recipe high = Recipe.builder().id(1l).title("제목1").cookingTime("시간1").likeCount(10).build();
+        Recipe low = Recipe.builder().id(2l).title("제목2").cookingTime("시간2").likeCount(2).build();
+        Recipe mid = Recipe.builder().id(3l).title("제목3").cookingTime("시간3").likeCount(6).build();
+
+        recipeRepository.save(high);
+        recipeRepository.save(low);
+        recipeRepository.save(mid);
+
+        List<RecipeDto> recipeDtoList = recipeRepository.mainPageRecipe();
+
+        assertThat(recipeDtoList.get(0).getLikeCount()).isEqualTo(10);
+        assertThat(recipeDtoList.get(1).getLikeCount()).isEqualTo(6);
+        assertThat(recipeDtoList.get(2).getLikeCount()).isEqualTo(2);
+    }
 }

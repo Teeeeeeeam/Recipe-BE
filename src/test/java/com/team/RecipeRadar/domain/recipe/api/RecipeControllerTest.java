@@ -6,10 +6,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.dto.BookMarkRequest;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -201,5 +198,28 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.content.[0].people").value("1인분"))
                 .andExpect(jsonPath("$.data.content.[0].cookingTime").value("10분"))
                 .andExpect(jsonPath("$.data.content.size()").value(2));
+    }
+
+    @Test
+    @DisplayName("메인 페이지에서 레시피 좋아요순으로 출력")
+    void main_Page_Recipe_like_desc() throws Exception {
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13));
+        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3));
+        MainPageRecipeResponse of = MainPageRecipeResponse.of(recipeDtoList);
+
+        given(recipeService.mainPageRecipe()).willReturn(of);
+
+        mockMvc.perform(get("/api/main/recipe")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.recipe.size()").value(3))
+                .andExpect(jsonPath("$.data.recipe.[0].likeCount").value(16))
+                .andExpect(jsonPath("$.data.recipe.[1].likeCount").value(13))
+                .andExpect(jsonPath("$.data.recipe.[2].likeCount").value(3));
+
+
     }
 }

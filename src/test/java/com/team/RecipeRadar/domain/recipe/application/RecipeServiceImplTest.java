@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
@@ -92,5 +93,22 @@ class RecipeServiceImplTest {
         assertThat(recipeDtos.getTotalElements()).isEqualTo(2);
     }
 
+    @Test
+    @DisplayName("메인 페이지의 좋아요순 service 테스트")
+    void main_page_like_desc_conversion(){
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13));
+        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3));
+
+        when(recipeRepository.mainPageRecipe()).thenReturn(recipeDtoList);
+
+        MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
+
+        assertThat(mainPageRecipeResponse.getRecipe()).hasSize(3);
+        assertThat(mainPageRecipeResponse.getRecipe().get(0).getLikeCount()).isEqualTo(16);
+        assertThat(mainPageRecipeResponse.getRecipe().get(1).getLikeCount()).isEqualTo(13);
+        assertThat(mainPageRecipeResponse.getRecipe().get(2).getLikeCount()).isEqualTo(3);
+    }
 
 }
