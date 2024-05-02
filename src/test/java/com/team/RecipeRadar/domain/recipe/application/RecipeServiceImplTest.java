@@ -11,9 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,5 +70,27 @@ class RecipeServiceImplTest {
         assertThat(response.getCookStep().size()).isEqualTo(2);
 
     }
+
+    @Test
+    @DisplayName("일반 페이지네이션 테스트")
+    void get_Search_RecipeFor_NormalPage(){
+
+        List<String> ingLists = Arrays.asList("밥");
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 0));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 0));
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
+
+        when(recipeRepository.getNormalPage(eq(ingLists),eq(pageRequest))).thenReturn(dtoPage);
+
+        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingLists, pageRequest);
+        assertThat(recipeDtos.getTotalPages()).isEqualTo(1);
+        assertThat(recipeDtos.getContent().get(0).getTitle()).isEqualTo("레시피1");
+        assertThat(recipeDtos.getTotalElements()).isEqualTo(2);
+    }
+
 
 }

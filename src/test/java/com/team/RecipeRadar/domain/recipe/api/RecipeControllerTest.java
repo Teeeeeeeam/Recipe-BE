@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -170,5 +171,35 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipe.title").value("title"))
                 .andExpect(jsonPath("$.data.ingredients.size()").value(3))
                 .andExpect(jsonPath("$.data.cookStep.size()").value(3));
+    }
+
+    @Test
+    @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트")
+    void Search_Recipe_Normal_Page() throws Exception {
+
+        List<String> ingredients = Arrays.asList("밥");
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0));
+        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피2", "level2", "2인분", "1시간", 0));
+
+
+        PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
+
+        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),any(Pageable.class)))
+                .willReturn(dtoPage);
+
+        mockMvc.perform(get("/api/recipeV1?ingredients=밥")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.[0].id").value(1))
+                .andExpect(jsonPath("$.data.content.[0].imageUrl").value("url1"))
+                .andExpect(jsonPath("$.data.content.[0].title").value("레시피1"))
+                .andExpect(jsonPath("$.data.content.[0].cookingLevel").value("level1"))
+                .andExpect(jsonPath("$.data.content.[0].people").value("1인분"))
+                .andExpect(jsonPath("$.data.content.[0].cookingTime").value("10분"))
+                .andExpect(jsonPath("$.data.content.size()").value(2));
     }
 }
