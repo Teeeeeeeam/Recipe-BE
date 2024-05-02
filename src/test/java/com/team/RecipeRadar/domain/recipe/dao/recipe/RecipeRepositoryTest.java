@@ -77,8 +77,8 @@ class RecipeRepositoryTest {
 
         Pageable pageRequest_nextPageFail = PageRequest.of(2, 2);
 
-        Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, save.getId(),pageRequest_nextPageFail);
-        assertThat(recipe_lastPage.getContent().size()).isEqualTo(0);
+        Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, save.getRecipe().getId(),pageRequest_nextPageFail);
+        assertThat(recipe_lastPage.getContent()).hasSize(0);
         assertThat(recipe_lastPage.hasNext()).isFalse();
     }
 
