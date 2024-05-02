@@ -101,7 +101,13 @@ public class RecipeController {
 
         return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
     }
-
+    
+    @Operation(summary = "레시피 좋아요순 조회", description = "좋아요가 많은 레시피의 대해서 10개만 출력하는 API 메인페이지에서 사용")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipe\":[\"10개의 레시피 데이터\"]}}")))
+    })
     @GetMapping("/main/recipe")
     public ResponseEntity<?> mainRecipe(){
         MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
