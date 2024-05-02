@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,11 @@ public class RecipeServiceImpl implements RecipeService{
         Slice<RecipeDto> recipe = recipeRepository.getRecipe(ingredients,lastRecipeId, pageable);
 
         return new RecipeResponse(recipe.getContent(),recipe.hasNext());
+    }
+
+    @Override
+    public  Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable) {
+        return  recipeRepository.getNormalPage(ingredients, pageable);
     }
 
     /**

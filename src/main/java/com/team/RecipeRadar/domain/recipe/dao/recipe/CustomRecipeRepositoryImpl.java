@@ -3,13 +3,12 @@ package com.team.RecipeRadar.domain.recipe.dao.recipe;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.*;
+import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
 @Slf4j
@@ -65,6 +65,41 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         }
 
         return new SliceImpl<>(content,pageable,hasNext);
+    }
+
+    /**
+     * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
+     * @param ingredients   재료들
+     * @param pageable      페이지정보
+     * @return              pageImpl을 반환
+     */
+    @Override
+    public Page<RecipeDto> getNormalPage(List<String> ingredients, Pageable pageable) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+        for (String ingredientList : ingredients) {
+            builder.or(ingredient.ingredients.like("%"+ingredientList+"%"));
+        }
+
+        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+                .from(ingredient)
+                .join(ingredient.recipe,recipe)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        
+        Long count = queryFactory.select(recipe.id.count())
+                .from(ingredient)
+                .join(ingredient.recipe, recipe)
+                .where(builder)
+                .orderBy(recipe.id.asc())
+                .fetchOne();
+        
+        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
+                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+
+        return new PageImpl<>(content,pageable,count);
     }
 
     /**
