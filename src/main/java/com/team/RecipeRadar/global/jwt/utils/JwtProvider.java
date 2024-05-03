@@ -66,6 +66,7 @@ public class JwtProvider {
      */
     public String generateRefreshToken(String loginId) {
         Member member = memberRepository.findByLoginId(loginId);
+        RefreshToken refreshToken_member = jwtRefreshTokenRepository.findByMemberId(member.getId());
 
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_EXPIRATION_TIME);
         Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
@@ -79,9 +80,15 @@ public class JwtProvider {
                 .withClaim("loginType",member.getLogin_type())
                 .sign(Algorithm.HMAC512(secret));
 
-        RefreshToken token = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
 
-        jwtRefreshTokenRepository.save(token);
+        if (refreshToken_member==null) {
+            RefreshToken build = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
+            jwtRefreshTokenRepository.save(build);
+        }else {
+            refreshToken_member.setRefreshToken(refreshToken);
+            jwtRefreshTokenRepository.save(refreshToken_member);
+        }
+
         return refreshToken;
     }
 
