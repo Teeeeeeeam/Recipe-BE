@@ -1,10 +1,12 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
-import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +31,8 @@ class RecipeServiceImplTest {
 
 
     @Mock RecipeRepository recipeRepository;
+    @Mock IngredientRepository ingredientRepository;
+    @Mock CookStepRepository cookStepRepository;
     @InjectMocks RecipeServiceImpl recipeService;
     
     @Test
@@ -110,5 +115,29 @@ class RecipeServiceImplTest {
         assertThat(mainPageRecipeResponse.getRecipe().get(1).getLikeCount()).isEqualTo(13);
         assertThat(mainPageRecipeResponse.getRecipe().get(2).getLikeCount()).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("레시피 저장 테스트")
+    void saveRecipe(){
+        List<String> cooksteps = List.of("조리1", "조리2");
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        Recipe entity = Recipe.toEntity(recipeSaveRequest);
+        Ingredient ingredient = Ingredient.builder().id(1L).ingredients("재료").recipe(entity).build();
+        List<CookingStep> cookingSteps = cooksteps.stream()
+                .map(s -> CookingStep.builder().steps(s).recipe(entity).build())
+                .collect(Collectors.toList());
+
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(entity);
+        when(ingredientRepository.save(any(Ingredient.class))).thenReturn(ingredient);
+        when(cookStepRepository.saveAll(anyList())).thenReturn(cookingSteps);
+
+        Recipe savedRecipe = recipeService.saveRecipe(recipeSaveRequest);
+
+        assertThat(savedRecipe.getTitle()).isEqualTo("title");
+        assertThat(savedRecipe).isInstanceOf(Recipe.class);
+        assertThat(ingredient.getRecipe()).isEqualTo(savedRecipe);
+        assertThat(cookingSteps.get(0).getRecipe()).isEqualTo(savedRecipe);
+    }
+
 
 }
