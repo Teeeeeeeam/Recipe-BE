@@ -1,9 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
-import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,4 +16,6 @@ public interface RecipeService {
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
 
     MainPageRecipeResponse mainPageRecipe();
+
+    Recipe saveRecipe(RecipeSaveRequest recipeSaveRequest);
 }

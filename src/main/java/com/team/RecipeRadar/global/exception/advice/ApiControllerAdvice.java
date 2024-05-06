@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 @Slf4j
 @RestControllerAdvice
@@ -61,6 +62,12 @@ public class ApiControllerAdvice {
     public ResponseEntity<ErrorResponse> Forbidden(ForbiddenException e){
         ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> UnSupport(UnsupportedMediaTypeStatusException e){
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
     }
 
 

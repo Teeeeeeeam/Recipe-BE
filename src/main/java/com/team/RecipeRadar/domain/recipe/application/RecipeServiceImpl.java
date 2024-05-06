@@ -1,10 +1,12 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
-import com.team.RecipeRadar.domain.recipe.dto.MainPageRecipeResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,8 @@ import java.util.StringTokenizer;
 public class RecipeServiceImpl implements RecipeService{
 
     private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
+    private final CookStepRepository cookStepRepository;
 
     /**
      * recipeRepository에서 페이징쿼리를 담아 반환된 데이터를 Response로 옮겨담아 전송, 조회 전용 메소드
@@ -77,5 +81,29 @@ public class RecipeServiceImpl implements RecipeService{
     public MainPageRecipeResponse mainPageRecipe() {
         List<RecipeDto> recipeDtoList = recipeRepository.mainPageRecipe();
         return MainPageRecipeResponse.of(recipeDtoList);
+    }
+
+    /**
+     * 어드민 사용자가 새로운 레세피를 등록하는 로직
+     * @param recipeSaveRequest 레시피의 정보
+     * @return 저장한 레시피 객체 반환
+     */
+    @Override
+    public Recipe saveRecipe(RecipeSaveRequest recipeSaveRequest) {
+        Recipe save_Recipe= recipeRepository.save(Recipe.toEntity(recipeSaveRequest));
+
+        Ingredient ingredient = Ingredient.builder()
+                .ingredients(recipeSaveRequest.getIngredients())
+                .recipe(save_Recipe).build();
+
+        ingredientRepository.save(ingredient);
+
+        List<String> cookSteps = recipeSaveRequest.getCookSteps();
+        List<CookingStep> cookingSteps = new ArrayList<>();
+        for (String steps : cookSteps){
+            cookingSteps.add(CookingStep.builder().steps(steps).recipe(save_Recipe).build());
+        }
+        cookStepRepository.saveAll(cookingSteps);
+        return save_Recipe;
     }
 }
