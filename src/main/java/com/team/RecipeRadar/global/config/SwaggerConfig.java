@@ -10,7 +10,10 @@ import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @OpenAPIDefinition(
@@ -64,5 +67,11 @@ public class SwaggerConfig {
                 .group("나만의 냉장고 API v1")
                 .pathsToMatch(paths)
                 .build();
+    }
+
+    public SwaggerConfig(MappingJackson2HttpMessageConverter converter) {
+        var supportedMediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
+        supportedMediaTypes.add(new MediaType("application", "octet-stream"));
+        converter.setSupportedMediaTypes(supportedMediaTypes);
     }
 }
