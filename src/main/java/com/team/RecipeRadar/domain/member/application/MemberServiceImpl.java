@@ -45,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
                 .loginId(memberDto.getLoginId())
                 .password(passwordEncoder.encode(memberDto.getPassword()))
                 .username(memberDto.getUsername())
-                .nickName(memberDto.getNickName())
+                .nickName(memberDto.getNickname())
                 .login_type(LOGIN_TYPE)
                 .email(memberDto.getEmail())
                 .join_date(LocalDate.now())
@@ -118,9 +118,9 @@ public class MemberServiceImpl implements MemberService {
     public Map<String, Boolean> nickNameValid(String nickName) {
         try{
             Map<String, Boolean> result = new LinkedHashMap<>();
-
+            Boolean existsByNickName = memberRepository.existsByNickName(nickName);
             boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,}$").matcher(nickName).matches();
-            result.put("nickNameValid",valid);
+            result.put("nicknameValid",valid && !existsByNickName);
             return result;
         }catch (Exception e){
             throw new RuntimeException();
@@ -232,7 +232,7 @@ public class MemberServiceImpl implements MemberService {
         validationResult.putAll(checkPasswordStrength(memberDto.getPassword()));
         validationResult.putAll(userNameValid(memberDto.getUsername()));
         validationResult.putAll(emailValid(memberDto.getEmail()));
-        validationResult.putAll(nickNameValid(memberDto.getNickName()));
+        validationResult.putAll(nickNameValid(memberDto.getNickname()));
         validationResult.putAll(verifyCode(memberDto.getEmail(),code));
 
         return validationResult;
