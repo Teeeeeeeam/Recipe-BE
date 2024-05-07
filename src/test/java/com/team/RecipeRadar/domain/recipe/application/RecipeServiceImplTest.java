@@ -1,26 +1,25 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.*;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,6 +31,8 @@ class RecipeServiceImplTest {
 
 
     @Mock RecipeRepository recipeRepository;
+    @Mock IngredientRepository ingredientRepository;
+    @Mock CookStepRepository cookStepRepository;
     @InjectMocks RecipeServiceImpl recipeService;
     
     @Test
@@ -47,9 +48,9 @@ class RecipeServiceImplTest {
 
         SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
 
-        when(recipeRepository.getRecipe(eq(ingLists),eq(pageRequest))).thenReturn(recipeDtoSlice);
+        when(recipeRepository.getRecipe(eq(ingLists),eq(1l),eq(pageRequest))).thenReturn(recipeDtoSlice);
 
-        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingLists, pageRequest);
+        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingLists, 1l, pageRequest);
 
         assertThat(recipeResponse.getNextPage()).isFalse();
         assertThat(recipeResponse.getRecipeDtoList().size()).isEqualTo(2);
@@ -75,5 +76,68 @@ class RecipeServiceImplTest {
         assertThat(response.getCookStep().size()).isEqualTo(2);
 
     }
+
+    @Test
+    @DisplayName("일반 페이지네이션 테스트")
+    void get_Search_RecipeFor_NormalPage(){
+
+        List<String> ingLists = Arrays.asList("밥");
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 0));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 0));
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
+
+        when(recipeRepository.getNormalPage(eq(ingLists),eq(pageRequest))).thenReturn(dtoPage);
+
+        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingLists, pageRequest);
+        assertThat(recipeDtos.getTotalPages()).isEqualTo(1);
+        assertThat(recipeDtos.getContent().get(0).getTitle()).isEqualTo("레시피1");
+        assertThat(recipeDtos.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("메인 페이지의 좋아요순 service 테스트")
+    void main_page_like_desc_conversion(){
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13));
+        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3));
+
+        when(recipeRepository.mainPageRecipe()).thenReturn(recipeDtoList);
+
+        MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
+
+        assertThat(mainPageRecipeResponse.getRecipe()).hasSize(3);
+        assertThat(mainPageRecipeResponse.getRecipe().get(0).getLikeCount()).isEqualTo(16);
+        assertThat(mainPageRecipeResponse.getRecipe().get(1).getLikeCount()).isEqualTo(13);
+        assertThat(mainPageRecipeResponse.getRecipe().get(2).getLikeCount()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("레시피 저장 테스트")
+    void saveRecipe(){
+        List<String> cooksteps = List.of("조리1", "조리2");
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        Recipe entity = Recipe.toEntity(recipeSaveRequest);
+        Ingredient ingredient = Ingredient.builder().id(1L).ingredients("재료").recipe(entity).build();
+        List<CookingStep> cookingSteps = cooksteps.stream()
+                .map(s -> CookingStep.builder().steps(s).recipe(entity).build())
+                .collect(Collectors.toList());
+
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(entity);
+        when(ingredientRepository.save(any(Ingredient.class))).thenReturn(ingredient);
+        when(cookStepRepository.saveAll(anyList())).thenReturn(cookingSteps);
+
+        Recipe savedRecipe = recipeService.saveRecipe(recipeSaveRequest);
+
+        assertThat(savedRecipe.getTitle()).isEqualTo("title");
+        assertThat(savedRecipe).isInstanceOf(Recipe.class);
+        assertThat(ingredient.getRecipe()).isEqualTo(savedRecipe);
+        assertThat(cookingSteps.get(0).getRecipe()).isEqualTo(savedRecipe);
+    }
+
 
 }

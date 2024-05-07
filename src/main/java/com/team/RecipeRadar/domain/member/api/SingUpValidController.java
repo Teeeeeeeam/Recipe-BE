@@ -129,4 +129,22 @@ public class SingUpValidController {
             throw new ServerErrorException("서버오류");
         }
     }
+
+    @Operation(summary = "닉네임 검증", description = "대소문자 한글 숫자로 이뤄진 4글자  이상이 닉네임이어야하며 중복된 닉네임인지 검증한다. (true = 사용가능 , false = 사용 불가능) ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"닉네임 검증\",\"data\":true}"))),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/nickname/validation")
+    public ResponseEntity<?> nickName(@RequestBody Map<String,String> nickname){
+        try {
+            Boolean nicknameValid = memberService.nickNameValid(nickname.get("nickname")).get("nicknameValid");
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"닉네임 검증",nicknameValid));
+        }catch (Exception e){
+            throw new ServerErrorException("서버 오류");
+        }
+    }
 }

@@ -31,7 +31,7 @@ public class MemberDto {
     @NotEmpty(message = "별명을 입력해주세요")
     @Pattern(regexp = "^[a-zA-Z0-9가-힣]{4,}$",message = "사용할수 없는 별명입니다.")
     @Schema(description = "사용자의 별명",example = "나만냉")
-    String nickName;
+    String nickname;
 
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
@@ -80,7 +80,7 @@ public class MemberDto {
                 .loginId(memberDto.loginId)
                 .email(memberDto.email)
                 .join_date(memberDto.join_date)
-                .nickName(memberDto.nickName)
+                .nickName(memberDto.nickname)
                 .username(memberDto.getUsername())
                 .login_type(memberDto.getLogin_type())
                 .build();
@@ -89,7 +89,7 @@ public class MemberDto {
     private MemberDto(Long id, String username, String nickName, String password, String loginId, String email) {
         this.id = id;
         this.username = username;
-        this.nickName = nickName;
+        this.nickname = nickName;
         this.password = password;
         this.loginId = loginId;
         this.email = email;
@@ -100,7 +100,7 @@ public class MemberDto {
                 .id(member.getId())
                 .loginId(member.getLoginId())
                 .username(member.getUsername())
-                .nickName(member.getNickName())
+                .nickname(member.getNickName())
                 .password(member.getPassword())
                 .email(member.getEmail())
                 .loginId(member.getLoginId())

@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,15 +52,14 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/auth/refresh-token/validate")
-    public ResponseEntity<?> RefreshToke(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<?> RefreshToke(HttpServletRequest request){
         try {
             String refreshToken = request.getHeader("RefreshToken");
             String substring = refreshToken.substring(refreshToken.indexOf("Bearer ") + 7);
             String token = jwtProvider.validateRefreshToken(substring);
 
             if (token!=null){
-                response.addHeader("Authorization","Bearer "+ token);
-                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급"));
+                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",token));
             }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));
@@ -130,10 +128,10 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/logout")
-    public ResponseEntity<?> LogOut(@RequestParam("member-id")String memberId) {
+    public ResponseEntity<?> LogOut(@RequestBody Map<String,String> data) {
         try {
-            long longId = Long.parseLong(memberId);
-            jwtAuthService.logout(longId);
+            long memberId = Long.parseLong(data.get("member-id"));
+            jwtAuthService.logout(memberId);
             SecurityContextHolder.clearContext();
             
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"로그아웃 성공"));
