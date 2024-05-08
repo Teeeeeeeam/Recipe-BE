@@ -34,7 +34,7 @@ class RecipeServiceImplTest {
     @Mock IngredientRepository ingredientRepository;
     @Mock CookStepRepository cookStepRepository;
     @InjectMocks RecipeServiceImpl recipeService;
-    
+
     @Test
     @DisplayName("무한 페이징 쿼리 테스트")
     void get_Search_Recipe(){
@@ -60,11 +60,20 @@ class RecipeServiceImplTest {
     @Test
     @DisplayName("레시피 상세 페이지")
     void get_Details_Recipe(){
+
+        List<CookingStep> cookingSteps = new ArrayList<>();
+
+        CookingStep cookingStep = CookingStep.builder().steps("순서 1").build();
+        CookingStep cookingStep1 = CookingStep.builder().steps("순서 2").build();
+
+        cookingSteps.add(cookingStep);
+        cookingSteps.add(cookingStep1);
+
         RecipeDto fakeRecipeDto = new RecipeDto();
         fakeRecipeDto.setId(1L);
         fakeRecipeDto.setTitle("title");
         fakeRecipeDto.setIngredient("재료1|재료2");
-        fakeRecipeDto.setCookingSteps(List.of("순서 1", "순서 2"));
+        fakeRecipeDto.setCookingSteps(cookingSteps);
 
         when(recipeRepository.getRecipeDetails(1L)).thenReturn(fakeRecipeDto);
 
@@ -72,7 +81,7 @@ class RecipeServiceImplTest {
 
         assertThat(response.getRecipe().getTitle()).isEqualTo(fakeRecipeDto.getTitle());
         assertThat(response.getIngredients().get(0)).isEqualTo("재료1");
-        assertThat(response.getCookStep().get(0)).isEqualTo("순서 1");
+        assertThat(response.getCookStep().get(0).get("cook_steps")).isEqualTo("순서 1");
         assertThat(response.getCookStep().size()).isEqualTo(2);
 
     }
@@ -119,8 +128,9 @@ class RecipeServiceImplTest {
     @Test
     @DisplayName("레시피 저장 테스트")
     void saveRecipe(){
+        List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         Recipe entity = Recipe.toEntity(recipeSaveRequest);
         Ingredient ingredient = Ingredient.builder().id(1L).ingredients("재료").recipe(entity).build();
         List<CookingStep> cookingSteps = cooksteps.stream()
