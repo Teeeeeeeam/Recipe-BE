@@ -56,8 +56,8 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         } else{
             for (MemberDto memberDto : byUsernameAndEmail) {
                 Map<String, String> loginInfo = new LinkedHashMap<>();
-                loginInfo.put("로그인 타입", memberDto.getLogin_type());
-                loginInfo.put("로그인 정보", memberDto.getLoginId());
+                loginInfo.put("login_type", memberDto.getLogin_type());
+                loginInfo.put("login_info", memberDto.getLoginId());
                 list.add(loginInfo);
             }
             mailService.deleteCode(email,code);

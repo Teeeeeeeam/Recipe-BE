@@ -48,7 +48,7 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":[{\"로그인 타입\":\"normal\",\"로그인 정보\":\"[로그인 아이디]\"},  {\"로그인 타입\": \"naver\", \"로그인 정보\": \"[소셜 로그인 아이디]\"}]}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":[{\"로그인 타입\":\"normal\",\"로그인 정보\":\"[로그인 아이디]\"},  {\"login_type\": \"naver\", \"login_info\": \"[소셜 로그인 아이디]\"}]}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
