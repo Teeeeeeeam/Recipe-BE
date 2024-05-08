@@ -9,4 +9,6 @@ public interface IngredientRepositoryCustom {
 
     List<Recipe> searchRecipeByIngredient();
 
+    void updateRecipe_ing(Long recipe_id,String ings);
+
 }

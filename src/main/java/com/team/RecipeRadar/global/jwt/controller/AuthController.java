@@ -128,7 +128,8 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/logout")
-    public ResponseEntity<?> LogOut(@RequestBody Map<String,String> data) {
+    public ResponseEntity<?> LogOut(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = "{\"member-id\":\"사용자 member-id\"}")))
+                                        @RequestBody Map<String,String> data) {
         try {
             long memberId = Long.parseLong(data.get("member-id"));
             jwtAuthService.logout(memberId);

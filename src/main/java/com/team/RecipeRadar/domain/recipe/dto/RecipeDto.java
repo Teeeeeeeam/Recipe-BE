@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.recipe.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.*;
 
@@ -28,7 +29,7 @@ public class RecipeDto {
     private Integer likeCount;      // 좋아요 수
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<String> cookingSteps;         // 조리순서
+    private List<CookingStep> cookingSteps;         // 조리순서
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String ingredient;          // 재료
@@ -55,7 +56,7 @@ public class RecipeDto {
         return new RecipeDto(recipe.getId(), recipe.getImageUrl(), recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount());
     }
 
-    public static RecipeDto of(Recipe recipe,List<String> cookStep,String ingredient){
+    public static RecipeDto of(Recipe recipe,List<CookingStep> cookStep,String ingredient){
         return new RecipeDto(recipe.getId(), recipe.getImageUrl(), recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
         ,cookStep,ingredient);
     }

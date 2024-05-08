@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.recipe.dao.recipe;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
-import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
@@ -110,21 +109,19 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Override
     public RecipeDto getRecipeDetails(Long recipeId) {
 
-        List<Tuple> details = queryFactory.select(recipe, ingredient.ingredients, cookingStep.steps)
+        List<Tuple> details = queryFactory.select(recipe, ingredient.ingredients, cookingStep)
                 .from(recipe)
                 .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
-                .join(cookingStep).on(cookingStep.recipe.id.eq(recipe.id))
+                .leftJoin(recipe.cookingStepList, cookingStep)
                 .where(recipe.id.eq(recipeId)).fetch();
 
-
-        List<String> cookStep = details.stream().map(tuple -> tuple.get(cookingStep.steps)).collect(Collectors.toList());
-
+        List<CookingStep> cookingSteps = details.stream().map(tuple -> tuple.get(cookingStep)).collect(Collectors.toList());
 
         Recipe recipeEntity = details.stream().map(tuple -> tuple.get(recipe)).collect(Collectors.toList()).stream().findFirst().get();
 
         String ingredients = details.stream().map(tuple -> tuple.get(ingredient.ingredients)).collect(Collectors.toList()).stream().findFirst().get();
 
-        return RecipeDto.of(recipeEntity,cookStep,ingredients);
+        return RecipeDto.of(recipeEntity,cookingSteps,ingredients);
     }
 
     @Override

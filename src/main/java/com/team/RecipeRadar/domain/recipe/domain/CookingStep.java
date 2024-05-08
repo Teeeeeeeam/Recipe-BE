@@ -22,7 +22,7 @@ public class CookingStep {
     @Column(length = 5000)
     private String steps;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 }
