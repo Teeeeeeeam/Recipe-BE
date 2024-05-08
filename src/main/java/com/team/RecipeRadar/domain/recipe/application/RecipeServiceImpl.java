@@ -7,6 +7,8 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.utils.FileStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,9 +17,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +29,8 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final CookStepRepository cookStepRepository;
+    private final ImgRepository imgRepository;
+    private final FileStore fileStore;
 
     /**
      * recipeRepository에서 페이징쿼리를 담아 반환된 데이터를 Response로 옮겨담아 전송, 조회 전용 메소드
@@ -59,7 +62,18 @@ public class RecipeServiceImpl implements RecipeService{
     public RecipeDetailsResponse getRecipeDetails(Long recipeId) {
         RecipeDto recipeDetails = recipeRepository.getRecipeDetails(recipeId);
 
-        List<String> cookingSteps = recipeDetails.getCookingSteps();
+        List<Map<String,String>> cookList = new ArrayList<>();
+        List<CookingStep> cookingSteps = recipeDetails.getCookingSteps();
+
+        for (CookingStep cookingStep : cookingSteps){
+            Map<String, String> cookStepMap = new LinkedHashMap<>(); // 새로운 Map 객체 생성
+
+            cookStepMap.put("cook_step_id", String.valueOf(cookingStep.getId()));
+            cookStepMap.put("cook_steps", cookingStep.getSteps());
+
+            cookList.add(cookStepMap); // 새로운 Map 객체를 리스트에 추가
+        }
+
 
         String ingredient = recipeDetails.getIngredient();
         StringTokenizer st = new StringTokenizer(ingredient, "|");
@@ -73,7 +87,7 @@ public class RecipeServiceImpl implements RecipeService{
             ingredients.add(ingred_token);
         }
 
-        return RecipeDetailsResponse.of(recipeDetails.toDto(),ingredients,cookingSteps);
+        return RecipeDetailsResponse.of(recipeDetails.toDto(),ingredients,cookList);
     }
 
     @Override
@@ -92,8 +106,10 @@ public class RecipeServiceImpl implements RecipeService{
     public Recipe saveRecipe(RecipeSaveRequest recipeSaveRequest) {
         Recipe save_Recipe= recipeRepository.save(Recipe.toEntity(recipeSaveRequest));
 
+        String ingredient_stream = recipeSaveRequest.getIngredients().stream().collect(Collectors.joining("|"));
+
         Ingredient ingredient = Ingredient.builder()
-                .ingredients(recipeSaveRequest.getIngredients())
+                .ingredients(ingredient_stream)
                 .recipe(save_Recipe).build();
 
         ingredientRepository.save(ingredient);

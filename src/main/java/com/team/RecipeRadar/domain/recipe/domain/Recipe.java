@@ -4,6 +4,8 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +37,10 @@ public class Recipe {
     private String cookingTime;     // 요리시간
 
     private Integer likeCount;      // 좋아요 수
+
+
+    @OneToMany(mappedBy = "recipe")
+    private List<CookingStep> cookingStepList=  new ArrayList<>();
 
 
     public void setLikeCount(int count){            //좋아요 증가 set
