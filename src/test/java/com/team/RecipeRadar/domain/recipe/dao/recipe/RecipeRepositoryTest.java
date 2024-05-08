@@ -169,4 +169,38 @@ class RecipeRepositoryTest {
         assertThat(recipeDtoList.get(1).getLikeCount()).isEqualTo(6);
         assertThat(recipeDtoList.get(2).getLikeCount()).isEqualTo(2);
     }
+    
+    @Test
+    @DisplayName("레시피 업데이트 테스트")
+    void recipe_update(){
+        Recipe recipe = Recipe.builder().title("레시피1").cookingLevel("어려움").cookingLevel("난이도").people("인원수").build();
+        Ingredient ingredient = Ingredient.builder().ingredients("재료1").recipe(recipe).build();
+        CookingStep cookingStep1 = CookingStep.builder().steps("조리순서1").recipe(recipe).build();
+        CookingStep cookingStep2 = CookingStep.builder().steps("조리순서2").recipe(recipe).build();
+
+
+        Recipe recipe_save = recipeRepository.save(recipe);
+        Ingredient ingredient_save = ingredientRepository.save(ingredient);
+        CookingStep cookingStep_save1 = cookStepRepository.save(cookingStep1);
+        CookingStep cookingStep_save2 = cookStepRepository.save(cookingStep2);
+
+        Recipe save_Recipe = recipeRepository.findById(recipe_save.getId()).get();
+        recipe_save.update_recipe("변경된 제목","변경된 레벨","변경된 인원수","변경된 시간");
+
+        ingredient_save.setIngredients("변경한재료!");
+
+        cookingStep_save1.setSteps("변경 된 조리순서1");
+        cookingStep_save2.setSteps("변경 된 조리순서2");
+
+        Recipe recipe_after = recipeRepository.save(save_Recipe);
+        Ingredient ingredient_after = ingredientRepository.save(ingredient_save);
+        CookingStep cookingStep_after1 = cookStepRepository.save(cookingStep_save1);
+        CookingStep cookingStep_after2 = cookStepRepository.save(cookingStep_save2);
+
+        assertThat(recipe_after.getTitle()).isEqualTo("변경된 제목");
+        assertThat(recipe_after.getTitle()).isNotEqualTo("레시피1");
+        assertThat(ingredient_after.getIngredients()).isEqualTo("변경한재료!");
+        assertThat(cookingStep_after1.getSteps()).isEqualTo("변경 된 조리순서1");
+        assertThat(cookingStep_after2.getSteps()).isEqualTo("변경 된 조리순서2");
+    }
 }

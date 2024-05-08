@@ -7,6 +7,10 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.global.Image.utils.FileStore;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,10 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
@@ -33,6 +37,8 @@ class RecipeServiceImplTest {
     @Mock RecipeRepository recipeRepository;
     @Mock IngredientRepository ingredientRepository;
     @Mock CookStepRepository cookStepRepository;
+    @Mock ImgRepository imgRepository;
+    @Mock FileStore fileStore;
     @InjectMocks RecipeServiceImpl recipeService;
 
     @Test
@@ -149,5 +155,52 @@ class RecipeServiceImplTest {
         assertThat(cookingSteps.get(0).getRecipe()).isEqualTo(savedRecipe);
     }
 
+    @Test
+    @DisplayName("레시피 수정 성공하는 테스트")
+    void updateRecipe_successful() throws Exception {
+        // Given
+        long recipeId = 1L;
+        String title = "변경된 Recipe";
+        List<Map<String, String>> cookSteps = new ArrayList<>();
+        Map<String, String> cookStep1 = new HashMap<>();
+        cookStep1.put("cook_step_id", "1");
+        cookStep1.put("cook_steps", "조리 순서 1");
+        cookSteps.add(cookStep1);
+        List<String> ingredients = Arrays.asList("재료 1", "재료 2");
+        String originalFileName = "after.jpg";
+        MockMultipartFile file = new MockMultipartFile("file", originalFileName, "image/jpeg", "test data".getBytes());
+
+        Recipe testRecipe = Recipe.builder().id(recipeId).title("변경전 타이틀").build();
+        when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(testRecipe));
+        
+        CookingStep testCookStep = new CookingStep();
+        when(cookStepRepository.findById(anyLong())).thenReturn(Optional.of(testCookStep));
+        
+        UploadFile testUploadFile = new UploadFile("before.jpg","저장돤 파일명");
+        when(fileStore.storeFile(file)).thenReturn(testUploadFile);
+        
+        when(imgRepository.findByRecipe_Id(recipeId)).thenReturn(Optional.of(testUploadFile));
+
+        doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
+
+        recipeService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps), file);
+        
+        assertThat(testRecipe.getTitle()).isEqualTo(title);
+        assertThat(testCookStep.getSteps()).isEqualTo("조리 순서 1");
+        assertThat(testUploadFile.getOriginFileName()).isNotEqualTo("before.jpg");
+        assertThat(testUploadFile.getOriginFileName()).isEqualTo("after.jpg");
+        verify(ingredientRepository, times(1)).updateRecipe_ing(anyLong(),anyString());
+    }
+
+    @Test
+    @DisplayName("레피시 변경시 해당 레피시가 존재하지 않을때")
+    void notEmpty_recipe(){
+        long recipe_id = 1l;
+        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest();
+        MockMultipartFile multipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "data ".getBytes());
+        when(recipeRepository.findById(eq(recipe_id))).thenThrow(new NoSuchElementException("해당 레시피를 찾을수 업습니다."));
+
+        assertThatThrownBy(()-> recipeService.updateRecipe(recipe_id,recipeUpdateRequest,multipartFile)).isInstanceOf(NoSuchElementException.class);
+    }
 
 }
