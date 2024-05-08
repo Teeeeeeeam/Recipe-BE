@@ -8,7 +8,9 @@ import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.Image.utils.FileStore;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,4 +126,41 @@ public class RecipeServiceImpl implements RecipeService{
         cookStepRepository.saveAll(cookingSteps);
         return save_Recipe;
     }
+
+    @Override
+    public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) throws Exception {
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("해당 레시피를 찾을수 없습니다."));
+        recipe.update_recipe(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getCookTime());
+        recipeRepository.save(recipe);
+
+
+        List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookeSteps();
+
+        for (Map<String,String> cookeStep : cookeSteps) {
+            long cookStepId = Long.parseLong(cookeStep.get("cook_step_id"));
+            Optional<CookingStep> byId = cookStepRepository.findById(cookStepId);
+            if (byId.isPresent()){
+                String cookSteps_Value = cookeStep.get("cook_steps");
+                CookingStep cookingStep = byId.get();
+                cookingStep.update(cookSteps_Value);
+                cookStepRepository.save(cookingStep);
+            }
+        }
+
+        String ing = recipeUpdateRequest.getIngredients().stream().collect(Collectors.joining("|"));
+        ingredientRepository.updateRecipe_ing(recipe.getId(),ing);
+
+        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
+        String storeFileName = uploadFile.getStoreFileName();
+
+        fileStore.deleteFile(storeFileName);
+
+        UploadFile uploadFile1 = fileStore.storeFile(file);
+        uploadFile.setStoreFileName(uploadFile1.getStoreFileName());
+        uploadFile.setOriginFileName(file.getOriginalFilename());
+
+        imgRepository.save(uploadFile);
+    }
+
+
 }

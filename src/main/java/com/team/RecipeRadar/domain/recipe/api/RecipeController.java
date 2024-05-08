@@ -158,4 +158,41 @@ public class RecipeController {
             throw new ServerErrorException("서버 오류 발생");
         }
     }
+
+
+    @Operation(summary = "레시피 수정 API",description = "admin 권환을 가진 관리자만에 기존 레시피의 모두 수정가능하다(좋아요 수 제외, 빈칸으로는 등록할수 없음 등록시 400에러 발생)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"레시피 수정 성공\"}"))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "[{\"success\": false, \"message\": \"모든 값을 입력해주세요\", \"data\": {\"errors\": [\"변경할 레시피의 제목를 입력해주세요\"]}}, {\"success\": false, \"message\": \"해당 레시피를 찾을수 없습니다.\"}]"))),
+            @ApiResponse(responseCode = "403",description = " Forbidden"),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @PostMapping(value = "/admin/update/{recipe-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateRecipe(@PathVariable(name = "recipe-id")Long recipeId ,
+                                          @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
+                                          @RequestPart MultipartFile file){
+        try {
+            if (bindingResult.hasErrors()){
+                List<String> errors = new ArrayList<>();
+                for (FieldError error : bindingResult.getFieldErrors()){
+                    errors.add(error.getDefaultMessage());
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"모든 값을 입력해주세요",errors));
+            }
+            recipeService.updateRecipe(recipeId,recipeUpdateRequest,file);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 수정 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (BadRequestException e){
+            throw new BadRequestException(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버오류");
+        }
+    }
+
 }
