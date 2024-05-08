@@ -98,11 +98,11 @@ class RecipeRepositoryTest {
         RecipeDto recipeDetails = recipeRepository.getRecipeDetails(save.getId());
         RecipeDto dto = recipeDetails.toDto();
         String ing = recipeDetails.getIngredient();
-        List<String> cookingSteps = recipeDetails.getCookingSteps();
+        List<CookingStep> cookingSteps = recipeDetails.getCookingSteps();
 
         assertThat(dto.getTitle()).isEqualTo(save.getTitle());
         assertThat(ing).isEqualTo(ingredient1.getIngredients());
-        assertThat(cookingSteps.get(0)).isEqualTo(save1.getSteps());
+        assertThat(cookingSteps.get(0).getSteps()).isEqualTo(save1.getSteps());
         
     }
     

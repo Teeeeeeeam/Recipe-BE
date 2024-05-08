@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeServiceImpl;
+import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.application.ImgServiceImpl;
@@ -27,19 +28,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -168,7 +163,18 @@ class RecipeControllerTest {
         Long id = 1l;
         RecipeDto recipeDto = RecipeDto.builder().id(id).cookingLevel("11").title("title").build();
         List<String> ing= Arrays.asList("밥","고기","김치");
-        List<String> cookSetp = Arrays.asList("조리1","조리2","조리3");
+        List<Map<String,String>> cookSetp = new ArrayList<>();
+
+        List<CookingStep> cookingStepList = List.of(CookingStep.builder().id(1l).steps("조리1").build(), CookingStep.builder().id(2l).steps("조리2").build(),
+                CookingStep.builder().id(3l).steps("조리3").build());
+
+        for (CookingStep cookingStep : cookingStepList) {
+            Map<String,String> map = new LinkedHashMap<>();
+            map.put("cook_step_id", String.valueOf(cookingStep.getId()));
+            map.put("cook_steps", cookingStep.getSteps());
+            cookSetp.add(map);
+        }
+
         RecipeDetailsResponse recipeDetailsResponse = RecipeDetailsResponse.of(recipeDto, ing, cookSetp);
         given(recipeService.getRecipeDetails(eq(1l))).willReturn(recipeDetailsResponse);
 
@@ -239,8 +245,9 @@ class RecipeControllerTest {
     @DisplayName("레시피 등록 테스트 (어드민 등록 성공시)")
     @CustomMockAdmin
     void save_Recipe_Admin_Success() throws Exception {
+        List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
         UploadFile uploadFile = new UploadFile("test.jpg", "stored_test.jpg");
@@ -251,7 +258,7 @@ class RecipeControllerTest {
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
-        
+
         mockMvc.perform(
                         multipart("/api/admin/save/recipe")
                                 .file(mockMultipartFile)
@@ -268,8 +275,9 @@ class RecipeControllerTest {
     @DisplayName("레시피 등록 테스트 (일반 사용자 등록 실패)")
     @CustomMockUser
     void save_Recipe_User_Fail() throws Exception {
+        List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
         UploadFile uploadFile = new UploadFile("test.jpg", "stored_test.jpg");
@@ -296,8 +304,9 @@ class RecipeControllerTest {
     @DisplayName("레시피 등록 테스트 (파일명확장자가 아닐시 오류)")
     @CustomMockAdmin
     void save_Recipe_With_Invalid_FileName() throws Exception {
+        List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.AAA", "image/jpeg", "test data".getBytes());
 
@@ -322,8 +331,9 @@ class RecipeControllerTest {
     @DisplayName("레시피 등록 테스트 (파일명확장자가 아닐시 오류)")
     @CustomMockAdmin
     void save_Empty_File() throws Exception {
+        List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", "재료", "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", null, "image/jpeg", "test data".getBytes());
 
