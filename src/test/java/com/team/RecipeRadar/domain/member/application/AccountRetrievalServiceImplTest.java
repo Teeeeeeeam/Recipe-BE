@@ -60,8 +60,8 @@ class AccountRetrievalServiceImplTest {
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, realCode);     //반환
 
-        assertThat(loginId.get(0).get("로그인 타입")).isEqualTo("normal");
-        assertThat(loginId.get(1).get("로그인 타입")).isEqualTo("kakao");
+        assertThat(loginId.get(0).get("login_type")).isEqualTo("normal");
+        assertThat(loginId.get(1).get("login_type")).isEqualTo("kakao");
         assertThat(loginId.size()).isEqualTo(2);
     }
 

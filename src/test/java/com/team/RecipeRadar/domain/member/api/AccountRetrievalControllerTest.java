@@ -70,8 +70,8 @@ class AccountRetrievalControllerTest {
 
         List<Map<String, String>> mapList = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("로그인 타입","normal");
-        map.put("로그인 타입","keuye0638");
+        map.put("login_type","normal");
+        map.put("login_type","keuye0638");
         mapList.add(map);
 
         given(accountRetrievalService.findLoginId(eq(username),eq(email),eq(code))).willReturn(mapList);
@@ -83,7 +83,7 @@ class AccountRetrievalControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("성공"))
-                .andExpect(jsonPath("$.data[0]['로그인 타입']").value("keuye0638"));
+                .andExpect(jsonPath("$.data[0]['login_type']").value("keuye0638"));
     }
 
     @Test
