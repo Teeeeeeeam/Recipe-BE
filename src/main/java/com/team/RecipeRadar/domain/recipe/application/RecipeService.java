@@ -12,7 +12,9 @@ public interface RecipeService {
 
     RecipeResponse searchRecipesByIngredients(List<String> ingredients, Long lastRecipeId,Pageable pageable);
 
-     Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable);
+    RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title,Long lastRecipeId,Pageable pageable);
+
+    Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable);
 
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
 

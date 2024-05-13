@@ -51,6 +51,16 @@ public class RecipeServiceImpl implements RecipeService{
         return new RecipeResponse(recipe.getContent(),recipe.hasNext());
     }
 
+    /*
+    searchRecipesByIngredients와 검색 기능은 동일하나 해당 로직은 admin 사용자를 위한 검색 api
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients,String title, Long lastRecipeId, Pageable pageable) {
+        Slice<RecipeDto> recipe = recipeRepository.adminSearchTitleOrIng(ingredients,title,lastRecipeId, pageable);
+        return new RecipeResponse(recipe.getContent(),recipe.hasNext());
+    }
+
     @Override
     public  Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable) {
         return  recipeRepository.getNormalPage(ingredients, pageable);

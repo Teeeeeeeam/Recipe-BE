@@ -44,28 +44,45 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
             builder.and(recipe.id.gt(lastRecipeId));
         }
 
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
-                .from(ingredient)
-                .join(ingredient.recipe,recipe)
-                .where(builder)
-                .orderBy(recipe.id.asc())
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
+        List<Tuple> result = getSearchRecipe(pageable, builder);
 
+        List<RecipeDto> content = getRecipeDtoList(result);
 
-        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
-                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
-        
-        boolean hasNext =false;
-
-        if (content.size() > pageable.getPageSize()){
-            content.remove(pageable.getPageSize());
-            hasNext = true;
-        }
+        boolean hasNext = isHasNext(pageable, content);
 
         return new SliceImpl<>(content,pageable,hasNext);
     }
 
+    /*
+    기존 재료 검색 로직이랑 비슷하나 제목 검색의 대한 조건이 추가된 어드민 전용 로직
+     */
+
+    @Override
+    public Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredients, String title,Long lastRecipeId, Pageable pageable) {
+        //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (title!=null){
+            builder.and(recipe.title.like("%"+title+"%"));
+        }
+        if (ingredients!=null) {
+            for (String ingredientList : ingredients) {
+                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
+            }
+        }
+        // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
+        if (lastRecipeId!=null){
+            builder.and(recipe.id.gt(lastRecipeId));
+        }
+
+        List<Tuple> result = getSearchRecipe(pageable, builder);
+
+        List<RecipeDto> content = getRecipeDtoList(result);
+
+        boolean hasNext = isHasNext(pageable, content);
+
+        return new SliceImpl<>(content,pageable,hasNext);
+    }
     /**
      * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
      * @param ingredients   재료들
@@ -87,16 +104,15 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        
+
         Long count = queryFactory.select(recipe.id.count())
                 .from(ingredient)
                 .join(ingredient.recipe, recipe)
                 .where(builder)
                 .orderBy(recipe.id.asc())
                 .fetchOne();
-        
-        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
-                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+
+        List<RecipeDto> content = getRecipeDtoList(result);
 
         return new PageImpl<>(content,pageable,count);
     }
@@ -134,5 +150,32 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
         return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
                 tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+    }
+
+    private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
+        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
+                .from(ingredient)
+                .join(ingredient.recipe,recipe)
+                .where(builder)
+                .orderBy(recipe.id.asc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+        return result;
+    }
+
+    private static List<RecipeDto> getRecipeDtoList(List<Tuple> result) {
+        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
+                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+        return content;
+    }
+
+    private static boolean isHasNext(Pageable pageable, List<RecipeDto> content) {
+        boolean hasNext =false;
+
+        if (content.size() > pageable.getPageSize()){
+            content.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+        return hasNext;
     }
 }

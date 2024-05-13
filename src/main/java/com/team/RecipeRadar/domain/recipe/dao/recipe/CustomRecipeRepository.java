@@ -11,6 +11,8 @@ public interface CustomRecipeRepository {
 
     Slice<RecipeDto> getRecipe(List<String> ingredient, Long lastRecipeId,Pageable pageable);
 
+    Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredient,String title,Long lastRecipeId,Pageable pageable);
+
     Page<RecipeDto> getNormalPage(List<String> ingredient,Pageable pageable);
 
     RecipeDto getRecipeDetails(Long recipeId);
