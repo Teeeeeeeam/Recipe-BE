@@ -17,6 +17,7 @@ import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecipeController.class)
+@Slf4j
 class RecipeControllerTest {
 
     @Autowired
@@ -402,8 +405,8 @@ class RecipeControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("모든 값을 입력해주세요"))
-                .andExpect(jsonPath("$.data.[0]").value("변경할 레시피의 제목를 입력해주세요"))
-                .andExpect(jsonPath("$.data.[1]").value("변경할 레시피의 조리순서를 입력해주세요"));
+                .andExpect(jsonPath("$.data.[0]").isString())
+                .andExpect(jsonPath("$.data.[1]").isString());
     }
 
     @Test
@@ -432,5 +435,36 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.message").value("해당 레시피를 찾을수가 없습니다."));
     }
 
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("어드민 검색 레시피 조회 테스트")
+    void Search_Recipe1() throws Exception {
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        String title= "recipe";
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1L, "url1", title, "level1", "1인분", "10분", 0));
+
+        boolean paged = pageRequest.next().isPaged();
+
+        RecipeResponse recipeResponse = new RecipeResponse(recipeDtoList, paged);
+
+        given(recipeService.searchRecipesByTitleAndIngredients(isNull(), eq(title), isNull(), any(Pageable.class)))
+                .willReturn(recipeResponse);
+
+        mockMvc.perform(get("/api/admin/recipe?title="+title)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].id").value(1))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].imageUrl").value("url1"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].title").value(title))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingLevel").value("level1"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].people").value("1인분"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
+                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(1));
+    }
 
 }

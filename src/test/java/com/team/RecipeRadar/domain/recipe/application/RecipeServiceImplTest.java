@@ -202,5 +202,48 @@ class RecipeServiceImplTest {
 
         assertThatThrownBy(()-> recipeService.updateRecipe(recipe_id,recipeUpdateRequest,multipartFile)).isInstanceOf(NoSuchElementException.class);
     }
+    @Test
+    @DisplayName("어드민 페이지-무한 페이징 쿼리 테스트_제목")
+    void get_Search_Admin_Recipe(){
 
+        List<String> ingLists = Arrays.asList("밥");
+
+
+        String title = "레시피1";
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1l, "url", title, "level1", "1", "10minute", 0,List.of(),"밥"));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 0));
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
+
+        when(recipeRepository.adminSearchTitleOrIng(eq(ingLists),eq(title),eq(1l),eq(pageRequest))).thenReturn(recipeDtoSlice);
+
+        RecipeResponse recipeResponse = recipeService.searchRecipesByTitleAndIngredients(ingLists, "레시피1", 1l, pageRequest);
+
+        assertThat(recipeResponse.getNextPage()).isFalse();
+        assertThat(recipeResponse.getRecipeDtoList().size()).isEqualTo(2);
+        assertThat(recipeResponse.getRecipeDtoList().get(0).getTitle()).isEqualTo("레시피1");
+    }
+
+    @Test
+    @DisplayName("어드민 페이지-무한 페이징 쿼리 테스트_찾는 값 없을때")
+    void get_Search_Admin_Recipe_titleAndIng(){
+
+        List<String> no_ingLists = Arrays.asList("밥");
+
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
+
+        when(recipeRepository.adminSearchTitleOrIng(anyList(),anyString(),anyLong(),eq(pageRequest))).thenReturn(recipeDtoSlice);
+
+        RecipeResponse recipeResponse = recipeService.searchRecipesByTitleAndIngredients(no_ingLists, "a", 1l, pageRequest);
+
+        assertThat(recipeResponse.getNextPage()).isFalse();
+        assertThat(recipeDtoList).isEmpty();
+    }
 }

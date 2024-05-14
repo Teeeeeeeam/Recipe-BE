@@ -203,4 +203,52 @@ class RecipeRepositoryTest {
         assertThat(cookingStep_after1.getSteps()).isEqualTo("변경 된 조리순서1");
         assertThat(cookingStep_after2.getSteps()).isEqualTo("변경 된 조리순서2");
     }
+
+    @Test
+    @DisplayName("무한 페이징(Slice) 테스트 _어드민")
+    void admin_find_titleAndIng(){
+
+        Recipe build1 = Recipe.builder().id(1l).title("제목1").cookingTime("시간1").build();
+        Recipe build2 = Recipe.builder().id(2l).title("제목2").cookingTime("시간2").build();
+        Recipe build3 = Recipe.builder().id(3l).title("제목").cookingTime("시간3").build();
+        Recipe build4 = Recipe.builder().id(4l).title("제목").cookingTime("시간4").build();
+        Recipe build5 = Recipe.builder().id(5l).title("제목5").cookingTime("시간5").build();
+
+        Recipe save1 = recipeRepository.save(build1);
+        Recipe save2 = recipeRepository.save(build2);
+        Recipe save3 = recipeRepository.save(build3);
+        Recipe save4 = recipeRepository.save(build4);
+        Recipe save5 = recipeRepository.save(build5);
+
+        Ingredient ingredient = Ingredient.builder().recipe(save1).ingredients("밥").build();
+        Ingredient ingredient1 = Ingredient.builder().recipe(save2).ingredients("밥|고기").build();
+        Ingredient ingredient2 = Ingredient.builder().recipe(save3).ingredients("밥|김치").build();
+        Ingredient ingredient3 = Ingredient.builder().recipe(save4).ingredients("밥|돼지고기|밑반찬").build();
+        Ingredient ingredient4 = Ingredient.builder().recipe(save5).ingredients("밥|물김치|닭고기").build();
+
+        ingredientRepository.save(ingredient);
+        ingredientRepository.save(ingredient1);
+        ingredientRepository.save(ingredient2);
+        ingredientRepository.save(ingredient3);
+        Ingredient save = ingredientRepository.save(ingredient4);
+
+
+        List<String>  ingredients = new ArrayList<>();
+        ingredients.add("밥");
+
+        Pageable pageRequest_nextPageTrue = PageRequest.of(0, 10);
+
+        Slice<RecipeDto> recipe_FirstPage = recipeRepository.adminSearchTitleOrIng(ingredients,save5.getTitle() ,save4.getId(),pageRequest_nextPageTrue);
+        Slice<RecipeDto> recipe_FirstPage_2 = recipeRepository.adminSearchTitleOrIng(ingredients,"제목" ,null,pageRequest_nextPageTrue);
+
+        // 하나의 데이터만 search
+        List<RecipeDto> content = recipe_FirstPage.getContent();
+        assertThat(content.get(0).getId()).isEqualTo(save5.getId());
+        assertThat(recipe_FirstPage.hasNext()).isFalse();
+
+        // 모든 레시피 데이터 검색
+        assertThat(recipe_FirstPage_2.getContent()).hasSize(5);
+        assertThat(recipe_FirstPage_2.getContent().get(0).getTitle()).isEqualTo(save1.getTitle());
+        assertThat(recipe_FirstPage_2.getContent().get(2).getTitle()).isEqualTo(save3.getTitle());
+    }
 }
