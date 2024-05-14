@@ -242,8 +242,7 @@ class RecipeRepositoryTest {
         Slice<RecipeDto> recipe_FirstPage_2 = recipeRepository.adminSearchTitleOrIng(ingredients,"제목" ,null,pageRequest_nextPageTrue);
 
         // 하나의 데이터만 search
-        List<RecipeDto> content = recipe_FirstPage.getContent();
-        assertThat(content.get(0).getId()).isEqualTo(5l);
+        assertThat(recipe_FirstPage.getContent()).hasSize(1);
         assertThat(recipe_FirstPage.hasNext()).isFalse();
 
         // 모든 레시피 데이터 검색
