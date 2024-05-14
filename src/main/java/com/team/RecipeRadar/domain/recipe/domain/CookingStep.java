@@ -25,4 +25,8 @@ public class CookingStep {
     @ManyToOne
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    public void update(String steps){
+        this.steps = steps;
+    }
 }

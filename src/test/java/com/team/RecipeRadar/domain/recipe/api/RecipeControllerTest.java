@@ -17,6 +17,7 @@ import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +36,15 @@ import java.util.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecipeController.class)
+@Slf4j
 class RecipeControllerTest {
 
     @Autowired
@@ -353,4 +357,114 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("대표 이미지를 등록해 주세요"));
     }
+    @Test
+    @CustomMockAdmin
+    @DisplayName("레시피 수정 성공시 테스트")
+    void recipe_update_successful() throws Exception {
+        String originFileName = "test.jpg";
+        long recipe_id =1l;
+
+        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "2", "cook_steps", "2번째 조리순서")));
+
+        MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
+        doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
+
+        MockMultipartFile recipeUpdateRequest_multi = new MockMultipartFile("recipeUpdateRequest", null, "application/json", objectMapper.writeValueAsString(recipeUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
+                        .file(recipeUpdateRequest_multi)
+                        .file(multipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("레시피 수정 성공"));
+    }
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("레시피 수정시 Valid 발생 테스트")
+    void recipe_update_fail_valid() throws Exception {
+        String originFileName = "test.jpg";
+        long recipe_id =1l;
+
+        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("", "난이도", "인원수",
+                List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")));
+
+        MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
+        doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
+
+        MockMultipartFile recipeUpdateRequest_multi = new MockMultipartFile("recipeUpdateRequest", null, "application/json", objectMapper.writeValueAsString(recipeUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
+                        .file(recipeUpdateRequest_multi)
+                        .file(multipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("모든 값을 입력해주세요"))
+                .andExpect(jsonPath("$.data.[0]").isString())
+                .andExpect(jsonPath("$.data.[1]").isString());
+    }
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("레시피 수정시 레시피가 존재하지 않을때 테스트")
+    void recipe_update_noEmpty_recipe() throws Exception {
+        String originFileName = "test.jpg";
+        long recipe_id =1l;
+
+        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "조리순서", "cook_steps", "2번째 조리순서")));
+        
+        MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
+
+        doThrow(new NoSuchElementException("해당 레시피를 찾을수가 없습니다.")).when(recipeService).updateRecipe(recipe_id,recipeUpdateRequest,multipartFile);
+
+        MockMultipartFile recipeUpdateRequest_multi = new MockMultipartFile("recipeUpdateRequest", null, "application/json", objectMapper.writeValueAsString(recipeUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
+                        .file(recipeUpdateRequest_multi)
+                        .file(multipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("해당 레시피를 찾을수가 없습니다."));
+    }
+
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("어드민 검색 레시피 조회 테스트")
+    void Search_Recipe1() throws Exception {
+
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        String title= "recipe";
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        recipeDtoList.add(new RecipeDto(1L, "url1", title, "level1", "1인분", "10분", 0));
+
+        boolean paged = pageRequest.next().isPaged();
+
+        RecipeResponse recipeResponse = new RecipeResponse(recipeDtoList, paged);
+
+        given(recipeService.searchRecipesByTitleAndIngredients(isNull(), eq(title), isNull(), any(Pageable.class)))
+                .willReturn(recipeResponse);
+
+        mockMvc.perform(get("/api/admin/recipe?title="+title)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].id").value(1))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].imageUrl").value("url1"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].title").value(title))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingLevel").value("level1"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].people").value("1인분"))
+                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
+                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(1));
+    }
+
 }
