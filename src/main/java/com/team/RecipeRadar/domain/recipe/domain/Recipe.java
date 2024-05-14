@@ -47,12 +47,6 @@ public class Recipe {
         this.likeCount = count;
     }
 
-    public void update_recipe(String title, String cookingLevel, String people, String cookingTime){
-        this.title=title;
-        this.cookingLevel=cookingLevel;
-        this.people=people;
-        this.cookingTime=cookingTime;
-    }
     public static Recipe toEntity(RecipeSaveRequest recipeSaveRequest){
         return  Recipe.builder()
                 .title(recipeSaveRequest.getTitle())

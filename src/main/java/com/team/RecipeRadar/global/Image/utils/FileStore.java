@@ -58,14 +58,4 @@ public class FileStore {
         String uuid = UUID.randomUUID().toString();
         return uuid+"."+substring;
     }
-
-    public void deleteFile(String storeFileName){
-        String fullPath = getFullPath(storeFileName);
-
-        File file = new File(fullPath);
-
-        if (!file.delete()){
-            throw new BadRequestException("파일이 삭제되지 않았습니다.");
-        }
-    }
 }
