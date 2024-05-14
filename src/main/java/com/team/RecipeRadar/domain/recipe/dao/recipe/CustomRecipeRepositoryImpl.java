@@ -67,7 +67,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         }
         if (ingredients!=null) {
             for (String ingredientList : ingredients) {
-                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
+                builder.and(ingredient.ingredients.like("%" + ingredientList + "%"));
             }
         }
         // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
