@@ -243,9 +243,11 @@ class RecipeRepositoryTest {
 
         // 하나의 데이터만 search
         assertThat(recipe_FirstPage.getContent()).hasSize(1);
+
         assertThat(recipe_FirstPage.hasNext()).isFalse();
 
         // 모든 레시피 데이터 검색
         assertThat(recipe_FirstPage_2.getContent()).hasSize(5);
+
     }
 }
