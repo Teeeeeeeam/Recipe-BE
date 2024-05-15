@@ -90,11 +90,17 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
      * @return              pageImpl을 반환
      */
     @Override
-    public Page<RecipeDto> getNormalPage(List<String> ingredients, Pageable pageable) {
+    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title ,Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        for (String ingredientList : ingredients) {
-            builder.or(ingredient.ingredients.like("%"+ingredientList+"%"));
+        if(title!=null){
+            builder.and(recipe.title.like("%"+title+"%"));
+        }
+
+        if(ingredients!=null) {
+            for (String ingredientList : ingredients) {
+                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
+            }
         }
 
         List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)

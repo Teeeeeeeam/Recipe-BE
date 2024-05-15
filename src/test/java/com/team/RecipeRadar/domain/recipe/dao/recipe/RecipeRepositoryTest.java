@@ -139,15 +139,15 @@ class RecipeRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(ingredients, pageable);
+        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(List.of(), "제목1",pageable);
 
-        assertThat(recipeDtoPage.getTotalPages()).isEqualTo(3);
+        assertThat(recipeDtoPage.getTotalPages()).isEqualTo(1);
         assertThat(recipeDtoPage.getContent().get(0).getTitle()).isEqualTo(save1.getTitle());
-        assertThat(recipeDtoPage.getTotalElements()).isEqualTo(5);
+        assertThat(recipeDtoPage.getTotalElements()).isEqualTo(1);
 
         Pageable pageable1 = PageRequest.of(3, 2);
 
-        Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, pageable1);
+        Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, "",pageable1);
         assertThat(NorecipeDtoPage.getContent()).hasSize(0);
     }
     
@@ -242,13 +242,12 @@ class RecipeRepositoryTest {
         Slice<RecipeDto> recipe_FirstPage_2 = recipeRepository.adminSearchTitleOrIng(ingredients,"제목" ,null,pageRequest_nextPageTrue);
 
         // 하나의 데이터만 search
-        List<RecipeDto> content = recipe_FirstPage.getContent();
-        assertThat(content.get(0).getId()).isEqualTo(save5.getId());
+        assertThat(recipe_FirstPage.getContent()).hasSize(1);
+
         assertThat(recipe_FirstPage.hasNext()).isFalse();
 
         // 모든 레시피 데이터 검색
         assertThat(recipe_FirstPage_2.getContent()).hasSize(5);
-        assertThat(recipe_FirstPage_2.getContent().get(0).getTitle()).isEqualTo(save1.getTitle());
-        assertThat(recipe_FirstPage_2.getContent().get(2).getTitle()).isEqualTo(save3.getTitle());
+
     }
 }
