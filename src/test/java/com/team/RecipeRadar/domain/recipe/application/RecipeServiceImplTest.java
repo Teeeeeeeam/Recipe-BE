@@ -105,9 +105,9 @@ class RecipeServiceImplTest {
 
         PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
 
-        when(recipeRepository.getNormalPage(eq(ingLists),eq(pageRequest))).thenReturn(dtoPage);
+        when(recipeRepository.getNormalPage(eq(ingLists),anyString(),eq(pageRequest))).thenReturn(dtoPage);
 
-        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingLists, pageRequest);
+        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingLists, "title" ,pageRequest);
         assertThat(recipeDtos.getTotalPages()).isEqualTo(1);
         assertThat(recipeDtos.getContent().get(0).getTitle()).isEqualTo("레시피1");
         assertThat(recipeDtos.getTotalElements()).isEqualTo(2);
