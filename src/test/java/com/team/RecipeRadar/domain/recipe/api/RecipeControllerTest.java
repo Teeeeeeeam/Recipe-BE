@@ -36,7 +36,6 @@ import java.util.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -495,5 +494,4 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
                 .andExpect(jsonPath("$.data.recipeDtoList.size()").value(1));
     }
-
 }

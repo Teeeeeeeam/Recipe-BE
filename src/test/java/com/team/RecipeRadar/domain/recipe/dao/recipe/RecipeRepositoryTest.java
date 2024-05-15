@@ -169,7 +169,6 @@ class RecipeRepositoryTest {
         assertThat(recipeDtoList.get(1).getLikeCount()).isEqualTo(6);
         assertThat(recipeDtoList.get(2).getLikeCount()).isEqualTo(2);
     }
-    
     @Test
     @DisplayName("레시피 업데이트 테스트")
     void recipe_update(){

@@ -25,7 +25,7 @@ class FileStoreTest {
         String originFileName = "test.jpg";
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image", "test data".getBytes());
 
-        UploadFile uploadFile = fileStore.storeFile(multipartFile);;
+        UploadFile uploadFile = fileStore.storeFile(multipartFile);
 
         assertThat(uploadFile.getOriginFileName()).isEqualTo(originFileName);
         assertThat(uploadFile.getStoreFileName()).isNotEmpty();

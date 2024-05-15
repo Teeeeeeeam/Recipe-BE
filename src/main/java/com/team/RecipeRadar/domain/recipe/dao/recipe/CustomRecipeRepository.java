@@ -15,6 +15,7 @@ public interface CustomRecipeRepository {
 
     Page<RecipeDto> getNormalPage(List<String> ingredient,String title,Pageable pageable);
 
+
     RecipeDto getRecipeDetails(Long recipeId);
 
     List<RecipeDto> mainPageRecipe();

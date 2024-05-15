@@ -7,10 +7,6 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
-import com.team.RecipeRadar.global.Image.dao.ImgRepository;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.Image.utils.FileStore;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
@@ -37,8 +33,6 @@ class RecipeServiceImplTest {
     @Mock RecipeRepository recipeRepository;
     @Mock IngredientRepository ingredientRepository;
     @Mock CookStepRepository cookStepRepository;
-    @Mock ImgRepository imgRepository;
-    @Mock FileStore fileStore;
     @InjectMocks RecipeServiceImpl recipeService;
 
     @Test
@@ -219,6 +213,7 @@ class RecipeServiceImplTest {
         SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
 
         when(recipeRepository.adminSearchTitleOrIng(eq(ingLists),eq(title),eq(1l),eq(pageRequest))).thenReturn(recipeDtoSlice);
+
 
         RecipeResponse recipeResponse = recipeService.searchRecipesByTitleAndIngredients(ingLists, "레시피1", 1l, pageRequest);
 
