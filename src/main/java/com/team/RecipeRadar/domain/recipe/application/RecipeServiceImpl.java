@@ -62,8 +62,8 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
-    public  Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable) {
-        return  recipeRepository.getNormalPage(ingredients, pageable);
+    public  Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients,String title, Pageable pageable) {
+        return  recipeRepository.getNormalPage(ingredients, title,pageable);
     }
 
     /**

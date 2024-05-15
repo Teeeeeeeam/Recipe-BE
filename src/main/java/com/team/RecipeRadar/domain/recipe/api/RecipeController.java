@@ -68,15 +68,15 @@ public class RecipeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
 
-    @Operation(summary = "레시피 검색 API(기본 페이징 방식)", description = "기본적인 페이지네이션 방식, sort는 사용안해도됩니다. 기본적으로 레시피를 오름차순 정렬 , Default.size = 10" )
+    @Operation(summary = "레시피 검색 API(기본 페이징 방식)", description = "기본적인 페이지네이션 방식, sort는 사용안해도됩니다. 기본적으로 레시피를 오름차순 정렬 , Default.size = 10, (title= '%like%' , ingredients ='%재료1%' or  ingredients ='%재료2%' 두개 모두 보낼시 하나라도 포함된 레시피 조회" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"content\":[{\"id\":128671,\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2015/05/18/1fb83f8578488ba482ad400e3b62df49.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"pageable\":{\"sort\":{\"empty\":true,\"sorted\":false,\"unsorted\":true},\"offset\":0,\"pageNumber\":0,\"pageSize\":1,\"unpaged\":false,\"paged\":true},\"last\":false,\"totalPages\":78221,\"totalElements\":78221,\"size\":1,\"number\":0,\"sort\":{\"empty\":true,\"sorted\":false,\"unsorted\":true},\"first\":true,\"numberOfElements\":1,\"empty\":false}}")))
     })
     @GetMapping("/recipeV1")
-    public ResponseEntity<?> findRecipeV1(@RequestParam("ingredients") List<String> ingredients, Pageable pageable){
-        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingredients, pageable);
+    public ResponseEntity<?> findRecipeV1(@RequestParam(value = "ingredients",required = false) List<String> ingredients,@RequestParam(value = "title", required = false) String title ,Pageable pageable){
+        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingredients,title, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeDtos));
     }
 

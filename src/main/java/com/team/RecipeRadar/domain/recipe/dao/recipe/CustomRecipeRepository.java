@@ -13,7 +13,7 @@ public interface CustomRecipeRepository {
 
     Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredient,String title,Long lastRecipeId,Pageable pageable);
 
-    Page<RecipeDto> getNormalPage(List<String> ingredient,Pageable pageable);
+    Page<RecipeDto> getNormalPage(List<String> ingredient,String title,Pageable pageable);
 
     RecipeDto getRecipeDetails(Long recipeId);
 

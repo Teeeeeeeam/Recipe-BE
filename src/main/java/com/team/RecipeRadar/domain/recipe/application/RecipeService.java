@@ -14,7 +14,7 @@ public interface RecipeService {
 
     RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title,Long lastRecipeId,Pageable pageable);
 
-    Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients, Pageable pageable);
+    Page<RecipeDto> searchRecipeByIngredientsNormal(List<String> ingredients,String title,Pageable pageable);
 
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
 
