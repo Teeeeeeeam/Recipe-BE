@@ -2,10 +2,15 @@ package com.team.RecipeRadar.domain.post.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
+import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
+import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -16,7 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -154,5 +161,23 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
                 .andExpect(jsonPath("$.data.size()").value(2));     //두개의 valid 발생
+    }
+    
+    @Test
+    @DisplayName("게시글 조회 API 무한 페이징 테스트")
+    void paging_API() throws Exception {
+        Pageable pageRequest = PageRequest.of(0, 2);
+
+        List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
+        PostResponse postResponse = new PostResponse(false, postDtos);
+        given(postService.postPage(eq(pageRequest))).willReturn(postResponse);
+
+        mockMvc.perform(get("/api/posts?size=2"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nextPage").value(false))
+                .andExpect(jsonPath("$.posts.[0].id").value(1))
+                .andExpect(jsonPath("$.posts.[1].postContent").value("컨텐트2"))
+                .andExpect(jsonPath("$.posts.size()").value(2));
     }
 }

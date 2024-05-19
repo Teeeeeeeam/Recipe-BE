@@ -6,8 +6,10 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
@@ -115,5 +117,19 @@ class PostServiceImplTest {
         postService.save(userAddRequest);
 
         verify(postRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("게시글 조회 무한 페이징 테스트")
+    void paging(){
+        Pageable pageRequest = PageRequest.of(0, 2);
+        List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
+        SliceImpl<PostDto> dtoSlice = new SliceImpl<>(postDtos , pageRequest, false);       // 다음 페이지는 없음
+        when(postRepository.getAllPost(eq(pageRequest))).thenReturn(dtoSlice);
+
+        PostResponse postResponse = postService.postPage(pageRequest);
+        assertThat(postResponse.getPosts()).hasSize(2);
+        assertThat(postResponse.getPosts().get(0).getPostContent()).isEqualTo("컨텐트");
+        assertThat(postResponse.isNextPage()).isFalse();
     }
 }
