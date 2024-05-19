@@ -1,10 +1,12 @@
 package com.team.RecipeRadar.domain.post.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -25,7 +27,9 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,5 +105,54 @@ class PostControllerTest {
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("접근 할수 없는 페이지 입니다."));
+    }
+    
+    @Test
+    @DisplayName("사용자 게시글 등록 API 테스트")
+    @CustomMockUser
+    void save_postAPI() throws Exception {
+        UserAddRequest userAddRequest = new UserAddRequest();
+        userAddRequest.setPostContent("컨텐트");
+        userAddRequest.setPostServing("인원");
+        userAddRequest.setPostTitle("제목");
+        userAddRequest.setPostCookingLevel("level");
+        userAddRequest.setPostImageUrl("image url");
+        userAddRequest.setPostCookingTime("cookingTime");
+        userAddRequest.setRecipe_id(1L);
+        userAddRequest.setMemberId(2L);
+        userAddRequest.setPostPassword("1234");
+        doNothing().when(postService).save(eq(userAddRequest));
+
+        mockMvc.perform(post("/api/user/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userAddRequest)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("작성 성공"));
+    }
+
+    @Test
+    @DisplayName("사용자 게시글 등록 API @Valid 테스트")
+    @CustomMockUser
+    void save_postAPI_Valid() throws Exception {
+        UserAddRequest userAddRequest = new UserAddRequest();
+        userAddRequest.setPostContent("컨텐트");
+        userAddRequest.setPostTitle("제목");
+        userAddRequest.setPostImageUrl("image url");
+        userAddRequest.setPostCookingTime("cookingTime");
+        userAddRequest.setRecipe_id(1L);
+        userAddRequest.setMemberId(2L);
+        userAddRequest.setPostPassword("1234");
+        doNothing().when(postService).save(eq(userAddRequest));
+
+        mockMvc.perform(post("/api/user/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userAddRequest)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
+                .andExpect(jsonPath("$.data.size()").value(2));     //두개의 valid 발생
     }
 }

@@ -1,10 +1,16 @@
 package com.team.RecipeRadar.domain.post.application;
 
+import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,16 +18,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +39,10 @@ class PostServiceImplTest {
 
     @Mock PostRepository postRepository;
     @Mock MemberRepository memberRepository;
+    @Mock RecipeRepository recipeRepository;
+    @Mock CommentRepository commentRepository;
+    @Mock PostLikeRepository postLikeRepository;
+    @Mock PasswordEncoder passwordEncoder;
 
     @InjectMocks PostServiceImpl postService;
 
@@ -74,4 +88,32 @@ class PostServiceImplTest {
         assertThatThrownBy(() -> postService.userPostPage(auName, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
     }
 
+    @Test
+    @DisplayName("게시글 등록 테스트 반환 타입이 void라 1회 호출됬는지 확이")
+    void newPost_save(){
+        Long memberId = 1l;
+        Long recipeId = 2l;
+        String password = "1234";
+
+        Member member = Member.builder().id(memberId).loginId("testId").build();
+        Recipe recipe = Recipe.builder().id(recipeId).title("레시피 제목").build();
+
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
+        when(recipeRepository.findById(eq(recipeId))).thenReturn(Optional.of(recipe));
+
+        when(passwordEncoder.encode(anyString())).thenReturn(password);
+
+        Post post = Post.builder().id(3l).member(member).recipe(recipe).build();
+        when(postRepository.save(any())).thenReturn(post);
+
+        UserAddRequest userAddRequest = new UserAddRequest();
+        userAddRequest.setPostContent("컨텐트");
+        userAddRequest.setRecipe_id(recipeId);
+        userAddRequest.setMemberId(memberId);
+        userAddRequest.setPostPassword(password);
+
+        postService.save(userAddRequest);
+
+        verify(postRepository, times(1)).save(any());
+    }
 }
