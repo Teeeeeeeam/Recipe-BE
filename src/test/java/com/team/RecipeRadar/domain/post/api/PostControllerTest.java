@@ -1,8 +1,6 @@
 package com.team.RecipeRadar.domain.post.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
@@ -12,6 +10,7 @@ import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -23,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -179,5 +177,36 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.posts.[0].id").value(1))
                 .andExpect(jsonPath("$.posts.[1].postContent").value("컨텐트2"))
                 .andExpect(jsonPath("$.posts.size()").value(2));
+    }
+    
+    @Test
+    @DisplayName("게시글 상세 조회")
+    @CustomMockUser
+    void details_posts() throws Exception {
+        Long postId= 1l;
+        List<CommentDto> commentDtoListbuild = List.of(CommentDto.builder().id(1l).comment_content("댓글1").build(), CommentDto.builder().id(2l).comment_content("댓글12").build());
+        PostDto postDto = PostDto.builder().id(postId).postContent("컨텐트").postTitle("제목").postCookingLevel("레밸").build();
+        PostDetailResponse postDetailResponse = new PostDetailResponse(postDto, commentDtoListbuild);
+        given(postService.postDetail(anyLong())).willReturn(postDetailResponse);
+
+        mockMvc.perform(get("/api/user/posts/"+postId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("조회성공"))
+                .andExpect(jsonPath("$.data.post.postTitle").value("제목"))
+                .andExpect(jsonPath("$.data.comments.size()").value(2));
+
+    }
+
+    @Test
+    @DisplayName("게시글 조회시 데이터 없을 때 예외 테스트")
+    @CustomMockUser
+    void details_posts_empty() throws Exception {
+        given(postService.postDetail(anyLong())).willThrow(new BadRequestException("게시글이 존재하지 않습니다."));
+
+        mockMvc.perform(get("/api/user/posts/1"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않습니다."));
     }
 }

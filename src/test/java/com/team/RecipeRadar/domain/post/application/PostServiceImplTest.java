@@ -132,4 +132,6 @@ class PostServiceImplTest {
         assertThat(postResponse.getPosts().get(0).getPostContent()).isEqualTo("컨텐트");
         assertThat(postResponse.isNextPage()).isFalse();
     }
+
+
 }
