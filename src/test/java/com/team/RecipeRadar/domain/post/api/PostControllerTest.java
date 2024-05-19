@@ -3,13 +3,16 @@ package com.team.RecipeRadar.domain.post.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
+import com.team.RecipeRadar.domain.post.dto.user.UserUpdateRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -29,12 +32,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -208,5 +211,84 @@ class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("게시글이 존재하지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("게시글 수정 테스트")
+    @CustomMockUser
+    void update_posts() throws Exception {
+        Long postId = 1L;
+        String loginId = "testId";
+        String password = "1234";
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setPostId(postId);
+        userUpdateRequest.setPostTitle("새로운 제목");
+        userUpdateRequest.setPostContent("새로운 내용");
+        userUpdateRequest.setPostServing("4인분");
+        userUpdateRequest.setPostCookingTime("45분");
+        userUpdateRequest.setPostCookingLevel("중간");
+        userUpdateRequest.setPostImageUrl("새로운 이미지 URL");
+        userUpdateRequest.setPostPassword(password);
+        doNothing().when(postService).update(userUpdateRequest,loginId);
+
+        mockMvc.perform(put("/api/user/posts")
+                .content(objectMapper.writeValueAsString(userUpdateRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요리글 수정 성공"));
+    }
+
+    @Test
+    @DisplayName("게시글 수정 @Valid 테스트")
+    @CustomMockUser
+    void update_posts_valid() throws Exception {
+        Long postId = 1L;
+        String loginId = "testId";
+        String password = "1234";
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setPostId(postId);
+        userUpdateRequest.setPostTitle("새로운 제목");
+        userUpdateRequest.setPostImageUrl("새로운 이미지 URL");
+        userUpdateRequest.setPostPassword(password);
+        doNothing().when(postService).update(userUpdateRequest,loginId);
+
+        mockMvc.perform(put("/api/user/posts")
+                        .content(objectMapper.writeValueAsString(userUpdateRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
+                .andExpect(jsonPath("$.data.size()").value("4"));
+    }
+    
+    @Test
+    @DisplayName("게시글 삭제 API 테스트")
+    @CustomMockUser
+    void delete_posts() throws Exception {
+        Long postId = 1l;
+        doNothing().when(postService).delete(anyString(),anyLong());
+
+        mockMvc.perform(delete("/api/user/posts/"+postId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("게시글 삭제 성공"));
+    }
+
+    @Test
+    @DisplayName("게시글 작성자만 삭제 가능 테스트")
+    @CustomMockUser
+    void delete_posts_member() throws Exception {
+        Long postId = 1l;
+        doThrow(new AccessDeniedException("작성자만 삭제할수 있습니다."))
+                .when(postService).delete(anyString(), anyLong());
+
+        mockMvc.perform(delete("/api/user/posts/"+postId))
+                .andDo(print())
+                .andExpect(status().is(401))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("작성자만 삭제할수 있습니다."));
     }
 }

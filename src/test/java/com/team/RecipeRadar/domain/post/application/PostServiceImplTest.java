@@ -11,6 +11,7 @@ import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
+import com.team.RecipeRadar.domain.post.dto.user.UserUpdateRequest;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +28,10 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.sound.sampled.Port;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -133,5 +136,95 @@ class PostServiceImplTest {
         assertThat(postResponse.isNextPage()).isFalse();
     }
 
+    @Test
+    @DisplayName("게시글 업데이트 테스트")
+    void update_Posts(){
+        Long postId = 1l;
+        String password = "1234";
+        String loginId = "testId";
+
+        Member member = Member.builder().loginId(loginId).nickName("ssss").build();
+        Post post = Post.builder().id(postId).postContent("내용").postTitle("제목").member(member).postPassword(password).build();
+        when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+
+        when(passwordEncoder.encode(anyString())).thenReturn(password);
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setPostId(postId);
+        userUpdateRequest.setPostPassword(password);
+        userUpdateRequest.setPostContent("변경된 내용");
+        postService.update(userUpdateRequest,loginId);
+
+        assertThat(post.getPostContent()).isEqualTo("변경된 내용");
+    }
+
+    @Test
+    @DisplayName("게시글 업데이트시 게시글이 존재하지 않을시")
+    void update_none_posts(){
+        Long postId = 1l;
+        String loginId = "testId";
+
+        when(postRepository.findById(eq(postId))).thenThrow(new NoSuchElementException("게시글을 찾을 수 없습니다."));
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setPostId(postId);
+
+        assertThatThrownBy(() -> postService.update(userUpdateRequest, loginId)).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("게시글 업데이트시 작성자가 아닐 경우 예외 발생 테스트")
+    void update_not_author() {
+        Long postId = 1L;
+        String loginId = "testId";
+        String anotherLoginId = "anotherId";
+        String password = "1234";
+
+        Member member = Member.builder().loginId(anotherLoginId).nickName("ssss").build();
+        Post post = Post.builder().id(postId).postContent("내용").postTitle("제목").member(member).postPassword(password).build();
+
+        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setPostId(postId);
+        userUpdateRequest.setPostTitle("새로운 제목");
+        userUpdateRequest.setPostContent("새로운 내용");
+        userUpdateRequest.setPostServing("4인분");
+        userUpdateRequest.setPostCookingTime("45분");
+        userUpdateRequest.setPostCookingLevel("중간");
+        userUpdateRequest.setPostImageUrl("새로운 이미지 URL");
+        userUpdateRequest.setPostPassword(password);
+
+        assertThatThrownBy(() -> postService.update(userUpdateRequest, loginId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("작성자만 삭제 가능합니다.");
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 테스트")
+    void delete_posts(){
+        String loginId= "testId";
+        Long postId = 1l;
+        Member member = Member.builder().id(1l).loginId(loginId).build();
+        Post post = Post.builder().id(postId).postTitle("제목").member(member).build();
+        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
+
+        postService.delete(loginId,postId);
+
+        verify(commentRepository,times(1)).deletePostID(anyLong());
+        verify(postLikeRepository,times(1)).deletePostID(anyLong());
+        verify(postRepository,times(1)).deleteMemberId(anyLong(),anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제시 게시글 없을시")
+    void delete_noSuch_posts(){
+        String loginId= "testId";
+        Long postId = 1l;
+        when(memberRepository.findByLoginId(eq(loginId))).thenThrow(new NoSuchElementException("게시글을 찾을수 없습니다."));
+
+        assertThatThrownBy(() -> postService.delete(loginId,postId)).isInstanceOf(NoSuchElementException.class);
+    }
 
 }
