@@ -2,10 +2,12 @@ package com.team.RecipeRadar.global.jwt.Service;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.jwt.controller.LoginDto;
+import com.team.RecipeRadar.global.jwt.dto.MemberInfoResponse;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +69,21 @@ public class JwtAuthServiceImpl implements JwtAuthService {
         }
     }
 
+    /**
+     * 엑세스 토큰을 통해 사용자의 정보를 조회한다.
+     * @param accessToken   헤더로 요청된 accessToken값
+     * @return MemberInfoResponse 객체를 반환
+     */
+    @Override
+    public MemberInfoResponse accessTokenMemberInfo(String accessToken) {
+        String loginId = jwtProvider.validateAccessToken(accessToken);
+        Member byLoginId = memberRepository.findByLoginId(loginId);
+        if(byLoginId!=null){
+            return MemberInfoResponse.of(MemberDto.from(byLoginId));
+        }else
+            throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+    }
+
     @Override
     public void logout(Long id) {
         RefreshToken byMemberId = refreshTokenRepository.findByMemberId(id);
@@ -74,6 +92,7 @@ public class JwtAuthServiceImpl implements JwtAuthService {
         } else
             throw new JwtTokenException("해당 회원은 이미 로그아웃 했습니다.");
     }
+
 
     @Override
     public void save(RefreshToken refreshToken) {

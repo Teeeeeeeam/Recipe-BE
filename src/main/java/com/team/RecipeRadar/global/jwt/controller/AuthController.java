@@ -4,6 +4,7 @@ import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.jwt.dto.MemberInfoResponse;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -112,6 +113,28 @@ public class AuthController {
         }
         catch (Exception e){
             e.printStackTrace();
+            throw new ServerErrorException(e.getMessage());
+        }
+    }
+    @Operation(summary = "엑세스 토큰 정보 조회", description = "로그인시 회득한 AccessToken의 대해서 사용자 정보를 획득")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\" :\"조회 성공\", \"data\": {\"id\":\"member_id\",\"loginId\":\"로그인 아이디\",\"nickName\":\"닉네임\",\"loginType\":\"normal\"}}"))),
+            @ApiResponse(responseCode = "401" ,description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"토큰이 존재하지 않습니다.\"}"))),
+            @ApiResponse(responseCode = "500" ,description = "SERVER ERROR",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/userinfo")
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request){
+        try{
+            String accessToken = request.getHeader("Authorization");
+            String token = accessToken.substring(accessToken.indexOf("Bearer ") + 7);
+            MemberInfoResponse info = jwtAuthService.accessTokenMemberInfo(token);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",info));
+        }catch (Exception e){
             throw new ServerErrorException(e.getMessage());
         }
     }
