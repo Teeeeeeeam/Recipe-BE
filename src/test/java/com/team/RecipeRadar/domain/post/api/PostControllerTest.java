@@ -9,10 +9,7 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
-import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
-import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
-import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
-import com.team.RecipeRadar.domain.post.dto.user.UserUpdateRequest;
+import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -290,5 +287,46 @@ class PostControllerTest {
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("작성자만 삭제할수 있습니다."));
+    }
+
+    @Test
+    @DisplayName("게시글 비밀번호 유효성 검사 불일치")
+    @CustomMockUser
+    void validPost_invalidPassword_throwsBadRequestException() throws Exception {
+        doThrow(new BadRequestException("비밀번호가 일치하지 않습니다."))
+                .when(postService).validPostPassword(anyString(), any());
+
+        ValidPostRequest validPostRequest = new ValidPostRequest();
+        validPostRequest.setPassword("1234");
+        validPostRequest.setPostId(1l);
+
+        mockMvc.perform(post("/api/valid/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validPostRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("게시글 비밀번호 유효성 검사")
+    @CustomMockUser
+    void validPost_invalidPassword() throws Exception {
+
+        String loginId = "testId";
+        Long postId = 1l;
+
+        ValidPostRequest validPostRequest = new ValidPostRequest();
+        validPostRequest.setPassword("1234");
+        validPostRequest.setPostId(postId);
+
+        given(postService.validPostPassword(eq(loginId),eq(validPostRequest))).willReturn(true);
+
+        mockMvc.perform(post("/api/valid/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validPostRequest)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("비밀번호 인증 성공"));
     }
 }

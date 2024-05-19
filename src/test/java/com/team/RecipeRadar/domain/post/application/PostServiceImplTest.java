@@ -12,8 +12,10 @@ import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.UserAddRequest;
 import com.team.RecipeRadar.domain.post.dto.user.UserUpdateRequest;
+import com.team.RecipeRadar.domain.post.dto.user.ValidPostRequest;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -225,6 +227,76 @@ class PostServiceImplTest {
         when(memberRepository.findByLoginId(eq(loginId))).thenThrow(new NoSuchElementException("게시글을 찾을수 없습니다."));
 
         assertThatThrownBy(() -> postService.delete(loginId,postId)).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("게시글 수정/삭제 진행시 비밀번호 검증 테스트")
+    void valid_passwordTest(){
+        String loginId = "testId";
+        Long postId = 1l;
+        String password="1234";
+
+        Member member = Member.builder().id(1l).loginId(loginId).nickName("닉네임").build();
+        Post post = Post.builder().id(postId).postTitle("제목").member(member).postPassword(password).build();
+
+        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
+
+
+        ValidPostRequest validPostRequest = new ValidPostRequest();
+        validPostRequest.setPassword(password);
+        validPostRequest.setPostId(postId);
+        when(passwordEncoder.matches(anyString(),anyString())).thenReturn(true);
+
+        boolean postPassword = postService.validPostPassword(loginId, validPostRequest);
+
+        assertThat(postPassword).isTrue();
+
+    }
+
+    @Test
+    @DisplayName("게시글 수정/삭제 진행시 비밀번호  일치하지 않을때 검증 테스트")
+    void valid_passwordTest_notSame(){
+        String loginId = "testId";
+        Long postId = 1l;
+        String password="1234";
+
+        Member member = Member.builder().id(1l).loginId(loginId).nickName("닉네임").build();
+        Post post = Post.builder().id(postId).postTitle("제목").member(member).postPassword(password).build();
+
+        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
+
+
+        ValidPostRequest validPostRequest = new ValidPostRequest();
+        validPostRequest.setPassword(password);
+        validPostRequest.setPostId(postId);
+        when(passwordEncoder.matches(anyString(),anyString())).thenReturn(false);
+
+        assertThatThrownBy(() ->  postService.validPostPassword(loginId, validPostRequest)).isInstanceOf(BadRequestException.class).hasMessage("비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("작성자가 아닐 시 게시글 비밀번호 유효성 검사 실패 테스트")
+    void validPostPassword_notAuthor_throwsAccessDeniedException() {
+        String loginId = "testUser";
+        Long postId = 1L;
+        String providedPassword = "password";
+
+        Member member = Member.builder().id(1L).loginId(loginId).build();
+        Member differentMember = Member.builder().id(2L).loginId("anotherUser").build();
+        Post post = Post.builder().id(postId).member(differentMember).postPassword("encodedPassword").build();
+
+        ValidPostRequest request = new ValidPostRequest();
+        request.setPostId(postId);
+        request.setPassword(providedPassword);
+
+        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        assertThatThrownBy(() -> postService.validPostPassword(loginId, request))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("작성한 사용자만 가능합니다.");
     }
 
 }
