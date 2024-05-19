@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CommentDto {
     
     private Long id;
@@ -39,6 +41,14 @@ public class CommentDto {
     }
 
 
+    public static CommentDto of(Comment comment){
+        return CommentDto.builder()
+                .id(comment.getId())
+                .comment_content(comment.getCommentContent())
+                .nickName(comment.getMember().getNickName())
+                .create_at(comment.getCreated_at())
+                .updated_at(comment.getUpdated_at()).build();
+    }
 
 
 }

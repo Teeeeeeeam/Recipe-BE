@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.post.dto;
+package com.team.RecipeRadar.domain.post.dto.user;
 
-import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.post.dto.PostDto;
 import lombok.Getter;
 
 import java.util.List;

@@ -1,20 +1,15 @@
 package com.team.RecipeRadar.domain.post.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class UserAddPostDto {
+public class UserAddRequest {
 
     @Schema(description = "요리글 제목", example = "요리제목!")
     @NotEmpty(message = "요리 제목을 입력해주세요")
