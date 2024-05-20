@@ -9,8 +9,8 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.application.ImgServiceImpl;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.Image.utils.FileStore;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -38,7 +38,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +53,7 @@ class RecipeControllerTest {
     @MockBean RecipeServiceImpl recipeService;
     @MockBean FileStore fileStore;
     @MockBean ImgServiceImpl imgService;
+    @MockBean S3UploadService s3UploadService;
 
 
     @MockBean
@@ -280,17 +280,14 @@ class RecipeControllerTest {
     void save_Recipe_Admin_Success() throws Exception {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
+        String uploadFile= "test.jpg";
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
-        UploadFile uploadFile = new UploadFile("test.jpg", "stored_test.jpg");
 
-        given(recipeService.saveRecipe(any())).willReturn(recipe);
-        given(fileStore.storeFile(any())).willReturn(uploadFile);
-        doNothing().when(imgService).saveRecipeImg(eq(recipe), eq(uploadFile));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willReturn(uploadFile);
+        doNothing().when(recipeService).saveRecipe(eq(recipeSaveRequest),anyString(),eq(uploadFile));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
-
 
         mockMvc.perform(
                         multipart("/api/admin/save/recipe")
@@ -311,16 +308,13 @@ class RecipeControllerTest {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe recipe = Recipe.toEntity(recipeSaveRequest);
+        String uploadFile= "test.jpg";
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
-        UploadFile uploadFile = new UploadFile("test.jpg", "stored_test.jpg");
 
-        given(recipeService.saveRecipe(any())).willReturn(recipe);
-        given(fileStore.storeFile(any())).willReturn(uploadFile);
-        doNothing().when(imgService).saveRecipeImg(eq(recipe), eq(uploadFile));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willReturn(uploadFile);
+        doNothing().when(recipeService).saveRecipe(eq(recipeSaveRequest), anyString(),eq(uploadFile));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
-
 
         mockMvc.perform(
                         multipart("/api/admin/save/recipe")
@@ -340,11 +334,9 @@ class RecipeControllerTest {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.AAA", "image/jpeg", "test data".getBytes());
 
-        given(recipeService.saveRecipe(any())).willReturn(recipe);
-        given(fileStore.storeFile(eq(mockMultipartFile))).willThrow(new BadRequestException("이미지 파일만 등록해 주세요"));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willThrow(new BadRequestException("이미지 파일만 등록해 주세요"));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -361,17 +353,15 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("레시피 등록 테스트 (파일명확장자가 아닐시 오류)")
+    @DisplayName("레시피 등록 테스트 (대표 이미지 등록 안했을 때)")
     @CustomMockAdmin
     void save_Empty_File() throws Exception {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe recipe = Recipe.toEntity(recipeSaveRequest);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", null, "image/jpeg", "test data".getBytes());
 
-        given(recipeService.saveRecipe(any())).willReturn(recipe);
-        given(fileStore.storeFile(eq(mockMultipartFile))).willThrow(new BadRequestException("대표 이미지를 등록해 주세요"));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willThrow(new BadRequestException("대표 이미지를 등록해 주세요"));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 

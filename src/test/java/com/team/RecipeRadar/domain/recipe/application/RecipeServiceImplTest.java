@@ -9,8 +9,7 @@ import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.Image.utils.FileStore;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,7 +36,7 @@ class RecipeServiceImplTest {
     @Mock IngredientRepository ingredientRepository;
     @Mock CookStepRepository cookStepRepository;
     @Mock ImgRepository imgRepository;
-    @Mock FileStore fileStore;
+    @Mock S3UploadService s3UploadService;
     @InjectMocks RecipeServiceImpl recipeService;
 
     @Test
@@ -147,12 +145,11 @@ class RecipeServiceImplTest {
         when(ingredientRepository.save(any(Ingredient.class))).thenReturn(ingredient);
         when(cookStepRepository.saveAll(anyList())).thenReturn(cookingSteps);
 
-        Recipe savedRecipe = recipeService.saveRecipe(recipeSaveRequest);
+        recipeService.saveRecipe(recipeSaveRequest,"testURL","IMG");
 
-        assertThat(savedRecipe.getTitle()).isEqualTo("title");
-        assertThat(savedRecipe).isInstanceOf(Recipe.class);
-        assertThat(ingredient.getRecipe()).isEqualTo(savedRecipe);
-        assertThat(cookingSteps.get(0).getRecipe()).isEqualTo(savedRecipe);
+
+        assertThat(entity.getTitle()).isEqualTo(recipeSaveRequest.getTitle());
+        assertThat(ingredient.getRecipe()).isEqualTo(entity);
     }
 
     @Test
@@ -177,8 +174,9 @@ class RecipeServiceImplTest {
         when(cookStepRepository.findById(anyLong())).thenReturn(Optional.of(testCookStep));
         
         UploadFile testUploadFile = new UploadFile("before.jpg","저장돤 파일명");
-        when(fileStore.storeFile(file)).thenReturn(testUploadFile);
-        
+        doNothing().when(s3UploadService).deleteFile(anyString());
+        when(s3UploadService.uploadFile(file)).thenReturn(originalFileName);
+
         when(imgRepository.findByRecipe_Id(recipeId)).thenReturn(Optional.of(testUploadFile));
 
         doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
