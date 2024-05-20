@@ -6,8 +6,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
+import com.team.RecipeRadar.global.Image.domain.QUploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
+import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository
@@ -24,6 +27,9 @@ import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
     private final JPAQueryFactory queryFactory;
+
+    @Value("${S3.URL}")
+    private  String s3URL;
 
     /**
      * 동적(재료) 무한 스크르롤 페이징 기능
@@ -103,9 +109,10 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
             }
         }
 
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
+                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -131,37 +138,45 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Override
     public RecipeDto getRecipeDetails(Long recipeId) {
 
-        List<Tuple> details = queryFactory.select(recipe, ingredient.ingredients, cookingStep)
+        List<Tuple> details = queryFactory.select(recipe, uploadFile.storeFileName,ingredient.ingredients, cookingStep)
                 .from(recipe)
                 .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
+                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .leftJoin(recipe.cookingStepList, cookingStep)
                 .where(recipe.id.eq(recipeId)).fetch();
 
         List<CookingStep> cookingSteps = details.stream().map(tuple -> tuple.get(cookingStep)).collect(Collectors.toList());
 
+
+        String imgName = details.stream().map(tuple -> getImageUrl(tuple)).findFirst().get();
         Recipe recipeEntity = details.stream().map(tuple -> tuple.get(recipe)).collect(Collectors.toList()).stream().findFirst().get();
 
         String ingredients = details.stream().map(tuple -> tuple.get(ingredient.ingredients)).collect(Collectors.toList()).stream().findFirst().get();
 
-        return RecipeDto.of(recipeEntity,cookingSteps,ingredients);
+        return RecipeDto.of(recipeEntity,imgName,cookingSteps,ingredients);
     }
 
     @Override
     public List<RecipeDto> mainPageRecipe() {
 
-        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
                 .from(recipe)
+                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .orderBy(recipe.likeCount.desc())
                 .limit(8).fetch();
 
-        return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
+        return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id),
+                getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
                 tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
     }
 
+
+
     private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, recipe.imageUrl, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
+        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
+                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(builder)
                 .orderBy(recipe.id.asc())
                 .limit(pageable.getPageSize() + 1)
@@ -169,12 +184,19 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         return result;
     }
 
-    private static List<RecipeDto> getRecipeDtoList(List<Tuple> result) {
-        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), tuple.get(recipe.imageUrl), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
+    private List<RecipeDto> getRecipeDtoList(List<Tuple> result) {
+        List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
                 tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
         return content;
     }
 
+    private  String getImageUrl(Tuple tuple) {
+        String img = tuple.get(uploadFile.storeFileName);
+        if(!img.startsWith("http")){
+            return s3URL+img;
+        }
+        return img;
+    }
     private static boolean isHasNext(Pageable pageable, List<RecipeDto> content) {
         boolean hasNext =false;
 

@@ -56,8 +56,8 @@ public class RecipeDto {
         return new RecipeDto(recipe.getId(), recipe.getImageUrl(), recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount());
     }
 
-    public static RecipeDto of(Recipe recipe,List<CookingStep> cookStep,String ingredient){
-        return new RecipeDto(recipe.getId(), recipe.getImageUrl(), recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
+    public static RecipeDto of(Recipe recipe,String imageUrl,List<CookingStep> cookStep,String ingredient){
+        return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
         ,cookStep,ingredient);
     }
 }
