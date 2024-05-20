@@ -23,4 +23,5 @@ public interface RecipeService {
     void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename);
     void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file);
 
+    void deleteByAdmin(Long recipeId,String loginId);
 }

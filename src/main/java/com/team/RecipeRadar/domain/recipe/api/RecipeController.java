@@ -9,6 +9,7 @@ import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -22,6 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -204,6 +208,33 @@ public class RecipeController {
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
         }
+    }
+    @Operation(summary = "레시피 수정 API",description = "admin 권환을 가진 관리자만 레시피를 삭제 가능하며 해당 레시피 삭제시 레시피와 관련된 모든 데이터를 삭제시킨다.(대표사진,게시글 등등)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"레시피 삭제 성공\"}"))),
+            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"관리지만 삭제 가능합니다.\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @DeleteMapping("/admin/recipe/{recipe-id}")
+    public ResponseEntity<?> deleteAdmin(@PathVariable("recipe-id") Long recipeId){
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+            String loginId = principal.getMemberDto(principal.getMember()).getLoginId();
+            recipeService.deleteByAdmin(recipeId,loginId);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 삭제 성공"));
+        }catch (AccessDeniedException e){
+            throw new AccessDeniedException(e.getMessage());
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버오류");
+        }
+
     }
 
 }

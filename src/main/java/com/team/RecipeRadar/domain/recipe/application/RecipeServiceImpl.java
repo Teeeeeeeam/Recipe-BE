@@ -1,5 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -9,13 +11,13 @@ import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.Image.utils.FileStore;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,8 +35,8 @@ public class RecipeServiceImpl implements RecipeService{
     private final IngredientRepository ingredientRepository;
     private final CookStepRepository cookStepRepository;
     private final ImgRepository imgRepository;
-    private final FileStore fileStore;
     private final S3UploadService s3UploadService;
+    private final MemberRepository memberRepository;
 
     /**
      * recipeRepository에서 페이징쿼리를 담아 반환된 데이터를 Response로 옮겨담아 전송, 조회 전용 메소드
@@ -178,5 +180,26 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
 
+    /**
+     * 관리자만 레시피를 삭제 가능 레시피와 관련된 모든 데이터 삭제
+     * @param recipeId
+     * @param loginId
+     */
+    @Override
+    public void deleteByAdmin(Long recipeId, String loginId) {
+        Member member = memberRepository.findByLoginId(loginId);
+        if(!member.getRoles().equals("ROLE_ADMIN")){
+            throw new AccessDeniedException("관리지만 삭제 가능합니다.");
+        }
+
+        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
+
+        String storeFileName = uploadFile.getStoreFileName();
+        s3UploadService.deleteFile(storeFileName);
+        ingredientRepository.deleteRecipeId(recipeId);
+        imgRepository.deleteRecipeId(recipeId);
+        cookStepRepository.deleteRecipeId(recipeId);
+        recipeRepository.deleteById(recipeId);
+    }
 
 }
