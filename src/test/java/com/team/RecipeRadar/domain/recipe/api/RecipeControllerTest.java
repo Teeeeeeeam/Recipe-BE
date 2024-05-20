@@ -28,9 +28,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
+import java.rmi.AccessException;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -486,4 +488,30 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipeDtoList.size()").value(1));
     }
 
+    @Test
+    @CustomMockAdmin
+    @DisplayName("괸리자 레시피 삭제 API 구현")
+    void deleteByAdmin() throws Exception {
+        String loginId = "testId";
+        Long recipeId = 1l;
+        doNothing().when(recipeService).deleteByAdmin(eq(recipeId),eq(loginId));
+        mockMvc.perform(delete("/api/admin/recipe/"+recipeId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("레시피 삭제 성공"));
+    }
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("일반 사용자가 레시피 삭제 API 구현")
+    void deleteByUser() throws Exception {
+        Long recipeId = 1l;
+
+        doThrow(new AccessDeniedException("관리자만 삭제가능")).when(recipeService).deleteByAdmin(eq(recipeId), anyString());
+
+        mockMvc.perform(delete("/api/admin/recipe/"+recipeId))
+                .andDo(print())
+                .andExpect(status().is(401))
+                .andExpect(jsonPath("$.message").value("관리자만 삭제가능"));
+    }
 }
