@@ -5,6 +5,8 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +36,9 @@ class RecipeRepositoryTest {
     @Autowired RecipeRepository recipeRepository;
     @Autowired IngredientRepository ingredientRepository;
     @Autowired CookStepRepository cookStepRepository;
-    
+    @Autowired ImgRepository imgRepository;
+
+
     @Test
     @DisplayName("무한 페이징(Slice) 테스트 ")
     void findIng(){
@@ -50,6 +54,16 @@ class RecipeRepositoryTest {
         Recipe save3 = recipeRepository.save(build3);
         Recipe save4 = recipeRepository.save(build4);
         Recipe save5 = recipeRepository.save(build5);
+        UploadFile uploadFile1 = UploadFile.builder().recipe(save1).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile2 = UploadFile.builder().recipe(save2).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile3 = UploadFile.builder().recipe(save3).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile4= UploadFile.builder().recipe(save4).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile5 = UploadFile.builder().recipe(save5).storeFileName("test").originFileName("test").build();
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
+        imgRepository.save(uploadFile4);
+        imgRepository.save(uploadFile5);
 
         Ingredient ingredient = Ingredient.builder().recipe(save1).ingredients("밥").build();
         Ingredient ingredient1 = Ingredient.builder().recipe(save2).ingredients("밥|고기").build();
@@ -91,6 +105,9 @@ class RecipeRepositoryTest {
         Ingredient ingredient = Ingredient.builder().recipe(save).ingredients("김치|밥|고가").build();
         CookingStep cookingStep = CookingStep.builder().recipe(save).steps("김치를 넣는다").build();
 
+        UploadFile uploadFile1 = UploadFile.builder().recipe(save).storeFileName("test").originFileName("test").build();
+
+        imgRepository.save(uploadFile1);
 
         Ingredient ingredient1 = ingredientRepository.save(ingredient);
         CookingStep save1 = cookStepRepository.save(cookingStep);
@@ -120,6 +137,17 @@ class RecipeRepositoryTest {
         Recipe save3 = recipeRepository.save(build3);
         Recipe save4 = recipeRepository.save(build4);
         Recipe save5 = recipeRepository.save(build5);
+
+        UploadFile uploadFile1 = UploadFile.builder().recipe(save1).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile2 = UploadFile.builder().recipe(save2).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile3 = UploadFile.builder().recipe(save3).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile4= UploadFile.builder().recipe(save4).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile5 = UploadFile.builder().recipe(save5).storeFileName("test").originFileName("test").build();
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
+        imgRepository.save(uploadFile4);
+        imgRepository.save(uploadFile5);
 
         Ingredient ingredient = Ingredient.builder().recipe(save1).ingredients("밥").build();
         Ingredient ingredient1 = Ingredient.builder().recipe(save2).ingredients("밥|고기").build();
@@ -159,9 +187,17 @@ class RecipeRepositoryTest {
         Recipe low = Recipe.builder().id(2l).title("제목2").cookingTime("시간2").likeCount(2).build();
         Recipe mid = Recipe.builder().id(3l).title("제목3").cookingTime("시간3").likeCount(6).build();
 
-        recipeRepository.save(high);
-        recipeRepository.save(low);
-        recipeRepository.save(mid);
+        Recipe save = recipeRepository.save(high);
+        Recipe save1 = recipeRepository.save(low);
+        Recipe save2 = recipeRepository.save(mid);
+
+        UploadFile uploadFile1 = UploadFile.builder().recipe(save).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile2 = UploadFile.builder().recipe(save1).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile3 = UploadFile.builder().recipe(save2).storeFileName("test").originFileName("test").build();
+
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
 
         List<RecipeDto> recipeDtoList = recipeRepository.mainPageRecipe();
 
@@ -219,6 +255,17 @@ class RecipeRepositoryTest {
         Recipe save3 = recipeRepository.save(build3);
         Recipe save4 = recipeRepository.save(build4);
         Recipe save5 = recipeRepository.save(build5);
+
+        UploadFile uploadFile1 = UploadFile.builder().recipe(save1).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile2 = UploadFile.builder().recipe(save2).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile3 = UploadFile.builder().recipe(save3).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile4= UploadFile.builder().recipe(save4).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile5 = UploadFile.builder().recipe(save5).storeFileName("test").originFileName("test").build();
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
+        imgRepository.save(uploadFile4);
+        imgRepository.save(uploadFile5);
 
         Ingredient ingredient = Ingredient.builder().recipe(save1).ingredients("밥").build();
         Ingredient ingredient1 = Ingredient.builder().recipe(save2).ingredients("밥|고기").build();
