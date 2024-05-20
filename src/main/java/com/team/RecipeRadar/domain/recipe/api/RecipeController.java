@@ -2,11 +2,10 @@ package com.team.RecipeRadar.domain.recipe.api;
 
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
-import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.application.ImageService;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.Image.utils.FileStore;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -43,6 +42,7 @@ public class RecipeController {
     private final ImageService imageService;
     private final RecipeService recipeService;
     private final FileStore fileStore;
+    private final S3UploadService s3UploadService;
 
     @Operation(summary = "레시피 검색 API(무한 스크롤 방식)", description = "조회된 마지막 레시피의 Id값을 통해 다음페이지 여부를 판단 ('lastId'는 조회된 마지막 페이지 작성 값을 넣지않고 보내면 첫번째의 데이터만 출력 , page에 대한 쿼리스트링 작동 x)" )
     @ApiResponses(value = {
@@ -147,7 +147,7 @@ public class RecipeController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @PostMapping(value = "/admin/save/recipe", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> recipe_image(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult, @RequestPart(required = false) MultipartFile file){
+    public ResponseEntity<?> recipe_save(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult, @RequestPart(required = false) MultipartFile file){
         try {
             if (bindingResult.hasErrors()){
                 List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -158,13 +158,12 @@ public class RecipeController {
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",errors));
             }
 
-            Recipe recipe = recipeService.saveRecipe(recipeSaveRequest);
-            UploadFile uploadFile = fileStore.storeFile(file);
-            imageService.saveRecipeImg(recipe,uploadFile);
-
+            String uploadFile = s3UploadService.uploadFile(file);
+            String originalFilename = file.getOriginalFilename();
+            recipeService.saveRecipe(recipeSaveRequest,uploadFile,originalFilename);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 등록 성공"));
         }catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());          //{"이미지 파일이 아닐시", "대표 이미지 사진이 등록 안될시","70MB 초과시"}
+            throw new BadRequestException(e.getMessage());          //{"이미지 파일이 아닐시", "대표 이미지 사진이 등록 안될시","10MB 초과시"}
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버 오류 발생");
@@ -185,8 +184,8 @@ public class RecipeController {
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @PostMapping(value = "/admin/update/{recipe-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRecipe(@PathVariable(name = "recipe-id")Long recipeId ,
-                                          @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
-                                          @RequestPart MultipartFile file){
+                                             @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
+                                             @RequestPart MultipartFile file){
         try {
             if (bindingResult.hasErrors()){
                 List<String> errors = new ArrayList<>();

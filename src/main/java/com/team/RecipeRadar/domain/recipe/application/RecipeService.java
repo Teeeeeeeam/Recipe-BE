@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
-import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ public interface RecipeService {
 
     MainPageRecipeResponse mainPageRecipe();
 
-    Recipe saveRecipe(RecipeSaveRequest recipeSaveRequest);
-    void updateRecipe(Long recipeId,  RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) throws Exception;
+    void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename);
+    void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file);
 
 }

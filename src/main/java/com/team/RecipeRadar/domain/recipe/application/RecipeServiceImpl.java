@@ -10,7 +10,7 @@ import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.Image.utils.FileStore;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +34,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final CookStepRepository cookStepRepository;
     private final ImgRepository imgRepository;
     private final FileStore fileStore;
+    private final S3UploadService s3UploadService;
 
     /**
      * recipeRepository에서 페이징쿼리를 담아 반환된 데이터를 Response로 옮겨담아 전송, 조회 전용 메소드
@@ -112,15 +112,18 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     /**
-     * 어드민 사용자가 새로운 레세피를 등록하는 로직
-     * @param recipeSaveRequest 레시피의 정보
-     * @return 저장한 레시피 객체 반환
+     * 레시피 저장하는 로직 s3에 이미지 저장
      */
+
     @Override
-    public Recipe saveRecipe(RecipeSaveRequest recipeSaveRequest) {
-        Recipe save_Recipe= recipeRepository.save(Recipe.toEntity(recipeSaveRequest));
+    public void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename) {
+
+        Recipe save_Recipe= recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
 
         String ingredient_stream = recipeSaveRequest.getIngredients().stream().collect(Collectors.joining("|"));
+
+        UploadFile uploadFile = UploadFile.builder().storeFileName(fileUrl).originFileName(originalFilename).recipe(save_Recipe).build();
+        imgRepository.save(uploadFile);
 
         Ingredient ingredient = Ingredient.builder()
                 .ingredients(ingredient_stream)
@@ -134,15 +137,25 @@ public class RecipeServiceImpl implements RecipeService{
             cookingSteps.add(CookingStep.builder().steps(steps).recipe(save_Recipe).build());
         }
         cookStepRepository.saveAll(cookingSteps);
-        return save_Recipe;
     }
 
+    /**
+     * 레시피의 정보를 수정하는 로직 해당 이미지파일의 정보가 db에 저장된 이미와 같을 경우 이미지 저장 로직 실행되지 않음
+     * @param recipeId
+     * @param recipeUpdateRequest
+     * @param file
+     */
     @Override
-    public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) throws Exception {
+    public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("해당 레시피를 찾을수 없습니다."));
-        recipe.update_recipe(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getCookTime());
-        recipeRepository.save(recipe);
 
+        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
+        if(!uploadFile.getOriginFileName().equals(file.getOriginalFilename())){
+            s3UploadService.deleteFile(uploadFile.getStoreFileName());
+            String storedFile = s3UploadService.uploadFile(file);
+            uploadFile.update(storedFile,file.getOriginalFilename());
+            imgRepository.save(uploadFile);
+        }
 
         List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookeSteps();
 
@@ -160,17 +173,10 @@ public class RecipeServiceImpl implements RecipeService{
         String ing = recipeUpdateRequest.getIngredients().stream().collect(Collectors.joining("|"));
         ingredientRepository.updateRecipe_ing(recipe.getId(),ing);
 
-        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
-        String storeFileName = uploadFile.getStoreFileName();
-
-        fileStore.deleteFile(storeFileName);
-
-        UploadFile uploadFile1 = fileStore.storeFile(file);
-        uploadFile.setStoreFileName(uploadFile1.getStoreFileName());
-        uploadFile.setOriginFileName(file.getOriginalFilename());
-
-        imgRepository.save(uploadFile);
+        recipe.s3_update_recipe(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getCookTime());
+        recipeRepository.save(recipe);
     }
+
 
 
 }

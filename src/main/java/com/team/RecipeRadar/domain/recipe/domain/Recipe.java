@@ -53,7 +53,23 @@ public class Recipe {
         this.people=people;
         this.cookingTime=cookingTime;
     }
+
+    public void s3_update_recipe(String title, String cookingLevel, String people, String cookingTime){
+        this.title=title;
+        this.cookingLevel=cookingLevel;
+        this.people=people;
+        this.cookingTime=cookingTime;
+    }
     public static Recipe toEntity(RecipeSaveRequest recipeSaveRequest){
+        return  Recipe.builder()
+                .title(recipeSaveRequest.getTitle())
+                .cookingTime(recipeSaveRequest.getCookTime())
+                .cookingLevel(recipeSaveRequest.getCookLevel())
+                .likeCount(0)
+                .people(recipeSaveRequest.getPeople()).build();
+    }
+
+    public static Recipe toEntity_s3(RecipeSaveRequest recipeSaveRequest){
         return  Recipe.builder()
                 .title(recipeSaveRequest.getTitle())
                 .cookingTime(recipeSaveRequest.getCookTime())

@@ -27,14 +27,13 @@ public class UploadFile {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    public UploadFile(String uploadFileName, String storeFileName, Recipe recipe) {
-        this.originFileName = uploadFileName;
-        this.storeFileName = storeFileName;
-        this.recipe = recipe;
-    }
-
     public UploadFile(String originFileName, String storeFileName) {
         this.originFileName = originFileName;
         this.storeFileName = storeFileName;
+    }
+
+    public void update(String storeFileName, String originFileName) {
+        this.storeFileName = storeFileName;
+        this.originFileName = originFileName;
     }
 }
