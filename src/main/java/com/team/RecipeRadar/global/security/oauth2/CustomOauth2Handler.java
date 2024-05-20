@@ -6,12 +6,15 @@ import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,13 +44,14 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
 
         String redirectURI = builder
                 .queryParam("access-token", jwtToken)
-                .queryParam("refresh-token",refreshToken)
                 .build().toString();
+        Cookie cookie = new Cookie("RefreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(30 * 24 * 60 * 60);
 
         if (jwtToken != null) {
-            String jsonResponse = "{\"success\": true, \"message\": \"로그인에 성공했습니다.\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(jsonResponse);
+            response.addCookie(cookie);
             response.sendRedirect(redirectURI);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "페이지를 찾을 수 없습니다.");

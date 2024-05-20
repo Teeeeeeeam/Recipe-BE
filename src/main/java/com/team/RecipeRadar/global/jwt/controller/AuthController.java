@@ -16,8 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
@@ -25,7 +25,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,12 +57,18 @@ public class AuthController {
     @PostMapping("/auth/refresh-token/validate")
     public ResponseEntity<?> RefreshToke(HttpServletRequest request){
         try {
-            String refreshToken = request.getHeader("RefreshToken");
-            String substring = refreshToken.substring(refreshToken.indexOf("Bearer ") + 7);
-            String token = jwtProvider.validateRefreshToken(substring);
+            String refreshToken = "";
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("RefreshToken".equals(cookie.getName())) {
+                        refreshToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
 
-            if (token!=null){
-                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",token));
+            if (refreshToken!=""){
+                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",refreshToken));
             }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));
@@ -84,7 +92,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, BindingResult result){
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, BindingResult result, HttpServletResponse response){
         try {
             if (result.hasErrors()){
                 Map<String, String> errorMap = new HashMap<>();
@@ -100,12 +108,15 @@ public class AuthController {
             }
             Map<String, String> login = jwtAuthService.login(loginDto);
 
-            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
-                    .success(true)
-                    .message("성공")
-                    .data(login).build();
+            String refreshToken = login.get("refreshToken");
 
-            return ResponseEntity.ok(response);
+            ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
+                    .httpOnly(true)
+                    .path("/")
+                    .maxAge(30 * 24 * 60 * 60)
+                    .sameSite("None").build();
+
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(new ControllerApiResponse<>(true,"로그인 성공",Map.of("accessToken",login.get("accessToken"))));
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         }catch (AccessDeniedException e){
