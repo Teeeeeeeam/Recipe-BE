@@ -176,8 +176,9 @@ public class AuthController {
             long memberId = Long.parseLong(data.get("member-id"));
             jwtAuthService.logout(memberId);
             SecurityContextHolder.clearContext();
-            
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"로그아웃 성공"));
+
+            ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null).maxAge(0).path("/").build();
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"로그아웃 성공"));
         } catch (Exception e) {
             throw new JwtTokenException(e.getMessage());
         }
