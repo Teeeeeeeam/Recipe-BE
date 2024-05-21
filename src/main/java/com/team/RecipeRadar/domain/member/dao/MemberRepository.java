@@ -25,4 +25,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Boolean existsByNickName(String nickname);
 
     void deleteById(Long memberId);
+
+    long countAllBy();
 }

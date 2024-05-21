@@ -19,4 +19,6 @@ public interface PostRepository extends JpaRepository<Post,Long>, PostRepository
     @Query("delete from Post c where c.member.id=:member_id and c.id=:post_id")
     void deleteMemberId(@Param("member_id") Long member_id, @Param("post_id")Long post_id);
 
+    long countAllBy();
+
 }
