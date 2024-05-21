@@ -15,6 +15,9 @@ import com.team.RecipeRadar.domain.post.dto.user.UserUpdateRequest;
 import com.team.RecipeRadar.domain.post.dto.user.ValidPostRequest;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -50,6 +54,8 @@ class PostServiceImplTest {
     @Mock CommentRepository commentRepository;
     @Mock PostLikeRepository postLikeRepository;
     @Mock PasswordEncoder passwordEncoder;
+    @Mock S3UploadService s3UploadService;
+    @Mock ImgRepository imgRepository;
 
     @InjectMocks PostServiceImpl postService;
 
@@ -100,7 +106,9 @@ class PostServiceImplTest {
     void newPost_save(){
         Long memberId = 1l;
         Long recipeId = 2l;
+        String imag="test";
         String password = "1234";
+        MockMultipartFile multipartFile = new MockMultipartFile("file", "Test.jpg", "image", "test data".getBytes());
 
         Member member = Member.builder().id(memberId).loginId("testId").build();
         Recipe recipe = Recipe.builder().id(recipeId).title("레시피 제목").build();
@@ -108,10 +116,15 @@ class PostServiceImplTest {
         when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
         when(recipeRepository.findById(eq(recipeId))).thenReturn(Optional.of(recipe));
 
+        when(s3UploadService.uploadFile(eq(multipartFile))).thenReturn(imag);
         when(passwordEncoder.encode(anyString())).thenReturn(password);
 
         Post post = Post.builder().id(3l).member(member).recipe(recipe).build();
         when(postRepository.save(any())).thenReturn(post);
+
+        UploadFile uploadFile = UploadFile.builder().recipe(recipe).storeFileName(imag).originFileName(imag).build();
+
+        when(imgRepository.save(any())).thenReturn(uploadFile);
 
         UserAddRequest userAddRequest = new UserAddRequest();
         userAddRequest.setPostContent("컨텐트");
@@ -119,7 +132,7 @@ class PostServiceImplTest {
         userAddRequest.setMemberId(memberId);
         userAddRequest.setPostPassword(password);
 
-        postService.save(userAddRequest);
+        postService.save(userAddRequest,multipartFile);
 
         verify(postRepository, times(1)).save(any());
     }

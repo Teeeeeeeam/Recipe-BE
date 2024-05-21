@@ -23,10 +23,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -116,21 +118,27 @@ class PostControllerTest {
     @DisplayName("사용자 게시글 등록 API 테스트")
     @CustomMockUser
     void save_postAPI() throws Exception {
+        String file = "test.jpg";
         UserAddRequest userAddRequest = new UserAddRequest();
         userAddRequest.setPostContent("컨텐트");
         userAddRequest.setPostServing("인원");
         userAddRequest.setPostTitle("제목");
         userAddRequest.setPostCookingLevel("level");
-        userAddRequest.setPostImageUrl("image url");
         userAddRequest.setPostCookingTime("cookingTime");
         userAddRequest.setRecipe_id(1L);
         userAddRequest.setMemberId(2L);
         userAddRequest.setPostPassword("1234");
-        doNothing().when(postService).save(eq(userAddRequest));
 
-        mockMvc.perform(post("/api/user/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userAddRequest)))
+        MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
+
+        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostDto", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
+        doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
+
+        mockMvc.perform(multipart("/api/user/posts")
+                        .file(multipartFile)
+                        .file(userAddRequest1)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -141,19 +149,25 @@ class PostControllerTest {
     @DisplayName("사용자 게시글 등록 API @Valid 테스트")
     @CustomMockUser
     void save_postAPI_Valid() throws Exception {
+        String file = "test.jpg";
         UserAddRequest userAddRequest = new UserAddRequest();
         userAddRequest.setPostContent("컨텐트");
         userAddRequest.setPostTitle("제목");
-        userAddRequest.setPostImageUrl("image url");
         userAddRequest.setPostCookingTime("cookingTime");
         userAddRequest.setRecipe_id(1L);
         userAddRequest.setMemberId(2L);
         userAddRequest.setPostPassword("1234");
-        doNothing().when(postService).save(eq(userAddRequest));
 
-        mockMvc.perform(post("/api/user/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userAddRequest)))
+        MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
+
+        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostDto", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
+        doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
+
+        mockMvc.perform(multipart("/api/user/posts")
+                        .file(multipartFile)
+                        .file(userAddRequest1)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
