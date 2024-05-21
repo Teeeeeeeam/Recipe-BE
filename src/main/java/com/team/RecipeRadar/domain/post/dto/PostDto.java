@@ -45,7 +45,7 @@ public class PostDto {
         this.nickName = nickName;
     }
 
-    public static PostDto of(Post post){
+    public static PostDto of(Post post,String imgUrl){
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
@@ -56,6 +56,6 @@ public class PostDto {
                 .postCookingTime(post.getPostCookingTime())
                 .postCookingLevel(post.getPostCookingLevel())
                 .postLikeCount(post.getPostLikeCount())
-                .postImageUrl(post.getPostImageUrl()).build();
+                .postImageUrl(imgUrl).build();
     }
 }

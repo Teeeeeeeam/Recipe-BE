@@ -56,13 +56,12 @@ public class Post {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel, String postImageUrl,String postPassword) {
+    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel,String postPassword) {
         this.postTitle = postTitle;
         this.postContent = postContent;
         this.postServing = postServing;
         this.postCookingTime = postCookingTime;
         this.postCookingLevel = postCookingLevel;
-        this.postImageUrl = postImageUrl;
         this.postPassword= postPassword;
         this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
     }

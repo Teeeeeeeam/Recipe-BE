@@ -33,10 +33,6 @@ public class UserUpdateRequest {
     @NotEmpty(message = "변경할 요리 난이도를 선택해주세요.")
     private String postCookingLevel;
 
-    @Schema(description = "게시글 이미지 URL", example = "http://example.com/newimage.jpg")
-    @NotEmpty(message = "변경할 요리 이미지를 넣어주세요")
-    private String postImageUrl;
-
     @NotEmpty(message = "비밀번호를 입력해주세요")
     @Schema(description = "게시글 비밀번호", example = "123456")
     private String postPassword;

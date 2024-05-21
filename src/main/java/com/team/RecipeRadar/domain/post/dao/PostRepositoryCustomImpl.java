@@ -2,13 +2,17 @@ package com.team.RecipeRadar.domain.post.dao;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
+import com.team.RecipeRadar.global.Image.domain.QUploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -16,11 +20,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository
@@ -28,6 +34,9 @@ import static com.team.RecipeRadar.domain.post.domain.QPost.*;
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
+
+    @Value("${S3.URL}")
+    private String S3URL;
 
     @Override
     public Slice<UserInfoPostRequest> userInfoPost(Long memberId, Pageable pageable) {
@@ -60,15 +69,16 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     @Override
     public Slice<PostDto> getAllPost(Pageable pageable) {
 
-        List<Tuple> list = jpaQueryFactory.select(post.id, post.postTitle, post.postImageUrl, post.member.nickName)
+        List<Tuple> list = jpaQueryFactory.select(post.id, post.postTitle, uploadFile.storeFileName, post.member.nickName)
                 .from(post)
+                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
                 .orderBy(post.created_at.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         boolean hasNextSize = false;
 
-        List<PostDto> collect = list.stream().map(tuple -> new PostDto(tuple.get(post.id), tuple.get(post.postTitle), tuple.get(post.postImageUrl), tuple.get(post.member.nickName))).collect(Collectors.toList());
+        List<PostDto> collect = list.stream().map(tuple -> new PostDto(tuple.get(post.id), tuple.get(post.postTitle), getImg(tuple), tuple.get(post.member.nickName))).collect(Collectors.toList());
 
 
         if(collect.size()> pageable.getPageSize()){
@@ -84,19 +94,30 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     @Override
     public PostDetailResponse postDetails(Long postId) {
 
-        List<Tuple> list = jpaQueryFactory.select(post,comment)
+        List<Tuple> list = jpaQueryFactory.select(post,uploadFile.storeFileName,comment)
                 .from(post)
-                .join(comment).on(comment.post.id.eq(post.id))
+                .leftJoin(comment).on(comment.post.id.eq(post.id))
+                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
                 .where(post.id.eq(postId)).fetch();
 
         if (list.isEmpty()) {
             throw new NoSuchElementException("해당하는 게시물이 없습니다.");
         }
-        
-        PostDto postDto = list.stream().map(tuple -> PostDto.of(tuple.get(post))).findFirst().get();
-        List<CommentDto> collect = list.stream().map(tuple -> CommentDto.of(tuple.get(comment))).collect(Collectors.toList());
 
+        PostDto postDto = list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple))).findFirst().get();
 
-        return new PostDetailResponse(postDto,collect);
+        //최초 등록시에는 댓글이 없을수도 있어서 없을때는 빅 베열이 생성
+        List<CommentDto> collect1 = list.stream().map(tuple -> {
+            Comment comment_entity = tuple.get(comment);
+            if (comment_entity != null) {
+                return CommentDto.of(comment_entity);
+            } else return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return new PostDetailResponse(postDto,collect1);
+    }
+
+    private String getImg(Tuple tuple) {
+        return S3URL+tuple.get(uploadFile.storeFileName);
     }
 }

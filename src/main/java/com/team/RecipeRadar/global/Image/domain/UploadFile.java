@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.global.Image.domain;
 
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,10 @@ public class UploadFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     public UploadFile(String originFileName, String storeFileName) {
         this.originFileName = originFileName;

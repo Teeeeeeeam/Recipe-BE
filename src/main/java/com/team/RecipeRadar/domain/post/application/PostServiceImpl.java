@@ -63,7 +63,6 @@ public class PostServiceImpl implements PostService {
             Member member= op_member.get();
             Recipe recipe = op_recipe.get();
             String storedFileName = s3UploadService.uploadFile(file);       //s3에 이미지 저장
-            UploadFile uploadFile = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(storedFileName).recipe(recipe).build();
 
             Post post = Post.builder()
                     .postTitle(userAddPostDto.getPostTitle())
@@ -78,6 +77,7 @@ public class PostServiceImpl implements PostService {
                     .created_at(LocalDateTime.now())
                     .build();
 
+            UploadFile uploadFile = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(storedFileName).recipe(recipe).post(post).build();
             imgRepository.save(uploadFile);
             postRepository.save(post);
         } else {
@@ -116,6 +116,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("게시글을 찾을수 없습니다."));
         if(!post.getMember().getLoginId().equals(member.getLoginId())) throw new AccessDeniedException("작성자만 삭제할수 있습니다.");
 
+        imgRepository.deletePostImg(post.getId(),post.getRecipe().getId());
         commentRepository.deletePostID(post.getId());
         postLikeRepository.deletePostID(postId);
         postRepository.deleteMemberId(member.getId(),postId);
@@ -133,14 +134,22 @@ public class PostServiceImpl implements PostService {
      * 게시글을 업데이트 하기 위한 로직
      */
     @Override
-    public void update(UserUpdateRequest userUpdateRequest,String loginId) {
+    public void update(UserUpdateRequest userUpdateRequest,String loginId,MultipartFile file) {
         Long postId = userUpdateRequest.getPostId();
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
         if(!post.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("작성자만 삭제 가능합니다.");
 
+        UploadFile uploadFile = imgRepository.getOriginalFileName(post.getId());
+        if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
+            s3UploadService.deleteFile(uploadFile.getStoreFileName());
+            String storedFileName = s3UploadService.uploadFile(file);
+            uploadFile.update(storedFileName, file.getOriginalFilename());
+            imgRepository.save(uploadFile);
+        }
+
         post.update(userUpdateRequest.getPostTitle(), userUpdateRequest.getPostContent(), userUpdateRequest.getPostServing(),
-                userUpdateRequest.getPostCookingTime(), userUpdateRequest.getPostCookingLevel(), userUpdateRequest.getPostImageUrl(),passwordEncoder.encode(userUpdateRequest.getPostPassword()));
+                userUpdateRequest.getPostCookingTime(), userUpdateRequest.getPostCookingLevel(),passwordEncoder.encode(userUpdateRequest.getPostPassword()));
 
         postRepository.save(post);
     }

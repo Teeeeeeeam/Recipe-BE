@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -56,7 +57,7 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                     examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\", \"data\": {\"postCookingTime\": \"요리 시간을 선택하세요\"}}"))),
     })
-    @PostMapping("/api/user/posts")
+    @PostMapping(value = "/api/user/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostDto, BindingResult bindingResult, @RequestPart MultipartFile file) {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
@@ -79,7 +80,6 @@ public class PostController {
     })
     @GetMapping("/api/posts")
     public ResponseEntity<?> findAllPosts(Pageable pageable) {
-
         PostResponse postResponse = postService.postPage(pageable);
         return ResponseEntity.ok(postResponse);
     }
@@ -141,14 +141,14 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @PutMapping("/api/user/posts")
-    public  ResponseEntity<?> updatePost(@Valid @RequestBody UserUpdateRequest updatePostDto, BindingResult bindingResult){
+    @PostMapping(value = "/api/user/update/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest updatePostDto, BindingResult bindingResult,@RequestPart MultipartFile file){
         try{
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
             String loginId = authenticationLogin();
-            postService.update(updatePostDto,loginId);
+            postService.update(updatePostDto,loginId,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공"));
         }catch (NoSuchElementException e){
