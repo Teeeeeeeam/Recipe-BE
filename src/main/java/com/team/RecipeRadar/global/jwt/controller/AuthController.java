@@ -73,15 +73,15 @@ public class AuthController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));   // 만료시 삭제
                 }
                 String accessToken = jwtProvider.validateRefreshToken(refreshToken);
-
                 return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",accessToken));
             }
 
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));
         }catch (JwtTokenException e){
-
             throw new JwtTokenException(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException(e.getMessage());
         }
     }
 
@@ -117,6 +117,7 @@ public class AuthController {
             Map<String, String> login = jwtAuthService.login(loginDto);
 
             String refreshToken = login.get("refreshToken");
+            log.info("토큰={}",refreshToken);
 
             ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
                     .httpOnly(true)
@@ -154,6 +155,7 @@ public class AuthController {
             MemberInfoResponse info = jwtAuthService.accessTokenMemberInfo(token);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",info));
         }catch (Exception e){
+            e.printStackTrace();
             throw new ServerErrorException(e.getMessage());
         }
     }

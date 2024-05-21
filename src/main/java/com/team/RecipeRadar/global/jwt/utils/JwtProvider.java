@@ -73,20 +73,22 @@ public class JwtProvider {
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_TINE);
         Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
 
-        String refreshToken = JWT.create()
-                .withSubject("RefreshToken")
-                .withExpiresAt(expirationDate)
-                .withClaim("id", member.getId())
-                .withClaim("loginId", member.getLoginId())
-                .withClaim("nickName",member.getNickName())
-                .withClaim("loginType",member.getLogin_type())
-                .sign(Algorithm.HMAC512(secret));
-
+        String refreshToken ="";
 
         if (refreshToken_member==null) {
+            String new_refreshToken = JWT.create()
+                    .withSubject("RefreshToken")
+                    .withExpiresAt(expirationDate)
+                    .withClaim("id", member.getId())
+                    .withClaim("loginId", member.getLoginId())
+                    .withClaim("nickName",member.getNickName())
+                    .withClaim("loginType",member.getLogin_type())
+                    .sign(Algorithm.HMAC512(secret));
+            refreshToken = new_refreshToken;
             RefreshToken build = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
             jwtRefreshTokenRepository.save(build);
         }else {
+            refreshToken = refreshToken_member.getRefreshToken();
             refreshToken_member.setRefreshToken(refreshToken);
             jwtRefreshTokenRepository.save(refreshToken_member);
         }
@@ -98,7 +100,7 @@ public class JwtProvider {
      * JWT 토큰의 만료를 검증하는 메소드
      *
      * @param token
-     * @return 만료되지않았다면 ture 만료되었으면  false
+     * @return 만료된 토큰 이면 ture 만려되지 않았다면 false
      */
     public Boolean TokenExpiration(String token) {
 
