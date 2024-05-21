@@ -4,9 +4,10 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface PostService {
-    void save(UserAddRequest userAddPostDto);
+    void save(UserAddRequest userAddPostDto, MultipartFile file);
 
     PostResponse postPage(Pageable pageable);
 

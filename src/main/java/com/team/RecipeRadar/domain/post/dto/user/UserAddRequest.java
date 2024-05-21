@@ -27,10 +27,6 @@ public class UserAddRequest {
     @NotEmpty(message = "요리 난이도를 선택해주세요")
     private String postCookingLevel;
 
-    @Schema(description = "게시글 이미지 URL", example = "http://example.com/image.jpg")
-    @NotEmpty(message = "대표 이미지를 작성해주세요")
-    private String postImageUrl;
-
     @Schema(description = "요리 제공 인원", example = "4인분")
     @NotEmpty(message = "인원수를 선택해 주세요")
     private String postServing;

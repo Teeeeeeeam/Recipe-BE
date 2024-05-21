@@ -13,6 +13,9 @@ import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.exception.PostException;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -40,6 +44,8 @@ public class PostServiceImpl implements PostService {
     private final PostLikeRepository postLikeRepository;
     private final RecipeRepository recipeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImgRepository imgRepository;
+    private final S3UploadService s3UploadService;
 
 
     /**
@@ -47,7 +53,7 @@ public class PostServiceImpl implements PostService {
      * @param userAddPostDto
      */
     @Override
-    public void save(UserAddRequest userAddPostDto) {
+    public void save(UserAddRequest userAddPostDto, MultipartFile file) {
         Long memberId = userAddPostDto.getMemberId();
 
         Optional<Member> op_member = memberRepository.findById(memberId);
@@ -56,6 +62,8 @@ public class PostServiceImpl implements PostService {
         if(op_member.isPresent()&& op_recipe.isPresent()) {
             Member member= op_member.get();
             Recipe recipe = op_recipe.get();
+            String storedFileName = s3UploadService.uploadFile(file);       //s3에 이미지 저장
+            UploadFile uploadFile = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(storedFileName).recipe(recipe).build();
 
             Post post = Post.builder()
                     .postTitle(userAddPostDto.getPostTitle())
@@ -64,12 +72,13 @@ public class PostServiceImpl implements PostService {
                     .postCookingTime(userAddPostDto.getPostCookingTime())
                     .postCookingLevel(userAddPostDto.getPostCookingLevel())
                     .postLikeCount(0) // 좋아요 초기값 설정
-                    .postImageUrl(userAddPostDto.getPostImageUrl()) // 이미지 URL 추가
                     .member(member)
                     .postPassword(passwordEncoder.encode(userAddPostDto.getPostPassword()))
                     .recipe(recipe)
                     .created_at(LocalDateTime.now())
                     .build();
+
+            imgRepository.save(uploadFile);
             postRepository.save(post);
         } else {
             // 데이터베이스 저장 중에 문제가 발생한 경우

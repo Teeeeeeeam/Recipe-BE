@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerErrorException;
 
 import javax.validation.Valid;
@@ -45,7 +46,6 @@ import java.util.NoSuchElementException;
 public class PostController {
 
     private final PostService postService;
-    private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "요리글 작성 API", description = "로그인한 사용자만 요리글 작성 가능", tags = {"일반 사용자 요리글 컨트롤러"} )
     @ApiResponses(value = {
@@ -57,11 +57,11 @@ public class PostController {
                     examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\", \"data\": {\"postCookingTime\": \"요리 시간을 선택하세요\"}}"))),
     })
     @PostMapping("/api/user/posts")
-    public ResponseEntity<?> postAdd(@Valid @RequestBody UserAddRequest userAddPostDto, BindingResult bindingResult) {
+    public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostDto, BindingResult bindingResult, @RequestPart MultipartFile file) {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
-            postService.save(userAddPostDto);
+            postService.save(userAddPostDto,file);
             return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
         }catch (NoSuchElementException e){
             throw new PostException(e.getMessage());
