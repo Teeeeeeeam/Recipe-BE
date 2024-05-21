@@ -55,7 +55,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/auth/refresh-token/validate")
-    public ResponseEntity<?> RefreshToke(HttpServletRequest request){
+    public ResponseEntity<?> RefreshToke(HttpServletRequest request,HttpServletResponse response){
         try {
             String refreshToken = "";
             if (request.getCookies() != null) {
@@ -68,11 +68,17 @@ public class AuthController {
             }
 
             if (refreshToken!=""){
+                if(jwtProvider.TokenExpiration(refreshToken)){
+                    ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null).maxAge(0).path("/").build();
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));   // 만료시 삭제
+                }
                 return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",refreshToken));
             }
 
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));
         }catch (JwtTokenException e){
+
             throw new JwtTokenException(e.getMessage());
         }
     }
