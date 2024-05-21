@@ -72,7 +72,9 @@ public class AuthController {
                     ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null).maxAge(0).path("/").build();
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ErrorResponse<>(false,"토큰이 만료되었거나 일치하지않습니다."));   // 만료시 삭제
                 }
-                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",refreshToken));
+                String accessToken = jwtProvider.validateRefreshToken(refreshToken);
+
+                return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",accessToken));
             }
 
 

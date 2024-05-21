@@ -24,8 +24,11 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
 
-    private static final int TOKEN_TIME = 10; //10분
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
+    @Value("${token.access}")
+    private int ACCESS_TOKEN_TINE;
+
+    @Value("${token.refresh}")
+    private int REFRESH_TOKEN_TINE;
 
     private final MemberRepository memberRepository;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
@@ -45,9 +48,8 @@ public class JwtProvider {
 
         Member member = memberRepository.findByLoginId(loginId);
 
-        LocalDateTime now = LocalDateTime.now().plusMinutes(TOKEN_TIME);
+        LocalDateTime now = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_TINE);
         Date date = Timestamp.valueOf(now);
-        System.out.println(date);
         String token = JWT.create()
                 .withSubject("Token")
                 .withExpiresAt(date)
@@ -68,7 +70,7 @@ public class JwtProvider {
         Member member = memberRepository.findByLoginId(loginId);
         RefreshToken refreshToken_member = jwtRefreshTokenRepository.findByMemberId(member.getId());
 
-        LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_EXPIRATION_TIME);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_TINE);
         Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
 
         String refreshToken = JWT.create()
@@ -110,7 +112,6 @@ public class JwtProvider {
 
     /**
      * 토큰을 검증하는 메서드
-     *
      * @param token
      * @return
      */
