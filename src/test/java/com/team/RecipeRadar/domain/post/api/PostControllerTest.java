@@ -231,6 +231,8 @@ class PostControllerTest {
         Long postId = 1L;
         String loginId = "testId";
         String password = "1234";
+        String file = "Test";
+
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         userUpdateRequest.setPostId(postId);
@@ -239,13 +241,17 @@ class PostControllerTest {
         userUpdateRequest.setPostServing("4인분");
         userUpdateRequest.setPostCookingTime("45분");
         userUpdateRequest.setPostCookingLevel("중간");
-        userUpdateRequest.setPostImageUrl("새로운 이미지 URL");
         userUpdateRequest.setPostPassword(password);
-        doNothing().when(postService).update(userUpdateRequest,loginId);
 
-        mockMvc.perform(put("/api/user/posts")
-                .content(objectMapper.writeValueAsString(userUpdateRequest))
-                .contentType(MediaType.APPLICATION_JSON))
+        MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
+        MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        doNothing().when(postService).update(userUpdateRequest,loginId,multipartFile);
+
+        mockMvc.perform(multipart("/api/user/update/posts")
+                        .file(multipartFile)
+                        .file(updatePostDto)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("요리글 수정 성공"));
@@ -258,17 +264,22 @@ class PostControllerTest {
         Long postId = 1L;
         String loginId = "testId";
         String password = "1234";
+        String file = "Test";
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         userUpdateRequest.setPostId(postId);
         userUpdateRequest.setPostTitle("새로운 제목");
-        userUpdateRequest.setPostImageUrl("새로운 이미지 URL");
         userUpdateRequest.setPostPassword(password);
-        doNothing().when(postService).update(userUpdateRequest,loginId);
+        MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
-        mockMvc.perform(put("/api/user/posts")
-                        .content(objectMapper.writeValueAsString(userUpdateRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
+        MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        doNothing().when(postService).update(userUpdateRequest,loginId,multipartFile);
+
+        mockMvc.perform(multipart("/api/user/update/posts")
+                        .file(multipartFile)
+                        .file(updatePostDto)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
