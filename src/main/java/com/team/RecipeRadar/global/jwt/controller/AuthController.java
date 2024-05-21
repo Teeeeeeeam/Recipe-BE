@@ -122,7 +122,7 @@ public class AuthController {
                     .httpOnly(true)
                     .path("/")
                     .maxAge(30 * 24 * 60 * 60)
-                    .sameSite("None").build();
+                    .build();
 
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(new ControllerApiResponse<>(true,"로그인 성공",Map.of("accessToken",login.get("accessToken"))));
         }catch (BadRequestException e){
