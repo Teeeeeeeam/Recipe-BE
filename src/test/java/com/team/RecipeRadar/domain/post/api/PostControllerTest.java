@@ -235,7 +235,6 @@ class PostControllerTest {
 
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostId(postId);
         userUpdateRequest.setPostTitle("새로운 제목");
         userUpdateRequest.setPostContent("새로운 내용");
         userUpdateRequest.setPostServing("4인분");
@@ -245,9 +244,9 @@ class PostControllerTest {
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
         MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).update(userUpdateRequest,loginId,multipartFile);
+        doNothing().when(postService).update(postId,userUpdateRequest,loginId,multipartFile);
 
-        mockMvc.perform(multipart("/api/user/update/posts")
+        mockMvc.perform(multipart("/api/user/update/posts/"+postId)
                         .file(multipartFile)
                         .file(updatePostDto)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -267,15 +266,14 @@ class PostControllerTest {
         String file = "Test";
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostId(postId);
         userUpdateRequest.setPostTitle("새로운 제목");
         userUpdateRequest.setPostPassword(password);
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
         MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).update(userUpdateRequest,loginId,multipartFile);
+        doNothing().when(postService).update(postId,userUpdateRequest,loginId,multipartFile);
 
-        mockMvc.perform(multipart("/api/user/update/posts")
+        mockMvc.perform(multipart("/api/user/update/posts/"+postId)
                         .file(multipartFile)
                         .file(updatePostDto)
                         .contentType(MediaType.MULTIPART_FORM_DATA)

@@ -174,12 +174,11 @@ class PostServiceImplTest {
         when(passwordEncoder.encode(anyString())).thenReturn(password);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostId(postId);
         userUpdateRequest.setPostPassword(password);
         userUpdateRequest.setPostContent("변경된 내용");
 
         // Perform the update operation
-        postService.update(userUpdateRequest, loginId, multipartFile);
+        postService.update(postId,userUpdateRequest, loginId, multipartFile);
 
         // Assertions
         assertThat(post.getPostContent()).isEqualTo("변경된 내용");
@@ -195,9 +194,8 @@ class PostServiceImplTest {
         when(postRepository.findById(eq(postId))).thenThrow(new NoSuchElementException("게시글을 찾을 수 없습니다."));
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostId(postId);
 
-        assertThatThrownBy(() -> postService.update(userUpdateRequest, loginId,multipartFile)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> postService.update(postId,userUpdateRequest, loginId,multipartFile)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -215,7 +213,6 @@ class PostServiceImplTest {
         when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostId(postId);
         userUpdateRequest.setPostTitle("새로운 제목");
         userUpdateRequest.setPostContent("새로운 내용");
         userUpdateRequest.setPostServing("4인분");
@@ -223,7 +220,7 @@ class PostServiceImplTest {
         userUpdateRequest.setPostCookingLevel("중간");
         userUpdateRequest.setPostPassword(password);
 
-        assertThatThrownBy(() -> postService.update(userUpdateRequest, loginId,multipartFile))
+        assertThatThrownBy(() -> postService.update(postId,userUpdateRequest, loginId,multipartFile))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("작성자만 삭제 가능합니다.");
     }
