@@ -30,7 +30,6 @@ public class RecipeUpdateRequest {
     @Schema(example = "[{\"cook_step_id\":\"조리순서_id\", \"cook_steps\":\"조리순서\"}]")
     private List<Map<String,String>> cookeSteps;
 
-
     private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps) {
         this.title = title;
         this.cookLevel = cookLevel;

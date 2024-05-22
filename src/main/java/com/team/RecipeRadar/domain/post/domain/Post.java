@@ -1,7 +1,8 @@
 package com.team.RecipeRadar.domain.post.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.post.dto.PostDto;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -17,26 +18,28 @@ import java.time.LocalDateTime;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id", updatable = false)
+    @Column(name = "post_id")
     private Long id;
 
-    @Column(name = "post_title", nullable = false)
+    @Column(name = "post_title")
     private String postTitle;
 
-    @Column(name = "post_content", nullable = false)
+    @Column(name = "post_content",length = 1000)
     private String postContent;
 
     private LocalDateTime created_at;
 
     private LocalDateTime updated_at;
 
-    @Column(name = "post_serving", nullable = false)
+    private String postPassword;
+
+    @Column(name = "post_serving")
     private String postServing;
 
-    @Column(name = "post_cooking_time", nullable = false)
+    @Column(name = "post_cooking_time")
     private String postCookingTime;
 
-    @Column(name = "post_cooking_level", nullable = false)
+    @Column(name = "post_cooking_level")
     private String postCookingLevel;
 
     private Integer postLikeCount;
@@ -49,25 +52,35 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @JsonIgnore
-    public LocalDateTime getLocDateTime(){
-        return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-    @JsonIgnore
-    public LocalDateTime getUpdate_LocDateTime(){
-        return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
+    @ManyToOne
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
 
-    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel, String postImageUrl) {
+    public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel,String postPassword) {
         this.postTitle = postTitle;
         this.postContent = postContent;
         this.postServing = postServing;
         this.postCookingTime = postCookingTime;
         this.postCookingLevel = postCookingLevel;
-        this.postImageUrl = postImageUrl;
+        this.postPassword= postPassword;
+        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
     }
 
     public void updateTime(LocalDateTime updated_at) {
         this.updated_at = updated_at;
+    }
+
+    static public PostDto of(Post post){
+        return PostDto.builder()
+                .id(post.getId())
+                .postTitle(post.getPostTitle())
+                .postContent(post.getPostContent())
+                .postServing(post.getPostServing())
+                .postCookingTime(post.getPostCookingTime())
+                .postCookingLevel(post.getPostCookingLevel())
+                .postImageUrl(post.getPostImageUrl())
+                .postLikeCount(post.postLikeCount)
+                .nickName(post.getMember().getNickName())
+                .build();
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member,Long> {
+public interface MemberRepository extends JpaRepository<Member,Long>,CustomMemberRepository {
 
     Member findByLoginId(String loginId);
 
@@ -25,4 +25,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Boolean existsByNickName(String nickname);
 
     void deleteById(Long memberId);
+
+    long countAllBy();
 }

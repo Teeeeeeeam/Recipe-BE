@@ -1,5 +1,8 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -9,8 +12,8 @@ import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.Image.utils.FileStore;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,7 +41,10 @@ class RecipeServiceImplTest {
     @Mock IngredientRepository ingredientRepository;
     @Mock CookStepRepository cookStepRepository;
     @Mock ImgRepository imgRepository;
-    @Mock FileStore fileStore;
+    @Mock S3UploadService s3UploadService;
+    @Mock MemberRepository memberRepository;
+    @Mock PostRepository postRepository;
+
     @InjectMocks RecipeServiceImpl recipeService;
 
     @Test
@@ -147,12 +153,11 @@ class RecipeServiceImplTest {
         when(ingredientRepository.save(any(Ingredient.class))).thenReturn(ingredient);
         when(cookStepRepository.saveAll(anyList())).thenReturn(cookingSteps);
 
-        Recipe savedRecipe = recipeService.saveRecipe(recipeSaveRequest);
+        recipeService.saveRecipe(recipeSaveRequest,"testURL","IMG");
 
-        assertThat(savedRecipe.getTitle()).isEqualTo("title");
-        assertThat(savedRecipe).isInstanceOf(Recipe.class);
-        assertThat(ingredient.getRecipe()).isEqualTo(savedRecipe);
-        assertThat(cookingSteps.get(0).getRecipe()).isEqualTo(savedRecipe);
+
+        assertThat(entity.getTitle()).isEqualTo(recipeSaveRequest.getTitle());
+        assertThat(ingredient.getRecipe()).isEqualTo(entity);
     }
 
     @Test
@@ -177,8 +182,9 @@ class RecipeServiceImplTest {
         when(cookStepRepository.findById(anyLong())).thenReturn(Optional.of(testCookStep));
         
         UploadFile testUploadFile = new UploadFile("before.jpg","저장돤 파일명");
-        when(fileStore.storeFile(file)).thenReturn(testUploadFile);
-        
+        doNothing().when(s3UploadService).deleteFile(anyString());
+        when(s3UploadService.uploadFile(file)).thenReturn(originalFileName);
+
         when(imgRepository.findByRecipe_Id(recipeId)).thenReturn(Optional.of(testUploadFile));
 
         doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
@@ -245,5 +251,39 @@ class RecipeServiceImplTest {
 
         assertThat(recipeResponse.getNextPage()).isFalse();
         assertThat(recipeDtoList).isEmpty();
+    }
+    
+    @Test
+    @DisplayName("관리지만 레시피 삭제가능")
+    void deleteAdmin(){
+        String loginId= "TestId";
+        Long recipeId =1l;
+        Member member = Member.builder().id(1l).loginId(loginId).roles("ROLE_ADMIN").build();
+        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+
+        UploadFile uploadFile = new UploadFile();
+        uploadFile.setStoreFileName("testfile.jpg");
+
+        when(imgRepository.findByRecipe_Id(anyLong())).thenReturn(Optional.of(uploadFile));
+
+        recipeService.deleteByAdmin(1l, loginId);
+
+        verify(postRepository, times(1)).deleteAllByRecipe_Id(recipeId);
+        verify(s3UploadService, times(1)).deleteFile("testfile.jpg");
+        verify(ingredientRepository, times(1)).deleteRecipeId(recipeId);
+        verify(imgRepository, times(1)).deleteRecipeId(recipeId);
+        verify(cookStepRepository, times(1)).deleteRecipeId(recipeId);
+        verify(recipeRepository, times(1)).deleteById(recipeId);
+
+    }
+
+    @Test
+    @DisplayName("레시피 삭젯 관리자가 아닐때 예외")
+    void delete_No_Admin(){
+        String loginId= "TestId";
+        Long recipeId =1l;
+        when(memberRepository.findByLoginId(eq(loginId))).thenThrow(new AccessDeniedException("관리자만 삭제 가능"));
+
+        assertThatThrownBy(() -> recipeService.deleteByAdmin(recipeId,loginId)).isInstanceOf(AccessDeniedException.class).hasMessage("관리자만 삭제 가능");
     }
 }

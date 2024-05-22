@@ -24,8 +24,11 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
 
-    private static final int TOKEN_TIME = 10; //10분
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME =1; // 7일
+    @Value("${token.access}")
+    private int ACCESS_TOKEN_TINE;
+
+    @Value("${token.refresh}")
+    private int REFRESH_TOKEN_TINE;
 
     private final MemberRepository memberRepository;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
@@ -45,9 +48,8 @@ public class JwtProvider {
 
         Member member = memberRepository.findByLoginId(loginId);
 
-        LocalDateTime now = LocalDateTime.now().plusMinutes(TOKEN_TIME);
+        LocalDateTime now = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_TINE);
         Date date = Timestamp.valueOf(now);
-        System.out.println(date);
         String token = JWT.create()
                 .withSubject("Token")
                 .withExpiresAt(date)
@@ -68,23 +70,25 @@ public class JwtProvider {
         Member member = memberRepository.findByLoginId(loginId);
         RefreshToken refreshToken_member = jwtRefreshTokenRepository.findByMemberId(member.getId());
 
-        LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_EXPIRATION_TIME);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_TINE);
         Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
 
-        String refreshToken = JWT.create()
-                .withSubject("RefreshToken")
-                .withExpiresAt(expirationDate)
-                .withClaim("id", member.getId())
-                .withClaim("loginId", member.getLoginId())
-                .withClaim("nickName",member.getNickName())
-                .withClaim("loginType",member.getLogin_type())
-                .sign(Algorithm.HMAC512(secret));
-
+        String refreshToken ="";
 
         if (refreshToken_member==null) {
+            String new_refreshToken = JWT.create()
+                    .withSubject("RefreshToken")
+                    .withExpiresAt(expirationDate)
+                    .withClaim("id", member.getId())
+                    .withClaim("loginId", member.getLoginId())
+                    .withClaim("nickName",member.getNickName())
+                    .withClaim("loginType",member.getLogin_type())
+                    .sign(Algorithm.HMAC512(secret));
+            refreshToken = new_refreshToken;
             RefreshToken build = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
             jwtRefreshTokenRepository.save(build);
         }else {
+            refreshToken = refreshToken_member.getRefreshToken();
             refreshToken_member.setRefreshToken(refreshToken);
             jwtRefreshTokenRepository.save(refreshToken_member);
         }
@@ -96,7 +100,7 @@ public class JwtProvider {
      * JWT 토큰의 만료를 검증하는 메소드
      *
      * @param token
-     * @return 만료되지않았다면 ture 만료되었으면  false
+     * @return 만료된 토큰 이면 ture 만려되지 않았다면 false
      */
     public Boolean TokenExpiration(String token) {
 
@@ -110,7 +114,6 @@ public class JwtProvider {
 
     /**
      * 토큰을 검증하는 메서드
-     *
      * @param token
      * @return
      */

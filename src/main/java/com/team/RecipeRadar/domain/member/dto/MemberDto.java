@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MemberDto {
 
     @Schema(nullable = true,hidden = true)
@@ -86,13 +87,13 @@ public class MemberDto {
                 .build();
     }
 
-    private MemberDto(Long id, String username, String nickName, String password, String loginId, String email) {
-        this.id = id;
-        this.username = username;
-        this.nickname = nickName;
-        this.password = password;
+    private MemberDto(Long memberId, String loginId, String email, String username, String nickname, LocalDate join_date) {
+        this.id = memberId;
         this.loginId = loginId;
         this.email = email;
+        this.username = username;
+        this.nickname =nickname;
+        this.join_date = join_date;
     }
 
     public static MemberDto from(Member member){
@@ -105,5 +106,9 @@ public class MemberDto {
                 .email(member.getEmail())
                 .loginId(member.getLoginId())
                 .login_type(member.getLogin_type()).build();
+    }
+
+    public static MemberDto of(Long memberId, String loginId, String email, String username, String nickname, LocalDate join_date){
+        return new MemberDto(memberId, loginId, email, username, nickname, join_date);
     }
 }

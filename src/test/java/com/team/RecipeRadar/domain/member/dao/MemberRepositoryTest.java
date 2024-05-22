@@ -9,9 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -65,6 +69,23 @@ class MemberRepositoryTest {
 
     }
 
+    @Test
+    @DisplayName("가입한 회원 모두 조회_무한 페이징")
+    void findAllMembers(){
+        String loginId = "loginId";
+        Member member_1 = Member.builder().username("회원1").email("email1").loginId(loginId).nickName("닉네임1").join_date(LocalDate.now()).build();
+        Member member_2 = Member.builder().username("회원2").email("email2").loginId("loginId2").nickName("닉네임2").join_date(LocalDate.now()).build();
+
+        Member save = memberRepository.save(member_1);
+        memberRepository.save(member_2);
+
+        Pageable pageRequest = PageRequest.of(0, 1);
+        Slice<Member> memberInfo = memberRepository.getMemberInfo(pageRequest);
+
+        assertThat(memberInfo.getContent()).hasSize(1);
+        assertThat(memberInfo.hasNext()).isTrue();
+        assertThat(memberInfo.getContent().get(0).getLoginId()).isEqualTo(loginId);
+    }
 
 
 }
