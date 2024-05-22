@@ -1,10 +1,10 @@
 package com.team.RecipeRadar.domain.admin.application;
 
-import com.team.RecipeRadar.domain.admin.dao.BlackList;
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -84,12 +83,12 @@ class AdminsServiceImplTest {
         Pageable pageRequest = PageRequest.of(0, 2);
         String loginId = "testId";
 
-        List<Member> memberList = List.of( Member.builder().username("회원1").email("email1").loginId(loginId).nickName("닉네임1").join_date(LocalDate.now()).build()
-                , Member.builder().username("회원2").email("email2").loginId("loginId2").nickName("닉네임2").join_date(LocalDate.now()).build());
+        List<MemberDto> memberList = List.of( MemberDto.builder().username("회원1").email("email1").loginId(loginId).nickname("닉네임1").join_date(LocalDate.now()).build()
+                , MemberDto.builder().username("회원2").email("email2").loginId("loginId2").nickname("닉네임2").join_date(LocalDate.now()).build());
 
         boolean hasNext = true;
 
-        SliceImpl<Member> memberSlice = new SliceImpl<>(memberList, pageRequest, hasNext);
+        SliceImpl<MemberDto> memberSlice = new SliceImpl<>(memberList, pageRequest, hasNext);
         when(memberRepository.getMemberInfo(pageRequest)).thenReturn(memberSlice);
 
         MemberInfoResponse memberInfoResponse = adminService.memberInfos(pageRequest);
@@ -118,5 +117,26 @@ class AdminsServiceImplTest {
         verify(jwtRefreshTokenRepository, times(1)).DeleteByMemberId(memberId);
         verify(memberRepository, times(1)).deleteById(memberId);
 
+    }
+
+    @Test
+    @DisplayName("사용자 검색 무한 페이징")
+    public void searchMembers_infinite_page(){
+        Pageable pageRequest = PageRequest.of(0, 2);
+        String loginId = "testId";
+
+        List<MemberDto> memberList = List.of( MemberDto.builder().username("회원1").email("email1").loginId(loginId).nickname("닉네임1").join_date(LocalDate.now()).build()
+                , MemberDto.builder().username("회원2").email("email2").loginId("loginId2").nickname("닉네임2").join_date(LocalDate.now()).build());
+
+        boolean hasNext = true;
+
+        SliceImpl<MemberDto> memberSlice = new SliceImpl<>(memberList, pageRequest, hasNext);
+        when(memberRepository.searchMember(eq(loginId),eq("닉네임2"),isNull(),isNull(),eq(pageRequest))).thenReturn(memberSlice);
+
+        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId,"닉네임2",null,null,pageRequest);
+
+        assertThat(memberInfoResponse.getNextPage()).isTrue();
+        assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);
+        assertThat(memberInfoResponse.getMemberInfos().get(0).getLoginId()).isEqualTo(loginId);
     }
 }

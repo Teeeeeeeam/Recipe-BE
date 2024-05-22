@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.dao;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -80,11 +81,37 @@ class MemberRepositoryTest {
         memberRepository.save(member_2);
 
         Pageable pageRequest = PageRequest.of(0, 1);
-        Slice<Member> memberInfo = memberRepository.getMemberInfo(pageRequest);
+        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(pageRequest);
 
         assertThat(memberInfo.getContent()).hasSize(1);
         assertThat(memberInfo.hasNext()).isTrue();
         assertThat(memberInfo.getContent().get(0).getLoginId()).isEqualTo(loginId);
+    }
+
+
+    @Test
+    @DisplayName("가입한 회원 검색_무한 페이징")
+    void searchMember(){
+
+        String meme1_loginId = "loginId";
+        String meme2_loginId = "loginId";
+        Member member_1 = Member.builder().username("회원1").email("email1").loginId(meme1_loginId).nickName("닉네임1").join_date(LocalDate.now()).build();
+        Member member_2 = Member.builder().username("회원2").email("email2").loginId(meme2_loginId).nickName("닉네임2").join_date(LocalDate.now()).build();
+
+        memberRepository.save(member_1);
+        memberRepository.save(member_2);
+
+        Pageable request = PageRequest.of(0, 1);
+        Slice<MemberDto> findMember_1 = memberRepository.searchMember(meme1_loginId, null, null, null, request);
+        Slice<MemberDto> findMember_2 = memberRepository.searchMember(meme2_loginId, "닉네임2", null, null, request);
+        Slice<MemberDto> memberDtos = memberRepository.searchMember(meme1_loginId, "닉네임2", null, null, request);
+
+
+        assertThat(findMember_1.getContent().get(0).getLoginId()).isEqualTo(meme1_loginId);     //첫번째 회원
+        assertThat(findMember_2.getContent().get(0).getLoginId()).isEqualTo(meme2_loginId);     // 두번쨰 회원
+        assertThat(memberDtos.hasNext()).isTrue();                                              // 두명의 정보로 검색해 2개의 검색으로 다음페이지 존재
+        assertThat(memberDtos.getContent()).hasSize(1);
+
     }
 
 

@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminMemberController.class)
-class AdminControllerTest {
+class AdminMemberControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -148,4 +148,26 @@ class AdminControllerTest {
                 .andExpect(jsonPath("$.message").value("삭제 성공"));
     }
 
+
+    @Test
+    @DisplayName("사용자 검색 API 무한 페이징 테스트")
+    @CustomMockAdmin
+    void getMemberSearchInfo() throws Exception {
+
+        String loginId = "testId";
+        String nickname = "nickName";
+        List<MemberDto>  memberDtoList = List.of(MemberDto.builder().username("회원1").email("email1").loginId(loginId).nickname("닉네임1").join_date(LocalDate.now()).build(),
+                MemberDto.builder().username("회원2").email("email2").loginId("loginId2").nickname(nickname).join_date(LocalDate.now()).build());
+
+        boolean hasNext = false;
+        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberDtoList, hasNext);
+        given(adminService.searchMember(eq(loginId),eq(nickname),any(),any(),any())).willReturn(memberInfoResponse);
+
+        mockMvc.perform(get("/api/admin/members/search?login-id="+loginId+"&nickname="+nickname))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
+                .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
+                .andExpect(jsonPath("$.data.size()").value(2));
+    }
 }
