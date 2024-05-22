@@ -15,6 +15,7 @@ import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -154,11 +155,14 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("해당 레시피를 찾을수 없습니다."));
 
         UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
-        if(!uploadFile.getOriginFileName().equals(file.getOriginalFilename())){
-            s3UploadService.deleteFile(uploadFile.getStoreFileName());
-            String storedFile = s3UploadService.uploadFile(file);
-            uploadFile.update(storedFile,file.getOriginalFilename());
-            imgRepository.save(uploadFile);
+
+        if(file!=null) {
+            if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
+                s3UploadService.deleteFile(uploadFile.getStoreFileName());
+                String storedFile = s3UploadService.uploadFile(file);
+                uploadFile.update(storedFile, file.getOriginalFilename());
+                imgRepository.save(uploadFile);
+            }
         }
 
         List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookeSteps();

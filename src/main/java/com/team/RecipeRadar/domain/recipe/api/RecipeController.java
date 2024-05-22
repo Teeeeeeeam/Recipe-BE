@@ -193,7 +193,7 @@ public class RecipeController {
     @PostMapping(value = "/admin/update/{recipe-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRecipe(@PathVariable(name = "recipe-id")Long recipeId ,
                                              @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
-                                             @RequestPart MultipartFile file){
+                                             @RequestPart(required = false) MultipartFile file){
         try {
             if (bindingResult.hasErrors()){
                 List<String> errors = new ArrayList<>();
