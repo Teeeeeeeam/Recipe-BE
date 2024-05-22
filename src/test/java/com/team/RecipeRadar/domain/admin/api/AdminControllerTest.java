@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -131,4 +132,20 @@ class AdminControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."));
     }
+
+    @Test
+    @DisplayName("어드민 일괄 삭제 API 구현")
+    @CustomMockAdmin
+    void deleteAllUser() throws Exception {
+
+        List<Long>  list= List.of(1l,2l,3l);
+        doNothing().when(adminService).adminDeleteUsers(anyList());
+
+        mockMvc.perform(delete("/api/admin/members?")
+                .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("삭제 성공"));
+    }
+
 }
