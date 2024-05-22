@@ -105,6 +105,7 @@ public class MemberDto {
                 .password(member.getPassword())
                 .email(member.getEmail())
                 .loginId(member.getLoginId())
+                .roles(member.getRoles())
                 .login_type(member.getLogin_type()).build();
     }
 
