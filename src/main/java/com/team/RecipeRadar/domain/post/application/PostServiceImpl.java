@@ -134,18 +134,19 @@ public class PostServiceImpl implements PostService {
      * 게시글을 업데이트 하기 위한 로직
      */
     @Override
-    public void update(UserUpdateRequest userUpdateRequest,String loginId,MultipartFile file) {
-        Long postId = userUpdateRequest.getPostId();
+    public void update(Long postId,UserUpdateRequest userUpdateRequest,String loginId,MultipartFile file) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
         if(!post.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("작성자만 삭제 가능합니다.");
 
         UploadFile uploadFile = imgRepository.getOriginalFileName(post.getId());
-        if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
-            s3UploadService.deleteFile(uploadFile.getStoreFileName());
-            String storedFileName = s3UploadService.uploadFile(file);
-            uploadFile.update(storedFileName, file.getOriginalFilename());
-            imgRepository.save(uploadFile);
+        if(file!=null) {
+            if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
+                s3UploadService.deleteFile(uploadFile.getStoreFileName());
+                String storedFileName = s3UploadService.uploadFile(file);
+                uploadFile.update(storedFileName, file.getOriginalFilename());
+                imgRepository.save(uploadFile);
+            }
         }
 
         post.update(userUpdateRequest.getPostTitle(), userUpdateRequest.getPostContent(), userUpdateRequest.getPostServing(),

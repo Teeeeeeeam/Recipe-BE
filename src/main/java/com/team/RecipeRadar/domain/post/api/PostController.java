@@ -141,14 +141,15 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @PostMapping(value = "/api/user/update/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest updatePostDto, BindingResult bindingResult,@RequestPart MultipartFile file){
+    @PostMapping(value = "/api/user/update/posts/{post-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest updatePostDto, BindingResult bindingResult,
+                                         @RequestPart(required = false) MultipartFile file, @PathVariable("post-id") Long postId){
         try{
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
             String loginId = authenticationLogin();
-            postService.update(updatePostDto,loginId,file);
+            postService.update(postId,updatePostDto,loginId,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공"));
         }catch (NoSuchElementException e){

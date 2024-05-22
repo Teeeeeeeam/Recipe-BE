@@ -10,8 +10,6 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 public class UserUpdateRequest {
 
-    @Schema(description = "요리글 id", example = "1")
-    private Long postId;
 
     @Schema(description = "수정할 요리글 내용", example = "요리글 내용 수정!")
     @NotEmpty(message = "변경할 내용을 작성해주세요")
