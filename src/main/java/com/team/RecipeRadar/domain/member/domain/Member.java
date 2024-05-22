@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.inquiry.domain.Inquiry;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
@@ -23,6 +24,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Member {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)

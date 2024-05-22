@@ -10,21 +10,16 @@ import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
-import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @Transactional
@@ -57,10 +52,9 @@ public class AdminsServiceImpl implements AdminService {
 
     @Override
     public MemberInfoResponse memberInfos(Pageable pageable) {
-        Slice<Member> memberInfo = memberRepository.getMemberInfo(pageable);
-        List<MemberDto> memberDtoList = memberInfo.getContent().stream().map(m -> MemberDto.of(m.getId(), m.getLoginId(), m.getEmail(), m.getUsername(), m.getNickName(), m.getJoin_date())).collect(Collectors.toList());
+        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(pageable);
         boolean hasNext = memberInfo.hasNext();
-        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberDtoList, hasNext);
+        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberInfo.getContent(), hasNext);
         return memberInfoResponse;
     }
 
@@ -104,5 +98,11 @@ public class AdminsServiceImpl implements AdminService {
             memberRepository.deleteById(save_memberId);
         }
 
+    }
+
+    @Override
+    public MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Pageable pageable) {
+        Slice<MemberDto> memberDtoSlice = memberRepository.searchMember(loginId, nickname, email, username, pageable);
+        return new MemberInfoResponse(memberDtoSlice.getContent(),memberDtoSlice.hasNext());
     }
 }

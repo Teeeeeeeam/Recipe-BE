@@ -5,7 +5,6 @@ import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -32,6 +30,8 @@ import java.util.NoSuchElementException;
 public class AdminMemberController {
 
     private final AdminService adminService;
+
+
 
     @Operation(summary = "회원수 조회 API", description = "현재 가입된 회원수를 조회하는 API")
     @ApiResponses(value = {
@@ -125,4 +125,19 @@ public class AdminMemberController {
         }
     }
 
+    @Operation(summary = "사용자 검색 API", description = "가입된 회원의 이름, 아이디, 닉네임, 이메일을 통해 사용자를 조회하는 API(무한 스크롤방식, 아이디,이름,닉네임, 이메일 하나라도 일치하는 사용자를 출력 no like 문, 아무 데이터도 안넘기면 모든 사용자를 출력)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfos\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
+    })
+    @GetMapping("/members/search")
+    public ResponseEntity<?> searchMember(@RequestParam(value = "login-id",required = false) String loginId,
+                                          @RequestParam(required = false) String username,
+                                          @RequestParam(required = false) String email,
+                                          @RequestParam(required = false) String nickname,
+                                          Pageable pageable){
+        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId, nickname, email, username, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
+    }
 }
