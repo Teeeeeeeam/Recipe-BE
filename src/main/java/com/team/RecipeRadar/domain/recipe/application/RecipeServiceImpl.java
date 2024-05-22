@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -37,6 +38,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final ImgRepository imgRepository;
     private final S3UploadService s3UploadService;
     private final MemberRepository memberRepository;
+    private final PostRepository postRepository;
 
     /**
      * recipeRepository에서 페이징쿼리를 담아 반환된 데이터를 Response로 옮겨담아 전송, 조회 전용 메소드
@@ -195,6 +197,7 @@ public class RecipeServiceImpl implements RecipeService{
         UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
 
         String storeFileName = uploadFile.getStoreFileName();
+        postRepository.deleteAllByRecipe_Id(recipeId);
         s3UploadService.deleteFile(storeFileName);
         ingredientRepository.deleteRecipeId(recipeId);
         imgRepository.deleteRecipeId(recipeId);
