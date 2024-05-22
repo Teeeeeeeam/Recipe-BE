@@ -14,23 +14,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminController.class)
+@WebMvcTest(AdminMemberController.class)
 class AdminControllerTest {
 
     @Autowired
@@ -102,5 +102,33 @@ class AdminControllerTest {
                 .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
                 .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
+    }
+    
+    @Test
+    @DisplayName("어드민 삭제 API 구현")
+    @CustomMockAdmin
+    void deleteUser() throws Exception {
+        Long memberId = 1l;
+
+        doNothing().when(adminService).adminDeleteUser(anyLong());
+
+        mockMvc.perform(delete("/api/admin/member/"+memberId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("삭제 성공"));
+    }
+
+    @Test
+    @DisplayName("어드민 삭제 API 구현시 회원 없을때 예외")
+    @CustomMockAdmin
+    void deleteUser_thr() throws Exception {
+        Long memberId = 1l;
+
+        doThrow(new NoSuchElementException("사용자를 찾을수 업습니다.")).when(adminService).adminDeleteUser(anyLong());
+
+        mockMvc.perform(delete("/api/admin/member/"+memberId))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."));
     }
 }
