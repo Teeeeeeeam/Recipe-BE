@@ -12,7 +12,8 @@ import java.util.Optional;
 @Repository
 public interface ImgRepository extends JpaRepository<UploadFile,Long> {
 
-    Optional<UploadFile> findByRecipe_Id(Long recipe_id);
+    @Query("select u from UploadFile u where u.recipe.id=:recipeId AND u.post.id is null")
+    Optional<UploadFile> findByRecipe_Id(@Param("recipeId") Long recipe_id);
     @Modifying
     @Query("delete from UploadFile u where u.recipe.id=:recipeId")
     void deleteRecipeId(@Param("recipeId") Long recipe_Id);
