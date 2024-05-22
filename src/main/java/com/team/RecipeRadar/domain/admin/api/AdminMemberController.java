@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -92,6 +94,28 @@ public class AdminMemberController {
     public ResponseEntity<?> deleteUser(@PathVariable("member-id") Long memberId){
         try {
             adminService.adminDeleteUser(memberId);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException("사용자를 찾을수 없습니다.");
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류");
+        }
+    }
+
+    @Operation(summary = "일괄 사용자 탈퇴 API", description = "여러 사용자를 일괄 삭제하는 API 사용자가 이용했던 모든 데이터를 삭제한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}"))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자를 찾을수 없습니다.\"}")))
+    })
+    @DeleteMapping("/members")
+    public ResponseEntity<?> deleteAllUser(@RequestParam("ids") List<Long> memberIds){
+        try {
+            adminService.adminDeleteUsers(memberIds);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
         }catch (NoSuchElementException e){
             throw new BadRequestException("사용자를 찾을수 없습니다.");

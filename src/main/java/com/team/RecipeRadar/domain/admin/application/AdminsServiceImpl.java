@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -78,6 +79,30 @@ public class AdminsServiceImpl implements AdminService {
         recipeBookmarkRepository.deleteByMember_Id(save_memberId);
         jwtRefreshTokenRepository.DeleteByMemberId(save_memberId);
         memberRepository.deleteById(save_memberId);
+
+    }
+
+    /**
+     * 여러명의 회원을 한번에 삭제 시킨다.
+     * @param memberIds
+     */
+    @Override
+    public void adminDeleteUsers(List<Long> memberIds) {
+
+        for (Long memberId : memberIds) {
+            Member member =memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자를 찾을수 없습니다."));
+            boolean existsByEmail = blackListRepository.existsByEmail(member.getEmail());
+            if (!existsByEmail) {
+                BlackList blackList = BlackList.toEntity(member.getEmail());
+                blackListRepository.save(blackList);
+            }
+
+            Long save_memberId = member.getId();
+            noticeRepository.deleteByMember_Id(save_memberId);
+            recipeBookmarkRepository.deleteByMember_Id(save_memberId);
+            jwtRefreshTokenRepository.DeleteByMemberId(save_memberId);
+            memberRepository.deleteById(save_memberId);
+        }
 
     }
 }
