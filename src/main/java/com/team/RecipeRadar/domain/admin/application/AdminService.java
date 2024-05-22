@@ -13,4 +13,6 @@ public interface AdminService {
 
     MemberInfoResponse memberInfos(Pageable pageable);
 
+    void adminDeleteUser(Long memberId);
+
 }

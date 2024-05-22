@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.admin.api;
 
 import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,23 +17,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerErrorException;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@OpenAPIDefinition(tags = {
-        @Tag(name = "어드민 컨트롤러", description = "어드민 관련 작업"),
-        @Tag(name = "일반 사용자 댓글 컨트롤러", description = "일반 사용자 관련 댓글 작업")
-})
+@Tag(name = "어드민 사용자 관련 컨트롤러" ,description = "어드민 페이지의 사용자 관련 API")
 @RequestMapping("/api/admin")
-public class AdminController {
+public class AdminMemberController {
 
     private final AdminService adminService;
 
-    @Operation(summary = "회원수 조회 API", description = "현재 가입된 회원수를 조회하는 API", tags = {"어드민 컨트롤러"})
+    @Operation(summary = "회원수 조회 API", description = "현재 가입된 회원수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -43,7 +43,7 @@ public class AdminController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "게시글 조회 API", description = "작성된 게시글의 수를 조회하는 API", tags = {"어드민 컨트롤러"})
+    @Operation(summary = "게시글 조회 API", description = "작성된 게시글의 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -55,7 +55,7 @@ public class AdminController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "레시피 조회 API", description = "작성된 레시피의 수를 조회하는 API", tags = {"어드민 컨트롤러"})
+    @Operation(summary = "레시피 조회 API", description = "작성된 레시피의 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -67,7 +67,7 @@ public class AdminController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "사용자 조회 API", description = "가입된 회원의 사용자를 모두 조회하는 API(무한 스크롤방식)", tags = {"어드민 컨트롤러"})
+    @Operation(summary = "사용자 조회 API", description = "가입된 회원의 사용자를 모두 조회하는 API(무한 스크롤방식)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -77,6 +77,28 @@ public class AdminController {
     public ResponseEntity<?> getMemberInfos(Pageable pageable){
         MemberInfoResponse memberInfoResponse = adminService.memberInfos(pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
+    }
+
+    @Operation(summary = "사용자 탈퇴 API", description = "가입된 회원의 사용자를 모두 탈퇴 시키는 API 사용자가 이용했던 모든 데이터를 삭제한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}"))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자를 찾을수 없습니다.\"}")))
+    })
+    @DeleteMapping("/member/{member-id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("member-id") Long memberId){
+        try {
+            adminService.adminDeleteUser(memberId);
+            return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException("사용자를 찾을수 없습니다.");
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류");
+        }
     }
 
 }
