@@ -102,4 +102,6 @@ class PostRepositoryTest {
         assertThat(postDetailResponse.getPost().getPostTitle()).isEqualTo(post.getPostTitle());
         assertThat(postDetailResponse.getComments().get(0).getComment_content()).isEqualTo(save1.getCommentContent());
     }
+
+
 }

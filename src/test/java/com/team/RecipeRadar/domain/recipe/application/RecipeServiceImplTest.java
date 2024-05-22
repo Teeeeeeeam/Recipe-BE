@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -42,6 +43,8 @@ class RecipeServiceImplTest {
     @Mock ImgRepository imgRepository;
     @Mock S3UploadService s3UploadService;
     @Mock MemberRepository memberRepository;
+    @Mock PostRepository postRepository;
+
     @InjectMocks RecipeServiceImpl recipeService;
 
     @Test
@@ -265,6 +268,7 @@ class RecipeServiceImplTest {
 
         recipeService.deleteByAdmin(1l, loginId);
 
+        verify(postRepository, times(1)).deleteAllByRecipe_Id(recipeId);
         verify(s3UploadService, times(1)).deleteFile("testfile.jpg");
         verify(ingredientRepository, times(1)).deleteRecipeId(recipeId);
         verify(imgRepository, times(1)).deleteRecipeId(recipeId);
