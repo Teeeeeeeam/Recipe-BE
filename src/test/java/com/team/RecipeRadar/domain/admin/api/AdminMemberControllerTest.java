@@ -5,6 +5,8 @@ import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.post.application.PostService;
+import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -39,6 +40,7 @@ class AdminMemberControllerTest {
 
     @MockBean AdminService adminService;
     @MockBean MemberRepository memberRepository;
+    @MockBean PostServiceImpl postService;
     @MockBean JwtProvider jwtProvider;
     @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean CustomOauth2Service customOauth2Service;
@@ -140,5 +142,20 @@ class AdminMemberControllerTest {
                 .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
                 .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
+    }
+
+    @Test
+    @DisplayName("어드민 게시글 일괄 삭제 API 구현")
+    @CustomMockAdmin
+    void deleteAllPosts() throws Exception {
+
+        List<Long>  list= List.of(1l,2l,3l);
+        doNothing().when(postService).deletePosts(anyList());
+
+        mockMvc.perform(delete("/api/admin/posts")
+                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("게시글 삭제 성공"));
     }
 }
