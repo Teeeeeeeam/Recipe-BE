@@ -76,8 +76,8 @@ public class AdminMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfos\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
     })
     @GetMapping("/members/info")
-    public ResponseEntity<?> getMemberInfos(Pageable pageable){
-        MemberInfoResponse memberInfoResponse = adminService.memberInfos(pageable);
+    public ResponseEntity<?> getMemberInfos(@RequestParam(value = "member-id",required = false) Long memberId ,Pageable pageable){
+        MemberInfoResponse memberInfoResponse = adminService.memberInfos(memberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 
@@ -136,8 +136,9 @@ public class AdminMemberController {
                                           @RequestParam(required = false) String username,
                                           @RequestParam(required = false) String email,
                                           @RequestParam(required = false) String nickname,
+                                          @RequestParam(value = "member-id",required = false) Long memberId,
                                           Pageable pageable){
-        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId, nickname, email, username, pageable);
+        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId, nickname, email, username, memberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 }

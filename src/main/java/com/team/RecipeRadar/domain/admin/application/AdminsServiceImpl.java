@@ -51,8 +51,8 @@ public class AdminsServiceImpl implements AdminService {
     }
 
     @Override
-    public MemberInfoResponse memberInfos(Pageable pageable) {
-        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(pageable);
+    public MemberInfoResponse memberInfos(Long lastMemberId,Pageable pageable) {
+        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(lastMemberId,pageable);
         boolean hasNext = memberInfo.hasNext();
         MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberInfo.getContent(), hasNext);
         return memberInfoResponse;
@@ -101,8 +101,8 @@ public class AdminsServiceImpl implements AdminService {
     }
 
     @Override
-    public MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Pageable pageable) {
-        Slice<MemberDto> memberDtoSlice = memberRepository.searchMember(loginId, nickname, email, username, pageable);
+    public MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable) {
+        Slice<MemberDto> memberDtoSlice = memberRepository.searchMember(loginId, nickname, email, username, lastMemberId,pageable);
         return new MemberInfoResponse(memberDtoSlice.getContent(),memberDtoSlice.hasNext());
     }
 }

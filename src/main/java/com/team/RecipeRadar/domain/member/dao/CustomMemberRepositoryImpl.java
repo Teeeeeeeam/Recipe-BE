@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
+import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.recipe;
 
 @Slf4j
 @Repository
@@ -26,10 +27,15 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
 
 
     @Override
-    public Slice getMemberInfo(Pageable pageable) {
+    public Slice getMemberInfo(Long lastMemberId,Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(lastMemberId!=null){
+            builder.and(member.id.gt(lastMemberId));
+        }
 
         List<Tuple> list = jpaQueryFactory.select(member.id,member.loginId, member.nickName, member.email, member.join_date, member.username)
                 .from(member)
+                .where(builder)
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
@@ -44,7 +50,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
     }
 
     @Override
-    public Slice<MemberDto> searchMember(String loginId, String nickname, String email, String username,Pageable pageable) {
+    public Slice<MemberDto> searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if(loginId!=null){
@@ -58,6 +64,9 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
         }
         if (username !=null){
             builder.or(member.username.eq(username));
+        }
+        if (lastMemberId!=null){
+            builder.and(member.id.gt(lastMemberId));
         }
         log.info("asad={}",builder);
 

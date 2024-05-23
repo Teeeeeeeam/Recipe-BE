@@ -14,13 +14,13 @@ public interface AdminService {
 
     long searchAllRecipes();
 
-    MemberInfoResponse memberInfos(Pageable pageable);
+    MemberInfoResponse memberInfos(Long lastMemberId,Pageable pageable);
 
     void adminDeleteUser(Long memberId);
 
     void adminDeleteUsers(List<Long> memberIds);
 
-    MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Pageable pageable);
+    MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable);
 
 
 }
