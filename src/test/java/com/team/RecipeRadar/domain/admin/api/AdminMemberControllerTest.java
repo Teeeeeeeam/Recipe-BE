@@ -13,6 +13,7 @@ import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockAdmin;
+import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,5 +183,31 @@ class AdminMemberControllerTest {
                 .andExpect(jsonPath("$.data.nextPage").value(false));
 
     }
+    @Test
+    @DisplayName("어드민 댓글 일괄 삭제 API 구현")
+    @CustomMockAdmin
+    void deleteAllComments() throws Exception {
 
+        List<Long>  list= List.of(1l,2l,3l);
+        doNothing().when(adminService).deleteComments(anyList());
+
+        mockMvc.perform(delete("/api/admin/posts/comments?")
+                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("댓글 삭제 성공"));
+    }
+
+    @Test
+    @DisplayName("어드민 API 요청시 권한이 어드민이 아닌 유저의 대해서 403 테스트")
+    @CustomMockUser //일반 사용자 권한으로 접근
+    void NoRoles_admin() throws Exception {
+
+        List<Long>  list= List.of(1l,2l,3l);
+        doNothing().when(adminService).deleteComments(anyList());
+
+        mockMvc.perform(delete("/api/admin/posts/comments?")
+                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                .andExpect(status().is(403));
+    }
 }
