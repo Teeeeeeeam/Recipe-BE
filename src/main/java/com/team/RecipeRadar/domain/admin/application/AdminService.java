@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.admin.application;
 
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import org.springframework.data.domain.Pageable;
 
@@ -19,6 +20,8 @@ public interface AdminService {
     void adminDeleteUsers(List<Long> memberIds);
 
     MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable);
+
+    PostsCommentResponse getPostsComments(Long postId,Long lastId,Pageable pageable);
 
 
 }

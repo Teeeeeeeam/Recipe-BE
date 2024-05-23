@@ -3,6 +3,9 @@ package com.team.RecipeRadar.domain.admin.application;
 import com.team.RecipeRadar.domain.admin.dao.BlackList;
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -33,6 +36,7 @@ public class AdminsServiceImpl implements AdminService {
     private final RecipeBookmarkRepository recipeBookmarkRepository;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final BlackListRepository blackListRepository;
+    private final CommentRepository commentRepository;
 
 
     @Override
@@ -87,5 +91,12 @@ public class AdminsServiceImpl implements AdminService {
     public MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable) {
         Slice<MemberDto> memberDtoSlice = memberRepository.searchMember(loginId, nickname, email, username, lastMemberId,pageable);
         return new MemberInfoResponse(memberDtoSlice.getContent(),memberDtoSlice.hasNext());
+    }
+
+    @Override
+    public PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable) {
+        Slice<CommentDto> postComment = commentRepository.getPostComment(postId, lastId, pageable);
+
+        return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
     }
 }

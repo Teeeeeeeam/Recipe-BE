@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.admin.api;
 
 import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.post.application.PostService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -147,4 +148,16 @@ public class AdminMemberController {
         }
     }
 
+    @Operation(summary = "게시글의 작성된 댓글 조회", description = "해당 게시글의 작성된 댓글을 모두 조회하는 API(무한 스크롤방식)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comment\":[{\"id\":16,\"comment_content\":\"댓글 내용 1\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"},{\"id\":17,\"comment_content\":\"댓글 내용 2\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"}]}}"
+                            ))),
+    })
+    @GetMapping("/posts/comments")
+    public ResponseEntity<?> getPostsContainsComments( @RequestParam("post-id") Long postId,@RequestParam(value = "last-id",required = false)Long lastId, Pageable pageable){
+        PostsCommentResponse postsComments = adminService.getPostsComments(postId, lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
+    }
 }

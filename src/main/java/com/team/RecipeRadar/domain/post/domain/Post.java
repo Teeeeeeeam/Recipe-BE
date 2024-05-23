@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.post.domain;
 
+import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
@@ -9,10 +10,10 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,6 +57,9 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    private List<Comment> comments;
 
     public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel,String postPassword) {
         this.postTitle = postTitle;

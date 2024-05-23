@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Long>{
+public interface CommentRepository extends JpaRepository<Comment, Long>, CustomCommentRepository{
     List<Comment> findByCommentContentContainingIgnoreCase(String commentTitle);
     @Modifying
     @Query("delete from Comment c where c.member.id=:member_id and c.id=:comment_id")

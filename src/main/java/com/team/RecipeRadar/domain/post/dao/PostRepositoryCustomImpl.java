@@ -159,7 +159,6 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
         return new SliceImpl(postDtoList,pageable,hasNextSize);
     }
-
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
     }

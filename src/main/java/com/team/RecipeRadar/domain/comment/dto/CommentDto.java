@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,6 +28,8 @@ public class CommentDto {
     @Schema(description = "작성자 닉네임", example = "나만의 냉장고")
     private String nickName;
 
+    private MemberDto member;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PostDto articleDto;
 
@@ -40,7 +43,6 @@ public class CommentDto {
         this.create_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
 
-
     public static CommentDto of(Comment comment){
         return CommentDto.builder()
                 .id(comment.getId())
@@ -50,5 +52,13 @@ public class CommentDto {
                 .updated_at(comment.getUpdated_at()).build();
     }
 
-
+    public static CommentDto admin(Comment comment){
+        Member member = comment.getMember();
+        MemberDto memberDto = MemberDto.builder().loginId(member.getLoginId()).nickname(member.getNickName()).username(member.getUsername()).build();
+        return CommentDto.builder()
+                .id(comment.getId())
+                .comment_content(comment.getCommentContent())
+                .create_at(comment.getCreated_at())
+                .member(memberDto).build();
+    }
 }
