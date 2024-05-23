@@ -217,7 +217,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "요리글 검색 API", description = "사용자 로그인아이디, 게시글 제목, 스크랩한 요리의 대해서 검색가능 단일 조건의 대해서 검색 가능, 조건데이터가 추가될때마다 and 조건으로 데이터를 추린다.(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
+    @Operation(summary = "요리글 검색 API", description = "사용자 로그인아이디, 게시글 제목, 스크랩한 요리의 대해서 검색가능 단일 조건의 대해서 검색 가능, 조건데이터가 추가될때마다 and 조건으로 데이터를 추린다.(무한페이징)", tags = {"어드민 관련 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),

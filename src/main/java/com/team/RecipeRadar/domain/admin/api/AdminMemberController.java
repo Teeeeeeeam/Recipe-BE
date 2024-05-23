@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.admin.api;
 
 import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.post.application.PostService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -25,11 +26,13 @@ import java.util.NoSuchElementException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "어드민 사용자 관련 컨트롤러" ,description = "어드민 페이지의 사용자 관련 API")
+@Tag(name = "어드민 관련 컨트롤러" ,description = "어드민 페이지의 관련 API")
 @RequestMapping("/api/admin")
 public class AdminMemberController {
 
     private final AdminService adminService;
+    private final PostService postService;
+
 
 
 
@@ -45,7 +48,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "게시글 조회 API", description = "작성된 게시글의 수를 조회하는 API")
+    @Operation(summary = "게시글수 조회 API", description = "작성된 게시글의 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -57,7 +60,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "레시피 조회 API", description = "작성된 레시피의 수를 조회하는 API")
+    @Operation(summary = "레시피수 조회 API", description = "작성된 레시피의 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -119,4 +122,29 @@ public class AdminMemberController {
         MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId, nickname, email, username, memberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
+
+
+    @Operation(summary = "요리글 일괄 삭제 API",description = "작성한 사용자만이 해당 레시피를 삭제가능 삭제시 해당 게시물과 관련된 데이터는 모두 삭제")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"게시글 삭제 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"게시글을 찾을수 없습니다.\"}"))),
+
+    })
+    @DeleteMapping("/posts")
+    public ResponseEntity<?> deletePost(@RequestParam(value = "ids") List<Long> postIds){
+        try{
+            postService.deletePosts(postIds);
+            return ResponseEntity.ok(new ControllerApiResponse(true,"게시글 삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류");
+        }
+    }
+
 }
