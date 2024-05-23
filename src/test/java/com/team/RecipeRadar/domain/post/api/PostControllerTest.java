@@ -182,7 +182,7 @@ class PostControllerTest {
 
         List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
         PostResponse postResponse = new PostResponse(false, postDtos);
-        given(postService.postPage(eq(pageRequest))).willReturn(postResponse);
+        given(postService.postPage(any(),eq(pageRequest))).willReturn(postResponse);
 
         mockMvc.perform(get("/api/posts?size=2"))
                 .andDo(print())

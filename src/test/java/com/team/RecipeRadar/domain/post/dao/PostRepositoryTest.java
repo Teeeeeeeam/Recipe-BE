@@ -75,7 +75,7 @@ class PostRepositoryTest {
         imgRepository.save(uploadFile2);
         imgRepository.save(uploadFile3);
 
-        Slice<PostDto> allPost = postRepository.getAllPost(request);
+        Slice<PostDto> allPost = postRepository.getAllPost(1l,request);
 
         assertThat(allPost.hasNext()).isTrue();
         assertThat(allPost.getContent()).hasSize(2);

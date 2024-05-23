@@ -143,9 +143,9 @@ class PostServiceImplTest {
         Pageable pageRequest = PageRequest.of(0, 2);
         List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
         SliceImpl<PostDto> dtoSlice = new SliceImpl<>(postDtos , pageRequest, false);       // 다음 페이지는 없음
-        when(postRepository.getAllPost(eq(pageRequest))).thenReturn(dtoSlice);
+        when(postRepository.getAllPost(anyLong(),eq(pageRequest))).thenReturn(dtoSlice);
 
-        PostResponse postResponse = postService.postPage(pageRequest);
+        PostResponse postResponse = postService.postPage(1l,pageRequest);
         assertThat(postResponse.getPosts()).hasSize(2);
         assertThat(postResponse.getPosts().get(0).getPostContent()).isEqualTo("컨텐트");
         assertThat(postResponse.isNextPage()).isFalse();
