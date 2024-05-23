@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -213,6 +214,24 @@ public class PostController {
         }catch (AccessDeniedException e){
             throw new AccessDeniedException(e.getMessage());
         }
+    }
+
+
+    @Operation(summary = "요리글 검색 API", description = "사용자 로그인아이디, 게시글 제목, 스크랩한 요리의 대해서 검색가능 단일 조건의 대해서 검색 가능, 조건데이터가 추가될때마다 and 조건으로 데이터를 추린다.(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                            examples = @ExampleObject(value = "{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}," +
+                                    "{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}"))),
+    })
+    @GetMapping("/api/search")
+    public ResponseEntity<?> searchPost(@RequestParam(value = "login-id",required = false) String loginId,
+                                  @RequestParam(value = "recipe-title",required = false) String recipeTitle,
+                                  @RequestParam(value = "post-title",required = false) String postTitle,
+                                  @RequestParam(value = "post-id",required = false) Long lastPostId,
+                                  Pageable pageable){
+        PostResponse postResponse = postService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
+        return ResponseEntity.ok(postResponse);
     }
 
     //로그인한 사용자의 loginId를 스프링 시큐리티에서 획득

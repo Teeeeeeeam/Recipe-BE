@@ -13,4 +13,6 @@ public interface PostRepositoryCustom {
     Slice<PostDto> getAllPost(Long post_Id,Pageable pageable);
 
     PostDetailResponse postDetails(Long postId);
+
+    Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable);
 }

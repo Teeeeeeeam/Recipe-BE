@@ -5,12 +5,10 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
-import com.team.RecipeRadar.global.Image.domain.QUploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,16 +80,12 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        boolean hasNextSize = false;
 
         List<PostDto> collect = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
                 getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
 
 
-        if(collect.size()> pageable.getPageSize()){
-            collect.remove(pageable.getPageSize());
-            hasNextSize = true;
-        }
+        boolean hasNextSize = isHasNextSize(pageable, collect);
         return new SliceImpl(collect,pageable,hasNextSize);
     }
 
@@ -124,7 +118,58 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         return new PostDetailResponse(postDto,collect1);
     }
 
+    /**
+     * 사용자의 게시글을 검색하는 쿼리 loginId,recipeTitle,postTitle,lastPostId 의 대해서 단일 조건으로 검색을 하고 모든 하나씩 추가될 때마다 and 조건으로 검색데이터수를 줄여감
+     * @param loginId   작성한 사용자 로그인 아이디
+     * @param recipeTitle   스크랩한 레시피 제목
+     * @param postTitle     작성한 레시피 제목
+     * @param lastPostId    마지막 포스트아이디 (무한페이징 사용)
+     * @param pageable  
+     * @return
+     */
+    @Override
+    public Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(loginId!=null){
+            builder.and(post.member.loginId.eq(loginId));
+        }
+        if(recipeTitle!=null){
+            builder.and(post.recipe.title.like("%"+recipeTitle+"%"));
+        }
+        if(postTitle!=null){
+            builder.and(post.postTitle.like("%"+postTitle+"%"));
+        }
+        if(lastPostId !=null){
+            builder.and(post.id.gt(lastPostId));
+        }
+
+        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
+                .from(post)
+                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
+                .where(builder)
+                .orderBy(post.created_at.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+
+        List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
+                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
+
+        boolean hasNextSize = isHasNextSize(pageable, postDtoList);
+
+        return new SliceImpl(postDtoList,pageable,hasNextSize);
+    }
+
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
+    }
+
+    private static boolean isHasNextSize(Pageable pageable, List<PostDto> collect) {
+        boolean hasNextSize = false;
+        if(collect.size()> pageable.getPageSize()){
+            collect.remove(pageable.getPageSize());
+            hasNextSize = true;
+        }
+        return hasNextSize;
     }
 }
