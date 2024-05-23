@@ -2,6 +2,7 @@ package com.team.RecipeRadar.repository;
 
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
@@ -17,11 +18,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,6 +45,7 @@ class CommentRepositoryTest {
     PostRepository articleRepository;
     @Autowired
     EntityManager entityManager;
+    @Autowired PostRepository postRepository;
 
     @Test
     @DisplayName("댓글 삭제 테스트")
@@ -144,6 +149,36 @@ class CommentRepositoryTest {
         assertThat(save.getCommentContent()).isEqualTo("테스트 댓글 수정후!");
         assertThat(save.getId()).isEqualTo(comment.getId());
         assertThat(save.getCommentContent()).isNotEqualTo("테스트 댓글 수정전");
+    }
+    
+    @Test
+    @DisplayName("게시글의 작상된 댓글 조회")
+    void postsContainsComment(){
+
+        Post post = Post.builder().postTitle("제목").build();
+        Post save_post = postRepository.save(post);
+        Member member = Member.builder().loginId("아이디").nickName("사용자1").build();
+        Member member1 = Member.builder().loginId("아이디").nickName("사용자2").build();
+
+        Member save = memberRepository.save(member);
+        Member save2 = memberRepository.save(member1);
+
+        List<Comment> commentList = List.of(
+                Comment.builder().commentContent("댓글1").member(save).post(save_post).build(),
+                Comment.builder().commentContent("댓글2").member(save2).post(save_post).build()
+        );
+
+        commentRepository.saveAll(commentList);
+
+        PageRequest request = PageRequest.of(0, 3);
+        Slice<CommentDto> postComment = commentRepository.getPostComment(post.getId(), null, request);
+
+        List<CommentDto> content = postComment.getContent();
+        assertThat(content).hasSize(2);
+        assertThat(content.get(0).getComment_content()).isEqualTo("댓글1");
+        assertThat(content.get(0).getMember().getNickname()).isEqualTo("사용자1");
+        assertThat(postComment.hasNext()).isFalse();
+
     }
 
 }

@@ -2,11 +2,15 @@ package com.team.RecipeRadar.domain.admin.application;
 
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
@@ -22,8 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +43,7 @@ class AdminsServiceImplTest {
     @Mock BlackListRepository blackListRepository;
     @Mock NoticeRepository noticeRepository;
     @Mock RecipeBookmarkRepository recipeBookmarkRepository;
+    @Mock CommentRepository commentRepository;
     @Mock JWTRefreshTokenRepository jwtRefreshTokenRepository;
 
 
@@ -118,5 +123,27 @@ class AdminsServiceImplTest {
         assertThat(memberInfoResponse.getNextPage()).isTrue();
         assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);
         assertThat(memberInfoResponse.getMemberInfos().get(0).getLoginId()).isEqualTo(loginId);
+    }
+    
+    @Test
+    @DisplayName("게시글 관련 댓글 페이징 변환 테스트")
+    void postsContainsComment(){
+        Long post_id= 1l;
+
+        PageRequest pageRequest = PageRequest.of(0, 2);
+
+        List<CommentDto> commentDtoList = List.of(
+                CommentDto.builder().comment_content("댓글1").create_at(LocalDateTime.now()).member(MemberDto.builder().loginId("testId").nickname("닉네임1").build()).build(),
+                CommentDto.builder().comment_content("댓글2").create_at(LocalDateTime.now()).member(MemberDto.builder().loginId("testId1").nickname("닉네임2").build()).build()
+        );
+        SliceImpl<CommentDto> commentDtos = new SliceImpl<>(commentDtoList, pageRequest, false);
+
+        when(commentRepository.getPostComment(eq(post_id),isNull(),eq(pageRequest))).thenReturn(commentDtos);
+
+        PostsCommentResponse postsComments = adminService.getPostsComments(post_id, null, pageRequest);
+
+        assertThat(postsComments.getComment()).hasSize(2);
+        assertThat(postsComments.getComment().get(0).getComment_content()).isEqualTo("댓글1");
+        assertThat(postsComments.getNextPage()).isFalse();
     }
 }

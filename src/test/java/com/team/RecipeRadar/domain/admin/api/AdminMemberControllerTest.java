@@ -3,6 +3,8 @@ package com.team.RecipeRadar.domain.admin.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.PostService;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -158,4 +161,26 @@ class AdminMemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("게시글 삭제 성공"));
     }
+
+    @Test
+    @DisplayName("어드민 게시글 관련 댓글 조회")
+    @CustomMockAdmin
+    void postsContainsComment() throws Exception {
+        Long post_id= 1l;
+        List<CommentDto> commentDtoList = List.of(
+                CommentDto.builder().comment_content("댓글1").create_at(LocalDateTime.now()).member(MemberDto.builder().loginId("testId").username("실명1").nickname("닉네임1").build()).build(),
+                CommentDto.builder().comment_content("댓글2").create_at(LocalDateTime.now()).member(MemberDto.builder().loginId("testId1").username("실명2").nickname("닉네임2").build()).build()
+        );
+        PostsCommentResponse postsCommentResponse = new PostsCommentResponse(false, commentDtoList);
+        given(adminService.getPostsComments(eq(post_id),isNull(),any())).willReturn(postsCommentResponse);
+
+        mockMvc.perform(get("/api/admin/posts/comments?post-id="+post_id))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()").value(2))
+                .andExpect(jsonPath("$.data.comment.[0].member.nickname").value("닉네임1"))
+                .andExpect(jsonPath("$.data.nextPage").value(false));
+
+    }
+
 }
