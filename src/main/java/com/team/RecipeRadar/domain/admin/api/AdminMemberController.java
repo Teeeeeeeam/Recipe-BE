@@ -81,29 +81,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 
-    @Operation(summary = "사용자 탈퇴 API", description = "가입된 회원의 사용자를 모두 탈퇴 시키는 API 사용자가 이용했던 모든 데이터를 삭제한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}"))),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자를 찾을수 없습니다.\"}")))
-    })
-    @DeleteMapping("/member/{member-id}")
-    public ResponseEntity<?> deleteUser(@PathVariable("member-id") Long memberId){
-        try {
-            adminService.adminDeleteUser(memberId);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException("사용자를 찾을수 없습니다.");
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류");
-        }
-    }
-
-    @Operation(summary = "일괄 사용자 탈퇴 API", description = "여러 사용자를 일괄 삭제하는 API 사용자가 이용했던 모든 데이터를 삭제한다.")
+    @Operation(summary = "사용자 탈퇴 API", description = "사용자의 강제 탈퇴 시킬수 있으며, 여려명 사용자의 대해서도 일괄 삭제가 가능하다. API 사용자가 이용했던 모든 데이터를 삭제한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),

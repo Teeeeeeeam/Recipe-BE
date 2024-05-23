@@ -16,8 +16,6 @@ public interface AdminService {
 
     MemberInfoResponse memberInfos(Long lastMemberId,Pageable pageable);
 
-    void adminDeleteUser(Long memberId);
-
     void adminDeleteUsers(List<Long> memberIds);
 
     MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable);
