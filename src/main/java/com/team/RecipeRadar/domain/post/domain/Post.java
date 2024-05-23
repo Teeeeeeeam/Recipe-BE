@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.post.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,6 +72,7 @@ public class Post {
     }
 
     static public PostDto of(Post post){
+
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
@@ -80,7 +82,7 @@ public class Post {
                 .postCookingLevel(post.getPostCookingLevel())
                 .postImageUrl(post.getPostImageUrl())
                 .postLikeCount(post.postLikeCount)
-                .nickName(post.getMember().getNickName())
+                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
                 .build();
     }
 }

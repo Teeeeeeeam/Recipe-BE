@@ -72,15 +72,16 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "전체 요리글 조회 API", description = "모든 사용자가 해당 게시글의 페이지를 볼수있음(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
+    @Operation(summary = "전체 요리글 조회 API", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있음(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
-                content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
-                        examples = @ExampleObject(value = "{\"nextPage\":false,\"posts\":[{\"id\":5,\"postTitle\":\"맛있는 파스타 레시피\",\"nickName\":\"짱파스타\",\"postImageUrl\":\"http://example.com/pasta.jpg\"},{\"id\":4,\"postTitle\":\"맛있는 파스타 레시피\",\"nickName\":\"짱파스타\",\"postImageUrl\":\"http://example.com/pasta.jpg\"}]}"))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                            examples = @ExampleObject(value = "{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}," +
+                                    "{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}"))),
     })
     @GetMapping("/api/posts")
-    public ResponseEntity<?> findAllPosts(Pageable pageable) {
-        PostResponse postResponse = postService.postPage(pageable);
+    public ResponseEntity<?> findAllPosts(@RequestParam(value = "post-id",required = false) Long postId,Pageable pageable) {
+        PostResponse postResponse = postService.postPage(postId,pageable);
         return ResponseEntity.ok(postResponse);
     }
 
@@ -88,7 +89,7 @@ public class PostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = PostResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회성공\",\"data\":{\"post\":{\"id\":3,\"postTitle\":\"냉장고~\",\"postContent\":\"이 파스타는 정말 간단하고 맛있어요!\",\"nickName\":\"김민우랍니다\",\"create_at\":\"2024-05-20T01:24:07.748424\",\"postServing\":\"3인분\",\"postCookingTime\":\"30분\",\"postCookingLevel\":\"중\",\"postLikeCount\":0,\"postImageUrl\":\"http://example.com/pasta.jpg\"},\"comments\":[{\"id\":1,\"comment_content\":\"댓글 작성!\",\"nickName\":\"닉네임\",\"create_at\":\"2024-05-20T02:26:00\"}]}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회성공\",\"data\":{\"post\":{\"id\":3,\"postTitle\":\"냉장고~\",\"postContent\":\"이 파스타는 정말 간단하고 맛있어요!\",\"nickName\":\"김민우랍니다\",\"create_at\":\"2024-05-20T01:24:07.748424\",\"postServing\":\"3인분\",\"postCookingTime\":\"30분\",\"postCookingLevel\":\"중\",\"postLikeCount\":0,\"postImageUrl\":\"http://example.com/pasta.jpg\", \"member\":{\"nickname\" :\"Admin\"}},\"comments\":[{\"id\":1,\"comment_content\":\"댓글 작성!\",\"nickName\":\"닉네임\",\"create_at\":\"2024-05-20T02:26:00\"}]}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"해당하는 게시물이 없습니다.\"}")))

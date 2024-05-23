@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.post.dao;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
@@ -67,18 +68,24 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
      * 게시글의 대해서 무한 페이징을 통해 페이징 처리 no-offset 방식을 사용
      */
     @Override
-    public Slice<PostDto> getAllPost(Pageable pageable) {
+    public Slice<PostDto> getAllPost(Long postId,Pageable pageable) {
 
-        List<Tuple> list = jpaQueryFactory.select(post.id, post.postTitle, uploadFile.storeFileName, post.member.nickName)
+        BooleanBuilder builder = new BooleanBuilder();
+        if(postId!=null){
+            builder.and(post.id.gt(postId));
+        }
+        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
                 .from(post)
                 .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
+                .where(builder)
                 .orderBy(post.created_at.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         boolean hasNextSize = false;
 
-        List<PostDto> collect = list.stream().map(tuple -> new PostDto(tuple.get(post.id), tuple.get(post.postTitle), getImg(tuple), tuple.get(post.member.nickName))).collect(Collectors.toList());
+        List<PostDto> collect = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
+                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
 
 
         if(collect.size()> pageable.getPageSize()){

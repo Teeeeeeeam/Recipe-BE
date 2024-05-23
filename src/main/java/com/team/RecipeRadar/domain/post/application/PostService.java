@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PostService {
     void save(UserAddRequest userAddPostDto, MultipartFile file);
 
-    PostResponse postPage(Pageable pageable);
+    PostResponse postPage(Long postId,Pageable pageable);
 
     Post findById(long id);
 

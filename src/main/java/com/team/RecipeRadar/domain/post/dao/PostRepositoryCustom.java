@@ -10,7 +10,7 @@ public interface PostRepositoryCustom {
 
     Slice<UserInfoPostRequest> userInfoPost(Long memberId, Pageable pageable);
 
-    Slice<PostDto> getAllPost(Pageable pageable);
+    Slice<PostDto> getAllPost(Long post_Id,Pageable pageable);
 
     PostDetailResponse postDetails(Long postId);
 }
