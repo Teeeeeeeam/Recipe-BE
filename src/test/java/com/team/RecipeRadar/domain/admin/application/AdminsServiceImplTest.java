@@ -89,9 +89,9 @@ class AdminsServiceImplTest {
         boolean hasNext = true;
 
         SliceImpl<MemberDto> memberSlice = new SliceImpl<>(memberList, pageRequest, hasNext);
-        when(memberRepository.getMemberInfo(pageRequest)).thenReturn(memberSlice);
+        when(memberRepository.getMemberInfo(anyLong(), any(Pageable.class))).thenReturn(memberSlice);
 
-        MemberInfoResponse memberInfoResponse = adminService.memberInfos(pageRequest);
+        MemberInfoResponse memberInfoResponse = adminService.memberInfos(1l,pageRequest);
 
         assertThat(memberInfoResponse.getNextPage()).isTrue();
         assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);
@@ -131,9 +131,9 @@ class AdminsServiceImplTest {
         boolean hasNext = true;
 
         SliceImpl<MemberDto> memberSlice = new SliceImpl<>(memberList, pageRequest, hasNext);
-        when(memberRepository.searchMember(eq(loginId),eq("닉네임2"),isNull(),isNull(),eq(pageRequest))).thenReturn(memberSlice);
+        when(memberRepository.searchMember(eq(loginId),eq("닉네임2"),isNull(),isNull(),isNull(),eq(pageRequest))).thenReturn(memberSlice);
 
-        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId,"닉네임2",null,null,pageRequest);
+        MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId,"닉네임2",null,null,null,pageRequest);
 
         assertThat(memberInfoResponse.getNextPage()).isTrue();
         assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);

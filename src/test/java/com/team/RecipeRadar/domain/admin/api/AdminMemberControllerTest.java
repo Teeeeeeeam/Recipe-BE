@@ -95,7 +95,7 @@ class AdminMemberControllerTest {
 
         boolean hasNext = false;
         MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberDtoList, hasNext);
-        given(adminService.memberInfos(any())).willReturn(memberInfoResponse);
+        given(adminService.memberInfos(isNull(),any())).willReturn(memberInfoResponse);
 
         mockMvc.perform(get("/api/admin/members/info"))
                 .andDo(print())
@@ -161,7 +161,7 @@ class AdminMemberControllerTest {
 
         boolean hasNext = false;
         MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberDtoList, hasNext);
-        given(adminService.searchMember(eq(loginId),eq(nickname),any(),any(),any())).willReturn(memberInfoResponse);
+        given(adminService.searchMember(eq(loginId),eq(nickname),any(),any(),isNull(),any())).willReturn(memberInfoResponse);
 
         mockMvc.perform(get("/api/admin/members/search?login-id="+loginId+"&nickname="+nickname))
                 .andDo(print())

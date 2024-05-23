@@ -81,7 +81,7 @@ class MemberRepositoryTest {
         memberRepository.save(member_2);
 
         Pageable pageRequest = PageRequest.of(0, 1);
-        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(pageRequest);
+        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(null,pageRequest);
 
         assertThat(memberInfo.getContent()).hasSize(1);
         assertThat(memberInfo.hasNext()).isTrue();
@@ -102,9 +102,9 @@ class MemberRepositoryTest {
         memberRepository.save(member_2);
 
         Pageable request = PageRequest.of(0, 1);
-        Slice<MemberDto> findMember_1 = memberRepository.searchMember(meme1_loginId, null, null, null, request);
-        Slice<MemberDto> findMember_2 = memberRepository.searchMember(meme2_loginId, "닉네임2", null, null, request);
-        Slice<MemberDto> memberDtos = memberRepository.searchMember(meme1_loginId, "닉네임2", null, null, request);
+        Slice<MemberDto> findMember_1 = memberRepository.searchMember(meme1_loginId, null, null, null,null, request);
+        Slice<MemberDto> findMember_2 = memberRepository.searchMember(meme2_loginId, "닉네임2", null, null,null, request);
+        Slice<MemberDto> memberDtos = memberRepository.searchMember(meme1_loginId, "닉네임2", null, null, null,request);
 
 
         assertThat(findMember_1.getContent().get(0).getLoginId()).isEqualTo(meme1_loginId);     //첫번째 회원
