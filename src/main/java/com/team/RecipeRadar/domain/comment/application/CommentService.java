@@ -7,8 +7,6 @@ import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.AddCommentRequest;
-import com.team.RecipeRadar.domain.comment.dto.UpdateCommentRequest;
 
 import java.util.List;
 

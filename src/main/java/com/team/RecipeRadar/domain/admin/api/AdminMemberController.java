@@ -160,4 +160,27 @@ public class AdminMemberController {
         PostsCommentResponse postsComments = adminService.getPostsComments(postId, lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }
+
+    @Operation(summary = "게시글 댓글 일괄 삭제 API",description = "댓글을 단일,일괄 삭제 가능 어드민 사용자만 가능")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"댓글 삭제 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"댓글을 찾을수 없습니다.\"}"))),
+
+    })
+    @DeleteMapping("/posts/comments")
+    public ResponseEntity<?> deleteComments(@RequestParam(value = "ids") List<Long> commentsIds){
+        try{
+            adminService.deleteComments(commentsIds);
+            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류");
+        }
+    }
 }

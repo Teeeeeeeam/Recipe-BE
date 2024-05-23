@@ -23,5 +23,6 @@ public interface AdminService {
 
     PostsCommentResponse getPostsComments(Long postId,Long lastId,Pageable pageable);
 
+    void deleteComments(List<Long> ids);
 
 }

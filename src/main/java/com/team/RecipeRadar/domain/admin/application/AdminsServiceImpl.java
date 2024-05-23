@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
@@ -98,5 +99,17 @@ public class AdminsServiceImpl implements AdminService {
         Slice<CommentDto> postComment = commentRepository.getPostComment(postId, lastId, pageable);
 
         return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
+    }
+
+    /**
+     * 어디민 사용자는 댓글을 단일,일괄 삭제
+     * @param ids
+     */
+    @Override
+    public void deleteComments(List<Long> ids) {
+        for (Long id : ids) {
+            Comment comment = commentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("댓글을 찾을수 없습니다."));
+            commentRepository.deleteById(comment.getId());
+        }
     }
 }
