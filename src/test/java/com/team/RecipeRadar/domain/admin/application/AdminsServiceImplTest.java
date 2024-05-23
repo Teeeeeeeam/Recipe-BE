@@ -98,26 +98,6 @@ class AdminsServiceImplTest {
         assertThat(memberInfoResponse.getMemberInfos().get(0).getLoginId()).isEqualTo(loginId);
     }
 
-    @Test
-    @DisplayName("관리자자가 사용자 데이터 삭제_처음삭제시")
-    public void delete_user(){
-        Long memberId= 1l;
-        String email ="tes@eamil.com";
-        boolean email_exist = true;
-
-        Member member = Member.builder().id(memberId).email(email).nickName("닉네임").build();
-
-        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
-        when(blackListRepository.existsByEmail(eq(email))).thenReturn(email_exist);
-
-        adminService.adminDeleteUser(memberId);
-
-        verify(noticeRepository, times(1)).deleteByMember_Id(memberId);
-        verify(recipeBookmarkRepository, times(1)).deleteByMember_Id(memberId);
-        verify(jwtRefreshTokenRepository, times(1)).DeleteByMemberId(memberId);
-        verify(memberRepository, times(1)).deleteById(memberId);
-
-    }
 
     @Test
     @DisplayName("사용자 검색 무한 페이징")

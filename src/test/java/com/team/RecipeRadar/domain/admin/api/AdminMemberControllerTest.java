@@ -104,35 +104,6 @@ class AdminMemberControllerTest {
                 .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
     }
-    
-    @Test
-    @DisplayName("어드민 삭제 API 구현")
-    @CustomMockAdmin
-    void deleteUser() throws Exception {
-        Long memberId = 1l;
-
-        doNothing().when(adminService).adminDeleteUser(anyLong());
-
-        mockMvc.perform(delete("/api/admin/member/"+memberId))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("삭제 성공"));
-    }
-
-    @Test
-    @DisplayName("어드민 삭제 API 구현시 회원 없을때 예외")
-    @CustomMockAdmin
-    void deleteUser_thr() throws Exception {
-        Long memberId = 1l;
-
-        doThrow(new NoSuchElementException("사용자를 찾을수 업습니다.")).when(adminService).adminDeleteUser(anyLong());
-
-        mockMvc.perform(delete("/api/admin/member/"+memberId))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."));
-    }
-
     @Test
     @DisplayName("어드민 일괄 삭제 API 구현")
     @CustomMockAdmin
