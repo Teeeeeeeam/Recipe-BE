@@ -162,6 +162,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
                 .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
+                .where(uploadFile.post.id.isNull())
                 .orderBy(recipe.likeCount.desc())
                 .limit(8).fetch();
 
