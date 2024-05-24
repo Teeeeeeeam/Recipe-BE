@@ -45,13 +45,20 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
         String redirectURI = builder
                 .queryParam("access-token", jwtToken)
                 .build().toString();
-        Cookie cookie = new Cookie("RefreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(30 * 24 * 60 * 60);
+
+        ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(30 * 24 * 60 * 60)
+                .build();
+
 
         if (jwtToken != null) {
-            response.addCookie(cookie);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
+            response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
             response.sendRedirect(redirectURI);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "페이지를 찾을 수 없습니다.");

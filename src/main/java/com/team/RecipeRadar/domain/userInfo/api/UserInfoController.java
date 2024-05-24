@@ -21,7 +21,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -177,7 +179,15 @@ public class UserInfoController {
             cookie.setMaxAge(1200); //20분
             response.addCookie(cookie);
 
-            return ResponseEntity.ok(new ControllerApiResponse<>(true, "인증 성공"));
+            ResponseCookie responseCookie = ResponseCookie.from("login-id", userEncodeToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/")
+                    .maxAge(1200)
+                    .build();
+
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
 
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());

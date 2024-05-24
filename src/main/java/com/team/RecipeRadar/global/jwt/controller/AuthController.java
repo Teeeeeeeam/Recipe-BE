@@ -117,10 +117,11 @@ public class AuthController {
             Map<String, String> login = jwtAuthService.login(loginDto);
 
             String refreshToken = login.get("refreshToken");
-            log.info("토큰={}",refreshToken);
 
             ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
                     .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
                     .path("/")
                     .maxAge(30 * 24 * 60 * 60)
                     .build();
