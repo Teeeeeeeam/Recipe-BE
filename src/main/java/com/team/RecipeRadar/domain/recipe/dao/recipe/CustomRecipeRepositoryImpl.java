@@ -143,7 +143,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .leftJoin(recipe.cookingStepList, cookingStep)
-                .where(recipe.id.eq(recipeId)).fetch();
+                .where(recipe.id.eq(recipeId).and(uploadFile.post.id.isNull())).fetch();
 
         List<CookingStep> cookingSteps = details.stream().map(tuple -> tuple.get(cookingStep)).collect(Collectors.toList());
 
