@@ -60,7 +60,7 @@ public class NoticeController {
                     examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\"}}"))),
     })
     @PostMapping(value = "/api/admin/notices", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> noticeAdd(@Valid @RequestBody AdminAddRequest adminAddNoticeDto, BindingResult bindingResult, @RequestPart MultipartFile file) {
+    public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddNoticeDto, BindingResult bindingResult, @RequestPart MultipartFile file) {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
@@ -86,7 +86,7 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
     @DeleteMapping("/api/admin/notices/{notice-id}")
-    public ResponseEntity<?> deleteNotice(@PathVariable("noitce-id") Long noticeId) {
+    public ResponseEntity<?> deleteNotice(@PathVariable("notice-id") Long noticeId) {
         try{
             String loginId = authenticationLogin();
             noticeService.delete(loginId, noticeId);
