@@ -1,19 +1,20 @@
 package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.notice.domain.Notice;
-import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddNoticeDto;
-import com.team.RecipeRadar.domain.notice.dto.admin.AdminDeleteNoticeDto;
+import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
+import com.team.RecipeRadar.domain.notice.dto.admin.*;
+import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 public interface NoticeService {
-    Notice save(AdminAddNoticeDto adminAddNoticeDto);
+    Notice save(AdminAddRequest adminAddNoticeDto, MultipartFile file);
 
-    List<Notice> findAll();
+    void delete(String loginId, Long noticeId);
 
-    Notice findById(long id);
+    void update(Long noticeId, AdminUpdateRequest adminUpdateNoticeDto, String loginId, MultipartFile file);
 
-    void delete(AdminDeleteNoticeDto admindeleteNoticeDto);
-
-    void update(Long memberId, Long noticeId, String noticeTitle);
 }

@@ -1,8 +1,8 @@
 package com.team.RecipeRadar.domain.post.api;
 
 import com.team.RecipeRadar.domain.post.application.PostService;
-import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.exception.PostException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -21,13 +21,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;

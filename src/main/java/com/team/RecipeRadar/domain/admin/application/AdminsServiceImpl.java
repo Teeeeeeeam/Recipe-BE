@@ -80,7 +80,7 @@ public class AdminsServiceImpl implements AdminService {
             }
 
             Long save_memberId = member.getId();
-            noticeRepository.deleteByMember_Id(save_memberId);
+            //noticeRepository.deleteByMember_Id(save_memberId);
             recipeBookmarkRepository.deleteByMember_Id(save_memberId);
             jwtRefreshTokenRepository.DeleteByMemberId(save_memberId);
             memberRepository.deleteById(save_memberId);

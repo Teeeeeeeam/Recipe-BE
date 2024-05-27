@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminDeleteNoticeDto {
+public class AdminDeleteRequest {
 
     @Schema(description = "사용자 id", example = "1")
     private Long memberId;

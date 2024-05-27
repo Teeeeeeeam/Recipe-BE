@@ -2,8 +2,11 @@ package com.team.RecipeRadar.domain.notice.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.aspectj.weaver.ast.Not;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -45,11 +48,24 @@ public class Notice {
         return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
     }
 
-    public void update(String noticeTitle) {
+    public void update(String noticeTitle, String noticeContent) {
         this.noticeTitle = noticeTitle;
+        this.noticeContent = noticeContent;
+        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
+
     }
 
     public void updateTime(LocalDateTime updated_at) {
         this.updated_at = updated_at;
+    }
+
+    static public NoticeDto of(Notice notice){
+
+        return NoticeDto.builder()
+                .id(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .noticeContent(notice.getNoticeContent())
+                .member(MemberDto.builder().nickname(notice.getMember().getNickName()).build())
+                .build();
     }
 }
