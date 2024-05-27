@@ -3,6 +3,7 @@ package com.team.RecipeRadar.domain.post.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,15 +59,19 @@ public class PostDto {
     public static PostDto of(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at){
         return new PostDto(id,loginId,postTitle,img,nickName,recipeTitle,recipeId,create_at);
     }
-    public static PostDto of(Post post,String imgUrl){
+    public static PostDto of(Post post, String imgUrl, Recipe recipe){
         MemberDto memberDto = new MemberDto();
         memberDto.setNickname(post.getMember().getNickName());
 
+        RecipeDto recipeDto = new RecipeDto();
+        recipeDto.setId(recipe.getId());
+        recipeDto.setTitle(recipe.getTitle());
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
                 .postContent(post.getPostContent())
                 .member(memberDto)
+                .recipe(recipeDto)
                 .create_at(post.getCreated_at())
                 .postServing(post.getPostServing())
                 .postCookingTime(post.getPostCookingTime())

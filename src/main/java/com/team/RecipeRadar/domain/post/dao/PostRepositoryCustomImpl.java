@@ -9,6 +9,7 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
+import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 
 @Slf4j
@@ -95,7 +97,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     @Override
     public PostDetailResponse postDetails(Long postId) {
 
-        List<Tuple> list = jpaQueryFactory.select(post,uploadFile.storeFileName,comment)
+        List<Tuple> list = jpaQueryFactory.select(post,uploadFile.storeFileName,comment, post.recipe)
                 .from(post)
                 .leftJoin(comment).on(comment.post.id.eq(post.id))
                 .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
@@ -105,7 +107,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             throw new NoSuchElementException("해당하는 게시물이 없습니다.");
         }
 
-        PostDto postDto = list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple))).findFirst().get();
+        PostDto postDto = list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple),tuple.get(post.recipe))).findFirst().get();
 
         //최초 등록시에는 댓글이 없을수도 있어서 없을때는 빅 베열이 생성
         List<CommentDto> collect1 = list.stream().map(tuple -> {
