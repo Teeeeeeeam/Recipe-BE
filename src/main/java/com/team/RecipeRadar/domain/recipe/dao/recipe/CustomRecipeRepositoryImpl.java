@@ -178,7 +178,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder)
+                .where(builder,uploadFile.post.isNull())
                 .orderBy(recipe.id.asc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
