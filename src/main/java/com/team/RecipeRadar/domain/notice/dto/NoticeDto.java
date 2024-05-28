@@ -49,4 +49,5 @@ public class NoticeDto {
                 .member(memberDto)
                 .created_at(notice.getCreated_at()).build();
     }
+
 }

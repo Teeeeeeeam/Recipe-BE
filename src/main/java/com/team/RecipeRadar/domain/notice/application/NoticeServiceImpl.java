@@ -2,11 +2,13 @@ package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
+import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
@@ -123,5 +125,14 @@ public class NoticeServiceImpl implements NoticeService {
         Slice<NoticeDto> noticeDto = noticeRepository.adminNotice(pageable);
 
         return new AdminInfoNoticeResponse(noticeDto.hasNext(),noticeDto.getContent());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminInfoDetailsResponse adminDetailNotice(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("해당 공지사항을 찾을수 없습니디ㅏ."));
+
+        MemberDto memberDto = MemberDto.builder().id(notice.getMember().getId()).nickname(notice.getMember().getNickName()).build();
+        return AdminInfoDetailsResponse.of(notice.getId(),notice.getNoticeTitle(),notice.getNoticeContent(),notice.getCreated_at(),memberDto);
     }
 }

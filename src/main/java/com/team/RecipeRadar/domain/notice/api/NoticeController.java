@@ -4,6 +4,7 @@ import com.team.RecipeRadar.domain.notice.application.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
+import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
 import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
@@ -153,6 +154,17 @@ public class NoticeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoNoticeResponse));
     }
 
+    @Operation(summary = "어드민 공지사항 상세 조회 API", description = "어드민 페이지에서 noticeId의 대해서 상세 조회", tags = {"공지사항 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"noticeContent\":\"첫 번째 공지사항 내용입니다.\",\"create_At\":\"2024-05-28T13:00:00\",\"member\":{\"id\":1,\"nickname\":\"관리자\"}}}"))),
+    })
+    @GetMapping("/api/admin/notice/{notice-id}")
+    public ResponseEntity<?> adminDetailNotice(@PathVariable("notice-id") Long noticeId){
+        AdminInfoDetailsResponse adminInfoDetailsResponse = noticeService.adminDetailNotice(noticeId);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoDetailsResponse));
+    }
 
 
 
