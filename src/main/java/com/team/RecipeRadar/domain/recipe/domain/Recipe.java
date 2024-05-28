@@ -23,9 +23,6 @@ public class Recipe {
     @Column(name = "recipe_id")
     private Long id;              // 요리 값
 
-    @Setter
-    private String imageUrl;
-
     @Column(name = "recipe_title")
     private String title;           // 요리제목
 
