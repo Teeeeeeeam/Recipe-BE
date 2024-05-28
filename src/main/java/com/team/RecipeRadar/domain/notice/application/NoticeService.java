@@ -17,4 +17,6 @@ public interface NoticeService {
 
     void update(Long noticeId, AdminUpdateRequest adminUpdateNoticeDto, String loginId, MultipartFile file);
 
+    List<NoticeDto> mainNotice();
+
 }

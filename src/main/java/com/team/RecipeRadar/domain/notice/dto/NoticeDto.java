@@ -27,19 +27,18 @@ public class NoticeDto {
 
     private LocalDateTime updated_at;       //수정일
 
+    private String imgUrl;
     private MemberDto member;
 
-    private NoticeDto(Long id, String loginId, String noticeTitle, String noticeContent, LocalDateTime created_at) {
+
+    private NoticeDto(Long id,String title,String img) {
         this.id = id;
-        this.member = new MemberDto();
-        this.member.setLoginId(loginId);
-        this.noticeTitle = noticeTitle;
-        this.noticeContent = noticeContent;
-        this.created_at = created_at;
+        this.noticeTitle = title;
+        this.imgUrl = img;
     }
 
-    private static NoticeDto of(Long id, String loginId, String noticeTitle, String noticeContent, LocalDateTime created_at) {
-        return new NoticeDto(id, loginId, noticeTitle, noticeContent, created_at);
+    public static NoticeDto of(Long id, String noticeTitle, String imgUrl) {
+        return new NoticeDto(id, noticeTitle, imgUrl);
     }
 
     public static NoticeDto of(Notice notice){

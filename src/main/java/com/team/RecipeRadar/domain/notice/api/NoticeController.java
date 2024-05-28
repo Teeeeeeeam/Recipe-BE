@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.notice.api;
 
 import com.team.RecipeRadar.domain.notice.application.NoticeService;
+import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.NoticeDetailResponse;
@@ -38,6 +39,7 @@ import org.springframework.web.server.ServerErrorException;
 import javax.validation.Valid;
 import java.awt.print.Pageable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -129,6 +131,18 @@ public class NoticeController {
             e.printStackTrace();
             throw new ServerErrorException("서버 오류 발생");
         }
+    }
+
+    @Operation(summary = "메인 페이지 공지사항 API", description = "메인 페이지에서 보여질 공지사항 총 5개의 공지사항을 조회 등록한 최신순으로 조회", tags = {"공지사항 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":[{\"id\":3,\"noticeTitle\":\"첫 번째 공지사항\",\"imgUrl\":\"https://www.recipe.kr/6ae7cd95-f2f5-4112-8d2c-8da3c09538cc.PNG\"},{\"id\":11,\"noticeTitle\":\"두 번째 공지사항\",\"imgUrl\":\"https://www.recipe.kr/6ae7cd95-f2f5-4112-8d2c-8da3c09538cc.PNG\"}]}"))),
+    })
+    @GetMapping("/api/notice")
+    public ResponseEntity<?> mainNotice(){
+        List<NoticeDto> noticeDtos = noticeService.mainNotice();
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",noticeDtos));
     }
 
 
