@@ -1,7 +1,9 @@
 package com.team.RecipeRadar.domain.inquiry.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team.RecipeRadar.domain.inquiry.dto.InquiryDto;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -31,31 +33,32 @@ public class Inquiry {
 
     private LocalDateTime updated_at;
 
-    @Column(name = "inquiry_answer", nullable = false)
-    private String inquiryAnswer;
-
-    @Column(name = "inquiry_answered", nullable = false)
-    private Boolean inquiryAnswered;
+    private String inquiryPassword;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Schema(hidden = true)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @JsonIgnore
-    public LocalDateTime getLocDateTime(){
-        return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-    @JsonIgnore
-    public LocalDateTime getUpdate_LocDateTime(){
-        return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
 
-    public void update(String inquiryTitle) {
+    public void update(String inquiryTitle, String inquiryContent, String inquiryPassword) {
         this.inquiryTitle = inquiryTitle;
+        this.inquiryContent = inquiryContent;
+        this.inquiryPassword = inquiryPassword;
+        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
     }
 
     public void updateTime(LocalDateTime updated_at) {
         this.updated_at = updated_at;
+    }
+
+    static public InquiryDto of(Inquiry inquiry) {
+
+        return InquiryDto.builder()
+                .id(inquiry.getId())
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryContent(inquiry.getInquiryContent())
+                .member(MemberDto.builder().nickname(inquiry.getMember().getNickName()).build())
+                .build();
     }
 }
