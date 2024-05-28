@@ -54,7 +54,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         boolean isHasNext = false;
 
         if(noticeDtoList.size()> pageable.getPageSize()){
-            list.remove(pageable.getPageSize());
+            noticeDtoList.remove(pageable.getPageSize());
             isHasNext = true;
         }
 
