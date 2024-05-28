@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.notice.dto.admin.NoticeResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
 import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
@@ -49,6 +50,7 @@ import java.util.NoSuchElementException;
 public class NoticeController {
 
     private final NoticeService noticeService;
+    private final S3UploadService s3UploadService;
 
     @Operation(summary = "공지사항 작성 API", description = "관리자만 공지사항 작성 가능", tags = {"공지사항 컨트롤러"} )
     @ApiResponses(value = {
@@ -64,7 +66,10 @@ public class NoticeController {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
-            noticeService.save(adminAddNoticeDto,file);
+
+            String uploadFile = s3UploadService.uploadFile(file);
+            String originalFilename = file.getOriginalFilename();
+            noticeService.save(adminAddNoticeDto,uploadFile,originalFilename);
             return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
             }catch (NoSuchElementException e){
                 throw new NoticeException(e.getMessage());

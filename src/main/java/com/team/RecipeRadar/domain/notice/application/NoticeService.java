@@ -11,7 +11,7 @@ import java.awt.print.Pageable;
 import java.util.List;
 
 public interface NoticeService {
-    Notice save(AdminAddRequest adminAddNoticeDto, MultipartFile file);
+    void save(AdminAddRequest adminAddNoticeDto,String fileUrl,String originalFilename);
 
     void delete(String loginId, Long noticeId);
 

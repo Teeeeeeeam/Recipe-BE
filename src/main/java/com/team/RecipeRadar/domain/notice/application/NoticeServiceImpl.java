@@ -44,7 +44,7 @@ public class NoticeServiceImpl implements NoticeService {
      * @param adminAddNoticeDto
      */
     @Override
-    public Notice save(AdminAddRequest adminAddNoticeDto, MultipartFile file) {
+    public void save(AdminAddRequest adminAddNoticeDto,String fileUrl,String originalFilename) {
         Long memberId = adminAddNoticeDto.getMemberId();
 
         Optional<Member> op_member = memberRepository.findById(memberId);
@@ -53,6 +53,7 @@ public class NoticeServiceImpl implements NoticeService {
             Member member = op_member.get();
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);
 
+
             Notice notice = Notice.builder()
                     .noticeTitle(adminAddNoticeDto.getNoticeTitle())
                     .noticeContent(adminAddNoticeDto.getNoticeContent())
@@ -60,7 +61,10 @@ public class NoticeServiceImpl implements NoticeService {
                     .created_at(localDateTime)
                     .build();
 
-            return noticeRepository.save(notice);
+            Notice notice_save = noticeRepository.save(notice);
+            UploadFile uploadFile = UploadFile.builder().originFileName(originalFilename).storeFileName(fileUrl).notice(notice_save).build();
+            imgRepository.save(uploadFile);
+
         } else {
             throw new NoSuchElementException("공지사항 저장에 실패했습니다.");
         }
