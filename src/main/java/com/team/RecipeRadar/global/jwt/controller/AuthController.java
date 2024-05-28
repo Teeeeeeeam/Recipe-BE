@@ -180,7 +180,11 @@ public class AuthController {
             jwtAuthService.logout(memberId);
             SecurityContextHolder.clearContext();
 
-            ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null).maxAge(0).path("/").build();
+            ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null)
+                    .secure(true)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .maxAge(0).path("/").build();
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"로그아웃 성공"));
         } catch (Exception e) {
             throw new JwtTokenException(e.getMessage());
