@@ -4,27 +4,19 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
-import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
-import com.team.RecipeRadar.domain.notice.dto.admin.AdminDeleteRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
-import com.team.RecipeRadar.domain.notice.dto.admin.NoticeResponse;
-import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -83,6 +75,9 @@ public class NoticeServiceImpl implements NoticeService {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("공지사항을 찾을수 없습니다."));
         if(!notice.getMember().getLoginId().equals(member.getLoginId())) throw new AccessDeniedException("관리자만 삭제할수 있습니다.");
 
+        UploadFile byNoticeOriginalFileName = imgRepository.getByNoticeOriginalFileName(notice.getId());
+        s3UploadService.deleteFile(byNoticeOriginalFileName.getStoreFileName());
+        imgRepository.deleteNoticeId(notice.getId());
         noticeRepository.deleteByMemberId(member.getId(),noticeId);
     }
 
