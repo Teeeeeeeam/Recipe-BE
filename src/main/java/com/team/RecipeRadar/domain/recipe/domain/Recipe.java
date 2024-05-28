@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(includeFieldNames = false, of = {"title","imageUrl" , "cookingTime", "cookingLevel"})
+@ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "likeCount"),
         @Index(columnList = "recipe_title")
