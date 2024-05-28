@@ -1,6 +1,8 @@
 package com.team.RecipeRadar.domain.notice.dao;
 
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,4 +11,6 @@ import java.util.List;
 public interface NoticeRepositoryCustom {
 
     List<NoticeDto> mainNotice();
+
+    Slice<NoticeDto> adminNotice(Pageable pageable);
 }

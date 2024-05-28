@@ -41,12 +41,12 @@ public class NoticeDto {
         return new NoticeDto(id, noticeTitle, imgUrl);
     }
 
-    public static NoticeDto of(Notice notice){
-
+    public static NoticeDto of(Notice notice, String nickName){
+        MemberDto memberDto = MemberDto.builder().nickname(nickName).build();
         return NoticeDto.builder()
                 .id(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
-                .noticeContent(notice.getNoticeContent())
+                .member(memberDto)
                 .created_at(notice.getCreated_at()).build();
     }
 }

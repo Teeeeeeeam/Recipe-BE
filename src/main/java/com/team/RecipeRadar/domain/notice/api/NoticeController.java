@@ -4,15 +4,12 @@ import com.team.RecipeRadar.domain.notice.application.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
-import com.team.RecipeRadar.domain.notice.dto.admin.NoticeDetailResponse;
-import com.team.RecipeRadar.domain.notice.dto.admin.NoticeResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
 import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -25,9 +22,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
@@ -37,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerErrorException;
 
 import javax.validation.Valid;
-import java.awt.print.Pageable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +140,19 @@ public class NoticeController {
         List<NoticeDto> noticeDtos = noticeService.mainNotice();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",noticeDtos));
     }
+
+    @Operation(summary = "어드민 공지사항 조회 API", description = "어드민 페이지에서 공자사항을 조회하는 페이징 API (무한페이징)", tags = {"공지사항 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"notice\":[{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"created_at\":\"2024-05-28T17:08:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":2,\"noticeTitle\":\"두 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":3,\"noticeTitle\":\"세 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}}]}}\n"))),
+    })
+    @GetMapping("/api/admin/notices")
+    public ResponseEntity<?> adminNotice(Pageable pageable){
+        AdminInfoNoticeResponse adminInfoNoticeResponse = noticeService.adminNotice(pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoNoticeResponse));
+    }
+
 
 
 

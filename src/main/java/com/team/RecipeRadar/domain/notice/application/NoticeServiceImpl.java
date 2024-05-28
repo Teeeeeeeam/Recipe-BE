@@ -7,11 +7,15 @@ import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
+import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,5 +115,13 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional(readOnly = true)
     public List<NoticeDto> mainNotice() {
         return noticeRepository.mainNotice();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminInfoNoticeResponse adminNotice(Pageable pageable) {
+        Slice<NoticeDto> noticeDto = noticeRepository.adminNotice(pageable);
+
+        return new AdminInfoNoticeResponse(noticeDto.hasNext(),noticeDto.getContent());
     }
 }
