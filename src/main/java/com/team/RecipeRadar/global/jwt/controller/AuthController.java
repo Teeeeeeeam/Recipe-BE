@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -152,6 +153,9 @@ public class AuthController {
     public ResponseEntity<?> getUserInfo(HttpServletRequest request){
         try{
             String accessToken = request.getHeader("Authorization");
+            if(accessToken ==null){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 존재하지 않습니다."));
+            }
             String token = accessToken.substring(accessToken.indexOf("Bearer ") + 7);
             MemberInfoResponse info = jwtAuthService.accessTokenMemberInfo(token);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",info));
