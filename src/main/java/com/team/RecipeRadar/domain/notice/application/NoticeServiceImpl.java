@@ -121,8 +121,8 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     @Transactional(readOnly = true)
-    public AdminInfoNoticeResponse adminNotice(Pageable pageable) {
-        Slice<NoticeDto> noticeDto = noticeRepository.adminNotice(pageable);
+    public AdminInfoNoticeResponse adminNotice(Long noticeId, Pageable pageable) {
+        Slice<NoticeDto> noticeDto = noticeRepository.adminNotice(noticeId,pageable);
 
         return new AdminInfoNoticeResponse(noticeDto.hasNext(),noticeDto.getContent());
     }

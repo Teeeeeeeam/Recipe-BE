@@ -149,8 +149,8 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"notice\":[{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"created_at\":\"2024-05-28T17:08:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":2,\"noticeTitle\":\"두 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":3,\"noticeTitle\":\"세 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}}]}}\n"))),
     })
     @GetMapping("/api/admin/notices")
-    public ResponseEntity<?> adminNotice(Pageable pageable){
-        AdminInfoNoticeResponse adminInfoNoticeResponse = noticeService.adminNotice(pageable);
+    public ResponseEntity<?> adminNotice(@RequestParam(value = "last-id",required = false)Long noticeId, Pageable pageable){
+        AdminInfoNoticeResponse adminInfoNoticeResponse = noticeService.adminNotice(noticeId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoNoticeResponse));
     }
 

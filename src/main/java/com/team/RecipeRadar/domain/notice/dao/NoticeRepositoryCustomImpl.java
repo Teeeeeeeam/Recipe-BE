@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.notice.dao;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.notice.domain.QNotice;
@@ -41,9 +42,14 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .collect(Collectors.toList());
     }
 
-    public Slice<NoticeDto> adminNotice(Pageable pageable){
+    public Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable){
+        BooleanBuilder builder = new BooleanBuilder();
+        if(noticeId!=null){
+            builder.and(notice.id.gt(noticeId));
+        }
         List<Tuple> list = jpaQueryFactory.select(notice, notice.member.nickName)
                 .from(notice)
+                .where(builder)
                 .orderBy(notice.created_at.desc())      //최신순 정렬
                 .limit(pageable.getPageSize() + 1)
                 .fetch();

@@ -12,5 +12,5 @@ public interface NoticeRepositoryCustom {
 
     List<NoticeDto> mainNotice();
 
-    Slice<NoticeDto> adminNotice(Pageable pageable);
+    Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable);
 }
