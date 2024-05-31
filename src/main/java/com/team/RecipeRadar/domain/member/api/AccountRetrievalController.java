@@ -91,11 +91,11 @@ public class AccountRetrievalController {
     }
 
     @Operation(summary = "비밀번호 찾기", 
-            description = "사용자실명, 로그인아이디, 이메일을 통한인증코드를 통해서 해당 사용자가 있는지 확인후 모두 true이며 token을 발급해준다. 그후 /api/pwd/update로 라디이렉트")
+            description = "사용자실명, 로그인아이디, 이메일을 통한인증코드를 통해서 해당 사용자가 있는지 확인후 모두 true이며 Token 정보가 담긴 쿠키(account-token)을 발급해준다(3분 유효시간). 그후 /api/pwd/update로 라디이렉트")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"token\":\"[토큰 값]\",\"회원 정보\":true,\"이메일 인증\":true}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"회원 정보\":true,\"이메일 인증\":true}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
@@ -140,7 +140,7 @@ public class AccountRetrievalController {
         }
     }
 
-    @Operation(summary = "비밀번호 변경",description = "토큰값을 받아, 해당 토큰이 존재한다면 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
+    @Operation(summary = "비밀번호 변경",description = "'account-token'쿠키가 존재한다면(비밀번호 찾기시 비밀번호 변경), 'login-id'쿠키가 존재시(사용자 페이지에서 비밀번호 변경) 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),

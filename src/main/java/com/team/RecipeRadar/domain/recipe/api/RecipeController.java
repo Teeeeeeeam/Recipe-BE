@@ -89,12 +89,12 @@ public class RecipeController {
     }
 
 
-    @Operation(summary = "즐겨찾기 API",description = "사용자가 좋아요한 게시글의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
-            "nextPage의 존재여부로 다음 페이지 호출",tags ="일반 사용자 레시피 컨트롤러")
+    // TODO: 2024-05-31 북마크 조회, 확인 기능 구현 및
+    @Operation(summary = "즐겨찾기 API",description = "레시피에 즐겨찾기를 하는 API 즐겨찾기시 -> true, 즐겨찾기 해제시 -> false",tags ="일반 사용자 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공 \",\"data\":{\"즐겨 찾기 상태\":\"[true or false]\"}]}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"즐겨 찾기 상태\":true}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자 및 레시피를 찾을수 없습니다.\"}"))),
