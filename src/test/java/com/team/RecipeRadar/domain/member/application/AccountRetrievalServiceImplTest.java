@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -179,7 +180,9 @@ class AccountRetrievalServiceImplTest {
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
 
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
-        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId(token).expireAt(LocalDateTime.now().plusMinutes(3)).loginId(loginId).build();
+        when(accountRetrievalRepository.findById(anyString())).thenReturn(Optional.of(accountRetrieval));
 
         Member member = Member.builder().id(1l).loginId(loginId).username("username").password("asd").build();
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
@@ -208,7 +211,8 @@ class AccountRetrievalServiceImplTest {
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
 
-        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId(token).expireAt(LocalDateTime.now().plusMinutes(3)).loginId(loginId).build();
+        when(accountRetrievalRepository.findById(anyString())).thenReturn(Optional.of(accountRetrieval));
 
         Member member = Member.builder().id(1l).username("username").password("asd").build();
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
@@ -238,7 +242,8 @@ class AccountRetrievalServiceImplTest {
         String token = Base64.getEncoder().encodeToString(verificationId.getBytes());
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, password, passwordRe);
 
-        when(accountRetrievalRepository.existsByVerificationId(verificationId)).thenReturn(true);
+        AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId(token).expireAt(LocalDateTime.now().plusMinutes(3)).loginId(loginId).build();
+        when(accountRetrievalRepository.findById(anyString())).thenReturn(Optional.of(accountRetrieval));
 
         Member member = Member.builder().id(1l).loginId(loginId).username("username").password("asd").build();
         when(memberRepository.findByLoginId(loginId)).thenReturn(member);
