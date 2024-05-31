@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,7 +87,8 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         Map<String, Object> map = new LinkedHashMap<>();
 
         if (memberExists&&emailedCode){
-            AccountRetrieval save = accountRetrievalRepository.save(AccountRetrieval.builder().loginId(loginId).build());
+            LocalDateTime expiration = LocalDateTime.now().plusMinutes(3);
+            AccountRetrieval save = accountRetrievalRepository.save(AccountRetrieval.builder().loginId(loginId).expireAt(expiration).build());
             String verificationId = save.getVerificationId();
             String token = new String(Base64.getEncoder().encode(verificationId.getBytes()));
             map.put("token",token);
@@ -109,7 +111,13 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
         String validId = new String(Base64.getDecoder().decode(id.getBytes()));
 
-        Boolean aBoolean = accountRetrievalRepository.existsByVerificationId(validId);              // 해당 ID가 있는지 체크
+        AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(validId).orElseThrow(() -> new BadRequestException("잘못된 접근"));
+
+        Boolean expiration = false;
+
+        if(accountRetrieval.getExpireAt().isAfter(LocalDateTime.now())){
+            expiration =true;
+        }
 
         Member byLoginId = memberRepository.findByLoginId(updatePasswordRequest.getLoginId());
         if (byLoginId==null) throw new NoSuchElementException("가입된 아이디를 찾을수 없습니다.");
@@ -119,7 +127,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
         ControllerApiResponse apiResponse = null;
 
-        if (aBoolean) {
+        if (expiration) {
             if (stringBooleanMap.get("passwordStrength")) {
                 if (stringBooleanMap1.get("duplicate_password")) {
                     byLoginId.update(passwordEncoder.encode(updatePasswordRequest.getPassword()));

@@ -20,13 +20,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -110,12 +114,24 @@ public class AccountRetrievalController {
             }
             Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
 
+            String token = (String) pwd.get("token");
+            log.info("token={}",token);
+
+            ResponseCookie accountToken = ResponseCookie.from("account-token", token)
+                    .maxAge(60 * 3)
+                    .secure(true)
+                    .httpOnly(true)
+                    .path("/")
+                    .sameSite("None")
+                    .build();
+            pwd.remove("token");
+
             ControllerApiResponse<Object> response = ControllerApiResponse.builder()
                     .success(true)
                     .message("성공")
                     .data(pwd).build();
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,accountToken.toString()).body(response);
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         } catch (Exception e){
@@ -123,7 +139,7 @@ public class AccountRetrievalController {
             throw new ServerErrorException("서버오류");
         }
     }
-
+    
     @Operation(summary = "비밀번호 변경",description = "토큰값을 받아, 해당 토큰이 존재한다면 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -136,7 +152,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/api/password/update")
-    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult){
+    public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult, HttpServletRequest request){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -145,7 +161,15 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
             }
-            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
+            Cookie[] cookies = request.getCookies();
+            String accountId = "";
+            for (Cookie cookie : cookies) {
+                if(cookie.getName().equals("account-token")){
+                    accountId = cookie.getValue();
+                }
+            }
+
+            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,accountId);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));
