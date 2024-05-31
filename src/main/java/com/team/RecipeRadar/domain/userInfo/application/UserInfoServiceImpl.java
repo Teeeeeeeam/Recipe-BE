@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,8 +113,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     public String userToken(String loginId,String authenticationName, String password,String loginType) {
 
         Member member = memberRepository.findByLoginId(loginId);
-        log.info("member={}",member.getUsername());
-        log.info("name={}",authenticationName);
         if (member == null || !member.getUsername().equals(authenticationName)) {
             throw new AccessDeniedException("잘못된 접근입니다.");
         }
@@ -153,11 +152,15 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public boolean validUserToken(String encodeToken,String loginId) {
+        if(encodeToken==null){
+            throw new ForbiddenException("잘못된 접근입니다.");
+        }
         String decodeToken = new String(Base64.getDecoder().decode(encodeToken.getBytes()));
         AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(decodeToken).orElseThrow(() -> new AccessDeniedException("잘못된 접근입니다."));
         Member byLoginId = memberRepository.findByLoginId(loginId);
-        log.info("ac={}",accountRetrieval.getLoginId());
-        log.info("mem={}",byLoginId.getLoginId());
+        if(!accountRetrieval.getExpireAt().isAfter(LocalDateTime.now())){       // 토큰 시간이 현재 시간보다 전이라면 false
+            return false;
+        }
         if (byLoginId==null||!accountRetrieval.getLoginId().equals(byLoginId.getLoginId())){
             return false;
         }
@@ -166,12 +169,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     private Member throwsMember(String loginId, String authName) {
         Member member = memberRepository.findByLoginId(loginId);
-
         if (member == null || !member.getUsername().equals(authName)) {
             throw new AccessDeniedException("잘못된 접근입니다.");
         }
-
-
         return member;
     }
 }

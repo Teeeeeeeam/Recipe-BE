@@ -139,7 +139,7 @@ public class AccountRetrievalController {
             throw new ServerErrorException("서버오류");
         }
     }
-    
+
     @Operation(summary = "비밀번호 변경",description = "토큰값을 받아, 해당 토큰이 존재한다면 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -165,6 +165,8 @@ public class AccountRetrievalController {
             String accountId = "";
             for (Cookie cookie : cookies) {
                 if(cookie.getName().equals("account-token")){
+                    accountId = cookie.getValue();
+                }if(cookie.getName().equals("login-id")){
                     accountId = cookie.getValue();
                 }
             }

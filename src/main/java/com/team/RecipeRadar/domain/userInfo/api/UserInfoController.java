@@ -31,9 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
@@ -64,7 +62,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -73,7 +71,6 @@ public class UserInfoController {
         try{
             MemberDto memberDto = getMemberDto();
             cookieValid(cookieLoginId,memberDto.getLoginId());
-//            boolean b = userInfoService.validUserToken(cookieLoginId);
 
             UserInfoResponse members = userInfoService.getMembers(loginId,memberDto.getUsername());
 
@@ -97,7 +94,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -106,14 +103,15 @@ public class UserInfoController {
         try {
             MemberDto memberDto = getMemberDto();
             cookieValid(cookieLoginId,memberDto.getLoginId());
-
             String nickName = userInfoUpdateNickNameRequest.getNickName();
             String loginId = userInfoUpdateNickNameRequest.getLoginId();
 
             userInfoService.updateNickName(nickName,loginId,memberDto.getUsername());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
-        }catch (AccessDeniedException e){
+        }catch (ForbiddenException e){
+            throw new ForbiddenException(e.getMessage());
+        } catch (AccessDeniedException e){
             throw new AccessDeniedException(e.getMessage());
         }catch (ServerErrorException e){
             throw new ServerErrorException(e.getMessage());
@@ -133,7 +131,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 변경 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -168,16 +166,12 @@ public class UserInfoController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO, HttpServletResponse response){
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO){
         try {
             MemberDto memberDto = getMemberDto();
 
             String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
             String userEncodeToken = new String(Base64.getEncoder().encode(userToken.getBytes()));
-
-            Cookie cookie = new Cookie("login-id", userEncodeToken);
-            cookie.setMaxAge(1200); //20분
-            response.addCookie(cookie);
 
             ResponseCookie responseCookie = ResponseCookie.from("login-id", userEncodeToken)
                     .httpOnly(true)
