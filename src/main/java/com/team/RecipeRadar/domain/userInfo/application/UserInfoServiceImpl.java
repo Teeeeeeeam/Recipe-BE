@@ -5,6 +5,9 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
+import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -13,6 +16,8 @@ import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final AccountRetrievalRepository accountRetrievalRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecipeBookmarkRepository recipeBookmarkRepository;
 
     @Qualifier("AccountEmail")
     private final MailService mailService;
@@ -165,6 +171,15 @@ public class UserInfoServiceImpl implements UserInfoService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public UserInfoBookmarkResponse userInfoBookmark(Long memberId, Long lastId, Pageable pageable) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자를 찾을수 없습니다."));
+
+        Slice<RecipeDto> recipeDtos = recipeBookmarkRepository.userInfoBookmarks(member.getId(), lastId, pageable);
+
+        return new UserInfoBookmarkResponse(recipeDtos.hasNext(),recipeDtos.getContent());
     }
 
     private Member throwsMember(String loginId, String authName) {

@@ -2,11 +2,9 @@ package com.team.RecipeRadar.domain.userInfo.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserDeleteIdRequest;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoEmailRequest;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
+import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
-import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoUpdateNickNameRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -21,11 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -287,5 +288,58 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("잘못된 접근 이거나 일반 사용자만 가능합니다."))
                 .andDo(print());
+    }
+    
+    @Test
+    @CustomMockUser
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징")
+    void bookmark_page() throws Exception {
+        Long memberId =  1l;
+        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+
+        UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
+        given(userInfoService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
+
+        Cookie cookie = new Cookie("login-id", "cookie");
+        mockMvc.perform(get("/api/user/info/bookmark")
+                        .cookie(cookie))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.hasNext").value(false))
+                .andExpect(jsonPath("$.data.bookmark_list.size()").value(3));
+    }
+
+    @Test
+    @CustomMockUser
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징(쿠키가 없을때 접근)")
+    void bookmark_page_NONECOOKIE() throws Exception {
+        Long memberId =  1l;
+        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+
+        UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
+        given(userInfoService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
+
+        mockMvc.perform(get("/api/user/info/bookmark"))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("쿠키값이 없을때 접근"));
+    }
+
+    @Test
+    @CustomMockUser(id = 2l)
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징(사용자가아닌 다른 사용자가 접근시)")
+    void aasdasd() throws Exception {
+        Long memberId =  1l;
+        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+
+        UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
+        given(userInfoService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
+        Cookie cookie = new Cookie("login-id", "cookie");
+
+        mockMvc.perform(get("/api/user/info/bookmark")
+                        .cookie(cookie))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
     }
 }

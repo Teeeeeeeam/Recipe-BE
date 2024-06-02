@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -227,7 +229,36 @@ public class UserInfoController {
         }
 
     }
+    @Operation(summary = "사용자 페이지의 즐겨찾기 페이징",description = "사용자가 즐겨찾기한 레시피의 대해서 무한 페이징 last-id는 레시피 아이디로 (sort는 사용 x)", tags = {"사용자 페이지 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":true,\"bookmark_list\":[{\"id\":128671,\"title\":\"어묵김말이\"}]}}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @GetMapping("/user/info/bookmark")
+    public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "last-id",required = false)Long lastId,@CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+        try {
+            if (cookieLoginId == null) {
+                throw new ForbiddenException("쿠키값이 없을때 접근");
+            }
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
+            Long member_id = principal.getMemberDto(principal.getMember()).getId();
+
+            UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(member_id, lastId, pageable);
+
+            return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", userInfoBookmarkResponse));
+        }catch (ForbiddenException e){
+            throw new ForbiddenException(e.getMessage());
+        } catch (Exception e){
+            throw new ServerErrorException("서버오류");
+        }
+    }
 
     @GetMapping ("/oauth2/social/unlink")
     @Hidden
