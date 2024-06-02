@@ -5,8 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface AnswerRepository extends JpaRepository<Answer, Long>, CustomAnswerRepository {
+@Repository
+public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
     @Modifying
     @Query("delete from Answer c where c.member.id=:member_id and c.id=:answer_id")
