@@ -79,7 +79,7 @@ class PostControllerTest {
                 .nextPage(false)
                 .content(requests).build();
 
-        given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
+        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -106,7 +106,7 @@ class PostControllerTest {
         String loginId= "test";
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
+        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))

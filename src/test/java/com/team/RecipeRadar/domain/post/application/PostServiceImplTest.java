@@ -75,9 +75,9 @@ class PostServiceImplTest {
 
         SliceImpl<UserInfoPostRequest> userInfoPostRequests = new SliceImpl<>(requests, pageable, false);
 
-        when(postRepository.userInfoPost(memberId,pageable)).thenReturn(userInfoPostRequests);
+        when(postRepository.userInfoPost(memberId,null,pageable)).thenReturn(userInfoPostRequests);
 
-        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(auName, loginId, pageable);
+        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(auName, null,loginId, pageable);
         assertThat(userInfoPostResponse.isNextPage()).isFalse();
         assertThat(userInfoPostResponse.getContent()).isNotEmpty();
         assertThat(userInfoPostResponse.getContent().size()).isEqualTo(2);
@@ -96,7 +96,7 @@ class PostServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        assertThatThrownBy(() -> postService.userPostPage(auName, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> postService.userPostPage(auName,null, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
