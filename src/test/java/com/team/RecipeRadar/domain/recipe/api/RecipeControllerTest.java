@@ -29,6 +29,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
@@ -513,5 +515,52 @@ class RecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.message").value("관리자만 삭제가능"));
+    }
+
+    @Test
+    @CustomMockUser
+    @DisplayName("로그인한 사용자 즐겨찾기 상태")
+    void loginIsBookmark() throws Exception {
+        Long recipeId = 1L;
+        Long memberId = 1L;
+
+        given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
+
+        mockMvc.perform(get("/api/check/bookmarks")
+                        .param("recipe-id", recipeId.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @CustomMockUser(id = 2l)
+    @DisplayName("로그인한 사용자(즐겨찾기 되어있지않은 사용자) 즐겨찾기 상태")
+    void diff_loginIsBookmark() throws Exception {
+        Long recipeId = 1L;
+        Long memberId = 1L;
+
+        given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
+
+        mockMvc.perform(get("/api/check/bookmarks")
+                        .param("recipe-id", recipeId.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+
+    @Test
+    @DisplayName("비로그인 사용자 즐겨찾기 상태")
+    void UnLoginIsBookmark() throws Exception {
+        Long recipeId = 1L;
+
+        given(recipeBookmarkService.checkBookmark(isNull() ,eq(recipeId))).willReturn(false);
+
+        mockMvc.perform(get("/api/check/bookmarks")
+                        .param("recipe-id", recipeId.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(false));
     }
 }
