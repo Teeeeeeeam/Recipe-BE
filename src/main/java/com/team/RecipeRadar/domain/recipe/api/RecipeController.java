@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.api;
 
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.*;
@@ -12,6 +13,7 @@ import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -239,6 +244,32 @@ public class RecipeController {
             throw new ServerErrorException("서버오류");
         }
 
+    }
+    @Operation(summary = "즐겨찾기를 했는지 확인",
+            description = "로그인하지않은 사용자는 기본적으로 false를 반환하며, 로그인한 사용자는 해당 레시피의 즐겨찾기 유무의 따라 상태를 반환한다.",tags ="일반 사용자 레시피 컨트롤러")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "로그인한 사용자 요청시",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\" : true, \"message\" : \"즐겨찾기 상태\"}")))
+    })
+    @GetMapping("/check/bookmarks")
+    public ResponseEntity<?> bookmarksCheck(@Parameter(description = "레시피 아이디") @RequestParam(value = "recipe-id",required = false) Long recipeId, HttpServletRequest request){
+        try {
+            Boolean isBookmark;
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if(authentication instanceof AnonymousAuthenticationToken){
+                isBookmark = false;
+            }else {
+                PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+                MemberDto memberDto = principal.getMemberDto(principal.getMember());
+                Long member_Id = memberDto.getId();
+                isBookmark = recipeBookmarkService.checkBookmark(member_Id, recipeId);
+            }
+            return ResponseEntity.ok(new ControllerApiResponse(isBookmark,"즐겨 찾기 상태"));
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServerErrorException("서버 오류 발생");
+        }
     }
 
 }
