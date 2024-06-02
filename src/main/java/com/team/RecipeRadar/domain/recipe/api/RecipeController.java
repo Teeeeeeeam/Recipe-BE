@@ -4,8 +4,6 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.*;
-import com.team.RecipeRadar.global.Image.application.ImageService;
-import com.team.RecipeRadar.global.Image.utils.FileStore;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -29,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -52,9 +49,7 @@ import java.util.*;
 public class RecipeController {
 
     private final RecipeBookmarkService recipeBookmarkService;
-    private final ImageService imageService;
     private final RecipeService recipeService;
-    private final FileStore fileStore;
     private final S3UploadService s3UploadService;
 
     @Operation(summary = "레시피 검색 API(무한 스크롤 방식)", description = "조회된 마지막 레시피의 Id값을 통해 다음페이지 여부를 판단 ('lastId'는 조회된 마지막 페이지 작성 값을 넣지않고 보내면 첫번째의 데이터만 출력 , page에 대한 쿼리스트링 작동 x)" ,tags ="일반 사용자 레시피 컨트롤러")
@@ -271,5 +266,4 @@ public class RecipeController {
             throw new ServerErrorException("서버 오류 발생");
         }
     }
-
 }
