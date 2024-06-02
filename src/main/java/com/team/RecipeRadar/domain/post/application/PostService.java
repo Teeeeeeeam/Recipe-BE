@@ -20,7 +20,7 @@ public interface PostService {
     PostDetailResponse postDetail(Long postId);
     void update(Long postId,UserUpdateRequest userUpdatePostDto,String loginId,MultipartFile file);
 
-    UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable);
+    UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable);
 
     boolean validPostPassword(String login, ValidPostRequest request);
 

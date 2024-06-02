@@ -157,14 +157,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable) {
+    public UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable) {
         Member member = memberRepository.findByLoginId(loginId);
 
         if (member==null||!member.getUsername().equals(authenticationName)){
             throw new AccessDeniedException("접근할 수 없는 사용자입니다.");
         }
 
-        Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(), pageable);
+        Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(),lastId, pageable);
 
         return UserInfoPostResponse.builder()
                 .nextPage(userInfoPostDto.hasNext())

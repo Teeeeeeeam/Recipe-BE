@@ -200,14 +200,16 @@ public class PostController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/posts")
-    public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId, @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+    public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId,
+                                           @RequestParam(value = "last-id",required = false) Long lastId,
+                                           @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
         try {
             if (cookieLoginId ==null){
                 throw new ForbiddenException("쿠키값이 없을때 접근");
             }
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String authenticationName = authentication.getName();
-            UserInfoPostResponse userInfoPostResponse = postService.userPostPage(authenticationName, loginId, pageable);
+            UserInfoPostResponse userInfoPostResponse = postService.userPostPage(authenticationName,lastId,loginId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userInfoPostResponse));
         }catch (AccessDeniedException e){
             throw new AccessDeniedException(e.getMessage());

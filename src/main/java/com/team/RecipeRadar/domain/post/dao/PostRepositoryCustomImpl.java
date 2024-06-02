@@ -40,10 +40,14 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     private String S3URL;
 
     @Override
-    public Slice<UserInfoPostRequest> userInfoPost(Long memberId, Pageable pageable) {
+    public Slice<UserInfoPostRequest> userInfoPost(Long memberId,Long lastId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (lastId!=null){
+            builder.and(post.id.gt(lastId));
+        }
         List<Post> postList = jpaQueryFactory.selectFrom(post)
                 .innerJoin(post.member, member).fetchJoin()
-                .where(post.member.id.eq(memberId))
+                .where(builder,post.member.id.eq(memberId))
                 .orderBy(post.member.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
