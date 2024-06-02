@@ -5,6 +5,10 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
+import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -16,13 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,6 +42,8 @@ class UserInfoServiceImplTest {
     @Mock
     MemberRepository memberRepository;
 
+    @Mock
+    RecipeBookmarkRepository recipeBookmarkRepository;
     @Mock
     MemberServiceImpl memberService;
     @Mock
@@ -268,4 +275,28 @@ class UserInfoServiceImplTest {
        assertThatThrownBy(() -> userInfoService.deleteMember("loginid",true,"test")).isInstanceOf(AccessDeniedException.class);
 
     }
+    
+    @Test
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 조회 테스트")
+    void bookmark_page(){
+
+        Long memberId = 1l;
+        Member member = Member.builder().id(memberId).nickName("닉네임").build();
+
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
+
+        Pageable pageRequest = PageRequest.of(0, 10);
+
+        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+        boolean hasNext =false;
+
+        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(list, pageRequest, hasNext);
+
+        when(recipeBookmarkRepository.userInfoBookmarks(eq(memberId),isNull(),eq(pageRequest))).thenReturn(recipeDtoSlice);
+
+        UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(memberId, null, pageRequest);
+        assertThat(userInfoBookmarkResponse.getBookmark_list()).hasSize(3);
+        assertThat(userInfoBookmarkResponse.getHasNext()).isFalse();
+    }
+
 }
