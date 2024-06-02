@@ -7,13 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@AllArgsConstructor
+@NoArgsConstructor
 public class AdminUpdateAnswerDto {
 
     @Schema(description = "수정할 댓글 내용", example = "댓글 수정!")

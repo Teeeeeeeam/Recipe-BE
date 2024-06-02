@@ -55,6 +55,11 @@ public class AnswerServiceImpl implements AnswerService{
         }
     }
 
+    @Override
+    public Answer findById(Long id) {
+        return answerRepository.findById(id).orElseThrow(() -> new AnswerException("찾을 수 없습니다."));
+    }
+
     /**
      * 응답의 Id와 사용자의 Id를 사용해서 응답을 삭제한다.
      * 응답의 작성자가 아닐경우 삭제시에는 ->AnswerException 예외를 날린다.
