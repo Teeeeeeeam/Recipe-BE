@@ -1,20 +1,20 @@
 package com.team.RecipeRadar.domain.inquiry.application;
 
 import com.team.RecipeRadar.domain.inquiry.domain.Inquiry;
-import com.team.RecipeRadar.domain.inquiry.dto.user.UserAddInquiryDto;
-import com.team.RecipeRadar.domain.inquiry.dto.user.UserDeleteInquiryDto;
+import com.team.RecipeRadar.domain.inquiry.dto.user.InquiryResponse;
+import com.team.RecipeRadar.domain.inquiry.dto.user.UserAddRequest;
+import com.team.RecipeRadar.domain.inquiry.dto.user.UserUpdateRequest;
+import com.team.RecipeRadar.domain.inquiry.dto.user.ValidInquiryRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface InquiryService {
-    Inquiry save(UserAddInquiryDto userAddInquiryDto);
+    void save(UserAddRequest userAddInquiryDto);
 
-    List<Inquiry> findAll();
+    void delete(String loginId, Long inquiryId);
 
-    Inquiry findById(long id);
+    void update(Long inquiryId, UserUpdateRequest updateInquiryDto, String loginId);
 
-    void delete(UserDeleteInquiryDto userDeleteInquiryDto);
-
-    void update(Long memberId, Long inquiryId, String inquiryTitle);
+    boolean validInquiryPassword(String login, ValidInquiryRequest request);
 
 }
