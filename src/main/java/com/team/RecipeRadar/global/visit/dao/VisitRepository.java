@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VisitRepository extends JpaRepository<VisitCount,Long> {
 
-    @Query("SELECT SUM(v.id) FROM VisitCount v WHERE DATE(v.expired_at) = CURRENT_DATE")
+    @Query("SELECT count(v) FROM VisitCount v WHERE DATE(v.expired_at) = CURRENT_DATE")
     Integer getCurrentCount();
     boolean existsByIpAddress(String uuid);
 }
