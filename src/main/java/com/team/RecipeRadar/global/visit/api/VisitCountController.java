@@ -22,10 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -113,7 +110,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"12\"}")))
     })
-    @GetMapping("/api/visit-count/today")
+    @GetMapping("/api/admin/visit-count/today")
     public ResponseEntity<?> todayCount(){
         int currentVisitCount = visitService.getCurrentVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",currentVisitCount));
@@ -125,7 +122,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"142\"}")))
     })
-    @GetMapping("/api/visit-count/before")
+    @GetMapping("/api/admin/visit-count/before")
     public ResponseEntity<?> before(){
         int previousVisitCount = visitService.getPreviousVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",previousVisitCount));
@@ -137,7 +134,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"14902\"}")))
     })
-    @GetMapping("/api/visit-count/all")
+    @GetMapping("/api/admin/visit-count/all")
     public ResponseEntity<?> allCount(){
         int totalVisitCount = visitService.getTotalVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",totalVisitCount));
@@ -149,7 +146,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"일간 방문자수 조회\",\"data\":[{\"date\":\"2024-06-06\",\"count\":4},{\"date\":\"2024-06-06\",\"count\":23}]}")))
     })
-    @GetMapping("/api/visit-count/days")
+    @GetMapping("/api/admin/visit-count/days")
     public ResponseEntity<?> days(@RequestParam(name = "days",required = false) Boolean days){
 
         List<DayDto> dailyVisitCount = visitService.getDailyVisitCount(days);
@@ -162,7 +159,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"주간  방문자수 조회\",\"data\":[{\"week\":\"2024-05-12\",\"count\":28156},{\"week\":\"2024-05-05\",\"count\":36076}]}")))
     })
-    @GetMapping("/api/visit-count/week")
+    @GetMapping("/api/admin/visit-count/week")
     public ResponseEntity<?> week(){
         List<WeekDto> weeklyVisitCount = visitService.getWeeklyVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"주간 방문자수 조회",weeklyVisitCount));
@@ -174,7 +171,7 @@ public class VisitCountController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"월간 방문자수 조회\",\"data\":[{\"month\":\"2024-06-01\",\"count\":4},{\"month\":\"2024-05-01\",\"count\":23}]}")))
     })
-    @GetMapping("/api/visit-count/month")
+    @GetMapping("/api/admin/visit-count/month")
     public ResponseEntity<?> month(){
         List<MonthDto> monthlyVisitCount = visitService.getMonthlyVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"월간 방문자수 조회",monthlyVisitCount));
