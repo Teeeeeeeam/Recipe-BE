@@ -33,14 +33,14 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
 
         if (day != null) {       //일간조회, 2주전까지 가능;
             if (day) {
-                LocalDateTime startDay = LocalDateTime.now().minusDays(14).withHour(0).withMinute(0);
+                LocalDateTime startDay = LocalDateTime.now().minusDays(13).withHour(0).withMinute(0);
                 LocalDateTime endDateTime = LocalDateTime.now();
 
                 builder.and(visitData.days.goe(startDay))       // >=
                         .and(visitData.days.loe(endDateTime));       // <=
             }
-        } else if (day == null) {        // 아무 값도 입력하지 않았으면 현재 선택한 달에 한달만 보여짐, 기본
-            LocalDate firstDayOfThisMonth = LocalDate.now().withDayOfMonth(1);
+        } else {        // 아무 값도 입력하지 않았으면 현재 선택한 달에 한달만 보여짐, 기본
+            LocalDate firstDayOfThisMonth = LocalDate.now().minusDays(30);
             LocalDateTime dateTime = LocalDateTime.of(firstDayOfThisMonth, LocalTime.MIN);
 
             LocalDateTime now = LocalDateTime.now();
@@ -54,7 +54,7 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
                 .orderBy(visitData.days.desc())
                 .fetch();
 
-        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(LocalDate.of(v.getDays().getYear(),v.getDays().getMonth(),v.getDays().getMonthValue()), v.getVisited_count())).collect(Collectors.toList());
+        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(LocalDate.of(v.getDays().getYear(),v.getDays().getMonth(),v.getDays().getDayOfMonth()), v.getVisited_count())).collect(Collectors.toList());
         return dayDtos;
     }
 
