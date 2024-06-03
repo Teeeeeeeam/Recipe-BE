@@ -9,10 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VisitCountRepository extends JpaRepository<VisitData,Long>, CustomVisitAdminRepository {
 
-
-    @Query("SELECT SUM(v.visited_count) AS count FROM VisitData v WHERE DATE(v.days) = CURRENT_DATE")
-    int getCurrentCount();
-
     @Query("SELECT SUM(v.visited_count) AS count FROM VisitData v")
     int getAllCount();
 

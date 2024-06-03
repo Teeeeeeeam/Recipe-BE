@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MonthDto {
 
-    public LocalDate week;
+    public LocalDate month;
 
     public Integer count;
 }

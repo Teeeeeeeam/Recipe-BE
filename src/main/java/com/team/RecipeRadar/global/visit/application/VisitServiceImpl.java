@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.global.visit.application;
 
 import com.team.RecipeRadar.global.visit.dao.VisitCountRepository;
+import com.team.RecipeRadar.global.visit.dao.VisitRepository;
 import com.team.RecipeRadar.global.visit.domain.VisitData;
 import com.team.RecipeRadar.global.visit.dto.DayDto;
 import com.team.RecipeRadar.global.visit.dto.MonthDto;
@@ -19,6 +20,7 @@ import java.util.List;
 public class VisitServiceImpl implements VisitService{
 
     private final VisitCountRepository visitCountRepository;
+    private final VisitRepository visitRepository;
 
     /**
      * 일 조회 specificDay null 아니고 ture시에는 14일간의 일간 데이터조회 없을시 기본페이지의 30일간의 데이터 조회
@@ -62,7 +64,7 @@ public class VisitServiceImpl implements VisitService{
      */
     @Override
     public int getCurrentVisitCount() {
-        return visitCountRepository.getCurrentCount();
+        return visitRepository.getCurrentCount();
     }
 
     /**

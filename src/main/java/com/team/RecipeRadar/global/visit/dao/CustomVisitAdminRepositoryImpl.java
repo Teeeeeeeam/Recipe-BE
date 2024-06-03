@@ -54,7 +54,7 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
                 .orderBy(visitData.days.desc())
                 .fetch();
 
-        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(v.getDays(), v.getVisited_count())).collect(Collectors.toList());
+        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(LocalDate.of(v.getDays().getYear(),v.getDays().getMonth(),v.getDays().getMonthValue()), v.getVisited_count())).collect(Collectors.toList());
         return dayDtos;
     }
 
