@@ -80,7 +80,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         }
         List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
                 .from(post)
-                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id))
+                .join(uploadFile).on(post.id.eq(uploadFile.post.id))
                 .where(builder,uploadFile.notice.id.isNull().and(uploadFile.post.isNotNull()).and(uploadFile.recipe.id.isNotNull()))
                 .orderBy(post.created_at.desc())
                 .limit(pageable.getPageSize() + 1)
