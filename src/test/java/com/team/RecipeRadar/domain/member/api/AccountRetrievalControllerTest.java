@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -42,6 +43,8 @@ class AccountRetrievalControllerTest {
     private AccountRetrievalService accountRetrievalService;
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    BlackListRepository blackListRepository;
 
     @MockBean
     AccountRetrievalEmailServiceImpl mailService;
