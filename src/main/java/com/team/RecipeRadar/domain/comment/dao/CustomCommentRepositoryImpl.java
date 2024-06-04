@@ -1,9 +1,12 @@
 package com.team.RecipeRadar.domain.comment.dao;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
+import com.team.RecipeRadar.domain.post.domain.QPost;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
+import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -50,6 +55,15 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         }
 
         return new SliceImpl<>(commentDtoList,pageable,hasNext);
+    }
+
+    @Override
+    public void deleteMember_comment(Long memberId) {
+        jpaQueryFactory.delete(comment)
+                .where(comment.post.id.in(
+                        JPAExpressions
+                                .select(post.id).from(post).where(post.member.id.eq(memberId)))
+                ).execute();
     }
 }
 
