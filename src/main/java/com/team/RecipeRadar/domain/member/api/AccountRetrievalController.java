@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.api;
 
 
+import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
@@ -32,10 +33,7 @@ import org.springframework.web.server.ServerErrorException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -45,6 +43,7 @@ public class AccountRetrievalController {
 
 
     private final AccountRetrievalService accountRetrievalService;
+    private final BlackListRepository blackListRepository;
     @Qualifier("AccountEmail")
     private final MailService mailService;
 
@@ -199,8 +198,11 @@ public class AccountRetrievalController {
     @PostMapping("/api/search/email-confirmation/send")
     public ResponseEntity<?> mailConfirm(@Parameter(description ="이메일") @RequestParam("email") String email){
         try {
-            mailService.sensMailMessage(email);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"메일 전송 성공"));
+            boolean existsByEmail = blackListRepository.existsByEmail(email);
+            if(!existsByEmail) {
+                mailService.sensMailMessage(email);
+                return ResponseEntity.ok(new ControllerApiResponse<>(true, "메일 전송 성공"));
+            }else return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"사용할수 없는 이메일입니다."));
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버오류");

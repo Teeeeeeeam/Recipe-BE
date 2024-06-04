@@ -89,7 +89,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public void updateEmail(String email, String code, String loginId, String authName,String loginType) {
         Member member = memberRepository.findByLoginId(loginId);;
-
         if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
             throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
         }
