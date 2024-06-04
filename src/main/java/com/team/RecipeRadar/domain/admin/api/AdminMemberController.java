@@ -4,6 +4,7 @@ import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.post.application.PostService;
+import com.team.RecipeRadar.global.email.event.ResignMemberEvent;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,7 @@ public class AdminMemberController {
 
     private final AdminService adminService;
     private final PostService postService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
 
@@ -97,7 +100,11 @@ public class AdminMemberController {
     @DeleteMapping("/members")
     public ResponseEntity<?> deleteAllUser(@RequestParam("ids") List<Long> memberIds){
         try {
-            adminService.adminDeleteUsers(memberIds);
+            List<String> emailList = adminService.adminDeleteUsers(memberIds);
+
+            for (String email : emailList) {;
+                eventPublisher.publishEvent(new ResignMemberEvent(email));
+            }
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
         }catch (NoSuchElementException e){
             throw new BadRequestException("사용자를 찾을수 없습니다.");

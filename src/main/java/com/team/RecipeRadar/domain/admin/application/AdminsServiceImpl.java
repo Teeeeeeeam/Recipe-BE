@@ -14,6 +14,7 @@ import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 @Slf4j
@@ -38,7 +40,7 @@ public class AdminsServiceImpl implements AdminService {
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final BlackListRepository blackListRepository;
     private final CommentRepository commentRepository;
-
+    private final ImgRepository imgRepository;
 
     @Override
     public long searchAllMembers() {
@@ -69,23 +71,28 @@ public class AdminsServiceImpl implements AdminService {
      * @param memberIds
      */
     @Override
-    public void adminDeleteUsers(List<Long> memberIds) {
+    public List<String> adminDeleteUsers(List<Long> memberIds) {
+
+        List<String> emailList = new ArrayList<>();
 
         for (Long memberId : memberIds) {
             Member member =memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자를 찾을수 없습니다."));
             boolean existsByEmail = blackListRepository.existsByEmail(member.getEmail());
             if (!existsByEmail) {
                 BlackList blackList = BlackList.toEntity(member.getEmail());
+                emailList.add(member.getEmail());
                 blackListRepository.save(blackList);
             }
 
             Long save_memberId = member.getId();
-            //noticeRepository.deleteByMember_Id(save_memberId);
+            commentRepository.deleteMember_comment(save_memberId);
+            imgRepository.deleteMemberImg(save_memberId);
             recipeBookmarkRepository.deleteByMember_Id(save_memberId);
             jwtRefreshTokenRepository.DeleteByMemberId(save_memberId);
             memberRepository.deleteById(save_memberId);
         }
 
+        return emailList;
     }
 
     @Override
