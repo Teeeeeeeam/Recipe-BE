@@ -72,12 +72,13 @@ class PostRepositoryTest {
         UploadFile uploadFile3 = UploadFile.builder().storeFileName("tesNmae").originFileName("originName").post(posts.get(3)).recipe(saveRecipe).build();
         imgRepository.save(uploadFile);
         imgRepository.save(uploadFile1);
-        imgRepository.save(uploadFile2);
+        UploadFile save2 = imgRepository.save(uploadFile2);
         imgRepository.save(uploadFile3);
 
-        Slice<PostDto> allPost = postRepository.getAllPost(1l,request);
+        Slice<PostDto> allPost = postRepository.getAllPost(save2.getId(),request);
 
         assertThat(allPost.hasNext()).isTrue();
+        log.info("aaaasdasdasdasd={}",allPost.getContent());
         assertThat(allPost.getContent()).hasSize(2);
     }
 
