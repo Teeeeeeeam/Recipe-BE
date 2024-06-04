@@ -7,48 +7,56 @@ import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.post.application.PostService;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
+import com.team.RecipeRadar.global.email.application.ResignEmailServiceImpl;
+import com.team.RecipeRadar.global.email.event.ResignMemberEvent;
+import com.team.RecipeRadar.global.email.listener.ResignEmailHandler;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @WebMvcTest(AdminMemberController.class)
 class AdminMemberControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @MockBean ApplicationEventPublisher eventPublisher;
+    @MockBean ResignEmailHandler resignEmailHandler;
+    @MockBean ApplicationEvent applicationEvent;
     @MockBean AdminService adminService;
     @MockBean MemberRepository memberRepository;
     @MockBean PostServiceImpl postService;
     @MockBean JwtProvider jwtProvider;
     @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean CustomOauth2Service customOauth2Service;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -114,15 +122,17 @@ class AdminMemberControllerTest {
     @DisplayName("어드민 일괄 삭제 API 구현")
     @CustomMockAdmin
     void deleteAllUser() throws Exception {
+        List<Long> list = List.of(1L, 2L, 3L);
+        List<String> emails = List.of("example1@test.com");
 
-        List<Long>  list= List.of(1l,2l,3l);
-        doNothing().when(adminService).adminDeleteUsers(anyList());
+        given(adminService.adminDeleteUsers(eq(list))).willReturn(emails);
 
-        mockMvc.perform(delete("/api/admin/members?")
-                .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
-                .andDo(print())
+        mockMvc.perform(delete("/api/admin/members")
+                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("삭제 성공"));
+
+        verify(adminService, times(1)).adminDeleteUsers(anyList());
     }
 
 
