@@ -9,7 +9,6 @@ import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
-import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 
 @Slf4j
@@ -49,10 +47,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .innerJoin(post.member, member).fetchJoin()
                 .where(builder,post.member.id.eq(memberId))
                 .orderBy(post.member.id.desc())
-                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
-
 
         List<UserInfoPostRequest> infoPostList = postList.stream()
                 .map(UserInfoPostRequest::of)
@@ -76,23 +72,22 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
         BooleanBuilder builder = new BooleanBuilder();
         if(postId!=null){
-            builder.and(post.id.gt(postId));
+            builder.and(post.id.lt(postId));
         }
         List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
                 .from(post)
                 .join(uploadFile).on(post.id.eq(uploadFile.post.id))
-                .where(builder,uploadFile.notice.id.isNull().and(uploadFile.post.isNotNull()).and(uploadFile.recipe.id.isNotNull()))
-                .orderBy(post.created_at.desc())
+                .where(builder.and(uploadFile.notice.isNull().and(uploadFile.post.id.isNotNull())))
+                .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-
-        List<PostDto> collect = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
+        List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
                 getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
 
+        boolean hasNextSize = isHasNextSize(pageable, postDtoList);
 
-        boolean hasNextSize = isHasNextSize(pageable, collect);
-        return new SliceImpl(collect,pageable,hasNextSize);
+        return new SliceImpl(postDtoList,pageable,hasNextSize);
     }
 
     /**
