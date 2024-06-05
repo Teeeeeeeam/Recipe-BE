@@ -11,9 +11,12 @@ import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 import java.util.List;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.exception.ex.CommentException;
@@ -96,14 +99,12 @@ public class CommentServiceImpl implements CommentService {
     public Page<CommentDto> commentPage(Long postId,Pageable pageable){
 
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
-        log.info("as={}",comments);
-
 
         if (!comments.getContent().isEmpty()) {
             return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())
-                    .nickName(comment.getMember().getNickName()).build());      //스트림 사용
+                    .nickName(comment.getMember().getNickName()).build());
         }else
-            throw new CommentException("게시글이 존재하지 않습니다.");
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
     }
 
     /**
