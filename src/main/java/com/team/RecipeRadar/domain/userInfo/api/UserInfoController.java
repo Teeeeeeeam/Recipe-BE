@@ -21,8 +21,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -48,6 +48,8 @@ public class UserInfoController {
 
     private final UserInfoService userInfoService;
 
+    @Value("${disconnect.oauth2.redirect}")
+    private String redirectUrl;
     @Qualifier("kakao")
     private final UserDisConnectService kakaoDisConnectService;
     @Qualifier("naver")
@@ -273,7 +275,7 @@ public class UserInfoController {
         String accessToken = kakaoDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = kakaoDisConnectService.disconnect(accessToken);
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+                    .location(URI.create(redirectUrl+disconnected)).build();
     }
 
     @RequestMapping(value = "/oauth2/unlink/naver",method = {RequestMethod.GET, RequestMethod.POST})
@@ -282,7 +284,7 @@ public class UserInfoController {
         String accessToken = naverDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = naverDisConnectService.disconnect(accessToken);
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+                .location(URI.create(redirectUrl+disconnected)).build();
     }
 
     private void cookieValid(String cookieLoginId,String loginId ) {
