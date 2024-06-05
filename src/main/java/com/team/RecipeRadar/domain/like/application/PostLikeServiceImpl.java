@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -32,6 +33,7 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final JwtProvider jwtProvider;
+    private final NotificationService notificationService;
 
     /**
      * 좋아요 api 호출시 해당 게시글의 좋아요가 있으면 DB 에서 삭제하고 좋아요가 되어있지않다면 DB에 추가하는 식으로 구현
@@ -54,13 +56,15 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
 
             postRepository.save(post);
             postLikeRepository.save(postLike);
-            log.info("댓글 등록");
+
+            notificationService.sendPostLikeNotification(post,member.getNickName());
             return false;
         }else{
             Post post = postRepository.findById(postLikeDto.getPostId()).get();
             post.setPostLikeCount(post.getPostLikeCount()-1);
             postRepository.save(post);
 
+            notificationService.deleteLikeNotification(postLikeDto.getMemberId(),post.getMember().getId(),post.getId());     //좋아요 한사람, 게시글 작성자
             postLikeRepository.deleteByMemberIdAndPostId(postLikeDto.getMemberId(),postLikeDto.getPostId());
             log.info("댓글 삭제");
             return true;
