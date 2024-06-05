@@ -26,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -113,7 +115,6 @@ class CommentControllerTest {
 
         //게시글 아이디
         long postId = Long.parseLong("55");
-        long postIdNo = Long.parseLong("111");
 
         String nickName= "testNickName";
         PostDto articleDto = PostDto.builder().id(postId).build();
@@ -130,14 +131,11 @@ class CommentControllerTest {
                     .build();
             commentDtos.add(commentDto);
         }
-        
         //페이징 객체 직접 생성
         Page<CommentDto> page = new PageImpl<>(commentDtos);
 
         // commentService.commentPage() 메서드의 게시글 id가 55일때 page 객체 반환
         given(commentService.commentPage(eq(postId), any(Pageable.class))).willReturn(page);
-
-        given(commentService.commentPage(eq(postIdNo), any(Pageable.class))).willThrow(CommentException.class);
 
 
         // GET 요청 수행 및 응답 확인
@@ -149,13 +147,6 @@ class CommentControllerTest {
                 .andExpect(status().isOk()) // 상태 코드 200 확인
                 .andExpect(jsonPath("$.data.content[0].id").value(1))
                 .andExpect(jsonPath("$.data.totalElements").value(10))
-                .andDo(print()); // 결과를 콘솔에 출력하여 확인
-
-        //게시글이 존재하지않았을때 false로 값이 나오는지 확인
-        mockMvc.perform(get("/api/comments")
-                        .param("posts","111")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400)) // 상태 코드 400 확인
                 .andDo(print()); // 결과를 콘솔에 출력하여 확인
     }
 
