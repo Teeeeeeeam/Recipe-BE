@@ -2,8 +2,8 @@ package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.*;
-import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoDetailsResponse;
-import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
+import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
+import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +18,7 @@ public interface NoticeService {
 
     List<NoticeDto> mainNotice();
 
-    AdminInfoNoticeResponse adminNotice(Long noticeId,Pageable pageable);
+    InfoNoticeResponse Notice(Long noticeId, Pageable pageable);
 
-    AdminInfoDetailsResponse adminDetailNotice(Long noticeId);
+    InfoDetailsResponse detailNotice(Long noticeId);
 }

@@ -4,8 +4,8 @@ import com.team.RecipeRadar.domain.notice.application.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
-import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoDetailsResponse;
-import com.team.RecipeRadar.domain.notice.dto.info.AdminInfoNoticeResponse;
+import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
+import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
@@ -148,10 +148,10 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"notice\":[{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"created_at\":\"2024-05-28T17:08:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":2,\"noticeTitle\":\"두 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":3,\"noticeTitle\":\"세 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}}]}}\n"))),
     })
-    @GetMapping("/api/admin/notices")
+    @GetMapping("/api/notices")
     public ResponseEntity<?> adminNotice(@RequestParam(value = "last-id",required = false)Long noticeId, Pageable pageable){
-        AdminInfoNoticeResponse adminInfoNoticeResponse = noticeService.adminNotice(noticeId,pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoNoticeResponse));
+        InfoNoticeResponse inInfoNoticeResponse = noticeService.Notice(noticeId,pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",inInfoNoticeResponse));
     }
 
     @Operation(summary = "어드민 공지사항 상세 조회 API", description = "어드민 페이지에서 noticeId의 대해서 상세 조회", tags = {"공지사항 컨트롤러"})
@@ -160,10 +160,10 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"noticeContent\":\"첫 번째 공지사항 내용입니다.\",\"create_At\":\"2024-05-28T13:00:00\",\"member\":{\"id\":1,\"nickname\":\"관리자\"}}}"))),
     })
-    @GetMapping("/api/admin/notice/{notice-id}")
+    @GetMapping("/api/notice/{notice-id}")
     public ResponseEntity<?> adminDetailNotice(@PathVariable("notice-id") Long noticeId){
-        AdminInfoDetailsResponse adminInfoDetailsResponse = noticeService.adminDetailNotice(noticeId);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",adminInfoDetailsResponse));
+        InfoDetailsResponse infoDetailsResponse = noticeService.detailNotice(noticeId);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoDetailsResponse));
     }
 
 

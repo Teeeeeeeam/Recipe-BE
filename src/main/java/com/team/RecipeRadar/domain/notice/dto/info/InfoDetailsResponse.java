@@ -8,20 +8,20 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class AdminInfoDetailsResponse {
+public class InfoDetailsResponse {
 
     private Long id;
     private String noticeTitle;
     private String noticeContent;
-    private LocalDateTime create_At;
+    private LocalDateTime create_at;
     private MemberDto member;
 
-    public static AdminInfoDetailsResponse of(Long id,String title, String content,LocalDateTime create_At,MemberDto memberDto){
-        return AdminInfoDetailsResponse.builder()
+    public static InfoDetailsResponse of(Long id, String title, String content, LocalDateTime create_at, MemberDto memberDto){
+        return InfoDetailsResponse.builder()
                 .id(id)
                 .noticeTitle(title)
                 .noticeContent(content)
-                .create_At(create_At)
+                .create_at(create_at)
                 .member(memberDto).build();
     }
 

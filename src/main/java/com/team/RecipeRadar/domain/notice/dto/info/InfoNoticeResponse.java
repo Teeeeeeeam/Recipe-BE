@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminInfoNoticeResponse {
+public class InfoNoticeResponse {
 
     private boolean nextPage;
     private List<NoticeDto> notice;
