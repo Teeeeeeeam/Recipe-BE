@@ -13,7 +13,9 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>, CustomCommentRepository{
-    List<Comment> findByCommentContentContainingIgnoreCase(String commentTitle);
+
+    List<Comment> findAllByPostId(Long postId);
+
     @Modifying
     @Query("delete from Comment c where c.member.id=:member_id and c.id=:comment_id")
     void deleteMemberId(@Param("member_id") Long member_id, @Param("comment_id")Long comment_id);
