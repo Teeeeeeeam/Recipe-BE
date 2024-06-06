@@ -66,7 +66,7 @@ class QuestionServiceTest {
                 .build();
 
         when(questionRepository.save(any(Question.class))).thenReturn(question);
-        
+
         questionService.account_Question(questionRequest, file);
 
         verify(questionRepository, times(1)).save(any(Question.class));

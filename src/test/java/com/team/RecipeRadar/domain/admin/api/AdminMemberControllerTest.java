@@ -8,8 +8,6 @@ import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
-import com.team.RecipeRadar.global.email.application.ResignEmailServiceImpl;
-import com.team.RecipeRadar.global.email.event.ResignMemberEvent;
 import com.team.RecipeRadar.global.email.listener.ResignEmailHandler;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -24,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -32,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
