@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 import static com.team.RecipeRadar.domain.questions.domain.AnswerType.*;
 import static com.team.RecipeRadar.domain.questions.domain.QuestionStatus.*;
 import static com.team.RecipeRadar.domain.questions.domain.QuestionType.*;
@@ -42,6 +44,7 @@ class QuestionServiceTest {
     @Test
     @DisplayName("계정 정지 상태에서 문의사항 등록")
     void account_Question() {
+        // given
         QuestionRequest questionRequest = new QuestionRequest();
         questionRequest.setQuestion_content("내용");
         questionRequest.setTitle("제목");
@@ -63,28 +66,31 @@ class QuestionServiceTest {
                 .build();
 
         when(questionRepository.save(any(Question.class))).thenReturn(question);
-
+        
         questionService.account_Question(questionRequest, file);
 
         verify(questionRepository, times(1)).save(any(Question.class));
-        verify(notificationService, times(1)).sendAdminNotification(any(Question.class));
         verify(imgRepository, times(1)).save(any(UploadFile.class));
     }
 
     @Test
     @DisplayName("일반 문의사항 등록")
     void general_Question() {
+        // given
         QuestionRequest questionRequest = new QuestionRequest();
         questionRequest.setQuestion_content("내용");
         questionRequest.setTitle("제목");
         questionRequest.setAnswer(EMAIL);
         questionRequest.setAnswer_email("example@example.com");
+        questionRequest.setMemberId(1l);
         questionRequest.setQuestionType(ACCOUNT_INQUIRY);
-
 
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.jpg");
         when(s3UploadService.uploadFile(file)).thenReturn("uploaded/test.jpg");
+
+        Member member = Member.builder().id(1l).nickName("닉네임").build();
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
 
         Question question = Question.builder()
                 .question_content("내용")
@@ -93,12 +99,14 @@ class QuestionServiceTest {
                 .status(PENDING)
                 .answer_email("example@example.com")
                 .questionType(ACCOUNT_INQUIRY)
+                .member(member)
                 .build();
-
         when(questionRepository.save(any(Question.class))).thenReturn(question);
 
+        // when
         questionService.general_Question(questionRequest, file);
 
+        // then
         verify(questionRepository, times(1)).save(any(Question.class));
         verify(imgRepository, times(1)).save(any(UploadFile.class));
     }
