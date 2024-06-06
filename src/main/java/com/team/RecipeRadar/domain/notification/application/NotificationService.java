@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.notification.application;
 
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.dao.EmitterRepository;
 import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
@@ -10,6 +11,8 @@ import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
 import com.team.RecipeRadar.domain.notification.dto.ResponseNotification;
 import com.team.RecipeRadar.domain.notification.dto.ResponseUserInfoNotification;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.questions.domain.Question;
+import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+
+import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
+import static com.team.RecipeRadar.domain.questions.domain.QuestionType.*;
 
 
 @Slf4j
@@ -32,9 +39,12 @@ public class NotificationService {
 
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
+    private final MemberRepository memberRepository;
 
     //연결 지속시간 한시간
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
+
+    private final String QUESTION_URL= "/api/user/question/";
 
     public SseEmitter subscribe(Long memberId,String lastEventId){
         // 고유한 아이디 생성
@@ -99,7 +109,7 @@ public class NotificationService {
         String content = nickName+"님이 댓글이 달렸습니다";
         String url = "/api/user/posts/" + post.getId();
 
-        send(postAuthor, NotificationType.COMMENT, content, url,nickName);
+        send(postAuthor, COMMENT, content, url,nickName);
     }
 
     // 레시피 좋아요시 보내지는 알람
@@ -108,9 +118,21 @@ public class NotificationService {
         String content = nickName+"님이 회원님의 게시글을 좋아합니다.";
         String url = "/api/user/posts/" + post.getId();
 
-        send(postAuthor, NotificationType.POSTLIKE, content, url,nickName);
+        send(postAuthor, POSTLIKE, content, url,nickName);
     }
 
+    // TODO: 2024-06-06 조회 api 구현시 해당 이벤트가 어드민에게 가도록 하기
+    public void sendAdminNotification(Question question){
+        Long id = question.getId();
+        QuestionType questionType = question.getQuestionType();
+        String type = (questionType.equals(QuestionType.ACCOUNT_INQUIRY)) ? "계정 문의" : "일반 문의";
+        String content ="새로운 "+ type+" 사항이 도착했습니다.";
+        String url = QUESTION_URL+id;
+        List<Member> members = memberRepository.adminMember();
+        for (Member member : members) {
+            send(member,QUESTION,content,url,"비로그인");
+        }
+    }
 
     private Notification createNotification(Member receiver, NotificationType notificationType, String content, String url,String toName) {
         return  Notification.builder().receiver(receiver).notificationType(notificationType).content(content).url(url).toName(toName).build();

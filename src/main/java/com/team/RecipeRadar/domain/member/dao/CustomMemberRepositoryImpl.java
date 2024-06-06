@@ -84,6 +84,14 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
         return new SliceImpl<>(memberDtoList,pageable,hasNext);
     }
 
+    @Override
+    public List<Member> adminMember() {
+
+        List<Member> memberList = jpaQueryFactory.selectFrom(member)
+                .where(member.roles.in("ROLE_ADMIN")).fetch();
+        return memberList;
+    }
+
     private boolean isHasNext(Pageable pageable, List<MemberDto> content) {
         boolean hasNext =false;
 

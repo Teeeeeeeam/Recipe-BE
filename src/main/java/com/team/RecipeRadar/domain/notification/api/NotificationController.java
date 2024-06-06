@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
@@ -32,7 +33,7 @@ public class NotificationController {
     @GetMapping(value = "/connect",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> subscribe(@Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                                 @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
-        return ResponseEntity.ok(notificationService.subscribe(principalDetails.getMember().getId(), lastEventId));
+            return ResponseEntity.ok(notificationService.subscribe(principalDetails.getMember().getId(), lastEventId));
     }
 
     @Operation(summary = "사용자 알림 목록", description = "사용자에 대한 알림을 모두 볼수있는 API")

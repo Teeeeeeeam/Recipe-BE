@@ -75,7 +75,7 @@ public class MemberDto {
     @JsonIgnore
     String code;
 
-    public Member toEntity(MemberDto memberDto) {
+    public static Member toEntity(MemberDto memberDto) {
         return Member.builder()
                 .id(memberDto.getId())
                 .loginId(memberDto.loginId)
