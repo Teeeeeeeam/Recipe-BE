@@ -4,6 +4,7 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.questions.application.QuestionService;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +25,14 @@ public class QuestionController {
     @PostMapping(value = "/api/question",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> accountQuestion(@RequestPart QuestionRequest questionRequest, @RequestPart(required = false) MultipartFile file){
         questionService.account_Question(questionRequest,file);
-        return ResponseEntity.ok("저장성공");
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"비로그인 문의 사항 등록"));
     }
 
     //로그인한 사용자들의 일반 문의
     @PostMapping(value = "/api/user/question",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> generalQuestion(@RequestPart QuestionRequest questionRequest, @RequestPart(required = false) MultipartFile file){
         questionService.general_Question(questionRequest,file);
-        return ResponseEntity.ok("저장성공");
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"문의 사항 등록"));
     }
 
     //어드민의 상세조회
@@ -39,6 +40,6 @@ public class QuestionController {
     public ResponseEntity<?> details_Question(@PathVariable("id") Long questionId, @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         QuestionDto questionDto = questionService.detailAdmin_Question(questionId, memberDto.getLoginId());
-        return ResponseEntity.ok(questionDto);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));
     }
 }
