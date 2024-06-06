@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.recipe.domain;
 
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -23,7 +25,7 @@ public class Ingredient {
     @Setter
     private String ingredients;         // 재료
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 }

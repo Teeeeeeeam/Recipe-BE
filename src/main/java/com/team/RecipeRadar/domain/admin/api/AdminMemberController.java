@@ -190,4 +190,26 @@ public class AdminMemberController {
             throw new ServerErrorException("서버 오류");
         }
     }
+
+    @Operation(summary = "레시피 일괄 삭제 API",description = "레시피 일괄 삭제 관련된 모든 데이터를 삭제한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"요리글 삭제 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"해당 레시피를 찾을수 없습니다.\"}"))),
+
+    })
+    @DeleteMapping("/recipes")
+    public ResponseEntity<?> deleteRecipe(@RequestParam(value = "ids") List<Long> recipeIds){
+        try{
+            adminService.deleteRecipe(recipeIds);
+            return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 삭제 성공"));
+        }catch (NoSuchElementException e){
+            throw new BadRequestException(e.getMessage());
+        }catch (Exception e){
+            throw new ServerErrorException("서버 오류");
+        }
+    }
 }

@@ -6,10 +6,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -22,6 +19,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "posts")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Member {
 

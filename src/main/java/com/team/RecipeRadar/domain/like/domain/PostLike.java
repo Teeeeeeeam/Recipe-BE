@@ -2,10 +2,7 @@ package com.team.RecipeRadar.domain.like.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
@@ -16,6 +13,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "member")
 public class PostLike {
 
     @Id
