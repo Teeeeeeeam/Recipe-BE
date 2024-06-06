@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.questions.application;
 
 
+import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
 import org.springframework.web.multipart.MultipartFile;

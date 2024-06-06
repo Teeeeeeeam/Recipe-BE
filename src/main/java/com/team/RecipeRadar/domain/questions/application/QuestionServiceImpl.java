@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
 import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
+import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;

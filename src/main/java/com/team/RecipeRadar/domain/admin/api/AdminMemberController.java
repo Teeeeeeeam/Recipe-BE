@@ -4,7 +4,7 @@ import com.team.RecipeRadar.domain.admin.application.AdminService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.post.application.PostService;
-import com.team.RecipeRadar.global.email.event.ResignMemberEvent;
+import com.team.RecipeRadar.global.email.event.MailEvent;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -103,7 +103,7 @@ public class AdminMemberController {
             List<String> emailList = adminService.adminDeleteUsers(memberIds);
 
             for (String email : emailList) {;
-                eventPublisher.publishEvent(new ResignMemberEvent(email));
+                eventPublisher.publishEvent(new MailEvent(email));
             }
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
         }catch (NoSuchElementException e){

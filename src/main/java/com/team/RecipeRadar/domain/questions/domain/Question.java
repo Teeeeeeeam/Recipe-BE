@@ -40,4 +40,9 @@ public class Question extends BaseTimeEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
+
+    //질문 상태 업데이트
+    public void updateStatus(QuestionStatus questionStatus){
+        this.status = questionStatus;
+    }
 }
