@@ -27,7 +27,7 @@ public class InquiryResponseEmailSender implements MailService {
     public String sensMailMessage(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setSubject("나만의 냉장고 이용 제한");
+        message.setSubject("나만의 냉장고 문의사항 답변 알림");
         message.setText(createText());
         message.setFrom(emailFrom);
         message.setTo(email);
