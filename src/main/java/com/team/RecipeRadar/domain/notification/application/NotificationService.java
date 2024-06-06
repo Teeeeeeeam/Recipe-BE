@@ -43,6 +43,7 @@ public class NotificationService {
 
     //연결 지속시간 한시간
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
+    private final String NON_LOGIN = "비로그인";
 
     private final String QUESTION_URL= "/api/user/question/";
 
@@ -122,15 +123,15 @@ public class NotificationService {
     }
 
     // TODO: 2024-06-06 조회 api 구현시 해당 이벤트가 어드민에게 가도록 하기
-    public void sendAdminNotification(Question question){
+    public void sendAdminNotification(Question question,String nickName){
         Long id = question.getId();
         QuestionType questionType = question.getQuestionType();
         String type = (questionType.equals(QuestionType.ACCOUNT_INQUIRY)) ? "계정 문의" : "일반 문의";
         String content ="새로운 "+ type+" 사항이 도착했습니다.";
         String url = QUESTION_URL+id;
         List<Member> members = memberRepository.adminMember();
-        for (Member member : members) {
-            send(member,QUESTION,content,url,"비로그인");
+        for (Member member_iter : members) {
+            send(member_iter,QUESTION,content,url,nickName!=null? nickName : NON_LOGIN);
         }
     }
 

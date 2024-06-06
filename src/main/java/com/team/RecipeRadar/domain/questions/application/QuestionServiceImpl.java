@@ -31,7 +31,6 @@ public class QuestionServiceImpl implements QuestionService {
     private final ImgRepository imgRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
-
     /**
      * 계정이 정지되었을때 문의사항 보낼떄 사용
      */
@@ -43,7 +42,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question savedQuestion = questionRepository.save(question);
 
-        notificationService.sendAdminNotification(question);
+        notificationService.sendAdminNotification(question,null);
 
         saveImageIfProvided(file, savedQuestion);
     }
@@ -58,6 +57,8 @@ public class QuestionServiceImpl implements QuestionService {
         setMemberIfProvided(questionRequest, question);        // 사용자 설정
 
         Question savedQuestion = questionRepository.save(question);  // 질문 저장
+
+        notificationService.sendAdminNotification(question,savedQuestion.getMember().getNickName());
 
         saveImageIfProvided(file, savedQuestion);          // 사진이 제공된 경우 저장
     }
