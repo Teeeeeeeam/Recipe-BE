@@ -13,7 +13,7 @@ public class InfoDetailsResponse {
     private Long id;
     private String noticeTitle;
     private String noticeContent;
-    private LocalDateTime create_at;
+    private LocalDateTime created_at;
     private MemberDto member;
 
     public static InfoDetailsResponse of(Long id, String title, String content, LocalDateTime create_at, MemberDto memberDto){
@@ -21,7 +21,7 @@ public class InfoDetailsResponse {
                 .id(id)
                 .noticeTitle(title)
                 .noticeContent(content)
-                .create_at(create_at)
+                .created_at(create_at)
                 .member(memberDto).build();
     }
 
