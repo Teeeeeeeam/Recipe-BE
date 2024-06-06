@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.questions.application.AnswerService;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,7 @@ import org.springframework.web.server.ServerErrorException;
 public class AnswerController {
 
     private final AnswerService answerService;
-
-
+    @Operation(summary = "문의사항 답변",description = "문의 사항에 대해서 관리자는 답변을 남긴다. 문의사항 작성시 이메일 수신의 동의한 유저는 답변 등록시 이메일로 답변 완료 이메일 전송, 계정 관련 답변은 해당 작성한 입력한 이메일로 답변 전송")
     @PostMapping("/api/admin/questions/{questionId}/answers")
     public ResponseEntity<?> answer(@PathVariable Long questionId, @RequestBody QuestionAnswerRequest questionAnswerRequest,
                                    @Schema(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
