@@ -5,7 +5,12 @@ import java.util.Map;
 
 public interface MailService {
 
-    String sensMailMessage(String email);
+    default String sensMailMessage(String email) {
+        return null;
+    }
+    default String sendMail(String email, String subject, String body) {
+        return null;
+    }
 
     default Integer createCode() {
         return null;

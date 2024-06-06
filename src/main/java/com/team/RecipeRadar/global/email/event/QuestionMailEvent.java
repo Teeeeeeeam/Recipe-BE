@@ -3,11 +3,10 @@ package com.team.RecipeRadar.global.email.event;
 import lombok.Getter;
 
 @Getter
-public class MailEvent {
-
+public class QuestionMailEvent {
     private String email;
 
-    public MailEvent(String email){
+    public QuestionMailEvent(String email){
         this.email = email;
     }
 

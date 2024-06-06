@@ -45,7 +45,8 @@ public class NotificationService {
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
     private final String NON_LOGIN = "비로그인";
 
-    private final String QUESTION_URL= "/api/user/question/";
+    private final String QUESTION_ADMIN_URL= "/api/admin/question/";
+    private final String QUESTION_USER_URL= "/api/user/question/";
 
     public SseEmitter subscribe(Long memberId,String lastEventId){
         // 고유한 아이디 생성
@@ -122,18 +123,33 @@ public class NotificationService {
         send(postAuthor, POSTLIKE, content, url,nickName);
     }
 
-    // TODO: 2024-06-06 조회 api 구현시 해당 이벤트가 어드민에게 가도록 하기
+
+    /**
+     * 어드민 에게 가는 알림(사용자가 문의사항 등록시)
+     */
     public void sendAdminNotification(Question question,String nickName){
         Long id = question.getId();
         QuestionType questionType = question.getQuestionType();
         String type = (questionType.equals(QuestionType.ACCOUNT_INQUIRY)) ? "계정 문의" : "일반 문의";
         String content ="새로운 "+ type+" 사항이 도착했습니다.";
-        String url = QUESTION_URL+id;
+        String url = QUESTION_ADMIN_URL+id;
         List<Member> members = memberRepository.adminMember();
         for (Member member_iter : members) {
             send(member_iter,QUESTION,content,url,nickName!=null? nickName : NON_LOGIN);
         }
     }
+
+    /**
+     * 일반사용자 문의사항 등록시 보내지는 알림
+     */
+    public void complete_question(Question question,String adminNickName){
+        String title = question.getTitle();
+        String content = title+"의 대해서 답변이 등록되었습니다.";
+        String url = QUESTION_USER_URL+question.getId();
+
+        send(question.getMember(),QUESTION,content,url,adminNickName);
+    }
+
 
     private Notification createNotification(Member receiver, NotificationType notificationType, String content, String url,String toName) {
         return  Notification.builder().receiver(receiver).notificationType(notificationType).content(content).url(url).toName(toName).build();
