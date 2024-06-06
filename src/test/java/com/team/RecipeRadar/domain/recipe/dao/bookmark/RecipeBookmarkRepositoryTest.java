@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @Transactional
 @Import(QueryDslConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ActiveProfiles("test")
 @Slf4j

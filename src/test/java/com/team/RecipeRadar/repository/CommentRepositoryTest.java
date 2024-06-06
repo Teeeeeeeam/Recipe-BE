@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @Import(QueryDslConfig.class)
 @Transactional
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Slf4j
 class CommentRepositoryTest {
