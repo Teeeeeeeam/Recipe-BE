@@ -53,22 +53,21 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
     public Slice<MemberDto> searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        if(loginId!=null){
-            builder.or(member.loginId.eq(loginId));
+        if (loginId != null) {
+            builder.and(member.loginId.containsIgnoreCase(loginId));
         }
-        if (nickname!=null){
-            builder.or(member.email.eq(nickname));
+        if (nickname != null) {
+            builder.and(member.nickName.containsIgnoreCase(nickname));
         }
-        if (email !=null){
-            builder.or(member.email.eq(email));
+        if (email != null) {
+            builder.and(member.email.containsIgnoreCase(email));
         }
-        if (username !=null){
-            builder.or(member.username.eq(username));
+        if (username != null) {
+            builder.and(member.username.containsIgnoreCase(username));
         }
-        if (lastMemberId!=null){
+        if (lastMemberId != null) {
             builder.and(member.id.gt(lastMemberId));
         }
-        log.info("asad={}",builder);
 
         List<Member> memberList = jpaQueryFactory.select(member)
                 .from(member)

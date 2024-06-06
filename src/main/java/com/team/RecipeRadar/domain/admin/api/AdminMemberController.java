@@ -114,7 +114,7 @@ public class AdminMemberController {
         }
     }
 
-    @Operation(summary = "사용자 검색 API", description = "가입된 회원의 이름, 아이디, 닉네임, 이메일을 통해 사용자를 조회하는 API(무한 스크롤방식, 아이디,이름,닉네임, 이메일 하나라도 일치하는 사용자를 출력 no like 문, 아무 데이터도 안넘기면 모든 사용자를 출력)")
+    @Operation(summary = "사용자 검색 API", description = "가입된 회원의 이름, 아이디, 닉네임, 이메일을 통해 사용자를 조회하는 API(무한 스크롤방식, 아이디,이름,닉네임, 이메일의 문자가 하나라도 일치하면 출력 아무 데이터도 안넘기면 모든 사용자를 출력)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
