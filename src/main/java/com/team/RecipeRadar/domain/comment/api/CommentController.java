@@ -94,9 +94,7 @@ public class CommentController {
             @ApiResponse(responseCode = "200",description = "OK",
             content = @Content(schema = @Schema(implementation = CommentDto.class),
                     examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"content\":\"댓글 리스트\"}, \"pageable\":\"페이징 내용\"}")
-            )),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            ))
     })
     @GetMapping("/api/comments")
     public ResponseEntity<?> comment_Page(@PageableDefault Pageable pageable,
@@ -104,10 +102,9 @@ public class CommentController {
         try {
             Page<CommentDto> comments = commentService.commentPage(Long.parseLong(postid), pageable);
 
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공", comments));
-        }catch (CommentException e){
-          throw new CommentException(e.getMessage());
+            return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", comments));
         } catch (Exception e){
+            e.printStackTrace();
             throw new ServerErrorException(e.getMessage());
         }
     }

@@ -113,7 +113,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder)
+                .where(builder,uploadFile.post.isNull())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -143,7 +143,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .leftJoin(recipe.cookingStepList, cookingStep)
-                .where(recipe.id.eq(recipeId)).fetch();
+                .where(recipe.id.eq(recipeId).and(uploadFile.post.id.isNull())).fetch();
 
         List<CookingStep> cookingSteps = details.stream().map(tuple -> tuple.get(cookingStep)).collect(Collectors.toList());
 
@@ -162,6 +162,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
                 .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
+                .where(uploadFile.post.id.isNull())
                 .orderBy(recipe.likeCount.desc())
                 .limit(8).fetch();
 
@@ -177,7 +178,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder)
+                .where(builder,uploadFile.post.isNull())
                 .orderBy(recipe.id.asc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();

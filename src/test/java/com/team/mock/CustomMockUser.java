@@ -10,4 +10,5 @@ import java.lang.annotation.RetentionPolicy;
 @WithSecurityContext(factory = CustomContextHolder.class)
 public @interface CustomMockUser{
     String loginId() default "test";
+    long id() default 1l;
 }

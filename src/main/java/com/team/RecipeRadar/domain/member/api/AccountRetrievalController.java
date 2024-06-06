@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.api;
 
 
+import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
@@ -20,18 +21,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -41,6 +43,7 @@ public class AccountRetrievalController {
 
 
     private final AccountRetrievalService accountRetrievalService;
+    private final BlackListRepository blackListRepository;
     @Qualifier("AccountEmail")
     private final MailService mailService;
 
@@ -87,11 +90,11 @@ public class AccountRetrievalController {
     }
 
     @Operation(summary = "비밀번호 찾기", 
-            description = "사용자실명, 로그인아이디, 이메일을 통한인증코드를 통해서 해당 사용자가 있는지 확인후 모두 true이며 token을 발급해준다. 그후 /api/pwd/update로 라디이렉트")
+            description = "사용자실명, 로그인아이디, 이메일을 통한인증코드를 통해서 해당 사용자가 있는지 확인후 모두 true이며 Token 정보가 담긴 쿠키(account-token)을 발급해준다(3분 유효시간). 그후 /api/pwd/update로 라디이렉트")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"token\":\"[토큰 값]\",\"회원 정보\":true,\"이메일 인증\":true}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"회원 정보\":true,\"이메일 인증\":true}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
@@ -110,12 +113,24 @@ public class AccountRetrievalController {
             }
             Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
 
+            String token = (String) pwd.get("token");
+            log.info("token={}",token);
+
+            ResponseCookie accountToken = ResponseCookie.from("account-token", token)
+                    .maxAge(60 * 3)
+                    .secure(true)
+                    .httpOnly(true)
+                    .path("/")
+                    .sameSite("None")
+                    .build();
+            pwd.remove("token");
+
             ControllerApiResponse<Object> response = ControllerApiResponse.builder()
                     .success(true)
                     .message("성공")
                     .data(pwd).build();
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,accountToken.toString()).body(response);
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
         } catch (Exception e){
@@ -124,7 +139,7 @@ public class AccountRetrievalController {
         }
     }
 
-    @Operation(summary = "비밀번호 변경",description = "토큰값을 받아, 해당 토큰이 존재한다면 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
+    @Operation(summary = "비밀번호 변경",description = "'account-token'쿠키가 존재한다면(비밀번호 찾기시 비밀번호 변경), 'login-id'쿠키가 존재시(사용자 페이지에서 비밀번호 변경) 해당 앤드포인트에 접속이 가능해 비밀번호 변경이 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -136,7 +151,7 @@ public class AccountRetrievalController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/api/password/update")
-    public ResponseEntity<?>updatePassword(@Parameter(description = "비밀번호 찾기시 생성된 TOKEN 값")@RequestParam String id , @Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult){
+    public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult, HttpServletRequest request){
         try {
             if (bindingResult.hasErrors()){
                 Map<String, String> result = new LinkedHashMap<>();
@@ -145,7 +160,17 @@ public class AccountRetrievalController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
             }
-            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,id);
+            Cookie[] cookies = request.getCookies();
+            String accountId = "";
+            for (Cookie cookie : cookies) {
+                if(cookie.getName().equals("account-token")){
+                    accountId = cookie.getValue();
+                }if(cookie.getName().equals("login-id")){
+                    accountId = cookie.getValue();
+                }
+            }
+
+            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,accountId);
             return ResponseEntity.ok(apiResponse);
         }catch (NoSuchElementException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));
@@ -173,8 +198,11 @@ public class AccountRetrievalController {
     @PostMapping("/api/search/email-confirmation/send")
     public ResponseEntity<?> mailConfirm(@Parameter(description ="이메일") @RequestParam("email") String email){
         try {
-            mailService.sensMailMessage(email);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"메일 전송 성공"));
+            boolean existsByEmail = blackListRepository.existsByEmail(email);
+            if(!existsByEmail) {
+                mailService.sensMailMessage(email);
+                return ResponseEntity.ok(new ControllerApiResponse<>(true, "메일 전송 성공"));
+            }else return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"사용할수 없는 이메일입니다."));
         }catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버오류");

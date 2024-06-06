@@ -1,8 +1,8 @@
 package com.team.RecipeRadar.domain.post.api;
 
 import com.team.RecipeRadar.domain.post.application.PostService;
-import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.exception.PostException;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -26,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -72,15 +71,16 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "전체 요리글 조회 API", description = "모든 사용자가 해당 게시글의 페이지를 볼수있음(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
+    @Operation(summary = "전체 요리글 조회 API", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있음(무한페이징)", tags = {"일반 사용자 요리글 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
-                content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
-                        examples = @ExampleObject(value = "{\"nextPage\":false,\"posts\":[{\"id\":5,\"postTitle\":\"맛있는 파스타 레시피\",\"nickName\":\"짱파스타\",\"postImageUrl\":\"http://example.com/pasta.jpg\"},{\"id\":4,\"postTitle\":\"맛있는 파스타 레시피\",\"nickName\":\"짱파스타\",\"postImageUrl\":\"http://example.com/pasta.jpg\"}]}"))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                            examples = @ExampleObject(value = "{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}," +
+                                    "{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}"))),
     })
     @GetMapping("/api/posts")
-    public ResponseEntity<?> findAllPosts(Pageable pageable) {
-        PostResponse postResponse = postService.postPage(pageable);
+    public ResponseEntity<?> findAllPosts(@RequestParam(value = "post-id",required = false) Long postId,Pageable pageable) {
+        PostResponse postResponse = postService.postPage(postId,pageable);
         return ResponseEntity.ok(postResponse);
     }
 
@@ -88,7 +88,7 @@ public class PostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = PostResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회성공\",\"data\":{\"post\":{\"id\":3,\"postTitle\":\"냉장고~\",\"postContent\":\"이 파스타는 정말 간단하고 맛있어요!\",\"nickName\":\"김민우랍니다\",\"create_at\":\"2024-05-20T01:24:07.748424\",\"postServing\":\"3인분\",\"postCookingTime\":\"30분\",\"postCookingLevel\":\"중\",\"postLikeCount\":0,\"postImageUrl\":\"http://example.com/pasta.jpg\"},\"comments\":[{\"id\":1,\"comment_content\":\"댓글 작성!\",\"nickName\":\"닉네임\",\"create_at\":\"2024-05-20T02:26:00\"}]}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회성공\",\"data\":{\"post\":{\"id\":3,\"postTitle\":\"냉장고~\",\"postContent\":\"이 파스타는 정말 간단하고 맛있어요!\",\"nickName\":\"김민우랍니다\",\"create_at\":\"2024-05-20T01:24:07.748424\",\"postServing\":\"3인분\",\"postCookingTime\":\"30분\",\"postCookingLevel\":\"중\",\"postLikeCount\":0,\"postImageUrl\":\"http://example.com/pasta.jpg\", \"member\":{\"nickname\" :\"Admin\"},\"recipe\":{\"id\":\"123\",\"title\":\"김치\"}},\"comments\":[{\"id\":1,\"comment_content\":\"댓글 작성!\",\"nickName\":\"닉네임\",\"create_at\":\"2024-05-20T02:26:00\"}]}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"해당하는 게시물이 없습니다.\"}")))
@@ -200,18 +200,38 @@ public class PostController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/posts")
-    public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId, @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+    public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId,
+                                           @RequestParam(value = "last-id",required = false) Long lastId,
+                                           @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
         try {
             if (cookieLoginId ==null){
                 throw new ForbiddenException("쿠키값이 없을때 접근");
             }
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String authenticationName = authentication.getName();
-            UserInfoPostResponse userInfoPostResponse = postService.userPostPage(authenticationName, loginId, pageable);
+            UserInfoPostResponse userInfoPostResponse = postService.userPostPage(authenticationName,lastId,loginId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userInfoPostResponse));
         }catch (AccessDeniedException e){
             throw new AccessDeniedException(e.getMessage());
         }
+    }
+
+
+    @Operation(summary = "요리글 검색 API", description = "사용자 로그인아이디, 게시글 제목, 스크랩한 요리의 대해서 검색가능 단일 조건의 대해서 검색 가능, 조건데이터가 추가될때마다 and 조건으로 데이터를 추린다.(무한페이징)", tags = {"어드민 관련 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                            examples = @ExampleObject(value = "{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}," +
+                                    "{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}"))),
+    })
+    @GetMapping("/api/search")
+    public ResponseEntity<?> searchPost(@RequestParam(value = "login-id",required = false) String loginId,
+                                  @RequestParam(value = "recipe-title",required = false) String recipeTitle,
+                                  @RequestParam(value = "post-title",required = false) String postTitle,
+                                  @RequestParam(value = "post-id",required = false) Long lastPostId,
+                                  Pageable pageable){
+        PostResponse postResponse = postService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
+        return ResponseEntity.ok(postResponse);
     }
 
     //로그인한 사용자의 loginId를 스프링 시큐리티에서 획득

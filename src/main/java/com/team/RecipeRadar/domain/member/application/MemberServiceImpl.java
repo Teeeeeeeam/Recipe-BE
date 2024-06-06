@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.member.application;
 
+import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -28,6 +29,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
+    private final BlackListRepository blackListRepository;
 
 
     @Qualifier("JoinEmail")
@@ -192,9 +194,11 @@ public class MemberServiceImpl implements MemberService {
         try {
             Map<String, Boolean> result = new LinkedHashMap<>();
 
+            boolean blackList = blackListRepository.existsByEmail(email);
+
             boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
 
-            if (valid) {
+            if (valid && !blackList) {
                 // 이메일이 데이터베이스에 존재하는지 확인
                 List<Member> member = memberRepository.findByEmail(email);
                 for (Member m : member) {

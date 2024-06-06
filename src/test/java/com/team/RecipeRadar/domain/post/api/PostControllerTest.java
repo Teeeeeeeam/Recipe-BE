@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.*;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -77,7 +79,7 @@ class PostControllerTest {
                 .nextPage(false)
                 .content(requests).build();
 
-        given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
+        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +106,7 @@ class PostControllerTest {
         String loginId= "test";
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(postService.userPostPage(anyString(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
+        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
@@ -182,7 +184,7 @@ class PostControllerTest {
 
         List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
         PostResponse postResponse = new PostResponse(false, postDtos);
-        given(postService.postPage(eq(pageRequest))).willReturn(postResponse);
+        given(postService.postPage(any(),eq(pageRequest))).willReturn(postResponse);
 
         mockMvc.perform(get("/api/posts?size=2"))
                 .andDo(print())
@@ -351,5 +353,32 @@ class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("비밀번호 인증 성공"));
+    }
+
+    @Test
+    @DisplayName("게시글 검색 API TEST")
+    void searchPostData() throws Exception {
+        String loginId = "searchId";
+        String postTitle = "제목";
+        List<PostDto> postDtos = List.of(
+                PostDto.builder().postContent("글").postTitle("제목").member(MemberDto.builder().loginId(loginId).nickname("닉네임").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목").build()).build(),
+                PostDto.builder().postContent("글1").postTitle("제목1").member(MemberDto.builder().loginId(loginId).nickname("닉네임1").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목1").build()).build()
+        );
+        PostResponse postResponse = new PostResponse(true, postDtos);
+
+        given(postService.searchPost(eq(loginId),isNull(), eq(postTitle),isNull(), any())).willReturn(postResponse);
+
+        mockMvc.perform(get("/api/search")
+                        .param("login-id",loginId)
+                        .param("post-title",postTitle))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nextPage").value(true))
+                .andExpect(jsonPath("$.posts").isArray())
+                .andExpect(jsonPath("$.posts[0].postTitle").value("제목"))
+                .andExpect(jsonPath("$.posts[0].postContent").value("글"))
+                .andExpect(jsonPath("$.posts[1].member.loginId").value("searchId"))
+                .andExpect(jsonPath("$.posts[1].recipe.id").value(1))
+                .andExpect(jsonPath("$.posts[1].recipe.title").value("레시피제목1"));
     }
 }

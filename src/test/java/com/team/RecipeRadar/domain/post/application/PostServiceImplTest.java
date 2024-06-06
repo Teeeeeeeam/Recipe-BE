@@ -26,7 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -34,7 +33,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.sound.sampled.Port;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -77,9 +75,9 @@ class PostServiceImplTest {
 
         SliceImpl<UserInfoPostRequest> userInfoPostRequests = new SliceImpl<>(requests, pageable, false);
 
-        when(postRepository.userInfoPost(memberId,pageable)).thenReturn(userInfoPostRequests);
+        when(postRepository.userInfoPost(memberId,null,pageable)).thenReturn(userInfoPostRequests);
 
-        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(auName, loginId, pageable);
+        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(auName, null,loginId, pageable);
         assertThat(userInfoPostResponse.isNextPage()).isFalse();
         assertThat(userInfoPostResponse.getContent()).isNotEmpty();
         assertThat(userInfoPostResponse.getContent().size()).isEqualTo(2);
@@ -98,7 +96,7 @@ class PostServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        assertThatThrownBy(() -> postService.userPostPage(auName, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> postService.userPostPage(auName,null, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
@@ -143,9 +141,9 @@ class PostServiceImplTest {
         Pageable pageRequest = PageRequest.of(0, 2);
         List<PostDto> postDtos = List.of(PostDto.builder().postContent("컨텐트").id(1l).build(), PostDto.builder().postContent("컨텐트2").id(2l).build());
         SliceImpl<PostDto> dtoSlice = new SliceImpl<>(postDtos , pageRequest, false);       // 다음 페이지는 없음
-        when(postRepository.getAllPost(eq(pageRequest))).thenReturn(dtoSlice);
+        when(postRepository.getAllPost(anyLong(),eq(pageRequest))).thenReturn(dtoSlice);
 
-        PostResponse postResponse = postService.postPage(pageRequest);
+        PostResponse postResponse = postService.postPage(1l,pageRequest);
         assertThat(postResponse.getPosts()).hasSize(2);
         assertThat(postResponse.getPosts().get(0).getPostContent()).isEqualTo("컨텐트");
         assertThat(postResponse.isNextPage()).isFalse();

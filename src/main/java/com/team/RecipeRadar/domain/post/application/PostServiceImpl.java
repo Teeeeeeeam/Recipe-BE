@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -92,8 +93,8 @@ public class PostServiceImpl implements PostService {
      * @return
      */
     @Override
-    public PostResponse postPage(Pageable pageable) {
-        Slice<PostDto> allPost = postRepository.getAllPost(pageable);
+    public PostResponse postPage(Long postId,Pageable pageable) {
+        Slice<PostDto> allPost = postRepository.getAllPost(postId,pageable);
 
         return new PostResponse(allPost.hasNext(),allPost.getContent());
     }
@@ -156,14 +157,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable) {
+    public UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable) {
         Member member = memberRepository.findByLoginId(loginId);
 
         if (member==null||!member.getUsername().equals(authenticationName)){
             throw new AccessDeniedException("접근할 수 없는 사용자입니다.");
         }
 
-        Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(), pageable);
+        Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(),lastId, pageable);
 
         return UserInfoPostResponse.builder()
                 .nextPage(userInfoPostDto.hasNext())
@@ -186,6 +187,31 @@ public class PostServiceImpl implements PostService {
             throw new BadRequestException("비밀번호가 일치하지 않습니다.");
 
         return true;
+    }
+
+    /**
+     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환
+     */
+    @Override
+    public PostResponse searchPost(String loginId, String recipeTitle, String postTitle, Long lastPostId, Pageable pageable) {
+        Slice<PostDto> postDtos = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
+        return new PostResponse(postDtos.hasNext(),postDtos.getContent());
+    }
+
+    /**
+     * 한개 이상의 게시글을 삭제할수 있다.
+     * @param postIds
+     */
+    @Override
+    public void deletePosts(List<Long> postIds) {
+
+        for (Long postId : postIds) {
+            Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
+            imgRepository.deletePostImg(post.getId(),post.getRecipe().getId());
+            commentRepository.deletePostID(post.getId());
+            postLikeRepository.deletePostID(postId);
+            postRepository.deleteById(post.getId());
+        }
     }
 
 }

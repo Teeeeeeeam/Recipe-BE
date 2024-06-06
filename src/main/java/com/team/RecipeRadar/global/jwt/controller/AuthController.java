@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -117,10 +118,11 @@ public class AuthController {
             Map<String, String> login = jwtAuthService.login(loginDto);
 
             String refreshToken = login.get("refreshToken");
-            log.info("토큰={}",refreshToken);
 
             ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
                     .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
                     .path("/")
                     .maxAge(30 * 24 * 60 * 60)
                     .build();
@@ -151,6 +153,9 @@ public class AuthController {
     public ResponseEntity<?> getUserInfo(HttpServletRequest request){
         try{
             String accessToken = request.getHeader("Authorization");
+            if(accessToken ==null){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse<>(false,"토큰이 존재하지 않습니다."));
+            }
             String token = accessToken.substring(accessToken.indexOf("Bearer ") + 7);
             MemberInfoResponse info = jwtAuthService.accessTokenMemberInfo(token);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",info));
@@ -179,7 +184,11 @@ public class AuthController {
             jwtAuthService.logout(memberId);
             SecurityContextHolder.clearContext();
 
-            ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null).maxAge(0).path("/").build();
+            ResponseCookie deleteCookie = ResponseCookie.from("RefreshToken", null)
+                    .secure(true)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .maxAge(0).path("/").build();
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"로그아웃 성공"));
         } catch (Exception e) {
             throw new JwtTokenException(e.getMessage());

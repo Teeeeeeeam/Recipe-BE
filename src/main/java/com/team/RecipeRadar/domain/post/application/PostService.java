@@ -6,10 +6,12 @@ import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface PostService {
     void save(UserAddRequest userAddPostDto, MultipartFile file);
 
-    PostResponse postPage(Pageable pageable);
+    PostResponse postPage(Long postId,Pageable pageable);
 
     Post findById(long id);
 
@@ -18,7 +20,11 @@ public interface PostService {
     PostDetailResponse postDetail(Long postId);
     void update(Long postId,UserUpdateRequest userUpdatePostDto,String loginId,MultipartFile file);
 
-    UserInfoPostResponse userPostPage(String authenticationName, String loginId, Pageable pageable);
+    UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable);
 
     boolean validPostPassword(String login, ValidPostRequest request);
+
+    PostResponse searchPost(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable);
+
+    void deletePosts(List<Long> postIds);
 }

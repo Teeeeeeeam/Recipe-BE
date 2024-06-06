@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RecipeDto {
 
     private Long id;              // 요리 값
@@ -51,9 +52,6 @@ public class RecipeDto {
 
     public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount){
         return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
-    }
-    public static RecipeDto of(Recipe recipe){
-        return new RecipeDto(recipe.getId(), recipe.getImageUrl(), recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount());
     }
 
     public static RecipeDto of(Recipe recipe,String imageUrl,List<CookingStep> cookStep,String ingredient){

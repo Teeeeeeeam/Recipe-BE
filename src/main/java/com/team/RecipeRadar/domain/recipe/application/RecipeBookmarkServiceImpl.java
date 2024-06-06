@@ -43,4 +43,10 @@ public class RecipeBookmarkServiceImpl implements RecipeBookmarkService{
             return false;
         }
     }
+    @Override
+    public Boolean checkBookmark(Long memberId, Long recipeId) {
+        return recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(memberId,recipeId);
+    }
+
+
 }

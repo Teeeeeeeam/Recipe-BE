@@ -10,15 +10,17 @@ public class MemberInfoResponse {
     private String loginId;
     private String nickName;
     private String loginType;
+    private String roles;
 
-    private MemberInfoResponse(Long id, String loginId, String nickName, String loginType) {
+    private MemberInfoResponse(Long id, String loginId, String nickName, String loginType,String roles) {
         this.id = id;
         this.loginId = loginId;
         this.nickName = nickName;
         this.loginType = loginType;
+        this.roles = roles;
     }
 
     public static MemberInfoResponse of(MemberDto memberDto){
-        return new MemberInfoResponse(memberDto.getId(), memberDto.getLoginId(), memberDto.getNickname(), memberDto.getLogin_type());
+        return new MemberInfoResponse(memberDto.getId(), memberDto.getLoginId(), memberDto.getNickname(), memberDto.getLogin_type(),memberDto.getRoles());
     }
 }

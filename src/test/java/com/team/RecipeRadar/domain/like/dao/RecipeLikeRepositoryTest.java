@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("test")
 @Import(QueryDslConfig.class)
 @Transactional
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
 class RecipeLikeRepositoryTest {
 

@@ -1,7 +1,10 @@
 package com.team.RecipeRadar.domain.post.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +25,6 @@ public class PostDto {
 
     private String postContent;     //요리글 내용
 
-    private String nickName;        //요리글 작성자 정보
-
     private LocalDateTime create_at;        //등록일
 
     private LocalDateTime updated_at;       //수정일
@@ -38,19 +39,39 @@ public class PostDto {
 
     private String postImageUrl;        // 게시글 이미지 URL
 
-    public PostDto(Long id, String postTitle,String img,String nickName) {
+    private MemberDto member;
+
+    private RecipeDto recipe;
+
+    private PostDto(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at) {
         this.id = id;
+        this.member = new MemberDto();
+        this.member.setLoginId(loginId);
+        this.recipe = new RecipeDto();
+        this.recipe.setId(recipeId);
+        this.recipe.setTitle(recipeTitle);
         this.postTitle = postTitle;
+        this.create_at=create_at;
         this.postImageUrl = img;
-        this.nickName = nickName;
+        this.member.setNickname(nickName);
     }
 
-    public static PostDto of(Post post,String imgUrl){
+    public static PostDto of(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at){
+        return new PostDto(id,loginId,postTitle,img,nickName,recipeTitle,recipeId,create_at);
+    }
+    public static PostDto of(Post post, String imgUrl, Recipe recipe){
+        MemberDto memberDto = new MemberDto();
+        memberDto.setNickname(post.getMember().getNickName());
+
+        RecipeDto recipeDto = new RecipeDto();
+        recipeDto.setId(recipe.getId());
+        recipeDto.setTitle(recipe.getTitle());
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
                 .postContent(post.getPostContent())
-                .nickName(post.getMember().getNickName())
+                .member(memberDto)
+                .recipe(recipeDto)
                 .create_at(post.getCreated_at())
                 .postServing(post.getPostServing())
                 .postCookingTime(post.getPostCookingTime())

@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(includeFieldNames = false, of = {"title","imageUrl" , "cookingTime", "cookingLevel"})
+@ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "likeCount"),
         @Index(columnList = "recipe_title")
@@ -22,9 +22,6 @@ public class Recipe {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
     private Long id;              // 요리 값
-
-    @Setter
-    private String imageUrl;
 
     @Column(name = "recipe_title")
     private String title;           // 요리제목

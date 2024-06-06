@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
@@ -44,6 +45,7 @@ class CommentServiceImplTest {
     @Mock MemberRepository memberRepository;
     @Mock PostRepository articleRepository;
     @Mock CommentRepository commentRepository;
+    @Mock NotificationService notificationService;
 
     @InjectMocks CommentServiceImpl commentService;
 
@@ -52,7 +54,7 @@ class CommentServiceImplTest {
     @DisplayName("Comment_save 저장테스트")
     public void testSave_ValidMemberAndArticle_ReturnsSavedComment() {
         // 범위
-        MemberDto build = MemberDto.builder().id(1l).build();
+        MemberDto build = MemberDto.builder().id(1l).nickname("닉네임").build();
         PostDto build1 = PostDto.builder().id(1l).build();
 
         LocalDateTime dateTime = LocalDateTime.of(2024,3,17,2,15);
@@ -61,6 +63,7 @@ class CommentServiceImplTest {
 
         Member member = new Member();
         member.setId(1L);
+        member.setNickName("닉네임");
         Post article = new Post();
         article.setId(1L);
 
@@ -69,6 +72,7 @@ class CommentServiceImplTest {
         when(articleRepository.findById(1L)).thenReturn(Optional.of(article));
 
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(notificationService).sendCommentNotification(any(Post.class),anyString());
 
         // 실행
         Comment savedComment = commentService.save(commentDto);
@@ -103,15 +107,14 @@ class CommentServiceImplTest {
     @DisplayName("댓글 삭제 검증")
     void delete_comment_Test() {
         // Mock 데이터 설정
-        MemberDto memberDto = MemberDto.builder().id(1L).username("test").build(); //댓글 작성자
+        MemberDto memberDto = MemberDto.builder().id(1L).username("test").nickname("닉네임").build(); //댓글 작성자
 
-//        CommentDto commentDto = CommentDto.builder().id(1L).comment_content("댓글 삭제 테스트코드").memberDto(memberDto).build();
 
         UserDeleteCommentDto commentDto = new UserDeleteCommentDto(memberDto.getId(), 1l);
 
-        Member member = Member.builder().id(1L).username("test").build();
+        Member member = Member.builder().id(1L).username("test").nickName("닉네임").build();
 
-        Comment comment = Comment.builder().id(1L).commentContent("댓글 삭제 테스트코드").member(member).build();
+        Comment comment = Comment.builder().id(1L).commentContent("댓글 삭제 테스트코드").member(member).post(Post.builder().id(2l).member(member).build()).build();
 
         // Member 리포지토리 mock 설정
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
@@ -119,6 +122,7 @@ class CommentServiceImplTest {
         // Comment 리포지토리 mock 설정
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
+        doNothing().when(notificationService).deleteCommentNotification(anyLong(),anyLong(),anyLong());
         // 테스트 수행
         commentService.delete_comment(commentDto);
 
@@ -132,7 +136,6 @@ class CommentServiceImplTest {
         // Mock 데이터 설정
         MemberDto nonAuthorDto = MemberDto.builder().id(2L).username("non_author").build(); // 비 작성자
 
-//        CommentDto commentDto = CommentDto.builder().id(3L).comment_content("댓글 삭제 테스트코드").memberDto(nonAuthorDto).build();
         UserDeleteCommentDto commentDto = new UserDeleteCommentDto(nonAuthorDto.getId(), 3L);
 
         Member member = Member.builder().id(1L).username("test").build();       //댓글 작성자

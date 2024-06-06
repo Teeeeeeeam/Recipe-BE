@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ImgRepository extends JpaRepository<UploadFile,Long> {
+public interface ImgRepository extends JpaRepository<UploadFile,Long> ,CustomImgRepository{
 
     @Query("select u from UploadFile u where u.recipe.id=:recipeId AND u.post.id is null")
     Optional<UploadFile> findByRecipe_Id(@Param("recipeId") Long recipe_id);
@@ -25,4 +25,10 @@ public interface ImgRepository extends JpaRepository<UploadFile,Long> {
     @Query("select u from UploadFile u where u.post.id=:postId")
     UploadFile getOriginalFileName(@Param("postId")Long postId);
 
+    @Modifying
+    @Query("delete from UploadFile u where u.notice.id =:noticeId")
+    void deleteNoticeId(@Param("noticeId")Long noticeId);
+
+    @Query("select u from UploadFile u where u.notice.id=:noticeId")
+    UploadFile getByNoticeOriginalFileName(@Param("noticeId")Long noticeId);
 }

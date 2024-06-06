@@ -21,7 +21,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -29,9 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
@@ -46,6 +48,8 @@ public class UserInfoController {
 
     private final UserInfoService userInfoService;
 
+    @Value("${disconnect.oauth2.redirect}")
+    private String redirectUrl;
     @Qualifier("kakao")
     private final UserDisConnectService kakaoDisConnectService;
     @Qualifier("naver")
@@ -62,7 +66,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -71,7 +75,6 @@ public class UserInfoController {
         try{
             MemberDto memberDto = getMemberDto();
             cookieValid(cookieLoginId,memberDto.getLoginId());
-//            boolean b = userInfoService.validUserToken(cookieLoginId);
 
             UserInfoResponse members = userInfoService.getMembers(loginId,memberDto.getUsername());
 
@@ -95,7 +98,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -104,14 +107,15 @@ public class UserInfoController {
         try {
             MemberDto memberDto = getMemberDto();
             cookieValid(cookieLoginId,memberDto.getLoginId());
-
             String nickName = userInfoUpdateNickNameRequest.getNickName();
             String loginId = userInfoUpdateNickNameRequest.getLoginId();
 
             userInfoService.updateNickName(nickName,loginId,memberDto.getUsername());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
-        }catch (AccessDeniedException e){
+        }catch (ForbiddenException e){
+            throw new ForbiddenException(e.getMessage());
+        } catch (AccessDeniedException e){
             throw new AccessDeniedException(e.getMessage());
         }catch (ServerErrorException e){
             throw new ServerErrorException(e.getMessage());
@@ -131,7 +135,7 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 변경 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -166,18 +170,22 @@ public class UserInfoController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO, HttpServletResponse response){
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO){
         try {
             MemberDto memberDto = getMemberDto();
 
             String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
             String userEncodeToken = new String(Base64.getEncoder().encode(userToken.getBytes()));
 
-            Cookie cookie = new Cookie("login-id", userEncodeToken);
-            cookie.setMaxAge(1200); //20분
-            response.addCookie(cookie);
+            ResponseCookie responseCookie = ResponseCookie.from("login-id", userEncodeToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/")
+                    .maxAge(1200)
+                    .build();
 
-            return ResponseEntity.ok(new ControllerApiResponse<>(true, "인증 성공"));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
 
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
@@ -223,7 +231,36 @@ public class UserInfoController {
         }
 
     }
+    @Operation(summary = "사용자 페이지의 즐겨찾기 페이징",description = "사용자가 즐겨찾기한 레시피의 대해서 무한 페이징 last-id는 레시피 아이디로 (sort는 사용 x)", tags = {"사용자 페이지 컨트롤러"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":true,\"bookmark_list\":[{\"id\":128671,\"title\":\"어묵김말이\"}]}}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
+            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
+                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    @GetMapping("/user/info/bookmark")
+    public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "last-id",required = false)Long lastId,@CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+        try {
+            if (cookieLoginId == null) {
+                throw new ForbiddenException("쿠키값이 없을때 접근");
+            }
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
+            Long member_id = principal.getMemberDto(principal.getMember()).getId();
+
+            UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(member_id, lastId, pageable);
+
+            return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", userInfoBookmarkResponse));
+        }catch (ForbiddenException e){
+            throw new ForbiddenException(e.getMessage());
+        } catch (Exception e){
+            throw new ServerErrorException("서버오류");
+        }
+    }
 
     @GetMapping ("/oauth2/social/unlink")
     @Hidden
@@ -238,7 +275,7 @@ public class UserInfoController {
         String accessToken = kakaoDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = kakaoDisConnectService.disconnect(accessToken);
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+                    .location(URI.create(redirectUrl+disconnected)).build();
     }
 
     @RequestMapping(value = "/oauth2/unlink/naver",method = {RequestMethod.GET, RequestMethod.POST})
@@ -247,7 +284,7 @@ public class UserInfoController {
         String accessToken = naverDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = naverDisConnectService.disconnect(accessToken);
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:3000/success/status?unlink="+disconnected)).build();
+                .location(URI.create(redirectUrl+disconnected)).build();
     }
 
     private void cookieValid(String cookieLoginId,String loginId ) {

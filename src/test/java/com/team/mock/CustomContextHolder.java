@@ -18,7 +18,8 @@ public class CustomContextHolder implements WithSecurityContextFactory<CustomMoc
     @Override
     public SecurityContext createSecurityContext(CustomMockUser annotation) {
         String loginId = annotation.loginId();
-        Member member = Member.builder().loginId(loginId).username("test").password("1234").email("test@email.com").build();
+        long member_Id = annotation.id();
+        Member member = Member.builder().id(member_Id).loginId(loginId).username("test").password("1234").email("test@email.com").build();
         PrincipalDetails principalDetails = new PrincipalDetails(member);
         Authentication token = new UsernamePasswordAuthenticationToken(principalDetails, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = SecurityContextHolder.getContext();

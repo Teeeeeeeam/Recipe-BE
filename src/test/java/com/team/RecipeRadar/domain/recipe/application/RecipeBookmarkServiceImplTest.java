@@ -80,7 +80,17 @@ class RecipeBookmarkServiceImplTest {
                 .hasMessage("사용자및 레시피를 찾을수 없습니다.");
     }
 
+    @Test
+    @DisplayName("북마크를 했는지 확인하는 테스트")
+    void bookmarkCheck(){
+        Long recipe_id= 3l;
+        Long member_id = 2l;
 
+        when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(eq(member_id),eq(recipe_id))).thenReturn(true);
+
+        Boolean checkBookmark = recipeBookmarkService.checkBookmark(member_id, recipe_id);
+        assertThat(checkBookmark).isTrue();
+    }
 
 
 }

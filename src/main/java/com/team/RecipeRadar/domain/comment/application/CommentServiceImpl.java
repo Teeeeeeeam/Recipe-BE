@@ -6,15 +6,17 @@ import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+
+import java.util.Collections;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.exception.ex.CommentException;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
     /**
      * 댓글 저장하는 기능 -> 게시글과 사용자의 정보를 이요해 Commnet 객체를 생성후 저장
@@ -56,7 +59,10 @@ public class CommentServiceImpl implements CommentService {
                     .post(post)
                     .created_at(localDateTime)
                     .build();
-            return commentRepository.save(build);
+            Comment savedComment = commentRepository.save(build);
+
+            notificationService.sendCommentNotification(post,savedComment.getMember().getNickName());
+            return savedComment;
         } else {
             throw new NoSuchElementException("회원정보나 게시글을 찾을수 없습니다.");     //사용자 및 게시글이 없을시에는 해당 예외발생
         }
@@ -81,6 +87,9 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentDtoId).orElseThrow(() -> new NoSuchElementException("해당 댓글 찾을 수없습니다. " + commentDtoId));
 
         if (comment.getMember().getId().equals(memberDtoId)){           // 댓글을 등록한 사용자 일경우
+            log.info("여기`~~");
+            notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());
+
             commentRepository.deleteMemberId(member.getId(),comment.getId());
         }else
             throw new CommentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
@@ -96,14 +105,12 @@ public class CommentServiceImpl implements CommentService {
     public Page<CommentDto> commentPage(Long postId,Pageable pageable){
 
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
-        log.info("as={}",comments);
-
 
         if (!comments.getContent().isEmpty()) {
             return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())
-                    .nickName(comment.getMember().getNickName()).build());      //스트림 사용
+                    .nickName(comment.getMember().getNickName()).build());
         }else
-            throw new CommentException("게시글이 존재하지 않습니다.");
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
     }
 
     /**

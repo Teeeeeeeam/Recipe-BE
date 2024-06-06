@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.member.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.servlet.http.Cookie;
 import java.util.*;
 
 import static org.mockito.BDDMockito.given;
@@ -41,6 +43,8 @@ class AccountRetrievalControllerTest {
     private AccountRetrievalService accountRetrievalService;
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    BlackListRepository blackListRepository;
 
     @MockBean
     AccountRetrievalEmailServiceImpl mailService;
@@ -112,7 +116,6 @@ class AccountRetrievalControllerTest {
                         .content(objectMapper.writeValueAsString(findPasswordDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.token").value("test_TOken"))
                 .andExpect(jsonPath("$.data['회원 정보']").value(true))
                 .andExpect(jsonPath("$.data['이메일 인증']").value(true));
     }
@@ -120,17 +123,17 @@ class AccountRetrievalControllerTest {
     @Test
     @DisplayName("비밀번호 수정 엔드포인트")
     void update_password_controller() throws Exception {
-        String username = "test";
         String loginId="loginId";
-        String email="test@email.com";
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
 
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
         ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
         given(accountRetrievalService.updatePassword(updatePasswordDto,token)).willReturn(apiResponse);
 
+        Cookie cookie = new Cookie("account-token", token);
+
         mockMvc.perform(put("/api/password/update")
-                .param("id",token)
+                        .cookie(cookie)
                 .content(objectMapper.writeValueAsString(updatePasswordDto))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

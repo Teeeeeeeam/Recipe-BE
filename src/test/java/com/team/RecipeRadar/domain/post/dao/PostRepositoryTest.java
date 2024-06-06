@@ -31,7 +31,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(QueryDslConfig.class)
 @Transactional
 @ActiveProfiles("test")
@@ -75,8 +74,9 @@ class PostRepositoryTest {
         imgRepository.save(uploadFile2);
         imgRepository.save(uploadFile3);
 
-        Slice<PostDto> allPost = postRepository.getAllPost(request);
+        Slice<PostDto> allPost = postRepository.getAllPost(null,request);
 
+        log.info("aaNext={}",allPost);
         assertThat(allPost.hasNext()).isTrue();
         assertThat(allPost.getContent()).hasSize(2);
     }
@@ -101,6 +101,46 @@ class PostRepositoryTest {
         assertThat(postDetailResponse).isNotNull();
         assertThat(postDetailResponse.getPost().getPostTitle()).isEqualTo(post.getPostTitle());
         assertThat(postDetailResponse.getComments().get(0).getComment_content()).isEqualTo(save1.getCommentContent());
+    }
+
+    @Test
+    @DisplayName("게시글 검색 페이징 테스트 진행")
+    void post_search(){
+        Pageable request = PageRequest.of(0, 2);
+        String loginId = "testId";
+        List<Post> postList = new ArrayList<>();
+        Member member = Member.builder().loginId(loginId).nickName("닉네임 1").build();
+        Member member1 = Member.builder().loginId("nosearch").nickName("닉네임 2").build();
+        Member save = memberRepository.save(member);
+        Member save1 = memberRepository.save(member1);
+
+        Recipe recipe = Recipe.builder().id(1l).title("testTitle").build();
+        Recipe saveRecipe = recipeRepository.save(recipe);
+
+        postList.add(Post.builder().postTitle("searchPost").postContent("컨텐트1").recipe(saveRecipe).postCookingLevel("coo").member(save).postCookingTime("ti").build());
+        postList.add(Post.builder().postTitle("tit").postContent("컨텐트2").recipe(saveRecipe).postCookingLevel("coo").member(save1).postCookingTime("ti").build());
+        postList.add(Post.builder().postTitle("tit").postContent("컨텐트3").recipe(saveRecipe).postCookingLevel("coo").member(save).postCookingTime("ti").build());
+        postList.add(Post.builder().postTitle("tit").postContent("컨텐트4").recipe(saveRecipe).postCookingLevel("coo").member(save).postCookingTime("ti").build());
+
+        List<Post> posts = postRepository.saveAll(postList);
+
+        UploadFile uploadFile = UploadFile.builder().storeFileName("tesNmae").originFileName("originName").post(posts.get(0)).recipe(saveRecipe).build();
+        UploadFile uploadFile1 = UploadFile.builder().storeFileName("tesNmae").originFileName("originName").post(posts.get(1)).recipe(saveRecipe).build();
+        UploadFile uploadFile2 = UploadFile.builder().storeFileName("tesNmae").originFileName("originName").post(posts.get(2)).recipe(saveRecipe).build();
+        UploadFile uploadFile3 = UploadFile.builder().storeFileName("tesNmae").originFileName("originName").post(posts.get(3)).recipe(saveRecipe).build();
+        imgRepository.save(uploadFile);
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
+
+        Slice<PostDto> search_loginId = postRepository.searchPosts(loginId,null,null,null,request);
+        Slice<PostDto> search_loginId_and_title_postTitle = postRepository.searchPosts(loginId,"testTitle","searchPost",null,request);
+
+        assertThat(search_loginId.hasNext()).isTrue();
+        assertThat(search_loginId.getContent()).hasSize(2);
+
+        assertThat(search_loginId_and_title_postTitle.hasNext()).isFalse();
+        assertThat(search_loginId_and_title_postTitle.getContent()).hasSize(1);
     }
 
 

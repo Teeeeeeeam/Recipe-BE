@@ -9,9 +9,9 @@ import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +43,7 @@ class PostLikeServiceImplTest {
 
 
     @Mock PostLikeRepository postLikeRepository;
+    @Mock NotificationService notificationService;
     @Mock MemberRepository memberRepository;
     @Mock PostRepository postRepository;
     @Mock
@@ -55,7 +56,7 @@ class PostLikeServiceImplTest {
     @DisplayName("게시물 좋아요")
     void addLike_NewLikeAdded() {
         // Given
-        Member member = Member.builder().id(1l).loginId("testId").email("222").build();
+        Member member = Member.builder().id(1l).loginId("testId").nickName("테스트 닉네임").email("222").build();
         Post post = Post.builder()
                 .id(2l)
                 .postContent("컨텐트")
@@ -75,6 +76,7 @@ class PostLikeServiceImplTest {
         when(postRepository.findById(2l)).thenReturn(Optional.of(post));
 
         when(postLikeRepository.existsByMemberIdAndPostId(anyLong(), anyLong())).thenReturn(false);
+        doNothing().when(notificationService).sendPostLikeNotification(any(),anyString());
 
         // When
         boolean result = postLikeService.addLike(postLikeDto);
@@ -95,6 +97,7 @@ class PostLikeServiceImplTest {
                 .postContent("컨텐트")
                 .postTitle("타이틀")
                 .postServing("ser")
+                .member(Member.builder().id(1l).nickName("닉네임").build())
                 .postCookingTime("time")
                 .postCookingLevel("level")
                 .postLikeCount(0)
@@ -109,6 +112,9 @@ class PostLikeServiceImplTest {
         when(postRepository.findById(2l)).thenReturn(Optional.of(addPostRequest));
         when(postLikeRepository.existsByMemberIdAndPostId(anyLong(), anyLong())).thenReturn(true);
 
+        doNothing().when(notificationService).deleteLikeNotification(anyLong(),anyLong(),anyLong());
+
+        // TODO: 2024-06-05 에러고치기
         // When
         boolean result = postLikeService.addLike(postLikeDto);
 
