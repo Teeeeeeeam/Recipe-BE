@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @AllArgsConstructor
+@ToString(exclude = "member")
 @NoArgsConstructor
 public class Notice {
 

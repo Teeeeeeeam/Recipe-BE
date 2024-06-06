@@ -129,9 +129,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional(readOnly = true)
     public InfoDetailsResponse detailNotice(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("해당 공지사항을 찾을수 없습니디ㅏ."));
-
-        MemberDto memberDto = MemberDto.builder().id(notice.getMember().getId()).nickname(notice.getMember().getNickName()).build();
-        return InfoDetailsResponse.of(notice.getId(),notice.getNoticeTitle(),notice.getNoticeContent(),notice.getCreated_at(),memberDto);
+        NoticeDto noticeDto = noticeRepository.detailsPage(noticeId);
+        return InfoDetailsResponse.of(noticeDto);
     }
 }

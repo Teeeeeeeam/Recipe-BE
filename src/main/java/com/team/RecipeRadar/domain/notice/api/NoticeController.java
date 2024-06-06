@@ -158,7 +158,7 @@ public class NoticeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"noticeContent\":\"첫 번째 공지사항 내용입니다.\",\"create_At\":\"2024-05-28T13:00:00\",\"member\":{\"id\":1,\"nickname\":\"관리자\"}}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"noticeContent\":\"첫 번째 공지사항 내용입니다.\",\"create_At\":\"2024-05-28T13:00:00\",\"img_url\":\"https://recipe-reader-kr/ce250eb8-a62a-42be-8536-5fcf8498a63f.png\",\"member\":{\"id\":1,\"nickname\":\"관리자\"}}}"))),
     })
     @GetMapping("/api/notice/{notice-id}")
     public ResponseEntity<?> adminDetailNotice(@PathVariable("notice-id") Long noticeId){

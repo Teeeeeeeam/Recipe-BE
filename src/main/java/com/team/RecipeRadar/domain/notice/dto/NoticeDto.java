@@ -41,10 +41,21 @@ public class NoticeDto {
         return new NoticeDto(id, noticeTitle, imgUrl);
     }
 
-    public static NoticeDto of(Notice notice, String nickName){
+    public static NoticeDto of(Notice notice,String nickName){
         MemberDto memberDto = MemberDto.builder().nickname(nickName).build();
         return NoticeDto.builder()
                 .id(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .member(memberDto)
+                .created_at(notice.getCreated_at()).build();
+    }
+
+    public static NoticeDto detailsOf(Notice notice, String imgUrl){
+        MemberDto memberDto = MemberDto.builder().id(notice.getMember().getId()).nickname(notice.getMember().getNickName()).build();
+        return NoticeDto.builder()
+                .id(notice.getId())
+                .imgUrl(imgUrl)
+                .noticeContent(notice.getNoticeContent())
                 .noticeTitle(notice.getNoticeTitle())
                 .member(memberDto)
                 .created_at(notice.getCreated_at()).build();
