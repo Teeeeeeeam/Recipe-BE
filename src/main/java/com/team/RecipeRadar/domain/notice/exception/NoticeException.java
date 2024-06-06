@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.notice.exception;
 
-import com.team.RecipeRadar.domain.inquiry.exception.InquiryException;
 
 public class NoticeException extends RuntimeException {
 
