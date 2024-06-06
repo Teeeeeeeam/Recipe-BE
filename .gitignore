@@ -19,6 +19,8 @@ bin/
 
 ### IntelliJ IDEA ###
 application.yml
+application-test.yml
+keystore.p12
 
 .idea
 *.iws
