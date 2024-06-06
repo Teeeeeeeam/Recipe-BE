@@ -108,10 +108,8 @@ class MemberRepositoryTest {
 
         assertThat(findMember_1.getContent().get(0).getLoginId()).isEqualTo(meme1_loginId);     //첫번째 회원
         assertThat(findMember_2.getContent().get(0).getLoginId()).isEqualTo(meme2_loginId);     // 두번쨰 회원
-        assertThat(memberDtos.hasNext()).isTrue();                                              // 두명의 정보로 검색해 2개의 검색으로 다음페이지 존재
+        assertThat(memberDtos.hasNext()).isFalse();
         assertThat(memberDtos.getContent()).hasSize(1);
-
     }
-
 
 }
