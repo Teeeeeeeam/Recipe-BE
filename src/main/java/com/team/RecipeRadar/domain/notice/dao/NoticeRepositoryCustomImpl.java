@@ -48,12 +48,12 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
     public Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable){
         BooleanBuilder builder = new BooleanBuilder();
         if(noticeId!=null){
-            builder.and(notice.id.gt(noticeId));
+            builder.and(notice.id.lt(noticeId));
         }
         List<Tuple> list = jpaQueryFactory.select(notice, notice.member.nickName)
                 .from(notice)
                 .where(builder)
-                .orderBy(notice.created_at.desc())      //최신순 정렬
+                .orderBy(notice.id.desc())      //최신순 정렬
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
