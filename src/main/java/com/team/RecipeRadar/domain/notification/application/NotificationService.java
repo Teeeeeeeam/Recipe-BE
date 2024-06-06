@@ -69,7 +69,7 @@ public class NotificationService {
         sseEmitters.forEach(
                 (key, emitter) -> {
                     emitterRepository.saveEventCache(key, notification);
-                    sendToClient(emitter, key, new ControllerApiResponse<>(true,"댓글 알림", ResponseNotification.from(notification)));
+                    sendToClient(emitter, key, new ControllerApiResponse<>(true,"새로운 알림", ResponseNotification.from(notification)));
                 }
         );
     }
