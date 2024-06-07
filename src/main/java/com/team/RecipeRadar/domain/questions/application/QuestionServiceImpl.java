@@ -108,8 +108,10 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public void deleteQuestions(List<Long> ids, MemberDto memberDto) {
         List<Question> questions = questionRepository.findAllById(ids);
-
+        if (questions.isEmpty()) throw new BadRequestException("해당 문의사항이 존재하지 않습니다.");
+        
         boolean isMember = questions.get(0).getMember().getId().equals(memberDto.getId());
+
         if(isMember) {
             for (Question question : questions) {
                 UploadFile byQuestionId = imgRepository.findByQuestionId(question.getId());
