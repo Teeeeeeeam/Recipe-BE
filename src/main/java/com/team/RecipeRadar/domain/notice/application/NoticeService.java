@@ -12,7 +12,7 @@ import java.util.List;
 public interface NoticeService {
     void save(AdminAddRequest adminAddNoticeDto,String fileUrl,String originalFilename);
 
-    void delete(String loginId, Long noticeId);
+    void delete(List<Long> noticeIds);
 
     void update(Long noticeId, AdminUpdateRequest adminUpdateNoticeDto, String loginId, MultipartFile file);
 

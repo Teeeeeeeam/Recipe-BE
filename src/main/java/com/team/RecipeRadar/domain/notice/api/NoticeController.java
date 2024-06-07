@@ -78,22 +78,20 @@ public class NoticeController {
         }
     }
 
-    @Operation(summary = "공지사항 삭제 API",description = "관리자만 문의사항 삭제가능",tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "공지사항 삭제 API",description = "관리자만 문의사항 삭제가능 단일, 일괄 삭제가능",tags = {"공지사항 컨트롤러"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"공지사항 삭제 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"해당 공지 사항이 존재하지 않습니다.\"}")))
     })
-    @DeleteMapping("/api/admin/notices/{notice-id}")
-    public ResponseEntity<?> deleteNotice(@PathVariable("notice-id") Long noticeId) {
+    @DeleteMapping("/api/admin/notices")
+    public ResponseEntity<?> deleteNotice(@RequestParam("ids") List<Long> noticeIds) {
         try{
-            String loginId = authenticationLogin();
-            noticeService.delete(loginId, noticeId);
+
+            noticeService.delete(noticeIds);
             return ResponseEntity.ok(new ControllerApiResponse(true,"문의사항 삭제 성공"));
         } catch (NoSuchElementException e) {
             throw new NoticeNotFoundException(e.getMessage());
