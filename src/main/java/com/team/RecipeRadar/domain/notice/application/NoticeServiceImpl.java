@@ -83,7 +83,8 @@ public class NoticeServiceImpl implements NoticeService {
         for (Notice notice : allById) {
             UploadFile byNoticeId = imgRepository.findByNoticeId(notice.getId());
             if(byNoticeId!=null) {
-                s3UploadService.deleteFile(byNoticeId.getStoreFileName());
+                if(byNoticeId.getOriginFileName()!=null)
+                    s3UploadService.deleteFile(byNoticeId.getStoreFileName());
                 imgRepository.deleteNoticeId(notice.getId());
             }
             noticeRepository.delete(notice);
