@@ -58,16 +58,19 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\"}}"))),
+                    examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\"}"))),
     })
     @PostMapping(value = "/api/admin/notices", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddNoticeDto, BindingResult bindingResult, @RequestPart(required = false) MultipartFile file) {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
-
-            String uploadFile = s3UploadService.uploadFile(file);
-            String originalFilename = file.getOriginalFilename();
+            String uploadFile=null;
+            String originalFilename =null;
+            if(file!=null){
+                uploadFile = s3UploadService.uploadFile(file);
+                originalFilename = file.getOriginalFilename();
+            }
             noticeService.save(adminAddNoticeDto,uploadFile,originalFilename);
             return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
             }catch (NoSuchElementException e){
