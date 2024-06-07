@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.admin.api;
 
 import com.team.RecipeRadar.domain.admin.application.AdminService;
+import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.post.application.PostService;
@@ -211,5 +212,17 @@ public class AdminMemberController {
         }catch (Exception e){
             throw new ServerErrorException("서버 오류");
         }
+    }
+
+    @Operation(summary = "블랙 리스트 이메일 조회",description = "추방된 이메일 목록을 모두 불러온다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"blackList\":[{\"id\":1,\"email\":\"user1@example.com\",\"black_check\":true}]}}")))
+    })
+    @GetMapping("/black")
+    public ResponseEntity<?> getBlackList(@RequestParam(name = "last-id",required = false) Long lastId, Pageable pageable){
+        BlackListResponse blackList = adminService.getBlackList(lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",blackList));
     }
 }

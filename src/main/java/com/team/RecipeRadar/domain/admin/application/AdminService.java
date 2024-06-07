@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.admin.application;
 
+import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import org.springframework.data.domain.Pageable;
@@ -25,5 +26,6 @@ public interface AdminService {
     void deleteComments(List<Long> ids);
 
     void deleteRecipe(List<Long> ids);
+    BlackListResponse getBlackList(Long lastId,Pageable pageable);
 
 }

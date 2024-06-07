@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.admin.application;
 
 import com.team.RecipeRadar.domain.admin.dao.BlackList;
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
+import com.team.RecipeRadar.domain.admin.dto.BlackListDto;
+import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
@@ -150,5 +152,14 @@ public class AdminsServiceImpl implements AdminService {
             ingredientRepository.deleteRecipeId(recipe.getId());
             recipeRepository.deleteById(recipe.getId());
         }
+    }
+
+    /**
+     * 블랙리스트 무한 페이징
+     */
+    @Override
+    public BlackListResponse getBlackList(Long lastId, Pageable pageable) {
+        Slice<BlackListDto> blackListDtoList = blackListRepository.allBlackList(lastId, pageable);
+        return new BlackListResponse(blackListDtoList.hasNext(),blackListDtoList.getContent());
     }
 }
