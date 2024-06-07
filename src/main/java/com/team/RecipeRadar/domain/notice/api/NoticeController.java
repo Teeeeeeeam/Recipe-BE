@@ -112,7 +112,7 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"관리자만 수정할수 있습니다.\"}")))
     })
-    @PostMapping("/api/admin/notices/{notice-id}")
+    @PostMapping(value = "/api/admin/notices/{notice-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest updateNoticeDto, BindingResult bindingResult,
                                            @RequestPart(required = false) MultipartFile file, @PathVariable("notice-id") Long noticeId){
         try{

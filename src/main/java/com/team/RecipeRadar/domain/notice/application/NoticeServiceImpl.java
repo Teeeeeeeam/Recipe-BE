@@ -102,15 +102,18 @@ public class NoticeServiceImpl implements NoticeService {
         if(!notice.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("관리자만 삭제 가능합니다.");
 
         UploadFile uploadFile = imgRepository.getOriginalFileName(notice.getId());
-        if(file!=null) {
+        if(file!=null && uploadFile!=null) {
             if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
                 s3UploadService.deleteFile(uploadFile.getStoreFileName());
                 String storedFileName = s3UploadService.uploadFile(file);
                 uploadFile.update(storedFileName, file.getOriginalFilename());
                 imgRepository.save(uploadFile);
             }
+        }else if(file!=null && uploadFile==null){// 처음부터 파일을 저장하지 않았을때 저장
+            String uploadedFile = s3UploadService.uploadFile(file);
+            UploadFile new_notice = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(uploadedFile).notice(notice).build();
+            imgRepository.save(new_notice);
         }
-
         notice.update(adminUpdateRequest.getNoticeTitle(), adminUpdateRequest.getNoticeContent());
         noticeRepository.save(notice);
     }
