@@ -32,4 +32,9 @@ public class BlackList {
                 .black_check(true)
                 .email(email).build();
     }
+
+    public void unLock(Boolean state){
+       if(state) this.black_check= false;
+       else this.black_check=true;
+    }
 }

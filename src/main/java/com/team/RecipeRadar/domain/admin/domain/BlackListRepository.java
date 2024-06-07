@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface BlackListRepository extends JpaRepository<BlackList,Long>, CustomBlackRepository {
 
     boolean existsByEmail(String email);
+
 }

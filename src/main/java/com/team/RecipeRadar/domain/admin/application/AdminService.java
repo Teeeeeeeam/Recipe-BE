@@ -27,5 +27,6 @@ public interface AdminService {
 
     void deleteRecipe(List<Long> ids);
     BlackListResponse getBlackList(Long lastId,Pageable pageable);
+    boolean temporarilyUnblockUser(Long blackId);
 
 }

@@ -162,4 +162,13 @@ public class AdminsServiceImpl implements AdminService {
         Slice<BlackListDto> blackListDtoList = blackListRepository.allBlackList(lastId, pageable);
         return new BlackListResponse(blackListDtoList.hasNext(),blackListDtoList.getContent());
     }
+
+    @Override
+    public boolean temporarilyUnblockUser(Long blackId) {
+        BlackList blackList = blackListRepository.findById(blackId).orElseThrow(() -> new BadRequestException("이메일이 존재하지 않습니다."));
+        blackList.unLock(blackList.isBlack_check());
+        BlackList update_black = blackListRepository.save(blackList);
+
+        return update_black.isBlack_check();
+    }
 }

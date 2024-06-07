@@ -225,4 +225,17 @@ public class AdminMemberController {
         BlackListResponse blackList = adminService.getBlackList(lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",blackList));
     }
+
+    @Operation(summary = "블랙 리스트 이메일 차단 유뮤",description = "차단된 이메일의 대해서 차단 해제 유무를 선택한다.'차단' or '임시 차단 해제' ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"임시 차단 해제\"}")))
+    })
+    @PostMapping("/blacklist/temporary-unblock/{id}")
+    public ResponseEntity<?> unBlock(@PathVariable Long id){
+        String status = adminService.temporarilyUnblockUser(id) ? "차단" :"임시 차단 해제";
+
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,status));
+    }
 }
