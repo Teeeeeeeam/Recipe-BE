@@ -1,10 +1,12 @@
 package com.team.RecipeRadar.domain.like.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserLikeDto {
 
     private Long id;
