@@ -92,7 +92,7 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
      * @param pageable 페이징 정보
      * @return 페이지별로 조회된 회원의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체 반환
      */
-    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId, Pageable pageable) {
+    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId,Long postLike_lastId, Pageable pageable) {
 
 
         Member member = memberRepository.findByLoginId(loginId);
@@ -103,7 +103,7 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
             throw new BadRequestException("접근할 수 없는 사용자입니다.");
         }
 
-        Slice<UserLikeDto> userDtoSlice = postLikeRepository.userInfoLikes(member.getId(), pageable);
+        Slice<UserLikeDto> userDtoSlice = postLikeRepository.userInfoLikes(member.getId(),postLike_lastId ,pageable);
 
         boolean hasNext = userDtoSlice.hasNext();
 

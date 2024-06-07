@@ -114,14 +114,16 @@ public class RecipeLikeController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/recipes/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
+                                         @RequestParam(value = "last-id",required = false) Long recipeLike_lastId,
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
         try{
 
             if (cookieLoginId ==null){
                 throw new ForbiddenException("쿠키값이 없을때 접근");
             }
             String authenticationName = getAuthenticationName();
-            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
+            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId,recipeLike_lastId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());

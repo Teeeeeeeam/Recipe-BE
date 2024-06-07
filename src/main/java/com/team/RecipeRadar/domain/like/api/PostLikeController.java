@@ -112,12 +112,14 @@ public class PostLikeController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/posts/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
+                                         @RequestParam(value = "last-id",required = false)Long postLike_lastId,
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
         try{
             if (cookieLoginId ==null){throw new ForbiddenException("쿠키값이 없을때 접근");}
 
             String authenticationName = getAuthenticationName();        //시큐리티 홀더에서 로그안한 사용자 정보 추출
-            UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
+            UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(authenticationName,loginId,postLike_lastId, pageable);
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){

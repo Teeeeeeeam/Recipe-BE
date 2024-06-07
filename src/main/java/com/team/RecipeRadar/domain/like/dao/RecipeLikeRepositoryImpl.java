@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.like.dao;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
@@ -33,12 +34,15 @@ public class RecipeLikeRepositoryImpl implements RecipeLikeRepositoryCustom{
      * @return  new SliceImpl<> 페이지 정보 반환
      */
     @Override
-    public Slice<UserLikeDto> userInfoRecipeLikes(Long memberId, Pageable pageable) {
+    public Slice<UserLikeDto> userInfoRecipeLikes(Long memberId, Long recipeLike_lastId,Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(recipeLike_lastId!=null){
+            builder.and(recipeLike.id.lt(recipeLike_lastId));
+        }
         List<RecipeLike> likeList = queryFactory.selectFrom(recipeLike)
                 .innerJoin(recipeLike.member, member).fetchJoin()
-                .where(recipeLike.member.id.eq(memberId))
+                .where(builder,recipeLike.member.id.eq(memberId))
                 .orderBy(recipeLike.id.desc())
-                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 

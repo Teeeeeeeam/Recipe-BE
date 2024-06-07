@@ -91,7 +91,7 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
      * @return 사용자의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체
      */
     @Override
-    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId, Pageable pageable) {
+    public UserInfoLikeResponse getUserLikesByPage(String authenticationName, String loginId,Long recipeLike_lastId, Pageable pageable) {
 
         Member member = memberRepository.findByLoginId(loginId);
 
@@ -103,7 +103,7 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
             throw new BadRequestException("접근할 수 없는 사용자입니다.");
         }
 
-        Slice<UserLikeDto> userLikeDtos = recipeLikeRepository.userInfoRecipeLikes(member.getId(), pageable);
+        Slice<UserLikeDto> userLikeDtos = recipeLikeRepository.userInfoRecipeLikes(member.getId(),recipeLike_lastId,pageable);
 
         boolean hasNext = userLikeDtos.hasNext();
 
