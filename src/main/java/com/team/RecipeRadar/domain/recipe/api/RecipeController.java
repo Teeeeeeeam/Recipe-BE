@@ -103,7 +103,7 @@ public class RecipeController {
     @PostMapping("/user/recipe")
     public ResponseEntity<?> saveRecipeBookmark(@RequestBody BookMarkRequest bookMarkRequest){
         try {
-            Boolean aBoolean = recipeBookmarkService.saveBookmark(Long.parseLong(bookMarkRequest.getMemberId()), bookMarkRequest.getRecipeId());
+            Boolean aBoolean = recipeBookmarkService.saveBookmark(bookMarkRequest.getMemberId(), bookMarkRequest.getRecipeId());
             Map<String,Boolean> bookMarkStatus = new LinkedHashMap<>();
             bookMarkStatus.put("즐겨 찾기 상태",aBoolean);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",bookMarkStatus));
