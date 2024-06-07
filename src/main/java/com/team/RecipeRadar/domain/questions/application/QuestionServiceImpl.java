@@ -92,6 +92,14 @@ public class QuestionServiceImpl implements QuestionService {
         return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
     }
 
+    /* 사용자 파에지에서 사용자가 작성한 문의사항의 대해서 조회한 데이터를 response로 변환 */
+    @Override
+    @Transactional(readOnly = true)
+    public QuestionAllResponse allUserQuestion(Long lasId, Long memberId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable) {
+        Slice<QuestionDto> allQuestion = questionRepository.getUserAllQuestion(lasId,memberId, questionType, questionStatus, pageable);
+        return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
+    }
+
     private Question buildQuestion(QuestionRequest questionRequest) {
         return Question.builder()
                 .question_content(questionRequest.getQuestion_content())

@@ -51,7 +51,7 @@ public class QuestionController {
     @GetMapping("/api/admin/question/{id}")
     public ResponseEntity<?> details_Question(@PathVariable("id") Long questionId,
                                               @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
-        MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
+        MemberDto memberDto = getMemberDto(principalDetails);
         QuestionDto questionDto = questionService.detailAdmin_Question(questionId, memberDto.getLoginId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));
     }
@@ -65,5 +65,22 @@ public class QuestionController {
 
         QuestionAllResponse questionAllResponse = questionService.allQuestion(lastId, questionType, questionStatus, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
+    }
+
+    @Operation(summary = "일반 사용자 문의사항 전체 조회",description = "문의사항의 대해서 상세 조회된다.\n question-type={ACCOUNT_INQUIRY[계정 문의],GENERAL_INQUIRY[일반 문의]} ,question_status={PENDING[대기중],COMPLETED[완료]} ")
+    @GetMapping("/api/user/questions")
+    public ResponseEntity<?> question_user_all(@RequestParam(name = "last-id",required = false)Long lastId,
+                                          @RequestParam(name = "question-type",required = false) QuestionType questionType,
+                                          @RequestParam(name = "question_status",required = false) QuestionStatus questionStatus,
+                                          @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
+                                          Pageable pageable){
+        MemberDto memberDto = getMemberDto(principalDetails);
+        QuestionAllResponse questionAllResponse = questionService.allUserQuestion(lastId,memberDto.getId(), questionType, questionStatus, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
+    }
+
+    private static MemberDto getMemberDto(PrincipalDetails principalDetails) {
+        MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
+        return memberDto;
     }
 }

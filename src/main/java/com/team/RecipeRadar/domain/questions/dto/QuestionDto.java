@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.questions.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.questions.domain.*;
 import lombok.*;
@@ -55,6 +56,7 @@ public class QuestionDto {
 
     public static QuestionDto pageDto(Question question){
 
+        Member questionMember = question.getMember();
         QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
                 .id(question.getId())
                 .title(question.getTitle())
@@ -62,12 +64,14 @@ public class QuestionDto {
                 .status(question.getStatus())
                 .questionType(question.getQuestionType());
 
-        MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
-        if(question.getMember()!=null) {
-            memberDtoBuilder.id(question.getMember().getId()).loginId(question.getMember().getLoginId());
-        }else
-            memberDtoBuilder.loginId("비사용자");
-        questionDtoBuilder.member(memberDtoBuilder.build());
+        if(questionMember.getRoles().equals("ROLE_ADMIN")) {        // 관리자 일대만 사용자 정보 포함
+            MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
+            if (question.getMember() != null) {
+                memberDtoBuilder.id(questionMember.getId()).loginId(questionMember.getLoginId());
+            } else
+                memberDtoBuilder.loginId("비사용자");
+            questionDtoBuilder.member(memberDtoBuilder.build());
+        }
 
         return questionDtoBuilder.build();
     }

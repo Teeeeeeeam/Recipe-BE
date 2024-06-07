@@ -11,4 +11,6 @@ public interface CustomQuestionRepository  {
     QuestionDto details(Long questionId);
 
     Slice<QuestionDto> getAllQuestion(Long lasId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
+
+    Slice<QuestionDto> getUserAllQuestion(Long lastId, Long memberId,QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
 }

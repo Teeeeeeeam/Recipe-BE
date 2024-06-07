@@ -18,4 +18,6 @@ public interface QuestionService {
     QuestionDto detailAdmin_Question(Long questionId,String loginId);
 
     QuestionAllResponse allQuestion(Long lasId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
+
+    QuestionAllResponse allUserQuestion(Long lasId, Long memberId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
 }
