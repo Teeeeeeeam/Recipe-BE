@@ -135,8 +135,8 @@ class PostLikeControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
-        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+        userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
         UserInfoLikeResponse response = UserInfoLikeResponse.builder()
                 .nextPage(true)
@@ -163,8 +163,8 @@ class PostLikeControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
-        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+        userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
         given(postLikeService.getUserLikesByPage(anyString(), anyString(),isNull(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
 

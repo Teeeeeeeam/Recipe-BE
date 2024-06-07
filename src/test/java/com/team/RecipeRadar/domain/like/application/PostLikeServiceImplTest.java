@@ -176,8 +176,8 @@ class PostLikeServiceImplTest {
         Member member = Member.builder().id(1l).loginId("test").username(memberName).build();
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, "Content 1", "Title 1"));
-        userLikeDtos.add(new UserLikeDto(2L, "Content 2", "Title 2"));
+        userLikeDtos.add(new UserLikeDto(1L, 1l,"Content 1", "Title 1"));
+        userLikeDtos.add(new UserLikeDto(2L,1l, "Content 2", "Title 2"));
 
         Slice<UserLikeDto> userDtoSlice = new SliceImpl<>(userLikeDtos);
 
