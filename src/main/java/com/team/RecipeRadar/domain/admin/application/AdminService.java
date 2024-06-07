@@ -29,4 +29,6 @@ public interface AdminService {
     BlackListResponse getBlackList(Long lastId,Pageable pageable);
     boolean temporarilyUnblockUser(Long blackId);
 
+    void deleteBlackList(Long blackId);
+
 }

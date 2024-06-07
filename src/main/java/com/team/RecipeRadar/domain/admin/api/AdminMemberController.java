@@ -238,4 +238,17 @@ public class AdminMemberController {
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,status));
     }
+
+    @Operation(summary = "블랙 리스트 이메일 해제",description = "아예 해당 이메일의 대해서 차단을 해제")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}")))
+    })
+    @DeleteMapping("/blacklist/{id}")
+    public ResponseEntity<?> deleteBlack(@PathVariable Long id){
+        adminService.deleteBlackList(id);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
+    }
+        
 }

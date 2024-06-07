@@ -171,4 +171,8 @@ public class AdminsServiceImpl implements AdminService {
 
         return update_black.isBlack_check();
     }
+    @Override
+    public void deleteBlackList(Long blackId) {
+        blackListRepository.deleteById(blackId);
+    }
 }
