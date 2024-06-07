@@ -80,7 +80,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(false);
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest("1", recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +101,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(true);
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest("1", recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +122,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willThrow(new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest("1", recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
