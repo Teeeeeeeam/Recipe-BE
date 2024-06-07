@@ -1,9 +1,6 @@
 package com.team.RecipeRadar.domain.questions.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,6 +9,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "question,member")
 public class Answer{
 
     @Id
@@ -23,6 +21,8 @@ public class Answer{
 
     @Column(length = 1000)
     private String answerContent;
+
+    private String answerAdminNickname;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")

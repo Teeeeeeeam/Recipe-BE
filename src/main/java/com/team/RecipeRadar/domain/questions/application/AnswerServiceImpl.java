@@ -1,18 +1,19 @@
 package com.team.RecipeRadar.domain.questions.application;
 
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
-import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.questions.dao.AnswerRepository;
 import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
 import com.team.RecipeRadar.domain.questions.domain.Answer;
-import com.team.RecipeRadar.domain.questions.domain.AnswerType;
 import com.team.RecipeRadar.domain.questions.domain.Question;
-import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
+import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.global.email.event.NoneQuestionMailEvent;
 import com.team.RecipeRadar.global.email.event.QuestionMailEvent;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import static com.team.RecipeRadar.domain.questions.domain.AnswerType.*;
 import static com.team.RecipeRadar.domain.questions.domain.QuestionType.*;
 
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -53,7 +55,26 @@ public class AnswerServiceImpl implements AnswerService{
         Answer build = Answer.builder()
                 .question(question)
                 .answerContent(questionAnswerRequest.getAnswer_content())
-                .answerTitle(questionAnswerRequest.getAnswer_title()).build();
+                .answerTitle(questionAnswerRequest.getAnswer_title())
+                .answerAdminNickname(adminNickName)
+                .build();
         answerRepository.save(build);
+    }
+
+    /**
+     * 작성한 문의사항의 답변
+     * @param memberDto 현재 로그인한 사용자의 DTO
+     * @param questionId 조회할 문의사항 ID
+     * @return
+     */
+    @Override
+    public QuestionDto viewResponse(MemberDto memberDto, Long questionId) {
+        QuestionDto questionDto = answerRepository.viewResponse(questionId);
+
+        if(!memberDto.getId().equals(questionDto.getMember().getId()) && !memberDto.getRoles().equals("ROLE_ADMIN")){
+            throw new ForbiddenException("작성자만 열람 가능합니다.");
+        }
+
+        return questionDto;
     }
 }

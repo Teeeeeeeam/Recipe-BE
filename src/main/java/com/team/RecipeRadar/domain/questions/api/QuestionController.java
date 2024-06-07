@@ -7,6 +7,8 @@ import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,8 @@ public class QuestionController {
 
     @Operation(summary = "어드민 사용자 문의사항 상세조회",description = "문의사항의 대해서 상세 조회된다.")
     @GetMapping("/api/admin/question/{id}")
-    public ResponseEntity<?> details_Question(@PathVariable("id") Long questionId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+    public ResponseEntity<?> details_Question(@PathVariable("id") Long questionId,
+                                              @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         QuestionDto questionDto = questionService.detailAdmin_Question(questionId, memberDto.getLoginId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));

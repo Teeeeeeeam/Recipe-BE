@@ -4,18 +4,17 @@ package com.team.RecipeRadar.domain.questions.api;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.questions.application.AnswerService;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
+import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 
 @Slf4j
@@ -28,7 +27,7 @@ public class AnswerController {
     ,tags = "문의사항 컨트롤러")
     @PostMapping("/api/admin/questions/{questionId}/answers")
     public ResponseEntity<?> answer(@PathVariable Long questionId, @RequestBody QuestionAnswerRequest questionAnswerRequest,
-                                   @Schema(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+                                    @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
         try {
             MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
             answerService.question_answer(questionId, questionAnswerRequest, memberDto.getNickname());
@@ -38,5 +37,16 @@ public class AnswerController {
             e.printStackTrace();
             throw  new ServerErrorException(e.getMessage());
         }
+    }
+
+    @Operation(summary = "유저 문의사항 조회",description = "작성했던 문의사항의 대해서 조회하는 API 로그인한 사용자만 열럼가능 하며 작성자만 열럼가능하다.",tags = "문의사항 컨트롤러")
+    @GetMapping("/api/user/question/{questionId}")
+    public ResponseEntity<?> test(@PathVariable("questionId") Long questionId,
+                                  @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+
+        MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
+        QuestionDto questionDto = answerService.viewResponse(memberDto,questionId);
+
+        return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",questionDto));
     }
 }
