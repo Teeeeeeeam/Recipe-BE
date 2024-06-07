@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.admin.application;
 
+import com.team.RecipeRadar.domain.admin.dao.BlackList;
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.SliceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -145,5 +147,18 @@ class AdminsServiceImplTest {
         assertThat(postsComments.getComment()).hasSize(2);
         assertThat(postsComments.getComment().get(0).getComment_content()).isEqualTo("댓글1");
         assertThat(postsComments.getNextPage()).isFalse();
+    }
+    
+    @Test
+    @DisplayName("이메일 차단 유뮤 테스트")
+    void temporarilyUnblockUser(){
+        BlackList blackList = BlackList.builder().id(1l).black_check(false).email("test@example.com").build();
+
+        when(blackListRepository.findById(eq(1l))).thenReturn(Optional.of(blackList));
+        when(blackListRepository.save(any(BlackList.class))).thenReturn(blackList);
+
+        boolean temporarilied = adminService.temporarilyUnblockUser(1l);
+
+        assertThat(temporarilied).isTrue();
     }
 }

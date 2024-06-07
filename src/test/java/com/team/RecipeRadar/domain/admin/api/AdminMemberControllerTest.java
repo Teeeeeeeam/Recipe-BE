@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -215,5 +214,18 @@ class AdminMemberControllerTest {
         mockMvc.perform(delete("/api/admin/posts/comments?")
                         .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
                 .andExpect(status().is(403));
+    }
+
+
+    @Test
+    @DisplayName("블랙리스트 이메일 임시 차단테스트")
+    @CustomMockAdmin
+    void unBlock() throws Exception {
+
+        when(adminService.temporarilyUnblockUser(anyLong())).thenReturn(false);
+
+        mockMvc.perform(post("/api/admin/blacklist/temporary-unblock/1"))
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value("임시 차단 해제"));
     }
 }
