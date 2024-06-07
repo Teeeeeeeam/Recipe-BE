@@ -9,6 +9,8 @@ import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.domain.QNotification;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
+import com.team.RecipeRadar.domain.questions.domain.QQuestion;
+import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,7 @@ import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.*;
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.notification;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
 
 @Repository
 @Slf4j
@@ -34,6 +37,8 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     private final MemberRepository memberRepository;
 
     private final String POST_URL ="/api/user/posts/";
+    private final String QUESTION_USER_URL = "/api/user/question/";
+    private final String QUESTION_ADMIN_URL = "/api/admin/question/";
 
     @Override
     public Slice<NotificationDto> notificationPage(Long memberId, Pageable pageable, Long lastId) {
@@ -175,6 +180,19 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
                     .from(post)
                     .where(post.id.eq(postId)).fetchFirst();
             content = toName+"님이 "+ postTitle+" 게시글에 댓글을 달았습니다.";
+        }
+        else if(notificationType.equals(QUESTION)){
+            String roles = notification.getReceiver().getRoles();
+            content = null;
+            if(roles.equals("ROLE_ADMIN")){
+                Long questionId = getReplace(notification.getUrl(), QUESTION_ADMIN_URL);
+                QuestionType questionType = jpaQueryFactory.select(question.questionType)
+                        .from(question)
+                        .where(question.id.eq(questionId)).fetchFirst();
+                String body= questionType==QuestionType.ACCOUNT_INQUIRY ?"계정 문의" : "일반 문의";
+                content = toName+"님이 "+ body+" 사항을 등록했습니다.";
+            }else {
+            }
         }
         return content;
 

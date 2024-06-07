@@ -38,16 +38,16 @@ public class NotificationController {
 
     @Operation(summary = "사용자 알림 목록", description = "사용자에 대한 알림을 모두 볼수있는 API")
     @GetMapping("/info/notification")
-    public ResponseEntity<?> notificationPage(@AuthenticationPrincipal PrincipalDetails principalDetails,
+    public ResponseEntity<?> notificationPage(@Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
                                               @RequestParam(value = "last-id",required = false) Long lasId, Pageable pageable){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         ResponseUserInfoNotification responseUserInfoNotification = notificationService.userInfoNotification(memberDto.getId(), lasId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",responseUserInfoNotification));
     }
 
-    @Operation(summary = "메인페이지 알림 목록", description = "메인페이지의 알림 목록을 7개 표시")
+    @Operation(summary = "메인페이지 알림 목록", description = "메인페이지의 알림 목록을 7개 표시(일반 사용자, 어드민 사용자 같이 해당 API 사용)")
     @GetMapping("/main/notification")
-    public ResponseEntity<?> notificationMainPage(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    public ResponseEntity<?> notificationMainPage(@Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         MainNotificationResponse mainNotificationResponse = notificationService.mainNotification(memberDto.getId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",mainNotificationResponse));
