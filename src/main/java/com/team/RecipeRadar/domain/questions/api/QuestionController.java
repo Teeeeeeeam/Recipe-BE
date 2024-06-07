@@ -2,6 +2,9 @@ package com.team.RecipeRadar.domain.questions.api;
 
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.questions.application.QuestionService;
+import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
+import com.team.RecipeRadar.domain.questions.domain.QuestionType;
+import com.team.RecipeRadar.domain.questions.dto.QuestionAllResponse;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,5 +54,16 @@ public class QuestionController {
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         QuestionDto questionDto = questionService.detailAdmin_Question(questionId, memberDto.getLoginId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));
+    }
+
+    @Operation(summary = "어드민 문의사항 전체 조회",description = "문의사항의 대해서 상세 조회된다.\n question-type={ACCOUNT_INQUIRY[계정 문의],GENERAL_INQUIRY[일반 문의]} ,question_status={PENDING[대기중],COMPLETED[완료]} ")
+    @GetMapping("/api/admin/questions")
+    public ResponseEntity<?> question_all(@RequestParam(name = "last-id",required = false)Long lastId,
+                                          @RequestParam(name = "question-type",required = false) QuestionType questionType,
+                                          @RequestParam(name = "question_status",required = false) QuestionStatus questionStatus,
+                                          Pageable pageable){
+
+        QuestionAllResponse questionAllResponse = questionService.allQuestion(lastId, questionType, questionStatus, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
     }
 }

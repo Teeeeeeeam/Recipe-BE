@@ -53,9 +53,23 @@ public class QuestionDto {
         this.member = memberDto;
     }
 
-    public static QuestionDto fromDto(Question question){
-//        MemberDto.builder().
-        return new QuestionDto(question.getQuestionType(),question.getTitle(),question.getQuestion_content(),question.getStatus(),question.getAnswer(),question.getAnswer_email(),MemberDto.from(question.getMember()));
+    public static QuestionDto pageDto(Question question){
+
+        QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
+                .id(question.getId())
+                .title(question.getTitle())
+                .create_at(question.getCreatedDate())
+                .status(question.getStatus())
+                .questionType(question.getQuestionType());
+
+        MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
+        if(question.getMember()!=null) {
+            memberDtoBuilder.id(question.getMember().getId()).loginId(question.getMember().getLoginId());
+        }else
+            memberDtoBuilder.loginId("비사용자");
+        questionDtoBuilder.member(memberDtoBuilder.build());
+
+        return questionDtoBuilder.build();
     }
 
     public static QuestionDto of(Question question, String url){
@@ -64,6 +78,7 @@ public class QuestionDto {
                 .title(question.getTitle())
                 .answerType(question.getAnswer())
                 .questionType(question.getQuestionType())
+                .create_at(question.getCreatedDate())
                 .question_content(question.getQuestion_content())
                 .status(question.getStatus());
 
@@ -84,13 +99,16 @@ public class QuestionDto {
 
    public static QuestionDto of(Question question, Answer answer, String img_url){
        LocalDateTime createdDate = question.getCreatedDate();
-       MemberDto memberDto = MemberDto.builder().id(question.getMember().getId()).build();
+
        QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder().id(question.getId())
                .status(question.getStatus()).title(question.getTitle())
-               .member(memberDto)
                .question_content(question.getQuestion_content())
                .create_at(createdDate.withSecond(0).withNano(0));
 
+       if(question.getMember()!=null){
+           MemberDto memberDto = MemberDto.builder().id(question.getMember().getId()).loginId(question.getMember().getLoginId()).build();
+           questionDtoBuilder.member(memberDto);
+       }
        if(img_url!=null){
            questionDtoBuilder.img_url(img_url);
        }

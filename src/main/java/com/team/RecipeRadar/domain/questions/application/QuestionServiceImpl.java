@@ -6,6 +6,8 @@ import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
 import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
+import com.team.RecipeRadar.domain.questions.domain.QuestionType;
+import com.team.RecipeRadar.domain.questions.dto.QuestionAllResponse;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
@@ -15,6 +17,8 @@ import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,6 +83,13 @@ public class QuestionServiceImpl implements QuestionService {
             return questionRepository.details(questionId);
         }else
             throw new BadRequestException("관리자만 접근 가능 가능합니다.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public QuestionAllResponse allQuestion(Long lasId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable) {
+        Slice<QuestionDto> allQuestion = questionRepository.getAllQuestion(lasId, questionType, questionStatus, pageable);
+        return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
     }
 
     private Question buildQuestion(QuestionRequest questionRequest) {
