@@ -10,10 +10,10 @@ import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,27 +83,19 @@ class PostLikeRepositoryTest {
         Post post1 = postRepository.save(Post.builder().postContent("테스트 게시글1").postTitle("타이틀1").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").postLikeCount(0).build());
         Post post2 = postRepository.save(Post.builder().postContent("테스트 게시글2").postTitle("타이틀2").postServing("서블").postCookingTime("이름").postCookingLevel("레벨").postLikeCount(0).build());
 
-        postLikeRepository.save(PostLike.builder().member(member).post(post1).build());
-        postLikeRepository.save(PostLike.builder().member(member).post(post2).build());
+        postLikeRepository.save(PostLike.builder().id(1l).member(member).post(post1).build());
+        postLikeRepository.save(PostLike.builder().id(2l).member(member).post(post2).build());
 
-        int pageSize = 1; // 페이지당 크기
-        int pageNumber = 0; // 페이지 번호
 
+        Pageable request = PageRequest.of(0, 1);
         // 사용자의 좋아요 정보를 첫 번째 페이지로 조회
-        Slice<UserLikeDto> result = postLikeRepository.userInfoLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
+        Slice<UserLikeDto> result = postLikeRepository.userInfoLikes(member.getId(), null,request);
         List<UserLikeDto> content = result.getContent();
-        log.info("res={}",result.hasNext());
-        log.info("res={}",result.getContent().stream().toList());
 
         assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
         assertThat(result.hasNext()).isTrue(); // 다음 페이지가 있는지 확인
 
-        // 다음 페이지로 넘어가기
-        pageNumber++;
-        result = postLikeRepository.userInfoLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
-        content = result.getContent();
-
-        assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
+        result = postLikeRepository.userInfoLikes(member.getId(), 1l,request);
         assertThat(result.hasNext()).isFalse(); // 다음 페이지가 없는지 확인
     }
 }

@@ -186,11 +186,11 @@ class PostLikeServiceImplTest {
         // memberRepository.findById() 메소드가 호출될 때 반환할 가짜 회원 데이터 설정
         when(memberRepository.findByLoginId("test")).thenReturn(member);
         // postLikeRepository.userInfoLikes() 메소드가 호출될 때 반환할 가짜 좋아요 정보 설정
-        when(postLikeRepository.userInfoLikes(member.getId(), pageable)).thenReturn(userDtoSlice);
+        when(postLikeRepository.userInfoLikes(member.getId(),null, pageable)).thenReturn(userDtoSlice);
 
 
         // 테스트 대상 메소드 호출
-        UserInfoLikeResponse response = postLikeService.getUserLikesByPage(authenticationName,member.getLoginId(),pageable);
+        UserInfoLikeResponse response = postLikeService.getUserLikesByPage(authenticationName,member.getLoginId(),null,pageable);
 
         // 결과 검증
         assertThat(response.getContent()).hasSize(2);
@@ -199,7 +199,7 @@ class PostLikeServiceImplTest {
         // memberRepository.findById() 메소드가 한 번 호출되었는지 확인
         verify(memberRepository, times(1)).findByLoginId(member.getLoginId());
         // postLikeRepository.userInfoLikes() 메소드가 한 번 호출되었는지 확인
-        verify(postLikeRepository, times(1)).userInfoLikes(member.getId(), pageable);
+        verify(postLikeRepository, times(1)).userInfoLikes(member.getId(), null,pageable);
     }
 
     @Test
@@ -215,7 +215,7 @@ class PostLikeServiceImplTest {
         when(memberRepository.findByLoginId("test")).thenReturn(member);
 
         // getUserLikesByPage 메소드를 호출하면 BadRequestException이 발생해야 합니다.
-        assertThatThrownBy(() -> postLikeService.getUserLikesByPage(authenticationName, member.getLoginId(), pageable))
+        assertThatThrownBy(() -> postLikeService.getUserLikesByPage(authenticationName, member.getLoginId(), null,pageable))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("접근할 수 없는 사용자입니다.");
     }

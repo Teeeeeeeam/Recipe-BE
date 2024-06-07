@@ -126,11 +126,11 @@ class RecipeLikeServiceImplTest {
         // memberRepository.findById() 메소드가 호출될 때 반환할 가짜 회원 데이터 설정
         when(memberRepository.findByLoginId("test")).thenReturn(member);
         // recipeLikeRepository.userInfoRecipeLikes() 메소드가 호출될 때 반환할 가짜 좋아요 정보 설정
-        when(recipeLikeRepository.userInfoRecipeLikes(member.getId(), pageable)).thenReturn(userDtoSlice);
+        when(recipeLikeRepository.userInfoRecipeLikes(member.getId(), null,pageable)).thenReturn(userDtoSlice);
 
 
         // 테스트 대상 메소드 호출
-        UserInfoLikeResponse response = recipeLikeService.getUserLikesByPage(authenticationName,member.getLoginId(),pageable);
+        UserInfoLikeResponse response = recipeLikeService.getUserLikesByPage(authenticationName,member.getLoginId(),null,pageable);
 
         // 결과 검증
         assertThat(response.getContent()).hasSize(2);
@@ -139,7 +139,7 @@ class RecipeLikeServiceImplTest {
         // memberRepository.findById() 메소드가 한 번 호출되었는지 확인
         verify(memberRepository, times(1)).findByLoginId(member.getLoginId());
         // recipeLikeRepository.userInfoRecipeLikes() 메소드가 한 번 호출되었는지 확인
-        verify(recipeLikeRepository, times(1)).userInfoRecipeLikes(member.getId(), pageable);
+        verify(recipeLikeRepository, times(1)).userInfoRecipeLikes(member.getId(), null,pageable);
     }
 
     @Test
@@ -155,7 +155,7 @@ class RecipeLikeServiceImplTest {
         when(memberRepository.findByLoginId("test")).thenReturn(member);
 
         // getUserLikesByPage 메소드를 호출하면 BadRequestException이 발생
-        assertThatThrownBy(() -> recipeLikeService.getUserLikesByPage(authenticationName, member.getLoginId(), pageable))
+        assertThatThrownBy(() -> recipeLikeService.getUserLikesByPage(authenticationName, member.getLoginId(), null,pageable))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("접근할 수 없는 사용자입니다.");
     }

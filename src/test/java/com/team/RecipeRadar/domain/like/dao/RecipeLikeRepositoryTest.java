@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
@@ -113,27 +114,20 @@ class RecipeLikeRepositoryTest {
         Recipe recipe = recipeRepository.save(Recipe.builder().title("타이틀1").cookingTime("쿠킹 시간").likeCount(1).build());
         Recipe recipe1 = recipeRepository.save(Recipe.builder().title("타이틀2").cookingTime("쿠킹 시간").likeCount(1).build());
 
-        recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe).build());
-        recipeLikeRepository.save(RecipeLike.builder().member(member).recipe(recipe1).build());
+        recipeLikeRepository.save(RecipeLike.builder().id(1l).member(member).recipe(recipe).build());
+        recipeLikeRepository.save(RecipeLike.builder().id(2l).member(member).recipe(recipe1).build());
 
-        int pageSize = 1; // 페이지당 크기
-        int pageNumber = 0; // 페이지 번호
+        Pageable request = PageRequest.of(0, 1);
 
         // 사용자의 좋아요 정보를 첫 번째 페이지로 조회
-        Slice<UserLikeDto> result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
+        Slice<UserLikeDto> result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), null,request);
         List<UserLikeDto> content = result.getContent();
-        log.info("res={}",result.hasNext());
-        log.info("res={}",result.getContent().stream().toList());
 
         assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
         assertThat(result.hasNext()).isTrue(); // 다음 페이지가 있는지 확인
 
-        // 다음 페이지로 넘어가기
-        pageNumber++;
-        result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), PageRequest.of(pageNumber, pageSize));
-        content = result.getContent();
+        result = recipeLikeRepository.userInfoRecipeLikes(member.getId(),1l ,request);
 
-        assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
         assertThat(result.hasNext()).isFalse(); // 다음 페이지가 없는지 확인
     }
 }

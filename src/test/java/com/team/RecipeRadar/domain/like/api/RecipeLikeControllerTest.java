@@ -146,7 +146,7 @@ class RecipeLikeControllerTest {
                 .content(userLikeDtos)
                 .build();
 
-        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willReturn(response);
+        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), isNull(),any(Pageable.class))).willReturn(response);
 
         mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId).cookie(cookie))
                 .andExpect(status().isOk())
@@ -169,7 +169,7 @@ class RecipeLikeControllerTest {
         userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
         userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
 
-        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
+        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(),isNull(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
 
         mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId).cookie(cookie))
                 .andExpect(status().isBadRequest())
