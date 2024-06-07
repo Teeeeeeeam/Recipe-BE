@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
 
 @RestController
 @Tag(name = "알림 컨트롤러" ,description = "실시간 알림 컨트롤러")
@@ -51,5 +53,12 @@ public class NotificationController {
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         MainNotificationResponse mainNotificationResponse = notificationService.mainNotification(memberDto.getId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",mainNotificationResponse));
+    }
+
+    @Operation(summary = "알림 삭제", description = "메인 페이지 및 알림 전제조회 페이지에서 공통으로 사용가능(단일,일괄 삭제가능)")
+    @DeleteMapping("/user/notification")
+    public ResponseEntity<?> deleteNotification(@RequestParam("ids")List<Long> ids){
+        notificationService.deleteAllNotification(ids);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 }

@@ -104,6 +104,15 @@ public class NotificationService {
         notificationRepository.deleteComment(toId,fromId,commentId);
     }
 
+    public void deleteAllNotification(List<Long> ids){
+        List<Notification> allById = notificationRepository.findAllById(ids);
+        if(allById.isEmpty()) throw  new BadRequestException("해당 알림을 찾을수 없습니다.");
+
+        for (Notification notification : allById) {
+            notificationRepository.delete(notification);
+        }
+    }
+
 
     // 댓글 등록시 보내지는 알람
     public void sendCommentNotification(Post post, String nickName) {
