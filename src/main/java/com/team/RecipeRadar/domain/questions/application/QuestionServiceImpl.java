@@ -2,7 +2,9 @@ package com.team.RecipeRadar.domain.questions.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
+import com.team.RecipeRadar.domain.questions.dao.AnswerRepository;
 import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
 import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -36,6 +39,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final ImgRepository imgRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
+    private final AnswerRepository answerRepository;
     /**
      * 계정이 정지되었을때 문의사항 보낼떄 사용
      */
@@ -98,6 +102,25 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionAllResponse allUserQuestion(Long lasId, Long memberId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable) {
         Slice<QuestionDto> allQuestion = questionRepository.getUserAllQuestion(lasId,memberId, questionType, questionStatus, pageable);
         return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
+    }
+
+    /* 사용자가 작성한 문의사항을 삭제한다. 단일 및 일괄 삭제 가능 */
+    @Override
+    public void deleteQuestions(List<Long> ids, MemberDto memberDto) {
+        List<Question> questions = questionRepository.findAllById(ids);
+
+        boolean isMember = questions.get(0).getMember().getId().equals(memberDto.getId());
+        if(isMember) {
+            for (Question question : questions) {
+                UploadFile byQuestionId = imgRepository.findByQuestionId(question.getId());
+                if (byQuestionId != null) {
+                    imgRepository.deleteById(byQuestionId.getId());
+                    s3UploadService.deleteFile(byQuestionId.getStoreFileName());
+                }
+                answerRepository.deleteByQuestionId(question.getId());
+                questionRepository.delete(question);
+            }
+        }else throw new BadRequestException("작성자만 삭제 가능합니다.");
     }
 
     private Question buildQuestion(QuestionRequest questionRequest) {

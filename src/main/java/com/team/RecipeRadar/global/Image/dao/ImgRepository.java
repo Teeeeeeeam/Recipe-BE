@@ -21,6 +21,7 @@ public interface ImgRepository extends JpaRepository<UploadFile,Long> ,CustomImg
     void deleteRecipeId(@Param("recipeId") Long recipe_Id);
 
     List<UploadFile> findAllByRecipeId(Long recipeId);
+    UploadFile findByQuestionId(Long questionId);
     @Modifying
     @Query("delete from UploadFile u where u.post.id=:postId and u.recipe.id=:recipeId")
     void deletePostImg(@Param("postId")Long postId,@Param("recipeId")Long recipeId);

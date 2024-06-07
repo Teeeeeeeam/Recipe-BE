@@ -22,6 +22,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @Tag(name = "문의사항 컨트롤러",description = "문의사항의 관한 컨트롤러")
@@ -77,6 +79,15 @@ public class QuestionController {
         MemberDto memberDto = getMemberDto(principalDetails);
         QuestionAllResponse questionAllResponse = questionService.allUserQuestion(lastId,memberDto.getId(), questionType, questionStatus, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
+    }
+    
+    @Operation(summary = "일반 사용자 문의사항 삭제",description = "사용자는 작성한 문의사항의 대해서 삭제가능하며 단일,일괄 삭제가능")
+    @DeleteMapping("/api/user/questions")
+    public ResponseEntity<?> question_delete(@RequestParam("ids") List<Long> ids,
+                                             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        MemberDto memberDto = getMemberDto(principalDetails);
+        questionService.deleteQuestions(ids,memberDto);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 
     private static MemberDto getMemberDto(PrincipalDetails principalDetails) {
