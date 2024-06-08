@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.recipe.domain;
 
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@OnDelete(action = OnDeleteAction.CASCADE)
 @ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "likeCount"),
@@ -36,9 +39,8 @@ public class Recipe {
     private Integer likeCount;      // 좋아요 수
 
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe",cascade = CascadeType.ALL)
     private List<CookingStep> cookingStepList=  new ArrayList<>();
-
 
     public void setLikeCount(int count){            //좋아요 증가 set
         this.likeCount = count;

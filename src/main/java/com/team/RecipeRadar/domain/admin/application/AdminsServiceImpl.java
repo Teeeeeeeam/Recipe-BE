@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.admin.application;
 
 import com.team.RecipeRadar.domain.admin.dao.BlackList;
 import com.team.RecipeRadar.domain.admin.domain.BlackListRepository;
+import com.team.RecipeRadar.domain.admin.dto.BlackListDto;
+import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
@@ -12,9 +14,16 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
+import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
+import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.RecipeBookmark;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
+import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +50,8 @@ public class AdminsServiceImpl implements AdminService {
     private final BlackListRepository blackListRepository;
     private final CommentRepository commentRepository;
     private final ImgRepository imgRepository;
+    private final S3UploadService s3UploadService;
+    private final IngredientRepository ingredientRepository;
 
     @Override
     public long searchAllMembers() {
@@ -118,5 +129,50 @@ public class AdminsServiceImpl implements AdminService {
             Comment comment = commentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("댓글을 찾을수 없습니다."));
             commentRepository.deleteById(comment.getId());
         }
+    }
+
+    @Override
+    public void deleteRecipe(List<Long> ids) {
+        for (Long id : ids){
+            Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new BadRequestException("해당 레시피를 찾을수 없습니다."));
+            List<UploadFile> byRecipeId = imgRepository.findAllByRecipeId(recipe.getId());
+            for (UploadFile uploadFile : byRecipeId) {
+                imgRepository.deleteById(uploadFile.getId());
+                s3UploadService.deleteFile(uploadFile.getStoreFileName());
+            }
+            List<Post> allByRecipeId = postRepository.findAllByRecipeId(recipe.getId());
+            for (Post post : allByRecipeId) {
+                postRepository.deleteById(post.getId());
+            }
+
+            List<RecipeBookmark> allByRecipeId1 = recipeBookmarkRepository.findAllByRecipeId(recipe.getId());
+            for (RecipeBookmark recipeBookmark : allByRecipeId1) {
+                recipeBookmarkRepository.deleteById(recipeBookmark.getId());
+            }
+            ingredientRepository.deleteRecipeId(recipe.getId());
+            recipeRepository.deleteById(recipe.getId());
+        }
+    }
+
+    /**
+     * 블랙리스트 무한 페이징
+     */
+    @Override
+    public BlackListResponse getBlackList(Long lastId, Pageable pageable) {
+        Slice<BlackListDto> blackListDtoList = blackListRepository.allBlackList(lastId, pageable);
+        return new BlackListResponse(blackListDtoList.hasNext(),blackListDtoList.getContent());
+    }
+
+    @Override
+    public boolean temporarilyUnblockUser(Long blackId) {
+        BlackList blackList = blackListRepository.findById(blackId).orElseThrow(() -> new BadRequestException("이메일이 존재하지 않습니다."));
+        blackList.unLock(blackList.isBlack_check());
+        BlackList update_black = blackListRepository.save(blackList);
+
+        return update_black.isBlack_check();
+    }
+    @Override
+    public void deleteBlackList(Long blackId) {
+        blackListRepository.deleteById(blackId);
     }
 }

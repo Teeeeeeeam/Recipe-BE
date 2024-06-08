@@ -3,15 +3,10 @@ package com.team.RecipeRadar.domain.member.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.inquiry.domain.Inquiry;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -24,6 +19,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "posts")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Member {
 
@@ -42,9 +38,6 @@ public class Member {
     String login_type;
     private boolean verified;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL,orphanRemoval = true)
-    List<Inquiry> inquiries = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)

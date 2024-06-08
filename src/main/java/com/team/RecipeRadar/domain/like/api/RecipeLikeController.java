@@ -32,7 +32,6 @@ import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "레시피 좋아요 컨트롤러",description = "사용자가 레시피 좋아요 API")
 @Slf4j
 public class RecipeLikeController {
 
@@ -40,8 +39,9 @@ public class RecipeLikeController {
     private final LikeService recipeLikeService;
 
 
-    @Operation(summary = "좋아요를 API",
-            description = "로그인한 사용자만 좋아요를 할수있으며, 기본값으로는 좋아여가 되어 있지않다. 최초 요청시 좋아요가 되며 좋아요가된 상태에서 다시 요청을하면 좋아요를 해제한다.")
+    @Tag(name = "사용자 - 좋아요/즐겨찾기 컨트롤러", description = "좋아요/즐겨찾기 확인 및 처리")
+    @Operation(summary = "레시피 - 좋아요",
+            description = "로그인한 사용자만 좋아요를 할 수 있으며, 기본값으로는 좋아여가 되어 있지 않다. 최초 요청시 좋아요가 되며 좋아요가된 상태에서 다시 요청을 하면 좋아요를 해제한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -69,9 +69,8 @@ public class RecipeLikeController {
         }
     }
 
-    @Operation(summary = "좋아요를 했는지 확인",
-            description = "로그인한 사용자가 해당 게시글을 좋아요 했는지 확인하는 API recipeId 'required = false' 로 설정해 비사용자는 모든 필드값을 좋아요하지않은 상태로 보여준다." +
-                    " \n(사용자 검증시 로그인후 사용, 비사용자 요청시에는 success=false로 응답)")
+    @Operation(summary = "레시피 - 좋아요 확인 여부",
+            description = "로그인한 사용자가 해당 레시피를 좋아요 했는지 확인합니다. recipe-id가 제공되지 않으면 false 값으로 응답됩니다.",tags = "사용자 - 좋아요/즐겨찾기 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "로그인한 사용자 요청시",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -96,32 +95,32 @@ public class RecipeLikeController {
         }
     }
 
-    @Operation(summary = "사용자 페이지의 레시피 페이징",description = "사용자가 좋아요한 레시피의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
-            "nextPage의 존재여부로 다음 페이지 호출",tags = {"사용자 페이지 컨트롤러"})
+    @Operation(summary = "레시피 좋아요 내역(페이징)",description = "사용자가 좋아요한 레시피에 대한 무한 페이징을 제공합니다.",tags = "사용자 - 마이페이지 컨트롤러")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
+            @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":\"boolean\",\"content\":[{\"id\":\"[레시피 id]\", \"content\" :\"[레시피 내용]\", \"title\":\"[레시피 제목]\"}]}}"))),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"해당 회원을 찾을수 없습니다.\"}"))),
-            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
+            @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"접근할 수 없는 사용자입니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}"))),
-            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
-                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}")))
+    })
     @GetMapping("/api/user/info/{login-id}/recipes/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId, @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
+                                         @RequestParam(value = "last-id",required = false) Long recipeLike_lastId,
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
         try{
 
             if (cookieLoginId ==null){
                 throw new ForbiddenException("쿠키값이 없을때 접근");
             }
             String authenticationName = getAuthenticationName();
-            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
+            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(authenticationName,loginId,recipeLike_lastId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());

@@ -55,6 +55,7 @@ public class ApiControllerAdvice {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> BadRequest(BadRequestException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 

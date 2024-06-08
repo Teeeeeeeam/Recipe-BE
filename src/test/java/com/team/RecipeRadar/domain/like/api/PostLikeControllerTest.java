@@ -17,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
@@ -136,15 +135,15 @@ class PostLikeControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
-        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+        userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
         UserInfoLikeResponse response = UserInfoLikeResponse.builder()
                 .nextPage(true)
                 .content(userLikeDtos)
                 .build();
 
-        given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willReturn(response);
+        given(postLikeService.getUserLikesByPage(anyString(), anyString(), isNull(),any(Pageable.class))).willReturn(response);
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId).cookie(cookie))
                 .andExpect(status().isOk())
@@ -164,10 +163,10 @@ class PostLikeControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, "내용", "제목"));
-        userLikeDtos.add(new UserLikeDto(2L, "내용1", "제목1"));
+        userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
+        userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
-        given(postLikeService.getUserLikesByPage(anyString(), anyString(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
+        given(postLikeService.getUserLikesByPage(anyString(), anyString(),isNull(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
 
         mockMvc.perform(get("/api/user/info/{login-id}/posts/likes", loginId).cookie(cookie))
                 .andExpect(status().isBadRequest())

@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

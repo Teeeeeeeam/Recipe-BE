@@ -6,5 +6,5 @@ import org.springframework.data.domain.Slice;
 
 public interface RecipeLikeRepositoryCustom {
 
-    Slice<UserLikeDto> userInfoRecipeLikes(Long memberId, Pageable pageable);
+    Slice<UserLikeDto> userInfoRecipeLikes(Long memberId,Long recipeLike_lastId ,Pageable pageable);
 }

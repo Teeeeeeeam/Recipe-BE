@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.notification.application;
 
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.dao.EmitterRepository;
 import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
@@ -10,6 +11,8 @@ import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
 import com.team.RecipeRadar.domain.notification.dto.ResponseNotification;
 import com.team.RecipeRadar.domain.notification.dto.ResponseUserInfoNotification;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.questions.domain.Question;
+import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+
+import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
+import static com.team.RecipeRadar.domain.questions.domain.QuestionType.*;
 
 
 @Slf4j
@@ -32,9 +39,14 @@ public class NotificationService {
 
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
+    private final MemberRepository memberRepository;
 
     //연결 지속시간 한시간
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
+    private final String NON_LOGIN = "비로그인";
+
+    private final String QUESTION_ADMIN_URL= "/api/admin/question/";
+    private final String QUESTION_USER_URL= "/api/user/question/";
 
     public SseEmitter subscribe(Long memberId,String lastEventId){
         // 고유한 아이디 생성
@@ -92,6 +104,15 @@ public class NotificationService {
         notificationRepository.deleteComment(toId,fromId,commentId);
     }
 
+    public void deleteAllNotification(List<Long> ids){
+        List<Notification> allById = notificationRepository.findAllById(ids);
+        if(allById.isEmpty()) throw  new BadRequestException("해당 알림을 찾을수 없습니다.");
+
+        for (Notification notification : allById) {
+            notificationRepository.delete(notification);
+        }
+    }
+
 
     // 댓글 등록시 보내지는 알람
     public void sendCommentNotification(Post post, String nickName) {
@@ -99,7 +120,7 @@ public class NotificationService {
         String content = nickName+"님이 댓글이 달렸습니다";
         String url = "/api/user/posts/" + post.getId();
 
-        send(postAuthor, NotificationType.COMMENT, content, url,nickName);
+        send(postAuthor, COMMENT, content, url,nickName);
     }
 
     // 레시피 좋아요시 보내지는 알람
@@ -108,7 +129,34 @@ public class NotificationService {
         String content = nickName+"님이 회원님의 게시글을 좋아합니다.";
         String url = "/api/user/posts/" + post.getId();
 
-        send(postAuthor, NotificationType.POSTLIKE, content, url,nickName);
+        send(postAuthor, POSTLIKE, content, url,nickName);
+    }
+
+
+    /**
+     * 어드민 에게 가는 알림(사용자가 문의사항 등록시)
+     */
+    public void sendAdminNotification(Question question,String nickName){
+        Long id = question.getId();
+        QuestionType questionType = question.getQuestionType();
+        String type = (questionType.equals(QuestionType.ACCOUNT_INQUIRY)) ? "계정 문의" : "일반 문의";
+        String content ="새로운 "+ type+" 사항이 도착했습니다.";
+        String url = QUESTION_ADMIN_URL+id;
+        List<Member> members = memberRepository.adminMember();
+        for (Member member_iter : members) {
+            send(member_iter,QUESTION,content,url,nickName!=null? nickName : NON_LOGIN);
+        }
+    }
+
+    /**
+     * 일반사용자 문의사항 등록시 보내지는 알림
+     */
+    public void complete_question(Question question,String adminNickName){
+        String title = question.getTitle();
+        String content = title+"의 대해서 답변이 등록되었습니다.";
+        String url = QUESTION_USER_URL+question.getId();
+
+        send(question.getMember(),QUESTION,content,url,adminNickName);
     }
 
 

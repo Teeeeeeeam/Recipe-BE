@@ -7,6 +7,8 @@ import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "member")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +61,7 @@ public class Post {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     private List<Comment> comments;
 
     public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel,String postPassword) {

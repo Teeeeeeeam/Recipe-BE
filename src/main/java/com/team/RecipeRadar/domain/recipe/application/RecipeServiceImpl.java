@@ -15,7 +15,6 @@ import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -154,7 +153,7 @@ public class RecipeServiceImpl implements RecipeService{
     public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("해당 레시피를 찾을수 없습니다."));
 
-        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
+        UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipeId).get();
 
         if(file!=null) {
             if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
@@ -198,7 +197,7 @@ public class RecipeServiceImpl implements RecipeService{
             throw new AccessDeniedException("관리지만 삭제 가능합니다.");
         }
 
-        UploadFile uploadFile = imgRepository.findByRecipe_Id(recipeId).get();
+        UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipeId).get();
 
         String storeFileName = uploadFile.getStoreFileName();
         postRepository.deleteAllByRecipe_Id(recipeId);

@@ -2,11 +2,14 @@ package com.team.RecipeRadar.global.Image.domain;
 
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -39,6 +42,10 @@ public class UploadFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notice_id")
     private Notice notice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
+    private Question question;
 
     public UploadFile(String originFileName, String storeFileName) {
         this.originFileName = originFileName;

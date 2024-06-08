@@ -141,14 +141,14 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             builder.and(post.postTitle.like("%"+postTitle+"%"));
         }
         if(lastPostId !=null){
-            builder.and(post.id.gt(lastPostId));
+            builder.and(post.id.lt(lastPostId));
         }
 
         List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
                 .from(post)
                 .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
                 .where(builder)
-                .orderBy(post.created_at.desc())
+                .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 

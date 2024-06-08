@@ -13,7 +13,6 @@ import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -185,7 +184,7 @@ class RecipeServiceImplTest {
         doNothing().when(s3UploadService).deleteFile(anyString());
         when(s3UploadService.uploadFile(file)).thenReturn(originalFileName);
 
-        when(imgRepository.findByRecipe_Id(recipeId)).thenReturn(Optional.of(testUploadFile));
+        when(imgRepository.findrecipeIdpostNull(recipeId)).thenReturn(Optional.of(testUploadFile));
 
         doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
 
@@ -264,7 +263,7 @@ class RecipeServiceImplTest {
         UploadFile uploadFile = new UploadFile();
         uploadFile.setStoreFileName("testfile.jpg");
 
-        when(imgRepository.findByRecipe_Id(anyLong())).thenReturn(Optional.of(uploadFile));
+        when(imgRepository.findrecipeIdpostNull(anyLong())).thenReturn(Optional.of(uploadFile));
 
         recipeService.deleteByAdmin(1l, loginId);
 

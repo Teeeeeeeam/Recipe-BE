@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -33,15 +32,13 @@ import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "게시글 좋아요 컨트롤러" ,description = "사용자가 게시글을 좋아요 API")
-@Slf4j
 public class PostLikeController {
 
     @Qualifier("PostLikeServiceImpl")
     private final LikeService postLikeService;
-
-    @Operation(summary = "좋아요를 API",
-            description = "로그인한 사용자만 좋아요를 할수있으며, 기본값으로는 좋아여가 되어 있지않다. 최초 요청시 좋아요가 되며 좋아요가된 상태에서 다시 요청을하면 좋아요를 해제한다.")
+    @Tag(name = "사용자 - 좋아요/즐겨찾기 컨트롤러", description = "좋아요/즐겨찾기 확인 및 처리")
+    @Operation(summary = "게시글 - 좋아요",
+            description = "로그인한 사용자만 가능 최초 요청 시 좋아요를 추가하고, 다시 요청하면 좋아요가 해제됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -68,9 +65,8 @@ public class PostLikeController {
         }
     }
 
-    @Operation(summary = "좋아요를 했는지 확인",
-            description = "로그인한 사용자가 해당 게시글을 좋아요 했는지 확인하는 API postId는 'required = false' 로 설정해 비사용자는 모든 필드값을 좋아요하지않은 상태로 보여준다." +
-                    " \n(사용자 검증시 로그인후 사용, 비사용자 요청시에는 success=false로 응답)")
+    @Operation(summary = "게시글 - 좋아요 여부 확인",
+            description = "로그인한 사용자가 해당 게시글을 좋아요 했는지 확인합니다. postId가 제공되지 않으면 false 값으로 응답됩니다.",tags = "사용자 - 좋아요/즐겨찾기 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "로그인한 사용자 요청시",
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -94,8 +90,7 @@ public class PostLikeController {
         }
     }
 
-    @Operation(summary = "사용자 페이지의 게시글 페이징",description = "사용자가 좋아요한 게시글의 대한 무한페이징 , 정렬은 기본적으로 서버에서 desc 순으로 설정하여 sort는 사용 x , 쿼리의 성능을 위해서 count쿼리는 사용하지않고" +
-            "nextPage의 존재여부로 다음 페이지 호출",tags = {"사용자 페이지 컨트롤러"})
+    @Operation(summary = "게시글 좋아요 내역(페이징)",description = "사용자가 좋아요한 게시글의 무한 페이징입니다.",tags = "사용자 - 마이페이지 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                 content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -112,12 +107,14 @@ public class PostLikeController {
             @ApiResponse(responseCode = "500",description = "SERVER ERROR",
                     content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/api/user/info/{login-id}/posts/likes")
-    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,@CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+    public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
+                                         @RequestParam(value = "last-id",required = false)Long postLike_lastId,
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
         try{
             if (cookieLoginId ==null){throw new ForbiddenException("쿠키값이 없을때 접근");}
 
             String authenticationName = getAuthenticationName();        //시큐리티 홀더에서 로그안한 사용자 정보 추출
-            UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(authenticationName,loginId, pageable);
+            UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(authenticationName,loginId,postLike_lastId, pageable);
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
         }catch (NoSuchElementException e){

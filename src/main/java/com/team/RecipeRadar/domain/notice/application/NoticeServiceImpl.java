@@ -13,6 +13,7 @@ import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -72,20 +73,22 @@ public class NoticeServiceImpl implements NoticeService {
 
     /**
      * 공지사항을 삭제하는 로직
-     * @param loginId   로그인한 사용자의 loginId
-     * @param noticeId    삭제할 공지사항 id
      */
     @Override
-    public void delete(String loginId, Long noticeId) {
+    public void delete(List<Long> noticeIds) {
 
-        Member member = memberRepository.findByLoginId(loginId);
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("공지사항을 찾을수 없습니다."));
-        if(!notice.getMember().getLoginId().equals(member.getLoginId())) throw new AccessDeniedException("관리자만 삭제할수 있습니다.");
+        List<Notice> allById = noticeRepository.findAllById(noticeIds);
+        if(allById.isEmpty()) throw new BadRequestException("해당 공지 사항이 존재하지 않습니다.");
 
-        UploadFile byNoticeOriginalFileName = imgRepository.getByNoticeOriginalFileName(notice.getId());
-        s3UploadService.deleteFile(byNoticeOriginalFileName.getStoreFileName());
-        imgRepository.deleteNoticeId(notice.getId());
-        noticeRepository.deleteByMemberId(member.getId(),noticeId);
+        for (Notice notice : allById) {
+            UploadFile byNoticeId = imgRepository.findByNoticeId(notice.getId());
+            if(byNoticeId!=null) {
+                if(byNoticeId.getOriginFileName()!=null)
+                    s3UploadService.deleteFile(byNoticeId.getStoreFileName());
+                imgRepository.deleteNoticeId(notice.getId());
+            }
+            noticeRepository.delete(notice);
+        }
     }
 
     /**
@@ -99,15 +102,18 @@ public class NoticeServiceImpl implements NoticeService {
         if(!notice.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("관리자만 삭제 가능합니다.");
 
         UploadFile uploadFile = imgRepository.getOriginalFileName(notice.getId());
-        if(file!=null) {
+        if(file!=null && uploadFile!=null) {
             if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
                 s3UploadService.deleteFile(uploadFile.getStoreFileName());
                 String storedFileName = s3UploadService.uploadFile(file);
                 uploadFile.update(storedFileName, file.getOriginalFilename());
                 imgRepository.save(uploadFile);
             }
+        }else if(file!=null && uploadFile==null){// 처음부터 파일을 저장하지 않았을때 저장
+            String uploadedFile = s3UploadService.uploadFile(file);
+            UploadFile new_notice = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(uploadedFile).notice(notice).build();
+            imgRepository.save(new_notice);
         }
-
         notice.update(adminUpdateRequest.getNoticeTitle(), adminUpdateRequest.getNoticeContent());
         noticeRepository.save(notice);
     }
