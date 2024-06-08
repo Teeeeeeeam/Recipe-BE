@@ -33,16 +33,13 @@ import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
-@OpenAPIDefinition(tags = {
-        @Tag(name = "어드민 댓글 컨트롤러", description = "어드민 관련 댓글 작업"),
-        @Tag(name = "일반 사용자 댓글 컨트롤러", description = "일반 사용자 관련 댓글 작업")
-})
+@Tag(name = "사용자 - 댓글 컨트롤러",description = "사용자 댓글 관리")
 @Slf4j
 public class CommentController {
 
     private final CommentService commentService;
 
-    @Operation(summary = "댓글 작성 API", description = "로그인한 사용자만 댓글을 작성 가능", tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "댓글 작성", description = "로그인한 사용자만 댓글을 작성할 수 있는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -70,7 +67,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "댓글 삭제 API",description = "로그인한 사용자만 댓글 삭제가능",tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "댓글 삭제",description = "로그인한 사용자만 댓글을 삭제할 수 있습니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -89,7 +86,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "댓글 모두 조회 API",description = "해당 게시글의 댓글을 모두 조회 (default size = 10, sort는 사용하지 않았음)",tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "댓글 모두 조회",description = "해당 게시글의 모든 댓글을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
             content = @Content(schema = @Schema(implementation = CommentDto.class),
@@ -109,7 +106,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "댓글 수정 API",description = "로그인, 작성자만 수정가능",tags = {"일반 사용자 댓글 컨트롤러"})
+    @Operation(summary = "댓글 수정 API",description = "로그인, 작성자만 수정가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-@Tag(name = "방문자수 조회 컨트롤러" ,description = "현재 프로토타입의 방문자수 조회 API")
+@Tag(name = "어드민 - 방문자수 컨트롤러" ,description = "방문한 사용자의 수 통계")
 @RestController
 @RequiredArgsConstructor
 public class VisitCountController {
@@ -42,8 +42,8 @@ public class VisitCountController {
     private final VisitRepository visitRepository;
     private final VisitService visitService;
 
-    @Operation(summary = "방문자수 카운트 API",
-            description = "최초 방문시에 해당 API 요청을 보내면 DB에 저장후 쿠키를 반환해준다. 만료시간은 당일 23시59분까지이며  쿠키가 있으면 해당 API 요청을 안보내도됨")
+    @Operation(summary = "최초 방문시 쿠키 발급",
+            description = "최초 방문 시 해당 API 요청을 보내면 DB에 저장한 후 쿠키를 반환합니다. 쿠키의 만료 시간은 당일 23시 59분까지이며, 쿠키가 있으면 해당 API 요청을 보내지 않아도 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                 content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -104,7 +104,7 @@ public class VisitCountController {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(new ControllerApiResponse<>(true,"방문 성공"));
     }
 
-    @Operation(summary = "당일방문자 수 조회",description = "당일 방문자수를 조회하는 API")
+    @Operation(summary = "당일 방문자 수 조회",description = "당일 방문자 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -140,7 +140,7 @@ public class VisitCountController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",totalVisitCount));
     }
 
-    @Operation(summary = "일간 방문자수 조회",description = "days 보내지않으면 한달간의 사용자의 방문자수를 조회한다, days=true 보내게되면 14일간 방문자수를  조회할수 있다.(티스토리 참고 days안보낼떄는 기본 페이지, ture보낼시에는 방문자 통계의 일간 조회동일)")
+    @Operation(summary = "일간 방문자수 조회",description = "days를 보내지 않으면 한 달간의 사용자 방문자 수를 조회합니다. days를 true로 보내면 14일간의 방문자 수를 조회할 수 있습니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -153,7 +153,7 @@ public class VisitCountController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"일간 방문자수 조회",dailyVisitCount));
     }
     
-    @Operation(summary = "주간 방문자수 조회",description = "1주간의 방문자수를 총10주 조회 일요일 ~토요일기준(현재 해당의 기준으로 주를 계산해 5월1~4일이 1주차로 계산됨")
+    @Operation(summary = "주간 방문자수 조회",description = "1주간의 방문자 수를 총 10주간 조회합니다. 기준은 일요일부터 토요일까지이며, 현재 기준으로 주를 계산하여 5월 1~4일이 1주차로 계산됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -165,7 +165,7 @@ public class VisitCountController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"주간 방문자수 조회",weeklyVisitCount));
     }
 
-    @Operation(summary = "월간 방문자수 조회",description = "1주간의 방문자수를 총 10달 조회")
+    @Operation(summary = "월간 방문자수 조회",description = "1주간의 방문자 수를 총 10달간 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),

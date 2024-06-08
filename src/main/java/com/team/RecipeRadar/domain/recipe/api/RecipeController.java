@@ -41,10 +41,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @RestController
-@OpenAPIDefinition(tags = {
-        @Tag(name = "일반 사용자 레시피 컨트롤러", description = "일반 사용자 관련 레시피 API"),
-        @Tag(name = "어드민 레시피 컨트롤러", description = "관리자 관련 레시피 API")
-})
 @Slf4j
 public class RecipeController {
 
@@ -52,31 +48,36 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final S3UploadService s3UploadService;
 
-    @Operation(summary = "레시피 검색 API(무한 스크롤 방식)", description = "조회된 마지막 레시피의 Id값을 통해 다음페이지 여부를 판단 ('lastId'는 조회된 마지막 페이지 작성 값을 넣지않고 보내면 첫번째의 데이터만 출력 , page에 대한 쿼리스트링 작동 x)" ,tags ="일반 사용자 레시피 컨트롤러")
+    @Tag(name = "사용자 - 레시피 컨트롤러", description = "레시피 검색 및 관리")
+    @Operation(summary = "레시피 검색(무한 스크롤)", description = "조회된 마지막 레시피의 ID 값을 통해 다음 페이지 여부를 판단합니다. 'lastId'는 조회된 마지막 페이지의 작성된 값을 넣지 않으면 첫 번째 데이터만 출력됩니다." ,tags ="사용자 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
     })
     @GetMapping("/recipe")
-    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients, @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
+    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients,
+                                        @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
         RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients,lastRecipeId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
 
-    @Operation(summary = "어드민 페이지 레시피 검색 API(무한 스크롤 방식)", description = "조회된 마지막 레시피의 Id값을 통해 다음페이지 여부를 판단 ('lastId'는 조회된 마지막 페이지 작성 값을 넣지않고 보내면 첫번째의 데이터만 출력 , page에 대한 쿼리스트링 작동 x), 사용 옵션 1. 레시피 제목 2.레시피 재료들 3. 레시피 제목+ 레시피 재료 ",tags ="어드민 레시피 컨트롤러")
+    @Tag(name = "어드민 - 레시피 컨트롤러", description = "레시피 관리")
+    @Operation(summary = "어드민 레시피 검색(무한 스크롤)", description = "조회된 마지막 레시피의 ID 값을 통해 다음 페이지 여부를 판단합니다. 'lastId'는 조회된 마지막 페이지의 작성된 값을 넣지 않으면 첫 번째 데이터만 출력됩니다.",tags ="어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
     })
     @GetMapping("/admin/recipe")
-    public ResponseEntity<?> findRecipeWithAdmin(@RequestParam(value = "ingredients",required = false) List<String> ingredients,@RequestParam(value = "title",required = false) String title, @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
+    public ResponseEntity<?> findRecipeWithAdmin(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
+                                                 @RequestParam(value = "title",required = false) String title,
+                                                 @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
         RecipeResponse recipeResponse = recipeService.searchRecipesByTitleAndIngredients(ingredients,title,lastRecipeId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
 
-    @Operation(summary = "레시피 검색 API(기본 페이징 방식)", description = "기본적인 페이지네이션 방식, sort는 사용안해도됩니다. 기본적으로 레시피를 오름차순 정렬 , Default.size = 10, (title= '%like%' , ingredients ='%재료1%' or  ingredients ='%재료2%' 두개 모두 보낼시 하나라도 포함된 레시피 조회" ,tags ="일반 사용자 레시피 컨트롤러")
+    @Operation(summary = "레시피 검색 (기본 페이징)", description = "기본적인 페이지네이션 방식을 사용합니다. 기본적으로 레시피를 오름차순으로 정렬합니다." ,tags ="사용자 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -89,17 +90,15 @@ public class RecipeController {
     }
 
 
-    // TODO: 2024-05-31 북마크 조회, 확인 기능 구현 및
-    @Operation(summary = "즐겨찾기 API",description = "레시피에 즐겨찾기를 하는 API 즐겨찾기시 -> true, 즐겨찾기 해제시 -> false",tags ="일반 사용자 레시피 컨트롤러")
+    @Operation(summary = "레시피 - 즐겨찾기",description = "레시피를 즐겨찾기 하는 API 즐겨찾기를 추가하면 true를 반환하고, 즐겨찾기를 해제하면 false를 반환합니다.",tags ="사용자 - 좋아요/즐겨찾기 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"즐겨 찾기 상태\":true}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자 및 레시피를 찾을수 없습니다.\"}"))),
-            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
-                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자 및 레시피를 찾을수 없습니다.\"}")))
+    })
     @PostMapping("/user/recipe")
     public ResponseEntity<?> saveRecipeBookmark(@RequestBody BookMarkRequest bookMarkRequest){
         try {
@@ -110,12 +109,11 @@ public class RecipeController {
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());
         } catch (Exception e){
-            log.error("즐겨찾기 api 예외 발생");
             throw new ServerErrorException("서버 오류 발생");
         }
     }
 
-    @Operation(summary = "레시피 정보 API", description = "해당 레시피의 자세한 정보를 보기위한 API",tags ="일반 사용자 레시피 컨트롤러")
+    @Operation(summary = "레시피 상제 정보",description = "해당 레시피의 자세한 정보를 보기위한 API",tags ="사용자 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -129,7 +127,7 @@ public class RecipeController {
 
         return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
     }
-    @Operation(summary = "레시피 좋아요순 조회", description = "좋아요가 많은 레시피의 대해서 8개만 출력하는 API 메인페이지에서 사용",tags ="일반 사용자 레시피 컨트롤러")
+    @Operation(summary = "레시피 좋아요순 조회",description = "좋아요가 많은 레시피 중 상위 8개를 출력하는 API",tags ="사용자 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -142,7 +140,7 @@ public class RecipeController {
     }
 
 
-    @Operation(summary = "레시피 등록 API",description = "admin 권환을 가진 관리자만에 신규 레시피를 등록할수 있다.[이미지 파일은 최대 10MB이하까지만 가능하며, 확장자는 jpeg,jpg,png 만 등록가능]",tags ="어드민 레시피 컨트롤러")
+    @Operation(summary = "레시피 등록 API",description = "관리자만이 신규 레시피를 등록할 수 있는 API. 이미지 파일은 최대 10MB까지 가능하며, 확장자는 jpeg, jpg, png만 등록할 수 있습니다.",tags ="어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -150,12 +148,11 @@ public class RecipeController {
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"[\\\"대표사진을 등록해주세요\\\" OR \\\"이미지 파일만 등록 해주세요\\\" OR \\\"70MB 이하로 등록해주세요\\\"]\"},{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\":\"필드 오류내용\"}}]"
-                            ))),
-            @ApiResponse(responseCode = "403",description = " Forbidden"),
-            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
-                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+                            )))
+    })
     @PostMapping(value = "/admin/save/recipe", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> recipe_save(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult, @RequestPart(required = false) MultipartFile file){
+    public ResponseEntity<?> recipe_save(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult,
+                                                @RequestPart(required = false) MultipartFile file){
         try {
             if (bindingResult.hasErrors()){
                 List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -179,7 +176,7 @@ public class RecipeController {
     }
 
 
-    @Operation(summary = "레시피 수정 API",description = "admin 권환을 가진 관리자만에 기존 레시피의 모두 수정가능하다(좋아요 수 제외, 빈칸으로는 등록할수 없음 등록시 400에러 발생)",tags ="어드민 레시피 컨트롤러")
+    @Operation(summary = "레시피 수정 API",description = "관리자만이 기존 레시피를 수정할 수 있는 API 수정 시 좋아요 수를 제외한 모든 정보를 수정할 수 있으며, 빈 칸으로는 등록할 수 없습니다.", tags ="어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -187,9 +184,7 @@ public class RecipeController {
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\": false, \"message\": \"모든 값을 입력해주세요\", \"data\": {\"errors\": [\"변경할 레시피의 제목를 입력해주세요\"]}}, {\"success\": false, \"message\": \"해당 레시피를 찾을수 없습니다.\"}]"))),
-            @ApiResponse(responseCode = "403",description = " Forbidden"),
-            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
-                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    })
     @PostMapping(value = "/admin/update/{recipe-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRecipe(@PathVariable(name = "recipe-id")Long recipeId ,
                                              @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
@@ -213,7 +208,7 @@ public class RecipeController {
             throw new ServerErrorException("서버오류");
         }
     }
-    @Operation(summary = "레시피 삭제 API",description = "admin 권환을 가진 관리자만 레시피를 삭제 가능하며 해당 레시피 삭제시 레시피와 관련된 모든 데이터를 삭제시킨다.(대표사진,게시글 등등)",tags ="어드민 레시피 컨트롤러")
+    @Operation(summary = "레시피 삭제 API",description = "관리자만이 레시피를 삭제할 수 있는 API 해당 레시피 삭제 시 레시피와 관련된 모든 데이터를 함께 삭제합니다.(대표 사진, 게시글 등등)", tags ="어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -221,8 +216,7 @@ public class RecipeController {
             @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\": \"관리지만 삭제 가능합니다.\"}"))),
-            @ApiResponse(responseCode = "500",description = "SERVER ERROR",
-                    content =@Content(schema = @Schema(implementation = ErrorResponse.class)))})
+          })
     @DeleteMapping("/admin/recipe/{recipe-id}")
     public ResponseEntity<?> deleteAdmin(@PathVariable("recipe-id") Long recipeId){
         try {
@@ -240,15 +234,15 @@ public class RecipeController {
         }
 
     }
-    @Operation(summary = "즐겨찾기를 했는지 확인",
-            description = "로그인하지않은 사용자는 기본적으로 false를 반환하며, 로그인한 사용자는 해당 레시피의 즐겨찾기 유무의 따라 상태를 반환한다.",tags ="일반 사용자 레시피 컨트롤러")
+    @Operation(summary = "레시피 - 즐겨찾기 상태 조회",
+            description = "로그인하지 않은 사용자는 기본적으로 false를 반환하며, 로그인한 사용자는 해당 레시피의 즐겨찾기 여부에 따라 상태를 반환합니다.", tags ="사용자 - 좋아요/즐겨찾기 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "로그인한 사용자 요청시",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : true, \"message\" : \"즐겨찾기 상태\"}")))
     })
     @GetMapping("/check/bookmarks")
-    public ResponseEntity<?> bookmarksCheck(@Parameter(description = "레시피 아이디") @RequestParam(value = "recipe-id",required = false) Long recipeId, HttpServletRequest request){
+    public ResponseEntity<?> bookmarksCheck(@Parameter(description = "레시피 아이디") @RequestParam(value = "recipe-id",required = false) Long recipeId){
         try {
             Boolean isBookmark;
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

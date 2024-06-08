@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "어드민 관련 컨트롤러" ,description = "어드민 페이지의 관련 API")
 @RequestMapping("/api/admin")
 public class AdminMemberController {
 
@@ -38,10 +37,8 @@ public class AdminMemberController {
     private final PostService postService;
     private final ApplicationEventPublisher eventPublisher;
 
-
-
-
-    @Operation(summary = "회원수 조회 API", description = "현재 가입된 회원수를 조회하는 API")
+    @Tag(name = "어드민 - 회원 및 블랙리스트 관리",description = "회원 관리")
+    @Operation(summary = "회원수 조회", description = "현재 가입된 회원의 수를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -53,7 +50,8 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "게시글수 조회 API", description = "작성된 게시글의 수를 조회하는 API")
+    @Tag(name = "어드민 - 게시글 컨트롤러",description = "게시글 관리")
+    @Operation(summary = "게시글수 조회", description = "작성된 게시글의 수를 조회하는 API",tags = "어드민 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -65,7 +63,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "레시피수 조회 API", description = "작성된 레시피의 수를 조회하는 API")
+    @Operation(summary = "레시피수 조회", description = "작성된 레시피의 수를 조회하는 API",tags = "어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -77,7 +75,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-    @Operation(summary = "사용자 조회 API", description = "가입된 회원의 사용자를 모두 조회하는 API(무한 스크롤방식)")
+    @Operation(summary = "사용자 조회", description = "가입된 회원의 정보를 모두 조회하는 API(무한 스크롤 방식)",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -89,7 +87,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 
-    @Operation(summary = "사용자 탈퇴 API", description = "사용자의 강제 탈퇴 시킬수 있으며, 여려명 사용자의 대해서도 일괄 삭제가 가능하다. API 사용자가 이용했던 모든 데이터를 삭제한다.")
+    @Operation(summary = "사용자 추방", description = "사용자를 강제 탈퇴시키는 API",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -115,7 +113,7 @@ public class AdminMemberController {
         }
     }
 
-    @Operation(summary = "사용자 검색 API", description = "가입된 회원의 이름, 아이디, 닉네임, 이메일을 통해 사용자를 조회하는 API(무한 스크롤방식, 아이디,이름,닉네임, 이메일의 문자가 하나라도 일치하면 출력 아무 데이터도 안넘기면 모든 사용자를 출력)")
+    @Operation(summary = "사용자 검색", description = "가입된 회원의 정보를 검색하는 API(무한 스크롤 방식)",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -132,8 +130,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 
-
-    @Operation(summary = "요리글 일괄 삭제 API",description = "작성한 사용자만이 해당 레시피를 삭제가능 삭제시 해당 게시물과 관련된 데이터는 모두 삭제")
+    @Operation(summary = "요리글 삭제",description = "요리글을 단일, 일괄 삭제하는 API",tags = "어드민 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -141,7 +138,6 @@ public class AdminMemberController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"게시글을 찾을수 없습니다.\"}"))),
-
     })
     @DeleteMapping("/posts")
     public ResponseEntity<?> deletePost(@RequestParam(value = "ids") List<Long> postIds){
@@ -156,12 +152,11 @@ public class AdminMemberController {
         }
     }
 
-    @Operation(summary = "게시글의 작성된 댓글 조회", description = "해당 게시글의 작성된 댓글을 모두 조회하는 API(무한 스크롤방식)")
+    @Operation(summary = "게시글의 작성된 댓글 조회", description = "게시글의 작성된 댓글을 조회하는 API",tags = "어드민 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comment\":[{\"id\":16,\"comment_content\":\"댓글 내용 1\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"},{\"id\":17,\"comment_content\":\"댓글 내용 2\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"}]}}"
-                            ))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comment\":[{\"id\":16,\"comment_content\":\"댓글 내용 1\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"},{\"id\":17,\"comment_content\":\"댓글 내용 2\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"}]}}"))),
     })
     @GetMapping("/posts/comments")
     public ResponseEntity<?> getPostsContainsComments( @RequestParam("post-id") Long postId,@RequestParam(value = "last-id",required = false)Long lastId, Pageable pageable){
@@ -169,7 +164,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }
 
-    @Operation(summary = "게시글 댓글 일괄 삭제 API",description = "댓글을 단일,일괄 삭제 가능 어드민 사용자만 가능")
+    @Operation(summary = "게시글 댓글 삭제",description = "게시글의 댓글을 단일, 일괄 삭제하는 API",tags = "어드민 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -177,7 +172,6 @@ public class AdminMemberController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"댓글을 찾을수 없습니다.\"}"))),
-
     })
     @DeleteMapping("/posts/comments")
     public ResponseEntity<?> deleteComments(@RequestParam(value = "ids") List<Long> commentsIds){
@@ -192,11 +186,11 @@ public class AdminMemberController {
         }
     }
 
-    @Operation(summary = "레시피 일괄 삭제 API",description = "레시피 일괄 삭제 관련된 모든 데이터를 삭제한다.")
+    @Operation(summary = "레시피 삭제",description = "레시피를 단일, 일괄 삭제하는 API",tags = "어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"요리글 삭제 성공\"}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"레시피 삭제 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"해당 레시피를 찾을수 없습니다.\"}"))),
@@ -206,7 +200,7 @@ public class AdminMemberController {
     public ResponseEntity<?> deleteRecipe(@RequestParam(value = "ids") List<Long> recipeIds){
         try{
             adminService.deleteRecipe(recipeIds);
-            return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 삭제 성공"));
+            return ResponseEntity.ok(new ControllerApiResponse(true,"레시피 삭제 성공"));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());
         }catch (Exception e){
@@ -214,7 +208,7 @@ public class AdminMemberController {
         }
     }
 
-    @Operation(summary = "블랙 리스트 이메일 조회",description = "추방된 이메일 목록을 모두 불러온다")
+    @Operation(summary = "블랙 리스트 이메일 조회",description = "블랙 리스트에 등록된 이메일 목록을 조회하는 API",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -226,7 +220,7 @@ public class AdminMemberController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",blackList));
     }
 
-    @Operation(summary = "블랙 리스트 이메일 차단 유뮤",description = "차단된 이메일의 대해서 차단 해제 유무를 선택한다.'차단' or '임시 차단 해제' ")
+    @Operation(summary = "블랙 리스트 이메일 차단 유뮤",description = "블랙 리스트에 등록된 이메일의 차단 해제 유무를 설정하는 API",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -235,11 +229,10 @@ public class AdminMemberController {
     @PostMapping("/blacklist/temporary-unblock/{id}")
     public ResponseEntity<?> unBlock(@PathVariable Long id){
         String status = adminService.temporarilyUnblockUser(id) ? "차단" :"임시 차단 해제";
-
         return ResponseEntity.ok(new ControllerApiResponse<>(true,status));
     }
 
-    @Operation(summary = "블랙 리스트 이메일 해제",description = "아예 해당 이메일의 대해서 차단을 해제")
+    @Operation(summary = "블랙 리스트 이메일 해제",description = "블랙 리스트에 등록된 이메일의 차단을 해제하는 API",tags = "어드민 - 회원 및 블랙리스트 관리")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),

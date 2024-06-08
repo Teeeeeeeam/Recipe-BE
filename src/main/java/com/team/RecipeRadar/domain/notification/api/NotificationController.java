@@ -15,14 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
 
 @RestController
-@Tag(name = "알림 컨트롤러" ,description = "실시간 알림 컨트롤러")
+@Tag(name = "공용 - 알림 컨트롤러" ,description = "실시간 알림 컨트롤러")
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class NotificationController {
@@ -38,7 +37,7 @@ public class NotificationController {
             return ResponseEntity.ok(notificationService.subscribe(principalDetails.getMember().getId(), lastEventId));
     }
 
-    @Operation(summary = "사용자 알림 목록", description = "사용자에 대한 알림을 모두 볼수있는 API")
+    @Operation(summary = "사용자 알림 내역(페이징)", description = "사용자에 대한 알림의 무한 페이징 입니다.",tags = "사용자 - 마이페이지 컨트롤러")
     @GetMapping("/info/notification")
     public ResponseEntity<?> notificationPage(@Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
                                               @RequestParam(value = "last-id",required = false) Long lasId, Pageable pageable){

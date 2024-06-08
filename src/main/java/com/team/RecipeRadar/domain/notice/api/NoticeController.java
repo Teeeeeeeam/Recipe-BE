@@ -13,7 +13,6 @@ import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -42,16 +41,14 @@ import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
-@OpenAPIDefinition(tags = {
-        @Tag(name = "관리자 공지사항 컨트롤러", description = "관리자 공지사항 작업")
-})
+@Tag(name = "어드민 - 공지사항 컨트롤러",description = "공지사항 관리")
 @Slf4j
 public class NoticeController {
 
     private final NoticeService noticeService;
     private final S3UploadService s3UploadService;
 
-    @Operation(summary = "공지사항 작성 API", description = "관리자만 공지사항 작성 가능", tags = {"공지사항 컨트롤러"} )
+    @Operation(summary = "공지사항 작성", description = "관리자만 공지사항 작성 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -81,7 +78,7 @@ public class NoticeController {
         }
     }
 
-    @Operation(summary = "공지사항 삭제 API",description = "관리자만 문의사항 삭제가능 단일, 일괄 삭제가능",tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "공지사항 삭제",description = "관리자만 문의사항 삭제가능 단일, 일괄 삭제가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -101,7 +98,7 @@ public class NoticeController {
         }
     }
 
-    @Operation(summary = "공지사항 수정 API", description = "관리자만 수정가능", tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "공지사항 수정", description = "관리자만 수정가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -131,7 +128,7 @@ public class NoticeController {
         }
     }
 
-    @Operation(summary = "메인 페이지 공지사항 API", description = "메인 페이지에서 보여질 공지사항 총 5개의 공지사항을 조회 등록한 최신순으로 조회", tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "메인 공지사항", description = "메인 페이지에서 보여질 공지사항 총 5개의 공지사항을 조회 등록한 최신순으로 조회")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -143,7 +140,7 @@ public class NoticeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",noticeDtos));
     }
 
-    @Operation(summary = "어드민 공지사항 조회 API", description = "어드민 페이지에서 공자사항을 조회하는 페이징 API (무한페이징)", tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "공지사항 조회(페이징)", description = "공자사항을 조회하는 무한페이징")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -155,7 +152,7 @@ public class NoticeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",inInfoNoticeResponse));
     }
 
-    @Operation(summary = "어드민 공지사항 상세 조회 API", description = "어드민 페이지에서 noticeId의 대해서 상세 조회", tags = {"공지사항 컨트롤러"})
+    @Operation(summary = "공지사항 상세 조회", description = "공지사항에 대한 상세 조회를 수행하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -166,8 +163,6 @@ public class NoticeController {
         InfoDetailsResponse infoDetailsResponse = noticeService.detailNotice(noticeId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoDetailsResponse));
     }
-
-
 
     //로그인한 사용자의 loginId를 스프링 시큐리티에서 획득
     private static String authenticationLogin() {

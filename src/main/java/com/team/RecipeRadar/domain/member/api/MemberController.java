@@ -28,13 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@Tag(name = "회원가입 컨트롤러",description = "회원가입을 하기위한 API")
 @Slf4j
+@Tag(name = "공용 - 회원가입 컨트롤러",description = "회원가입 및 검증 처리")
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class MemberController {
 
     private final MemberService memberService;
+
 
 
     @Operation(summary = "회원가입", description = "사용자가 회원가입합니다.")
@@ -45,8 +46,6 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\", \"globalError\": \"모든 검사를 검증해주세요\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
-            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody MemberDto memberDto , BindingResult result,
