@@ -59,4 +59,10 @@ public class RecipeLikeRepositoryImpl implements RecipeLikeRepositoryCustom{
         }
         return new SliceImpl<>(content, pageable, hasNext);
     }
+
+    @Override
+    public void deleteRecipeId(Long recipeId) {
+        queryFactory.delete(recipeLike)
+                .where(recipeLike.recipe.id.in(recipeId)).execute();
+    }
 }

@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.like.dao;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.like.domain.QPostLike.*;
+import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
 @Slf4j
 @Repository
@@ -59,5 +62,17 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
         }
 
       return new SliceImpl<>(content,pageable,hasNext);
+    }
+
+    @Override
+    public void deleteRecipeId(Long recipeId) {
+        queryFactory
+                .delete(postLike)
+                .where(postLike.post.id.in(
+                        JPAExpressions.select(post.id)
+                                .from(post)
+                                .join(recipe).on(post.recipe.id.eq(recipe.id))
+                                .where(recipe.id.eq(recipeId))
+                )).execute();
     }
 }

@@ -61,7 +61,9 @@ public class S3UploadService {
      */
     public void deleteFile(String uploadFileName){
         try{
-            amazonS3.deleteObject(bucket,uploadFileName);
+            if(uploadFileName.startsWith("https")) {
+                amazonS3.deleteObject(bucket, uploadFileName);
+            }
         }catch (SdkClientException e){
             throw new BadRequestException("파일 삭제도중 오류 발생");
         }

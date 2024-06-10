@@ -200,7 +200,7 @@ public class RecipeServiceImpl implements RecipeService{
         UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipeId).get();
 
         String storeFileName = uploadFile.getStoreFileName();
-        postRepository.deleteAllByRecipe_Id(recipeId);
+        postRepository.deletePostByRecipeId(recipeId);
         s3UploadService.deleteFile(storeFileName);
         ingredientRepository.deleteRecipeId(recipeId);
         imgRepository.deleteRecipeId(recipeId);

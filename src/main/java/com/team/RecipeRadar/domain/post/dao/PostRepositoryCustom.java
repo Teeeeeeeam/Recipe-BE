@@ -15,4 +15,6 @@ public interface PostRepositoryCustom {
     PostDetailResponse postDetails(Long postId);
 
     Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable);
+
+    void deletePostByRecipeId(Long recipeId);
 }

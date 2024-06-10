@@ -13,5 +13,7 @@ public interface RecipeBookmarkRepository extends JpaRepository<RecipeBookmark,L
     void deleteByMember_Id(Long memberId);
     void deleteByMember_IdAndRecipe_Id(Long memberId, Long recipeId);
 
+    void deleteAllByRecipe_Id(Long recipeId);
+
     List<RecipeBookmark> findAllByRecipeId(Long recipeId);
 }

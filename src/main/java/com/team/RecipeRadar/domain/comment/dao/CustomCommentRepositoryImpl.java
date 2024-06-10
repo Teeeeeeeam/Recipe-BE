@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.post.domain.QPost;
+import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
+import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
 @Slf4j
 @Repository
@@ -55,6 +57,17 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         }
 
         return new SliceImpl<>(commentDtoList,pageable,hasNext);
+    }
+
+    @Override
+    public void delete_post(Long recipeId) {
+        jpaQueryFactory.delete(comment)
+                .where(comment.post.id.in(
+                        JPAExpressions
+                                .select(post.id).from(post)
+                                .join(recipe).on(post.recipe.id.eq(recipe.id))
+                                .where(post.recipe.id.eq(recipeId))
+                )).execute();
     }
 
     @Override

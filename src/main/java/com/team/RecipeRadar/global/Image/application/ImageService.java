@@ -6,4 +6,6 @@ import com.team.RecipeRadar.global.Image.domain.UploadFile;
 public interface ImageService {
 
     void saveRecipeImg(Recipe recipe, UploadFile uploadFile);
+
+    void delete_Recipe(Long recipeId);
 }

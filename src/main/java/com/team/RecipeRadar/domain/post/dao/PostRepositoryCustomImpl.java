@@ -160,6 +160,12 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
         return new SliceImpl(postDtoList,pageable,hasNextSize);
     }
+    @Override
+    public void deletePostByRecipeId(Long recipeId) {
+        jpaQueryFactory.delete(post)
+                .where(post.recipe.id.in(recipeId)).execute();
+    }
+
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
     }

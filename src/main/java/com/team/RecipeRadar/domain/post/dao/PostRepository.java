@@ -18,7 +18,6 @@ public interface PostRepository extends JpaRepository<Post,Long>, PostRepository
 
     List<Post> findAllByRecipeId(Long recipeId);
 
-    void deleteAllByRecipe_Id(Long recipe_Id);
     long countAllBy();
 
 }

@@ -9,20 +9,19 @@ import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
+import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
-import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.domain.RecipeBookmark;
+import com.team.RecipeRadar.global.Image.application.ImageService;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,13 +43,15 @@ public class AdminsServiceImpl implements AdminService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final RecipeRepository recipeRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final RecipeLikeRepository recipeLikeRepository;
     private final NoticeRepository noticeRepository;
     private final RecipeBookmarkRepository recipeBookmarkRepository;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final BlackListRepository blackListRepository;
     private final CommentRepository commentRepository;
     private final ImgRepository imgRepository;
-    private final S3UploadService s3UploadService;
+    private final ImageService imageService;
     private final IngredientRepository ingredientRepository;
 
     @Override
@@ -133,24 +134,8 @@ public class AdminsServiceImpl implements AdminService {
 
     @Override
     public void deleteRecipe(List<Long> ids) {
-        for (Long id : ids){
-            Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new BadRequestException("해당 레시피를 찾을수 없습니다."));
-            List<UploadFile> byRecipeId = imgRepository.findAllByRecipeId(recipe.getId());
-            for (UploadFile uploadFile : byRecipeId) {
-                imgRepository.deleteById(uploadFile.getId());
-                s3UploadService.deleteFile(uploadFile.getStoreFileName());
-            }
-            List<Post> allByRecipeId = postRepository.findAllByRecipeId(recipe.getId());
-            for (Post post : allByRecipeId) {
-                postRepository.deleteById(post.getId());
-            }
-
-            List<RecipeBookmark> allByRecipeId1 = recipeBookmarkRepository.findAllByRecipeId(recipe.getId());
-            for (RecipeBookmark recipeBookmark : allByRecipeId1) {
-                recipeBookmarkRepository.deleteById(recipeBookmark.getId());
-            }
-            ingredientRepository.deleteRecipeId(recipe.getId());
-            recipeRepository.deleteById(recipe.getId());
+        for (Long id : ids) {
+            deleteRecipeById(id);
         }
     }
 
@@ -174,5 +159,20 @@ public class AdminsServiceImpl implements AdminService {
     @Override
     public void deleteBlackList(Long blackId) {
         blackListRepository.deleteById(blackId);
+    }
+
+    private void deleteRecipeById(Long id) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("해당 레시피를 찾을수 없습니다."));
+        Long recipeId = recipe.getId();
+
+        imageService.delete_Recipe(recipeId);
+        commentRepository.delete_post(recipeId);
+        postLikeRepository.deleteRecipeId(recipeId);
+        postRepository.deletePostByRecipeId(recipeId);
+        recipeLikeRepository.deleteRecipeId(recipeId);
+        recipeBookmarkRepository.deleteAllByRecipe_Id(recipeId);
+        ingredientRepository.deleteRecipeId(recipeId);
+        recipeRepository.deleteById(recipeId);
     }
 }

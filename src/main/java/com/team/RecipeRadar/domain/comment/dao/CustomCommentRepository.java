@@ -9,5 +9,6 @@ public interface CustomCommentRepository {
 
     Slice<CommentDto> getPostComment(Long postId, Long lastId,Pageable pageable);
 
+    void delete_post(Long recipeId);
     void deleteMember_comment(Long memberId);
 }
