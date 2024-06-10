@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
@@ -18,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,7 +162,7 @@ public class RecipeServiceImpl implements RecipeService{
             }
         }
 
-        List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookeSteps();
+        List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookSteps();
 
         for (Map<String,String> cookeStep : cookeSteps) {
             long cookStepId = Long.parseLong(cookeStep.get("cook_step_id"));

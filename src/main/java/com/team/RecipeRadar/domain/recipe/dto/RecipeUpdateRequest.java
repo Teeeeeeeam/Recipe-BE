@@ -28,18 +28,18 @@ public class RecipeUpdateRequest {
     private String cookTime;
     @NotEmptyMapValue(message = "변경할 레시피의 조리순서를 입력해주세요")
     @Schema(example = "[{\"cook_step_id\":\"조리순서_id\", \"cook_steps\":\"조리순서\"}]")
-    private List<Map<String,String>> cookeSteps;
+    private List<Map<String,String>> cookSteps;
 
     private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps) {
         this.title = title;
         this.cookLevel = cookLevel;
         this.people = people;
         this.ingredients = ingredients;
-        this.cookeSteps = cookeSteps;
+        this.cookSteps = cookeSteps;
 
     }
 
     public static RecipeUpdateRequest of(RecipeUpdateRequest recipeUpdateRequest){
-        return new RecipeUpdateRequest(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getIngredients(),recipeUpdateRequest.getCookeSteps());
+        return new RecipeUpdateRequest(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getIngredients(),recipeUpdateRequest.getCookSteps());
     }
 }
