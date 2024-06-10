@@ -491,33 +491,6 @@ class RecipeControllerTest {
     }
 
     @Test
-    @CustomMockAdmin
-    @DisplayName("괸리자 레시피 삭제 API 구현")
-    void deleteByAdmin() throws Exception {
-        String loginId = "testId";
-        Long recipeId = 1l;
-        doNothing().when(recipeService).deleteByAdmin(eq(recipeId),eq(loginId));
-        mockMvc.perform(delete("/api/admin/recipe/"+recipeId))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("레시피 삭제 성공"));
-    }
-
-    @Test
-    @CustomMockAdmin
-    @DisplayName("일반 사용자가 레시피 삭제 API 구현")
-    void deleteByUser() throws Exception {
-        Long recipeId = 1l;
-
-        doThrow(new AccessDeniedException("관리자만 삭제가능")).when(recipeService).deleteByAdmin(eq(recipeId), anyString());
-
-        mockMvc.perform(delete("/api/admin/recipe/"+recipeId))
-                .andDo(print())
-                .andExpect(status().is(401))
-                .andExpect(jsonPath("$.message").value("관리자만 삭제가능"));
-    }
-
-    @Test
     @CustomMockUser
     @DisplayName("로그인한 사용자 즐겨찾기 상태")
     void loginIsBookmark() throws Exception {

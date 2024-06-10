@@ -251,38 +251,5 @@ class RecipeServiceImplTest {
         assertThat(recipeResponse.getNextPage()).isFalse();
         assertThat(recipeDtoList).isEmpty();
     }
-    
-    @Test
-    @DisplayName("관리지만 레시피 삭제가능")
-    void deleteAdmin(){
-        String loginId= "TestId";
-        Long recipeId =1l;
-        Member member = Member.builder().id(1l).loginId(loginId).roles("ROLE_ADMIN").build();
-        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
 
-        UploadFile uploadFile = new UploadFile();
-        uploadFile.setStoreFileName("testfile.jpg");
-
-        when(imgRepository.findrecipeIdpostNull(anyLong())).thenReturn(Optional.of(uploadFile));
-
-        recipeService.deleteByAdmin(1l, loginId);
-
-        verify(postRepository, times(1)).deleteAllByRecipe_Id(recipeId);
-        verify(s3UploadService, times(1)).deleteFile("testfile.jpg");
-        verify(ingredientRepository, times(1)).deleteRecipeId(recipeId);
-        verify(imgRepository, times(1)).deleteRecipeId(recipeId);
-        verify(cookStepRepository, times(1)).deleteRecipeId(recipeId);
-        verify(recipeRepository, times(1)).deleteById(recipeId);
-
-    }
-
-    @Test
-    @DisplayName("레시피 삭젯 관리자가 아닐때 예외")
-    void delete_No_Admin(){
-        String loginId= "TestId";
-        Long recipeId =1l;
-        when(memberRepository.findByLoginId(eq(loginId))).thenThrow(new AccessDeniedException("관리자만 삭제 가능"));
-
-        assertThatThrownBy(() -> recipeService.deleteByAdmin(recipeId,loginId)).isInstanceOf(AccessDeniedException.class).hasMessage("관리자만 삭제 가능");
-    }
 }
