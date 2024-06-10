@@ -386,9 +386,10 @@ class RecipeControllerTest {
     void recipe_update_successful() throws Exception {
         String originFileName = "test.jpg";
         long recipe_id =1l;
+        List<String> newCook = List.of("새로운 값~~");
 
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
-                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "2", "cook_steps", "2번째 조리순서")));
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "2", "cook_steps", "2번째 조리순서")),newCook);
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
         doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
@@ -397,6 +398,10 @@ class RecipeControllerTest {
         mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
                         .file(recipeUpdateRequest_multi)
                         .file(multipartFile)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -411,9 +416,10 @@ class RecipeControllerTest {
     void recipe_update_fail_valid() throws Exception {
         String originFileName = "test.jpg";
         long recipe_id =1l;
+        List<String> newCook = List.of("새로운 값~~");
 
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("", "난이도", "인원수",
-                List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")));
+                List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")),newCook );
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
         doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
@@ -422,6 +428,10 @@ class RecipeControllerTest {
         mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
                         .file(recipeUpdateRequest_multi)
                         .file(multipartFile)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -438,9 +448,9 @@ class RecipeControllerTest {
     void recipe_update_noEmpty_recipe() throws Exception {
         String originFileName = "test.jpg";
         long recipe_id =1l;
-
+        List<String> newCook = List.of("새로운 값~~");
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
-                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "조리순서", "cook_steps", "2번째 조리순서")));
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "조리순서", "cook_steps", "2번째 조리순서")),newCook);
         
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
 
@@ -450,6 +460,10 @@ class RecipeControllerTest {
         mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
                         .file(recipeUpdateRequest_multi)
                         .file(multipartFile)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())

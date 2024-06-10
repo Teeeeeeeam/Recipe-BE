@@ -188,7 +188,7 @@ class RecipeServiceImplTest {
 
         doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
 
-        recipeService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps), file);
+        recipeService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps,List.of("새로운 데이터")), file);
         
         assertThat(testRecipe.getTitle()).isEqualTo(title);
         assertThat(testCookStep.getSteps()).isEqualTo("조리 순서 1");
