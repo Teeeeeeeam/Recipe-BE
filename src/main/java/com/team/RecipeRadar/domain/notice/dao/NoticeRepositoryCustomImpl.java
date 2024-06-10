@@ -75,11 +75,11 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
 
         List<Tuple> list = jpaQueryFactory.select(uploadFile.storeFileName,notice)
                 .from(notice)
-                .join(uploadFile).on(uploadFile.notice.id.eq(notice.id))
+                .leftJoin(uploadFile).on(uploadFile.notice.id.eq(notice.id))
                 .where(notice.id.eq(noticeId))
                 .fetch();
 
-        return  list.stream().map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst().orElseThrow(() -> new NoSuchElementException("공지사항을 찾을수 없습니다."));
+        return list.stream().map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst().orElseThrow(() -> new NoSuchElementException("공지사항을 찾을수 없습니다."));
     }
 
     private  String getImageUrl(Tuple tuple) {
