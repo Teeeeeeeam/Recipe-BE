@@ -18,7 +18,6 @@ import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 public class CustomImgRepositoryImpl implements CustomImgRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
-    private final S3UploadService s3UploadService;
 
     @Override
     public void deleteMemberImg(Long memberId) {
