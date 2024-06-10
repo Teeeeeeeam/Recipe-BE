@@ -63,15 +63,14 @@ public class QuestionDto {
                 .create_at(question.getCreatedDate())
                 .status(question.getStatus())
                 .questionType(question.getQuestionType());
+        MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
 
-        if(questionMember.getRoles().equals("ROLE_ADMIN")) {        // 관리자 일대만 사용자 정보 포함
-            MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
-            if (question.getMember() != null) {
-                memberDtoBuilder.id(questionMember.getId()).loginId(questionMember.getLoginId());
-            } else
-                memberDtoBuilder.loginId("비사용자");
-            questionDtoBuilder.member(memberDtoBuilder.build());
+        if(questionMember == null){
+            memberDtoBuilder.loginId("비사용자");
+        }else if(questionMember!=null) {        // 관리자 일대만 사용자 정보 포함
+            memberDtoBuilder.id(questionMember.getId()).loginId(questionMember.getLoginId());
         }
+        questionDtoBuilder.member(memberDtoBuilder.build());
 
         return questionDtoBuilder.build();
     }
