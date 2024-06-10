@@ -84,7 +84,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
 
     private  String getImageUrl(Tuple tuple) {
         String img = tuple.get(uploadFile.storeFileName);
-        if(!img.startsWith("http")){
+        if(img!=null && !img.startsWith("http")){
             return s3URL+img;
         }
         return img;
