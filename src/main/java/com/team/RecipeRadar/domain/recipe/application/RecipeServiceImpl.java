@@ -174,6 +174,13 @@ public class RecipeServiceImpl implements RecipeService{
                 cookStepRepository.save(cookingStep);
             }
         }
+        List<String> newCookSteps = recipeUpdateRequest.getNewCookSteps();
+
+        if (!newCookSteps.isEmpty() && newCookSteps !=null){
+            CookingStep.CookingStepBuilder recipe1 = CookingStep.builder().recipe(recipe);
+            newCookSteps.stream().forEach(s -> recipe1.steps(s).build());
+            cookStepRepository.save(recipe1.build());
+        }
 
         String ing = recipeUpdateRequest.getIngredients().stream().collect(Collectors.joining("|"));
         ingredientRepository.updateRecipe_ing(recipe.getId(),ing);

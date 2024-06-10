@@ -30,16 +30,19 @@ public class RecipeUpdateRequest {
     @Schema(example = "[{\"cook_step_id\":\"조리순서_id\", \"cook_steps\":\"조리순서\"}]")
     private List<Map<String,String>> cookSteps;
 
-    private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps) {
+    private List<String> newCookSteps;
+
+    private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps,List<String> newCookSteps) {
         this.title = title;
         this.cookLevel = cookLevel;
         this.people = people;
         this.ingredients = ingredients;
         this.cookSteps = cookeSteps;
+        this.newCookSteps = newCookSteps;
 
     }
 
     public static RecipeUpdateRequest of(RecipeUpdateRequest recipeUpdateRequest){
-        return new RecipeUpdateRequest(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getIngredients(),recipeUpdateRequest.getCookSteps());
+        return new RecipeUpdateRequest(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getIngredients(),recipeUpdateRequest.getCookSteps(),recipeUpdateRequest.getNewCookSteps());
     }
 }
