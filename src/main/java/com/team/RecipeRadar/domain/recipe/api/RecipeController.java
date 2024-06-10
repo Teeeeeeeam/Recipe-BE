@@ -9,7 +9,6 @@ import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerErrorException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -207,32 +204,6 @@ public class RecipeController {
             e.printStackTrace();
             throw new ServerErrorException("서버오류");
         }
-    }
-    @Operation(summary = "레시피 삭제 API",description = "관리자만이 레시피를 삭제할 수 있는 API 해당 레시피 삭제 시 레시피와 관련된 모든 데이터를 함께 삭제합니다.(대표 사진, 게시글 등등)", tags ="어드민 - 레시피 컨트롤러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"레시피 삭제 성공\"}"))),
-            @ApiResponse(responseCode = "401",description = "UNAUTHORIZED",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"관리지만 삭제 가능합니다.\"}"))),
-          })
-    @DeleteMapping("/admin/recipe/{recipe-id}")
-    public ResponseEntity<?> deleteAdmin(@PathVariable("recipe-id") Long recipeId){
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-            String loginId = principal.getMemberDto(principal.getMember()).getLoginId();
-            recipeService.deleteByAdmin(recipeId,loginId);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 삭제 성공"));
-        }catch (AccessDeniedException e){
-            throw new AccessDeniedException(e.getMessage());
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
-        }
-
     }
     @Operation(summary = "레시피 - 즐겨찾기 상태 조회",
             description = "로그인하지 않은 사용자는 기본적으로 false를 반환하며, 로그인한 사용자는 해당 레시피의 즐겨찾기 여부에 따라 상태를 반환합니다.", tags ="사용자 - 좋아요/즐겨찾기 컨트롤러")

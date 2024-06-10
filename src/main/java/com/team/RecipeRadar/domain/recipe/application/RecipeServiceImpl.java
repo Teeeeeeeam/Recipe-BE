@@ -184,28 +184,4 @@ public class RecipeServiceImpl implements RecipeService{
         recipeRepository.save(recipe);
     }
 
-
-    /**
-     * 관리자만 레시피를 삭제 가능 레시피와 관련된 모든 데이터 삭제
-     * @param recipeId
-     * @param loginId
-     */
-    @Override
-    public void deleteByAdmin(Long recipeId, String loginId) {
-        Member member = memberRepository.findByLoginId(loginId);
-        if(!member.getRoles().equals("ROLE_ADMIN")){
-            throw new AccessDeniedException("관리지만 삭제 가능합니다.");
-        }
-
-        UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipeId).get();
-
-        String storeFileName = uploadFile.getStoreFileName();
-        postRepository.deletePostByRecipeId(recipeId);
-        s3UploadService.deleteFile(storeFileName);
-        ingredientRepository.deleteRecipeId(recipeId);
-        imgRepository.deleteRecipeId(recipeId);
-        cookStepRepository.deleteRecipeId(recipeId);
-        recipeRepository.deleteById(recipeId);
-    }
-
 }
