@@ -13,24 +13,38 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "요리 수정 요청")
 public class RecipeUpdateRequest {
 
     @NotEmpty(message = "변경할 레시피의 제목를 입력해주세요")
+    @Schema(example = "짜장면")
     private String title;
+
     @NotEmpty(message = "변경할 레시피의 난이도를 입력해주세요")
+    @Schema(example = "중급")
     private String cookLevel;
+
     @NotEmpty(message = "변경할 레시피의 인원수를 입력해주세요")
+    @Schema(example = "1인분")
     private String people;
+
     @NotEmpty(message = "변경할 레시피의 재료를 입력해주세요")
-    @Schema(example = "{\"ingredients\":[\"재료1\", \"재료2\"]}")
+    @Schema(example = "[\"양파\", \"고기\"]")
     private List<String> ingredients;
+
     @NotEmpty(message = "변경할 레시피의 시간를 입력해주세요")
+    @Schema(example = "1시간")
     private String cookTime;
+
     @NotEmptyMapValue(message = "변경할 레시피의 조리순서를 입력해주세요")
-    @Schema(example = "[{\"cook_step_id\":\"조리순서_id\", \"cook_steps\":\"조리순서\"}]")
+    @Schema(example = "[{\"cook_step_id\":\"185128\", \"cook_steps\":\"양파를 볶는다.\"}]")
     private List<Map<String,String>> cookSteps;
 
+    @Schema(example = "[\"라드를이용해 볶는다.\"]")
     private List<String> newCookSteps;
+
+    @Schema(example = "[\"185135\"]",description = "삭제할 조리순서가 있을때만 사용")
+    private List<Long> deleteCookStepsId;
 
     private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps,List<String> newCookSteps) {
         this.title = title;

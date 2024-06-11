@@ -164,22 +164,28 @@ public class RecipeServiceImpl implements RecipeService{
 
         List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookSteps();
 
-        for (Map<String,String> cookeStep : cookeSteps) {
-            long cookStepId = Long.parseLong(cookeStep.get("cook_step_id"));
-            Optional<CookingStep> byId = cookStepRepository.findById(cookStepId);
-            if (byId.isPresent()){
-                String cookSteps_Value = cookeStep.get("cook_steps");
-                CookingStep cookingStep = byId.get();
-                cookingStep.update(cookSteps_Value);
-                cookStepRepository.save(cookingStep);
+        if(cookeSteps!=null) {
+            for (Map<String, String> cookeStep : cookeSteps) {
+                long cookStepId = Long.parseLong(cookeStep.get("cook_step_id"));
+                Optional<CookingStep> byId = cookStepRepository.findById(cookStepId);
+                if (byId.isPresent()) {
+                    String cookSteps_Value = cookeStep.get("cook_steps");
+                    CookingStep cookingStep = byId.get();
+                    cookingStep.update(cookSteps_Value);
+                    cookStepRepository.save(cookingStep);
+                }
             }
         }
         List<String> newCookSteps = recipeUpdateRequest.getNewCookSteps();
 
-        if (!newCookSteps.isEmpty() && newCookSteps !=null){
+        if (newCookSteps != null){
             CookingStep.CookingStepBuilder recipe1 = CookingStep.builder().recipe(recipe);
             newCookSteps.stream().forEach(s -> recipe1.steps(s).build());
             cookStepRepository.save(recipe1.build());
+        }
+
+        if(recipeUpdateRequest.getDeleteCookStepsId()!=null){
+            recipeUpdateRequest.getDeleteCookStepsId().stream().forEach(s ->cookStepRepository.deleteById(s));
         }
 
         String ing = recipeUpdateRequest.getIngredients().stream().collect(Collectors.joining("|"));

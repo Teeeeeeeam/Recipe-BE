@@ -183,7 +183,7 @@ public class RecipeController {
                             examples = @ExampleObject(value = "[{\"success\": false, \"message\": \"모든 값을 입력해주세요\", \"data\": {\"errors\": [\"변경할 레시피의 제목를 입력해주세요\"]}}, {\"success\": false, \"message\": \"해당 레시피를 찾을수 없습니다.\"}]"))),
     })
     @PutMapping(value = "/admin/update/{recipe-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateRecipe(@PathVariable(name = "recipe-id")Long recipeId ,
+    public ResponseEntity<?> updateRecipe(@Schema(example = "400648")@PathVariable(name = "recipe-id")Long recipeId ,
                                              @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
                                              @RequestPart(required = false) MultipartFile file){
         try {
