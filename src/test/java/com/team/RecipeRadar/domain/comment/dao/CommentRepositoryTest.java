@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.repository;
+package com.team.RecipeRadar.domain.comment.dao;
 
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;

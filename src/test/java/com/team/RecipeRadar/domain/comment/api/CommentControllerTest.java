@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.controller;
+package com.team.RecipeRadar.domain.comment.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.api.CommentController;

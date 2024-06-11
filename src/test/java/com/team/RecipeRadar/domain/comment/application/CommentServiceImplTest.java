@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.Service.impl;
+package com.team.RecipeRadar.domain.comment.application;
 
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
