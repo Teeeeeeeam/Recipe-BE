@@ -47,7 +47,7 @@ public class QuestionServiceImpl implements QuestionService {
     public void account_Question(QuestionRequest questionRequest, MultipartFile file) {
         Question question = buildQuestion(questionRequest);
         
-        setMemberIfProvided(questionRequest, question);
+        setMemberIfProvided(null, question);
 
         Question savedQuestion = questionRepository.save(question);
 
@@ -60,10 +60,10 @@ public class QuestionServiceImpl implements QuestionService {
      * 일반 문의사항일때 문의사항 로직
      */
     @Override
-    public void general_Question(QuestionRequest questionRequest, MultipartFile file) {
+    public void general_Question(QuestionRequest questionRequest,Long memberId, MultipartFile file) {
         Question question = buildQuestion(questionRequest);  // 질문 생성
 
-        setMemberIfProvided(questionRequest, question);        // 사용자 설정
+        setMemberIfProvided(memberId,question);        // 사용자 설정
 
         Question savedQuestion = questionRepository.save(question);  // 질문 저장
 
@@ -136,10 +136,10 @@ public class QuestionServiceImpl implements QuestionService {
                 .build();
     }
 
-    private void setMemberIfProvided(QuestionRequest questionRequest, Question question) {
-        if (questionRequest.getMemberId() != null) {
-            Member member = memberRepository.findById(questionRequest.getMemberId())
-                    .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+    private void setMemberIfProvided(Long memberId ,Question question) {
+        if (memberId != null) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new BadRequestException("사용자를 찾을 수 없습니다."));
             question.setMember(member);
         }
     }

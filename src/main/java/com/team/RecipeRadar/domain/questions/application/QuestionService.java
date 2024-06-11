@@ -16,7 +16,7 @@ public interface QuestionService {
 
     void account_Question(QuestionRequest questionRequest, MultipartFile file);
 
-    void general_Question(QuestionRequest questionRequest, MultipartFile file);
+    void general_Question(QuestionRequest questionRequest,Long memberId, MultipartFile file);
 
     QuestionDto detailAdmin_Question(Long questionId,String loginId);
 

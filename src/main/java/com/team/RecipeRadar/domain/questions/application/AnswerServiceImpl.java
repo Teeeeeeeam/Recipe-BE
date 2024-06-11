@@ -71,6 +71,9 @@ public class AnswerServiceImpl implements AnswerService{
     public QuestionDto viewResponse(MemberDto memberDto, Long questionId) {
         QuestionDto questionDto = answerRepository.viewResponse(questionId);
 
+        if(questionDto.getMember() == null){
+            throw new BadRequestException("존재하지 않습니다.");
+        }
         if(!memberDto.getId().equals(questionDto.getMember().getId()) && !memberDto.getRoles().equals("ROLE_ADMIN")){
             throw new ForbiddenException("작성자만 열람 가능합니다.");
         }
