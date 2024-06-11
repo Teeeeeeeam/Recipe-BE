@@ -71,7 +71,6 @@ class QuestionControllerTest {
     @DisplayName("로그인한 사용자들의 일반 문의 등록 성공")
     void generalQuestion_Success() throws Exception {
         QuestionRequest questionRequest = new QuestionRequest();
-        questionRequest.setMemberId(1l);
         MockMultipartFile file = new MockMultipartFile("file", "test.jpg", MediaType.TEXT_PLAIN_VALUE, "fileContent".getBytes());
         MockMultipartFile userAddRequestMultipartFile = new MockMultipartFile("questionRequest", null, "application/json", objectMapper.writeValueAsString(questionRequest).getBytes(StandardCharsets.UTF_8));
 

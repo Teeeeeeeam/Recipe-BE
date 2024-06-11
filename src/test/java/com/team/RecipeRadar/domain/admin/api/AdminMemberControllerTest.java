@@ -226,6 +226,7 @@ class AdminMemberControllerTest {
 
         mockMvc.perform(post("/api/admin/blacklist/temporary-unblock/1"))
                 .andDo(print())
-                .andExpect(jsonPath("$.message").value("임시 차단 해제"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("임시 차단 유뮤"));
     }
 }

@@ -3,10 +3,8 @@ package com.team.RecipeRadar.domain.post.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
-import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
@@ -236,21 +234,21 @@ class PostControllerTest {
         String file = "Test";
 
 
-        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        userUpdateRequest.setPostTitle("새로운 제목");
-        userUpdateRequest.setPostContent("새로운 내용");
-        userUpdateRequest.setPostServing("4인분");
-        userUpdateRequest.setPostCookingTime("45분");
-        userUpdateRequest.setPostCookingLevel("중간");
-        userUpdateRequest.setPostPassword(password);
+        UserUpdateRequest userUpdateRequest_1 = new UserUpdateRequest();
+        userUpdateRequest_1.setPostTitle("새로운 제목");
+        userUpdateRequest_1.setPostContent("새로운 내용");
+        userUpdateRequest_1.setPostServing("4인분");
+        userUpdateRequest_1.setPostCookingTime("45분");
+        userUpdateRequest_1.setPostCookingLevel("중간");
+        userUpdateRequest_1.setPostPassword(password);
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
-        MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).update(postId,userUpdateRequest,loginId,multipartFile);
+        MockMultipartFile userUpdateRequest = new MockMultipartFile("userUpdateRequest", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest_1).getBytes(StandardCharsets.UTF_8));
+        doNothing().when(postService).update(postId,userUpdateRequest_1,loginId,multipartFile);
 
         mockMvc.perform(multipart("/api/user/update/posts/"+postId)
                         .file(multipartFile)
-                        .file(updatePostDto)
+                        .file(userUpdateRequest)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -272,7 +270,7 @@ class PostControllerTest {
         userUpdateRequest.setPostPassword(password);
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
-        MockMultipartFile updatePostDto = new MockMultipartFile("updatePostDto", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile updatePostDto = new MockMultipartFile("userUpdateRequest", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
         doNothing().when(postService).update(postId,userUpdateRequest,loginId,multipartFile);
 
         mockMvc.perform(multipart("/api/user/update/posts/"+postId)

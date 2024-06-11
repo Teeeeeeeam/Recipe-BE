@@ -82,7 +82,6 @@ class QuestionServiceTest {
         questionRequest.setTitle("제목");
         questionRequest.setAnswer(EMAIL);
         questionRequest.setAnswer_email("example@example.com");
-        questionRequest.setMemberId(1l);
         questionRequest.setQuestionType(ACCOUNT_INQUIRY);
 
         MultipartFile file = mock(MultipartFile.class);
@@ -104,7 +103,7 @@ class QuestionServiceTest {
         when(questionRepository.save(any(Question.class))).thenReturn(question);
 
         // when
-        questionService.general_Question(questionRequest, file);
+        questionService.general_Question(questionRequest, 1l,file);
 
         // then
         verify(questionRepository, times(1)).save(any(Question.class));
