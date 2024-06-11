@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.like.api;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.domain.like.application.LikeService;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
+import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
@@ -51,9 +51,9 @@ public class RecipeLikeController {
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
     })
     @PostMapping("/api/user/recipe/like")
-    public ResponseEntity<?> addLike(@RequestBody RecipeLikeDto recipeLikeDto){
+    public ResponseEntity<?> addLike(@RequestBody RecipeLikeRequest recipeLikeRequest){
         try {
-            Boolean aBoolean = recipeLikeService.addLike(recipeLikeDto);
+            Boolean aBoolean = recipeLikeService.addLike(recipeLikeRequest);
             ControllerApiResponse response;
             if (!aBoolean){
                 response = new ControllerApiResponse(true,"좋아요 성공");

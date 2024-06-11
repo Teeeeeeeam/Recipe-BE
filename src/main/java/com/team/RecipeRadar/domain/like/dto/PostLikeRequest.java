@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "게시글 좋아요 Request")
 public class PostLikeRequest {
 
     @Schema(hidden = true)

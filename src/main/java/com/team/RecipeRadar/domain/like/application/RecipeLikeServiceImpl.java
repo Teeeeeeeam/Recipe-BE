@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 @Qualifier("RecipeLikeServiceImpl")
 @Service
 @Slf4j
-public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeService<T> {
+public class RecipeLikeServiceImpl<T extends RecipeLikeRequest> implements LikeService<T> {
 
     private final MemberRepository memberRepository;
     private final RecipeLikeRepository recipeLikeRepository;
@@ -37,7 +37,7 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeDto> implements LikeServi
      * @return 좋아요시 -> false , 좋아요 해제시 ->true
      */
     @Override
-    public Boolean addLike(RecipeLikeDto recipeLikeDto) {
+    public Boolean addLike(RecipeLikeRequest recipeLikeDto) {
         Long memberId = recipeLikeDto.getMemberId();
         Long recipeId = recipeLikeDto.getRecipeId();
         boolean exists = recipeLikeRepository.existsByMemberIdAndRecipeId(memberId, recipeId);
