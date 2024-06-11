@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
-import com.team.RecipeRadar.global.jwt.controller.LoginDto;
+import com.team.RecipeRadar.global.jwt.controller.LoginRequest;
 import com.team.RecipeRadar.global.jwt.dto.MemberInfoResponse;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
@@ -44,7 +44,7 @@ public class JwtAuthServiceImpl implements JwtAuthService {
      * @return 로그인 성공 시 액세스 토큰과 리프레시 토큰을 포함하는 맵
      * @throws BadRequestException 로그인 실패 시 발생하는 예외
      */
-    public Map<String, String> login(LoginDto loginDto) {
+    public Map<String, String> login(LoginRequest loginDto) {
         Map<String, String> result = new LinkedHashMap<>();
 
         String loginId = loginDto.getLoginId();

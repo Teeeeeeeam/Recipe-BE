@@ -4,6 +4,7 @@ package com.team.RecipeRadar.domain.recipe.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(name = "레시피 DTO")
 public class RecipeDto {
 
     private Long id;              // 요리 값

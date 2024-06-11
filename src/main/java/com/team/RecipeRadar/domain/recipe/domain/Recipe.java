@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -20,6 +21,7 @@ import java.util.List;
         @Index(columnList = "likeCount"),
         @Index(columnList = "recipe_title")
 })
+@Schema(hidden = true, name = "레시피")
 public class Recipe {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

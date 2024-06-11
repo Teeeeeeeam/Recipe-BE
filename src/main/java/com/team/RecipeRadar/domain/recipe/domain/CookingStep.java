@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@Schema(name = "재료")
 public class CookingStep {
 
 

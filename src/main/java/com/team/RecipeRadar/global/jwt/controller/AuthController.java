@@ -52,7 +52,7 @@ public class AuthController {
                     examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"토큰이 만료되었거나 일치하지않습니다.\"}"))),
     })
     @PostMapping("/auth/refresh-token/validate")
-    public ResponseEntity<?> RefreshToke(HttpServletRequest request){
+    public ResponseEntity<?> RefreshToken(HttpServletRequest request){
         try {
             String refreshToken = "";
             if (request.getCookies() != null) {
@@ -95,7 +95,7 @@ public class AuthController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"로그인 실패\"}")))
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, BindingResult result){
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult result){
         try {
             if (result.hasErrors()){
                 Map<String, String> errorMap = new HashMap<>();
@@ -109,7 +109,7 @@ public class AuthController {
                         .data(errorMap).build();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(failResponse);
             }
-            Map<String, String> login = jwtAuthService.login(loginDto);
+            Map<String, String> login = jwtAuthService.login(loginRequest);
 
             String refreshToken = login.get("refreshToken");
 
