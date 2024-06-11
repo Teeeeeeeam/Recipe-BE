@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.global.Image.domain.QUploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository

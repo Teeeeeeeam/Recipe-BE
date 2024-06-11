@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository

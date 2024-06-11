@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
-import com.team.RecipeRadar.global.email.application.MailService;
+import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

@@ -13,7 +13,7 @@ import java.util.List;
 
 import static com.team.RecipeRadar.domain.questions.domain.QAnswer.*;
 import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository

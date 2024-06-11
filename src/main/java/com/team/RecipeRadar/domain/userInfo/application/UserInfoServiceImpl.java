@@ -9,7 +9,7 @@ import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
-import com.team.RecipeRadar.global.email.application.MailService;
+import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;

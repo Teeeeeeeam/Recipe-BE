@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
 import static com.team.RecipeRadar.domain.questions.domain.QuestionStatus.*;
 import static com.team.RecipeRadar.domain.questions.domain.QuestionType.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.uploadFile;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository

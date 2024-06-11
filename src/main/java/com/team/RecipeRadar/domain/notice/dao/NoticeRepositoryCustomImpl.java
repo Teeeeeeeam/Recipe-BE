@@ -7,7 +7,6 @@ import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.domain.QNotice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.global.Image.domain.QUploadFile;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.notice.domain.QNotice.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
 @Slf4j
 @Repository

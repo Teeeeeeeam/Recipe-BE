@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.member.api;
 
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dto.valid.*;
-import com.team.RecipeRadar.global.email.application.MailService;
+import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
