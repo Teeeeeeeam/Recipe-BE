@@ -4,7 +4,7 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.*;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

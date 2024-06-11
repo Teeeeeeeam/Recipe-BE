@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
@@ -12,7 +11,7 @@ import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

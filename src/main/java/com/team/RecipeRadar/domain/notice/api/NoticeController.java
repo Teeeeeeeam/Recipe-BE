@@ -8,7 +8,7 @@ import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

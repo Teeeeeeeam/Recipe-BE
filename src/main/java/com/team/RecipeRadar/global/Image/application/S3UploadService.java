@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.global.aws.S3.application;
+package com.team.RecipeRadar.global.Image.application;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;

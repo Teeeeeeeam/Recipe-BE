@@ -10,12 +10,11 @@ import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
 import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAllResponse;
-import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.domain.questions.dto.QuestionRequest;
 import com.team.RecipeRadar.global.Image.dao.ImgRepository;
 import com.team.RecipeRadar.global.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
+import com.team.RecipeRadar.global.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
