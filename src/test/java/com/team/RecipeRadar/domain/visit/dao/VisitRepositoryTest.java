@@ -1,10 +1,9 @@
-package com.team.RecipeRadar.global.visit.dao;
+package com.team.RecipeRadar.domain.visit.dao;
 
+import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
-import com.team.RecipeRadar.global.visit.domain.VisitCount;
-import com.team.RecipeRadar.global.visit.domain.VisitData;
+import com.team.RecipeRadar.domain.visit.domain.VisitCount;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,8 @@ import static org.assertj.core.api.Assertions.*;
 @Slf4j
 class VisitRepositoryTest {
 
-    @Autowired VisitRepository visitRepository;
+    @Autowired
+    VisitRepository visitRepository;
 
     @Test
     @DisplayName("일간 조회수 카운트")

@@ -1,8 +1,9 @@
-package com.team.RecipeRadar.global.Image.application;
+package com.team.RecipeRadar.domain.Image.application;
 
+import com.team.RecipeRadar.domain.Image.application.ImgServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.global.Image.dao.ImgRepository;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
+import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -2,8 +2,8 @@ package com.team.RecipeRadar.domain.questions.dao;
 
 import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
-import com.team.RecipeRadar.global.Image.dao.ImgRepository;
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
+import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;

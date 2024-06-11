@@ -1,6 +1,7 @@
-package com.team.RecipeRadar.global.Image.utils;
+package com.team.RecipeRadar.domain.Image.utils;
 
-import com.team.RecipeRadar.global.Image.domain.UploadFile;
+import com.team.RecipeRadar.domain.Image.domain.UploadFile;
+import com.team.RecipeRadar.domain.Image.utils.FileStore;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +16,8 @@ import static org.assertj.core.api.Assertions.*;
 @Slf4j
 class FileStoreTest {
 
-    @InjectMocks FileStore fileStore;
+    @InjectMocks
+    FileStore fileStore;
 
 
     @Test

@@ -1,16 +1,17 @@
-package com.team.RecipeRadar.global.visit.api;
+package com.team.RecipeRadar.domain.visit.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.visit.api.VisitCountController;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
-import com.team.RecipeRadar.global.visit.application.VisitService;
-import com.team.RecipeRadar.global.visit.dao.VisitRepository;
-import com.team.RecipeRadar.global.visit.domain.VisitCount;
-import com.team.RecipeRadar.global.visit.dto.DayDto;
-import com.team.RecipeRadar.global.visit.dto.MonthDto;
-import com.team.RecipeRadar.global.visit.dto.WeekDto;
+import com.team.RecipeRadar.domain.visit.application.VisitService;
+import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
+import com.team.RecipeRadar.domain.visit.domain.VisitCount;
+import com.team.RecipeRadar.domain.visit.dto.DayDto;
+import com.team.RecipeRadar.domain.visit.dto.MonthDto;
+import com.team.RecipeRadar.domain.visit.dto.WeekDto;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,12 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.LocalDate.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;

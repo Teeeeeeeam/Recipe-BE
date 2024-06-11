@@ -1,15 +1,15 @@
-package com.team.RecipeRadar.global.visit.dao;
+package com.team.RecipeRadar.domain.visit.dao;
 
+import com.team.RecipeRadar.domain.visit.dao.VisitCountRepository;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
-import com.team.RecipeRadar.global.visit.domain.VisitData;
-import com.team.RecipeRadar.global.visit.dto.DayDto;
-import com.team.RecipeRadar.global.visit.dto.MonthDto;
-import com.team.RecipeRadar.global.visit.dto.WeekDto;
+import com.team.RecipeRadar.domain.visit.domain.VisitData;
+import com.team.RecipeRadar.domain.visit.dto.DayDto;
+import com.team.RecipeRadar.domain.visit.dto.MonthDto;
+import com.team.RecipeRadar.domain.visit.dto.WeekDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,7 +30,8 @@ import static org.assertj.core.api.Assertions.*;
 class VisitCountRepositoryTest {
 
     
-    @Autowired VisitCountRepository visitCountRepository;
+    @Autowired
+    VisitCountRepository visitCountRepository;
     
     @Test
     @DisplayName("총 방문자 수 조회")

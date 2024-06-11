@@ -8,7 +8,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
-import com.team.RecipeRadar.global.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
