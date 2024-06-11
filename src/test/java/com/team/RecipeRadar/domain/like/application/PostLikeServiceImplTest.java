@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.like.application;
 
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
-import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.PostLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -67,7 +67,7 @@ class PostLikeServiceImplTest {
                 .postLikeCount(0)
                 .build();
 
-        PostLikeDto postLikeDto = PostLikeDto.builder()
+        PostLikeRequest postLikeDto = PostLikeRequest.builder()
                 .postId(2L)
                 .memberId(1l)
                 .build();
@@ -103,7 +103,7 @@ class PostLikeServiceImplTest {
                 .postLikeCount(0)
                 .build();
 
-        PostLikeDto postLikeDto = PostLikeDto.builder()
+        PostLikeRequest postLikeDto = PostLikeRequest.builder()
                 .postId(2l)
                 .memberId(1l)
                 .build();

@@ -8,6 +8,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Data
 @NoArgsConstructor
+@Schema(name = "게시글 수정 Reqeust")
 public class UserUpdateRequest {
 
 

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostLikeDto {
+public class PostLikeRequest {
 
     @Schema(hidden = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)

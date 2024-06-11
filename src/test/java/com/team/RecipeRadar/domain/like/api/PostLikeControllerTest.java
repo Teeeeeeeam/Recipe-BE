@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
-import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.PostLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -63,7 +63,7 @@ class PostLikeControllerTest {
     @DisplayName("좋아요 컨트롤러 테스트")
     void add_like_Test() throws Exception {
 
-        PostLikeDto postLikeDto = PostLikeDto.builder().postId(1l).memberId(2l).build();
+        PostLikeRequest postLikeDto = PostLikeRequest.builder().postId(1l).memberId(2l).build();
         given(postLikeService.addLike(postLikeDto)).willReturn(true);
 
         mockMvc.perform(post("/api/user/postLike")
@@ -80,7 +80,7 @@ class PostLikeControllerTest {
     @DisplayName("좋아요 해제하기 테스트")
     void delete_like_test()throws Exception{
         
-        PostLikeDto postLikeDto = PostLikeDto.builder().postId(1l).memberId(2l).build();
+        PostLikeRequest postLikeDto = PostLikeRequest.builder().postId(1l).memberId(2l).build();
         given(postLikeService.addLike(postLikeDto)).willReturn(false);
 
         mockMvc.perform(post("/api/user/postLike")

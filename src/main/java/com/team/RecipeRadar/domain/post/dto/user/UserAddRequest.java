@@ -9,6 +9,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Data
 @NoArgsConstructor
+@Schema(name = "게시글 작성 Request")
 public class UserAddRequest {
 
     @Schema(description = "요리글 제목", example = "요리제목!")

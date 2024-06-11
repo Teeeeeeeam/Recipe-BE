@@ -4,7 +4,7 @@ import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
-import com.team.RecipeRadar.domain.like.dto.PostLikeDto;
+import com.team.RecipeRadar.domain.like.dto.PostLikeRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 @Qualifier("PostLikeServiceImpl")
 @Service
 @Slf4j
-public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService<T> {
+public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeService<T> {
 
     private final PostLikeRepository postLikeRepository;
     private final MemberRepository memberRepository;
@@ -37,17 +37,17 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
 
     /**
      * 좋아요 api 호출시 해당 게시글의 좋아요가 있으면 DB 에서 삭제하고 좋아요가 되어있지않다면 DB에 추가하는 식으로 구현
-     * @param postLikeDto
+     * @param postLikeRequest
      * @return
      */
     @Override
-    public Boolean addLike(PostLikeDto postLikeDto) {
+    public Boolean addLike(PostLikeRequest postLikeRequest) {
 
-        Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(postLikeDto.getMemberId(), postLikeDto.getPostId());    // 해당 테이블의 있는지검사
+        Boolean aBoolean = postLikeRepository.existsByMemberIdAndPostId(postLikeRequest.getMemberId(), postLikeRequest.getPostId());    // 해당 테이블의 있는지검사
 
         if (!aBoolean) {
-            Member member = memberRepository.findById(postLikeDto.getMemberId()).orElseThrow(() -> new NoSuchElementException("회원을 찾을 수가 없습니다."));
-            Post post = postRepository.findById(postLikeDto.getPostId()).orElseThrow(() -> new NoSuchElementException("게시물을 찾을 수없습니다."));
+            Member member = memberRepository.findById(postLikeRequest.getMemberId()).orElseThrow(() -> new NoSuchElementException("회원을 찾을 수가 없습니다."));
+            Post post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(() -> new NoSuchElementException("게시물을 찾을 수없습니다."));
             post.setPostLikeCount(post.getPostLikeCount()+1);
             PostLike postLike = PostLike.builder()
                     .post(post)
@@ -60,12 +60,12 @@ public class PostLikeServiceImpl<T extends PostLikeDto,U> implements LikeService
             notificationService.sendPostLikeNotification(post,member.getNickName());
             return false;
         }else{
-            Post post = postRepository.findById(postLikeDto.getPostId()).get();
+            Post post = postRepository.findById(postLikeRequest.getPostId()).get();
             post.setPostLikeCount(post.getPostLikeCount()-1);
             postRepository.save(post);
 
-            notificationService.deleteLikeNotification(postLikeDto.getMemberId(),post.getMember().getId(),post.getId());     //좋아요 한사람, 게시글 작성자
-            postLikeRepository.deleteByMemberIdAndPostId(postLikeDto.getMemberId(),postLikeDto.getPostId());
+            notificationService.deleteLikeNotification(postLikeRequest.getMemberId(),post.getMember().getId(),post.getId());     //좋아요 한사람, 게시글 작성자
+            postLikeRepository.deleteByMemberIdAndPostId(postLikeRequest.getMemberId(),postLikeRequest.getPostId());
             log.info("댓글 삭제");
             return true;
         }

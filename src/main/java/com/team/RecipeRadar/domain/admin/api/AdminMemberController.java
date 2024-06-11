@@ -163,7 +163,8 @@ public class AdminMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comment\":[{\"id\":16,\"comment_content\":\"댓글 내용 1\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"},{\"id\":17,\"comment_content\":\"댓글 내용 2\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"}]}}"))),
     })
     @GetMapping("/posts/comments")
-    public ResponseEntity<?> getPostsContainsComments( @RequestParam("post-id") Long postId,@RequestParam(value = "last-id",required = false)Long lastId, Pageable pageable){
+    public ResponseEntity<?> getPostsContainsComments( @RequestParam("post-id") Long postId,@RequestParam(value = "last-id",required = false)Long lastId,
+                                                       @Parameter(example = "{\"size\":10}") Pageable pageable){
         PostsCommentResponse postsComments = adminService.getPostsComments(postId, lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }

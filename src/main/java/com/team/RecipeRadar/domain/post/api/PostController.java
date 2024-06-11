@@ -10,6 +10,7 @@ import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -38,13 +39,13 @@ import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "사용자 - 요리글 컨트롤러", description = "사용자 요리글과 관련된 API")
+@Tag(name = "사용자 - 게시글 컨트롤러", description = "사용자 게시글과 관련된 API")
 @Slf4j
 public class PostController {
 
     private final PostService postService;
 
-    @Operation(summary = "요리글 작성", description = "로그인한 사용자만 요리글 작성 가능")
+    @Operation(summary = "게시글 작성", description = "로그인한 사용자만 게시글 작성 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -68,7 +69,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "전체 요리글 조회(페이징)", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있다.(무한페이징)")
+    @Operation(summary = "전체 게시글 조회(페이징)", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있다.(무한페이징)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
@@ -76,12 +77,13 @@ public class PostController {
                                     "{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}"))),
     })
     @GetMapping("/api/posts")
-    public ResponseEntity<?> findAllPosts(@RequestParam(value = "post-id",required = false) Long postId,Pageable pageable) {
+    public ResponseEntity<?> findAllPosts(@RequestParam(value = "post-id",required = false) Long postId,
+                                          @Parameter(example = "{\"size\":10}") Pageable pageable) {
         PostResponse postResponse = postService.postPage(postId,pageable);
         return ResponseEntity.ok(postResponse);
     }
 
-    @Operation(summary = "요리글 상세 조회", description = "사용자가 요리글의 상세 정보를 조회할 수 있습니다.")
+    @Operation(summary = "게시글 상세 조회", description = "사용자가 게시글의 상세 정보를 조회할 수 있습니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = PostResponse.class),
@@ -101,7 +103,7 @@ public class PostController {
 
     }
 
-    @Operation(summary = "요리글 삭제",description = "작성한 사용자만이 해당 레시피를 삭제할 수 있습니다. 삭제 시 해당 게시물과 관련된 모든 데이터가 삭제됩니다.")
+    @Operation(summary = "게시글 삭제",description = "작성한 사용자만이 해당 레시피를 삭제할 수 있습니다. 삭제 시 해당 게시물과 관련된 모든 데이터가 삭제됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -125,7 +127,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "요리글 수정",  description = "로그인한 사용자만 수정이 가능하며, 작성자만 수정할 수 있습니다. 비밀번호 검증을 통해 사용자를 확인한 후 해당 API에 접근할 수 있습니다.")
+    @Operation(summary = "게시글 수정",  description = "로그인한 사용자만 수정이 가능하며, 작성자만 수정할 수 있습니다. 비밀번호 검증을 통해 사용자를 확인한 후 해당 API에 접근할 수 있습니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -138,14 +140,14 @@ public class PostController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
     @PostMapping(value = "/api/user/update/posts/{post-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest updatePostDto, BindingResult bindingResult,
+    public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest userUpdateRequest, BindingResult bindingResult,
                                          @RequestPart(required = false) MultipartFile file, @PathVariable("post-id") Long postId){
         try{
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
             String loginId = authenticationLogin();
-            postService.update(postId,updatePostDto,loginId,file);
+            postService.update(postId,userUpdateRequest,loginId,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공"));
         }catch (NoSuchElementException e){
@@ -197,7 +199,8 @@ public class PostController {
     @GetMapping("/api/user/info/{login-id}/posts")
     public ResponseEntity<?> postTitlePage(@PathVariable("login-id") String loginId,
                                            @RequestParam(value = "last-id",required = false) Long lastId,
-                                           @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+                                           @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                           @Parameter(example = "{\"size\":10}") Pageable pageable){
         try {
             if (cookieLoginId ==null){
                 throw new ForbiddenException("쿠키값이 없을때 접근");
@@ -211,7 +214,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "요리글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)", tags = "어드민 - 게시글 컨트롤러")
+    @Operation(summary = "게시글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)", tags = "어드민 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
@@ -223,7 +226,7 @@ public class PostController {
                                   @RequestParam(value = "recipe-title",required = false) String recipeTitle,
                                   @RequestParam(value = "post-title",required = false) String postTitle,
                                   @RequestParam(value = "post-id",required = false) Long lastPostId,
-                                  Pageable pageable){
+                                  @Parameter(example = "{\"size\":10}") Pageable pageable){
         PostResponse postResponse = postService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
         return ResponseEntity.ok(postResponse);
     }
