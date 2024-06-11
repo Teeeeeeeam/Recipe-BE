@@ -12,6 +12,7 @@ import com.team.RecipeRadar.global.security.oauth2.UserDisConnectService;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -163,11 +164,11 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"비밀번호가 일치하지 않습니다.\"}")))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordDTO){
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordRequest){
         try {
             MemberDto memberDto = getMemberDto();
 
-            String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordDTO.getPassword(), passwordDTO.getLoginType());
+            String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordRequest.getPassword(), passwordRequest.getLoginType());
             String userEncodeToken = new String(Base64.getEncoder().encode(userToken.getBytes()));
 
             ResponseCookie responseCookie = ResponseCookie.from("login-id", userEncodeToken)
@@ -231,7 +232,8 @@ public class UserInfoController {
     })
     @GetMapping("/user/info/bookmark")
     public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "last-id",required = false)Long lastId,
-                                              @CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+                                              @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                              @Parameter(example = "{\"size\":10}")Pageable pageable){
         try {
             if (cookieLoginId == null) {
                 throw new ForbiddenException("쿠키값이 없을때 접근");

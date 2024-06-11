@@ -109,7 +109,8 @@ public class PostLikeController {
     @GetMapping("/api/user/info/{login-id}/posts/likes")
     public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
                                          @RequestParam(value = "last-id",required = false)Long postLike_lastId,
-                                         @CookieValue(name = "login-id",required = false) String cookieLoginId, Pageable pageable){
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
         try{
             if (cookieLoginId ==null){throw new ForbiddenException("쿠키값이 없을때 접근");}
 

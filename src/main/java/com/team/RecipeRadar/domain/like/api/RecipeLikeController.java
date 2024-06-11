@@ -113,7 +113,8 @@ public class RecipeLikeController {
     @GetMapping("/api/user/info/{login-id}/recipes/likes")
     public ResponseEntity<?> getUserLike(@PathVariable("login-id")String loginId,
                                          @RequestParam(value = "last-id",required = false) Long recipeLike_lastId,
-                                         @CookieValue(name = "login-id",required = false) String cookieLoginId,Pageable pageable){
+                                         @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
         try{
 
             if (cookieLoginId ==null){

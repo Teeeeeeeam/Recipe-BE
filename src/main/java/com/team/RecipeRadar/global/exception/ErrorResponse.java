@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Builder
+@Schema(name = "오류 응답 Response")
 public class ErrorResponse<T> {
 
     @Schema(defaultValue = "false")

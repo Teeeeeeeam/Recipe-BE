@@ -40,7 +40,8 @@ public class NotificationController {
     @Operation(summary = "사용자 알림 내역(페이징)", description = "사용자에 대한 알림의 무한 페이징 입니다.",tags = "사용자 - 마이페이지 컨트롤러")
     @GetMapping("/info/notification")
     public ResponseEntity<?> notificationPage(@Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
-                                              @RequestParam(value = "last-id",required = false) Long lasId, Pageable pageable){
+                                              @RequestParam(value = "last-id",required = false) Long lasId,
+                                              @Parameter(example = "{\"size\":10}")Pageable pageable){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         ResponseUserInfoNotification responseUserInfoNotification = notificationService.userInfoNotification(memberDto.getId(), lasId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",responseUserInfoNotification));

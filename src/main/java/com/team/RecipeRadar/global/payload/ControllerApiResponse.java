@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
+@Schema(name = "응값값 Response")
 public class ControllerApiResponse<T> {
 
     @Schema(example = "true")

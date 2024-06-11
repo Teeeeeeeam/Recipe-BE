@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "사용자 탈퇴 Request")
 public class UserDeleteIdRequest {
 
+    @Schema(example = "user1234")
     String loginId;
 
     @Schema(defaultValue ="false")
