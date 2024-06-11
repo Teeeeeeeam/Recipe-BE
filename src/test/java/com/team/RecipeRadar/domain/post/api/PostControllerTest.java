@@ -131,7 +131,7 @@ class PostControllerTest {
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
-        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostDto", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostRequest", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
         doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
 
         mockMvc.perform(multipart("/api/user/posts")
@@ -160,7 +160,7 @@ class PostControllerTest {
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
-        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostDto", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostRequest", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
         doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
 
         mockMvc.perform(multipart("/api/user/posts")
