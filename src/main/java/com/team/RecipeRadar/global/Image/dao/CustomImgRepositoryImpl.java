@@ -2,15 +2,12 @@ package com.team.RecipeRadar.global.Image.dao;
 
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
-import com.team.RecipeRadar.global.aws.S3.application.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
 
 @Repository
