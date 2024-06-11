@@ -3,9 +3,8 @@ package com.team.RecipeRadar.domain.like.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.like.api.RecipeLikeController;
 import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
+import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -64,7 +62,7 @@ class RecipeLikeControllerTest {
     @CustomMockUser
     @DisplayName("좋아요 해제하기")
     void add_like_recipe() throws Exception {
-        RecipeLikeDto recipeLikeDto = RecipeLikeDto.builder().recipeId(1l).memberId(2l).build();
+        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).memberId(2l).build();
 
         given(recipeLikeService.addLike(recipeLikeDto)).willReturn(true);
 
@@ -82,7 +80,7 @@ class RecipeLikeControllerTest {
     @DisplayName("좋아요 해제하기 테스트")
     void delete_like_test()throws Exception{
 
-        RecipeLikeDto recipeLikeDto = RecipeLikeDto.builder().recipeId(1l).memberId(2l).build();
+        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).memberId(2l).build();
         given(recipeLikeService.addLike(recipeLikeDto)).willReturn(false);
 
         mockMvc.perform(post("/api/user/recipe/like")

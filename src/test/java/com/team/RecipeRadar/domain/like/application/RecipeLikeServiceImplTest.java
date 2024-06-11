@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.like.application;
 
 import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeDto;
+import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -50,7 +50,7 @@ class RecipeLikeServiceImplTest {
         Member member = Member.builder().id(2l).loginId("testId").username("testuserName").build();
         Recipe recipe = Recipe.builder().id(recipe_id).title("title").cookingLevel("1").likeCount(0).build();
 
-        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(recipe_id).build();
+        RecipeLikeRequest build = RecipeLikeRequest.builder().memberId(2l).recipeId(recipe_id).build();
 
 
         when(recipeLikeRepository.existsByMemberIdAndRecipeId(build.getMemberId(),build.getRecipeId())).thenReturn(false);      // 좋아요가 되어있지않음
@@ -73,7 +73,7 @@ class RecipeLikeServiceImplTest {
         Member.builder().id(2l).loginId("testId").build();
         Recipe recipe = Recipe.builder().id(recipe_id).likeCount(1).build();
 
-        RecipeLikeDto build = RecipeLikeDto.builder().memberId(2l).recipeId(recipe_id).build();
+        RecipeLikeRequest build = RecipeLikeRequest.builder().memberId(2l).recipeId(recipe_id).build();
 
         when(recipeLikeRepository.existsByMemberIdAndRecipeId(build.getMemberId(),build.getRecipeId())).thenReturn(true);
         when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
