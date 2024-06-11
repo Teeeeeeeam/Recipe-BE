@@ -18,6 +18,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(name = "사용자 DTO")
 public class MemberDto {
 
     @Schema(nullable = true,hidden = true)

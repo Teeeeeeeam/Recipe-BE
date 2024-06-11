@@ -10,6 +10,7 @@ import javax.validation.constraints.Pattern;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "비밀번호 변경 Reqeust")
 public class UpdatePasswordRequest {
 
     @Schema(description = "가입한 아이디", example = "testId")

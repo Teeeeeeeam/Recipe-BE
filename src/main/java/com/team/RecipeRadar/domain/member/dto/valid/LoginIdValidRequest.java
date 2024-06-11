@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 
 @Data
+@Schema(name = "로그인 아이디 검증 Request")
 public class LoginIdValidRequest {
 
     @NotEmpty(message = "아이디를 입력해주세요")

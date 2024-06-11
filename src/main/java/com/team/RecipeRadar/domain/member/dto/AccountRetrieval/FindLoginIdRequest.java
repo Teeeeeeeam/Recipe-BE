@@ -13,6 +13,7 @@ import javax.validation.constraints.Pattern;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(name = "아이디 찾기 Request")
 public class FindLoginIdRequest {
 
     @Schema(description = "가입할때 입력한 사용자 실명",example = "홍길동")

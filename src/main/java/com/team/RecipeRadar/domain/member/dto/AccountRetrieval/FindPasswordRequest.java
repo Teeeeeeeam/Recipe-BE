@@ -10,6 +10,7 @@ import javax.validation.constraints.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(name = "비밀번호 찾기 Request")
 public class FindPasswordRequest {
 
     @Schema(description = "가입한 사용자 실명",example = "홍길동")

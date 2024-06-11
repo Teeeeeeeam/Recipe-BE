@@ -46,9 +46,9 @@ public class SingUpValidController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"사용할수 없는 아이디입니다.\"}")))
     })
     @PostMapping("/register/validation")
-    public ResponseEntity<ErrorResponse> LoginIdValid(@RequestBody LoginIdValidRequest loginIdValidDto){
+    public ResponseEntity<ErrorResponse> LoginIdValid(@RequestBody LoginIdValidRequest loginIdValidRequest){
         try {
-            Map<String, Boolean> stringBooleanMap = memberService.LoginIdValid(loginIdValidDto.getLoginId());
+            Map<String, Boolean> stringBooleanMap = memberService.LoginIdValid(loginIdValidRequest.getLoginId());
             return ResponseEntity.ok(new ErrorResponse<>(stringBooleanMap.get("use_loginId"),"사용 가능한 아이디"));
         }catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
@@ -66,10 +66,10 @@ public class SingUpValidController {
                             examples = @ExampleObject(value ="{\"success\":true,\"message\":\"이메일 검증\",\"data\":{\"duplicateEmail\":\"boolean\",\"useEmail\":\"boolean\"}}")))
     })
     @PostMapping("/email/validation")
-    public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidRequest emailValidDto){
+    public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidRequest emailValidRequest){
         try {
 
-            Map<String, Boolean> stringBooleanMap = memberService.emailValid(emailValidDto.getEmail());
+            Map<String, Boolean> stringBooleanMap = memberService.emailValid(emailValidRequest.getEmail());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 검증", stringBooleanMap));
         }catch (Exception e){
