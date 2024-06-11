@@ -54,7 +54,8 @@ public class RecipeController {
     })
     @GetMapping("/recipe")
     public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients,
-                                        @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
+                                        @RequestParam(value = "lastId",required = false)Long lastRecipeId,
+                                        @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients,lastRecipeId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
@@ -82,7 +83,8 @@ public class RecipeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"content\":[{\"id\":128671,\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2015/05/18/1fb83f8578488ba482ad400e3b62df49.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"pageable\":{\"sort\":{\"empty\":true,\"sorted\":false,\"unsorted\":true},\"offset\":0,\"pageNumber\":0,\"pageSize\":1,\"unpaged\":false,\"paged\":true},\"last\":false,\"totalPages\":78221,\"totalElements\":78221,\"size\":1,\"number\":0,\"sort\":{\"empty\":true,\"sorted\":false,\"unsorted\":true},\"first\":true,\"numberOfElements\":1,\"empty\":false}}")))
     })
     @GetMapping("/recipeV1")
-    public ResponseEntity<?> findRecipeV1(@RequestParam(value = "ingredients",required = false) List<String> ingredients,@RequestParam(value = "title", required = false) String title ,Pageable pageable){
+    public ResponseEntity<?> findRecipeV1(@RequestParam(value = "ingredients",required = false) List<String> ingredients,@RequestParam(value = "title", required = false) String title ,
+                                          @Parameter(example = "{\"page\":2,\"size\":10}") Pageable pageable){
         Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingredients,title, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeDtos));
     }
@@ -120,7 +122,7 @@ public class RecipeController {
                                     "\"cookStep\":[{\"cook_step_id\":\"193\",\"cook_steps\":\"당근과 양파는 깨끗히 씻으신 후에 채썰어 준비한 후 후라이팬에 기름을 두르고 팬을 달군 후 당근| 양파를 살짝 볶아주세요.\"}]}}")))
     })
     @GetMapping("/recipe/{id}")
-    public ResponseEntity<?> getDetials(@PathVariable("id")Long recipe_id){
+    public ResponseEntity<?> getDetials(@Schema(example = "221094")@PathVariable("id")Long recipe_id){
         RecipeDetailsResponse recipeDetails = recipeService.getRecipeDetails(recipe_id);
 
         return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
