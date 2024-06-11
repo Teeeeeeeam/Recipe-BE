@@ -55,11 +55,11 @@ public class PostController {
                     examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\", \"data\": {\"postCookingTime\": \"요리 시간을 선택하세요\"}}"))),
     })
     @PostMapping(value = "/api/user/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostDto, BindingResult bindingResult, @RequestPart MultipartFile file) {
+    public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostRequest, BindingResult bindingResult, @RequestPart MultipartFile file) {
         try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
-            postService.save(userAddPostDto,file);
+            postService.save(userAddPostRequest,file);
             return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
         }catch (NoSuchElementException e){
             throw new PostException(e.getMessage());
