@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.api.CommentController;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -26,7 +25,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -34,7 +32,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +63,7 @@ class CommentControllerTest {
     @DisplayName("댓글 작성 Controller 테스트")
     void commnet_add_test() throws Exception {
 
-        UserAddCommentDto commentDto = UserAddCommentDto.builder().memberId(2l).postId(3l).commentContent("테스트 댓글").build();
+        UserAddCommentRequest commentDto = UserAddCommentRequest.builder().memberId(2l).postId(3l).commentContent("테스트 댓글").build();
 
         given(commentService.save(commentDto))
                 .willReturn(Comment.builder().id(1l).commentContent("테스트 댓글").member(Member.builder().id(2l).build()).post(Post.builder().id(3l).build()).build());
@@ -92,7 +89,7 @@ class CommentControllerTest {
     void comment_delete_existing_comment_test() throws Exception {
         // given
         String nickName="testNickName";
-        UserDeleteCommentDto userDeleteCommentDto = new UserDeleteCommentDto(2l, 1l);
+        UserDeleteCommentRequest userDeleteCommentDto = new UserDeleteCommentRequest(2l, 1l);
         CommentDto commentDto = CommentDto.builder().id(1l).nickName(nickName).comment_content("테스트 댓글").build();
 
         Member member = Member.builder().id(2l).build();
@@ -168,7 +165,7 @@ class CommentControllerTest {
                 .build();
         given(commentService.findById(commentId)).willReturn(updatedComment);
 
-        UserUpdateCommentDto updateCommentDto = UserUpdateCommentDto.builder()
+        UserUpdateCommentRequest updateCommentDto = UserUpdateCommentRequest.builder()
                 .commentContent(update_content)
                 .commentId(commentId)
                 .memberId(memberId)

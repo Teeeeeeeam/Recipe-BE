@@ -3,8 +3,8 @@ package com.team.RecipeRadar.Service.impl;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -59,7 +59,7 @@ class CommentServiceImplTest {
 
         LocalDateTime dateTime = LocalDateTime.of(2024,3,17,2,15);
 
-        UserAddCommentDto commentDto = new UserAddCommentDto("Test comment", build.getId(), build1.getId(), dateTime);
+        UserAddCommentRequest commentDto = new UserAddCommentRequest("Test comment", build.getId(), build1.getId(), dateTime);
 
         Member member = new Member();
         member.setId(1L);
@@ -93,7 +93,7 @@ class CommentServiceImplTest {
         PostDto build1 = PostDto.builder().id(1l).build();
 
         LocalDateTime dateTime = LocalDateTime.of(2024,3,17,2,15);
-        UserAddCommentDto commentDto = new UserAddCommentDto("Test comment", build.getId(), build1.getId(), dateTime);
+        UserAddCommentRequest commentDto = new UserAddCommentRequest("Test comment", build.getId(), build1.getId(), dateTime);
 
         // 목 리파지토리
         when(memberRepository.findById(1L)).thenReturn(Optional.empty());
@@ -110,7 +110,7 @@ class CommentServiceImplTest {
         MemberDto memberDto = MemberDto.builder().id(1L).username("test").nickname("닉네임").build(); //댓글 작성자
 
 
-        UserDeleteCommentDto commentDto = new UserDeleteCommentDto(memberDto.getId(), 1l);
+        UserDeleteCommentRequest commentDto = new UserDeleteCommentRequest(memberDto.getId(), 1l);
 
         Member member = Member.builder().id(1L).username("test").nickName("닉네임").build();
 
@@ -136,7 +136,7 @@ class CommentServiceImplTest {
         // Mock 데이터 설정
         MemberDto nonAuthorDto = MemberDto.builder().id(2L).username("non_author").build(); // 비 작성자
 
-        UserDeleteCommentDto commentDto = new UserDeleteCommentDto(nonAuthorDto.getId(), 3L);
+        UserDeleteCommentRequest commentDto = new UserDeleteCommentRequest(nonAuthorDto.getId(), 3L);
 
         Member member = Member.builder().id(1L).username("test").build();       //댓글 작성자
         Member member1 = Member.builder().id(2L).username("non_author").build();        //댓글 비작성자
