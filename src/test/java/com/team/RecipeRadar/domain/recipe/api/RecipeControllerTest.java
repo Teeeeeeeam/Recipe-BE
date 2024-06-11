@@ -28,13 +28,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
-import java.rmi.AccessException;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -387,9 +383,10 @@ class RecipeControllerTest {
         String originFileName = "test.jpg";
         long recipe_id =1l;
         List<String> newCook = List.of("새로운 값~~");
+        List<Long> delete = List.of(1l);
 
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
-                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "2", "cook_steps", "2번째 조리순서")),newCook);
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "2", "cook_steps", "2번째 조리순서")),newCook,delete);
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
         doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
@@ -417,9 +414,10 @@ class RecipeControllerTest {
         String originFileName = "test.jpg";
         long recipe_id =1l;
         List<String> newCook = List.of("새로운 값~~");
+        List<Long> delete = List.of(1l);
 
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("", "난이도", "인원수",
-                List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")),newCook );
+                List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")),newCook,delete);
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
         doNothing().when(recipeService).updateRecipe(eq(recipe_id),eq(recipeUpdateRequest),eq(multipartFile));
@@ -449,8 +447,9 @@ class RecipeControllerTest {
         String originFileName = "test.jpg";
         long recipe_id =1l;
         List<String> newCook = List.of("새로운 값~~");
+        List<Long> delete = List.of(1l);
         RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("제목", "난이도", "인원수",
-                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "조리순서", "cook_steps", "2번째 조리순서")),newCook);
+                List.of("재료1", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "조리순서", "cook_steps", "2번째 조리순서")),newCook,delete);
         
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
 
