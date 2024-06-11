@@ -187,10 +187,10 @@ class PostControllerTest {
         mockMvc.perform(get("/api/posts?size=2"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nextPage").value(false))
-                .andExpect(jsonPath("$.posts.[0].id").value(1))
-                .andExpect(jsonPath("$.posts.[1].postContent").value("컨텐트2"))
-                .andExpect(jsonPath("$.posts.size()").value(2));
+                .andExpect(jsonPath("$.data.nextPage").value(false))
+                .andExpect(jsonPath("$.data.posts.[0].id").value(1))
+                .andExpect(jsonPath("$.data.posts.[1].postContent").value("컨텐트2"))
+                .andExpect(jsonPath("$.data.posts.size()").value(2));
     }
     
     @Test
@@ -371,12 +371,12 @@ class PostControllerTest {
                         .param("post-title",postTitle))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nextPage").value(true))
-                .andExpect(jsonPath("$.posts").isArray())
-                .andExpect(jsonPath("$.posts[0].postTitle").value("제목"))
-                .andExpect(jsonPath("$.posts[0].postContent").value("글"))
-                .andExpect(jsonPath("$.posts[1].member.loginId").value("searchId"))
-                .andExpect(jsonPath("$.posts[1].recipe.id").value(1))
-                .andExpect(jsonPath("$.posts[1].recipe.title").value("레시피제목1"));
+                .andExpect(jsonPath("$.data.nextPage").value(true))
+                .andExpect(jsonPath("$.data.posts").isArray())
+                .andExpect(jsonPath("$.data.posts[0].postTitle").value("제목"))
+                .andExpect(jsonPath("$.data.posts[0].postContent").value("글"))
+                .andExpect(jsonPath("$.data.posts[1].member.loginId").value("searchId"))
+                .andExpect(jsonPath("$.data.posts[1].recipe.id").value(1))
+                .andExpect(jsonPath("$.data.posts[1].recipe.title").value("레시피제목1"));
     }
 }
