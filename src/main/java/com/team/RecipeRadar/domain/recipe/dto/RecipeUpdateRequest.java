@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "요리 수정 요청")
+@Schema(name = "요리 수정 Request")
 public class RecipeUpdateRequest {
 
     @NotEmpty(message = "변경할 레시피의 제목를 입력해주세요")

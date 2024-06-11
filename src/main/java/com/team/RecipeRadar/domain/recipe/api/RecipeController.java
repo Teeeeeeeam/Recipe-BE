@@ -69,7 +69,8 @@ public class RecipeController {
     @GetMapping("/admin/recipe")
     public ResponseEntity<?> findRecipeWithAdmin(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
                                                  @RequestParam(value = "title",required = false) String title,
-                                                 @RequestParam(value = "lastId",required = false)Long lastRecipeId, Pageable pageable){
+                                                 @RequestParam(value = "lastId",required = false)Long lastRecipeId,
+                                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeResponse recipeResponse = recipeService.searchRecipesByTitleAndIngredients(ingredients,title,lastRecipeId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
@@ -149,7 +150,7 @@ public class RecipeController {
     })
     @PostMapping(value = "/admin/save/recipe", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> recipe_save(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult,
-                                                @RequestPart(required = false) MultipartFile file){
+                                                @RequestPart MultipartFile file){
         try {
             if (bindingResult.hasErrors()){
                 List<FieldError> fieldErrors = bindingResult.getFieldErrors();
