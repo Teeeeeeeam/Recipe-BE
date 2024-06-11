@@ -2,8 +2,8 @@ package com.team.RecipeRadar.domain.comment.application;
 
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
+import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
@@ -42,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
      * @param userAddCommentDto
      * @return 저장된 Commnet객체
      */
-    public Comment save(UserAddCommentDto userAddCommentDto) {
+    public Comment save(UserAddCommentRequest userAddCommentDto) {
         Long memberId = userAddCommentDto.getMemberId();
         Long postId = userAddCommentDto.getPostId();
 
@@ -78,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
      * @param userDeleteCommentDto
      */
     @Override
-    public void delete_comment(UserDeleteCommentDto userDeleteCommentDto) {
+    public void delete_comment(UserDeleteCommentRequest userDeleteCommentDto) {
 
         Long memberDtoId = userDeleteCommentDto.getMemberId();
         Long commentDtoId = userDeleteCommentDto.getCommentId();

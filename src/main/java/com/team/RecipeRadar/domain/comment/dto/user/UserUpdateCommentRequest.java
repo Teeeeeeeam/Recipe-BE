@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @NoArgsConstructor
-public class UserUpdateCommentDto {
+@Schema(name = "댓글 수정 Request")
+public class UserUpdateCommentRequest {
 
     @Schema(description = "수정할 댓글 내용", example = "댓글 수정!")
     @NotBlank(message = "수정할 댓글을 입력해주세요")
@@ -31,10 +32,10 @@ public class UserUpdateCommentDto {
 
     @JsonIgnore
     @JsonCreator
-    public UserUpdateCommentDto(@JsonProperty String commentContent,
-                                @JsonProperty Long memberId,
-                                @JsonProperty Long commentId,
-                                @JsonProperty LocalDateTime update_At) {
+    public UserUpdateCommentRequest(@JsonProperty String commentContent,
+                                    @JsonProperty Long memberId,
+                                    @JsonProperty Long commentId,
+                                    @JsonProperty LocalDateTime update_At) {
         this.commentContent = commentContent;
         this.memberId = memberId;
         this.commentId = commentId;

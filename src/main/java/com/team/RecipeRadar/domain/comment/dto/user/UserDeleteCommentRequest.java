@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDeleteCommentDto {
+@Schema(name = "댓글 삭제 Request")
+public class UserDeleteCommentRequest {
 
     @Schema(description = "사용자 id", example = "1")
     private Long memberId;
