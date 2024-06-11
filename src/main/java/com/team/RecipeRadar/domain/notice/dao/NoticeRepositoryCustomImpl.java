@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.notice.domain.QNotice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.Image.domain.QUploadFile;
+import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,7 +80,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .where(notice.id.eq(noticeId))
                 .fetch();
 
-        return list.stream().map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst().orElseThrow(() -> new NoSuchElementException("공지사항을 찾을수 없습니다."));
+        return list.stream().map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst().orElseThrow(() -> new BadRequestException("공지사항을 찾을수 없습니다."));
     }
 
     private  String getImageUrl(Tuple tuple) {

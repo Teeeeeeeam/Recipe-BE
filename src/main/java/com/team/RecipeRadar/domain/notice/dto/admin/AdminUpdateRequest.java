@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@Schema(name = "공지사항 수정 Request")
 public class AdminUpdateRequest {
 
     @Schema(description = "수정할 공지사항 내용", example = "공지사항 내용 수정!")

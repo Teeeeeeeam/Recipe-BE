@@ -14,6 +14,7 @@ import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -104,20 +105,21 @@ public class NoticeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"noticeTitle\": \"[수정한 공지사항 제목]\", \"memberId\": \"[사용자 ID]\", \"noitceId\": \"[공지사항 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"해당 공지사항을 찾을 수 없습니다.\"}"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"관리자만 수정할수 있습니다.\"}")))
     })
     @PutMapping(value = "/api/admin/notices/{notice-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest updateNoticeDto, BindingResult bindingResult,
+    public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest adminUpdateRequest, BindingResult bindingResult,
                                            @RequestPart(required = false) MultipartFile file, @PathVariable("notice-id") Long noticeId){
         try{
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
             String loginId = authenticationLogin();
-            noticeService.update(noticeId,updateNoticeDto,loginId,file);
+            noticeService.update(noticeId,adminUpdateRequest,loginId,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
         }catch (NoSuchElementException e){
@@ -147,7 +149,8 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"notice\":[{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"created_at\":\"2024-05-28T17:08:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":2,\"noticeTitle\":\"두 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":3,\"noticeTitle\":\"세 번째 공지사항\",\"created_at\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}}]}}\n"))),
     })
     @GetMapping("/api/notices")
-    public ResponseEntity<?> adminNotice(@RequestParam(value = "last-id",required = false)Long noticeId, Pageable pageable){
+    public ResponseEntity<?> adminNotice(@RequestParam(value = "last-id",required = false)Long noticeId,
+                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
         InfoNoticeResponse inInfoNoticeResponse = noticeService.Notice(noticeId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",inInfoNoticeResponse));
     }
@@ -157,9 +160,12 @@ public class NoticeController {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"noticeContent\":\"첫 번째 공지사항 내용입니다.\",\"create_At\":\"2024-05-28T13:00:00\",\"img_url\":\"https://recipe-reader-kr/ce250eb8-a62a-42be-8536-5fcf8498a63f.png\",\"member\":{\"id\":1,\"nickname\":\"관리자\"}}}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                    examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"공지사항을 찾을수 없습니다\"}"))),
     })
     @GetMapping("/api/notice/{notice-id}")
-    public ResponseEntity<?> adminDetailNotice(@PathVariable("notice-id") Long noticeId){
+    public ResponseEntity<?> adminDetailNotice(@Schema(example = "1")@PathVariable("notice-id") Long noticeId){
         InfoDetailsResponse infoDetailsResponse = noticeService.detailNotice(noticeId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoDetailsResponse));
     }
