@@ -14,14 +14,12 @@ public class ResponseNotification {
     private Long id;
     private String content;
     private String url;
-    private Boolean isRead;
 
     @Builder
     public ResponseNotification(Notification notification) {
         this.id = notification.getId();
         this.content = notification.getContent();
         this.url = notification.getUrl();
-        this.isRead = notification.getIsRead();
     }
 
     public static ResponseNotification from(Notification notification) {

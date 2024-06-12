@@ -23,8 +23,6 @@ public class Notification {
     @Embedded
     private RelatedUrl url;
 
-    private Boolean isRead;     // 조회 여부
-
     private String toName;
 
     @Enumerated(EnumType.STRING)
@@ -42,7 +40,6 @@ public class Notification {
         this.toName = toName;
         this.content = new NotificationContent(content);
         this.url=  new RelatedUrl(url);
-        this.isRead =false;
     }
 
     public String getContent() {
@@ -51,10 +48,6 @@ public class Notification {
 
     public String getUrl() {
         return url.getUrl();
-    }
-
-    public void read(){
-        isRead = true;
     }
 
 }
