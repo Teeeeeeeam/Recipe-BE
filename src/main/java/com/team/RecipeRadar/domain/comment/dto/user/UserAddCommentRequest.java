@@ -28,7 +28,7 @@ public class UserAddCommentRequest {
     private Long postId;
 
     @Schema(hidden = true)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
 
     @JsonIgnore
@@ -36,11 +36,11 @@ public class UserAddCommentRequest {
     public UserAddCommentRequest(@JsonProperty("commentContent") String commentContent,
                                  @JsonProperty("memberId") Long memberId,
                                  @JsonProperty("postId") Long postId,
-                                 @JsonProperty("create_at")LocalDateTime created_at) {
+                                 @JsonProperty("create_at")LocalDateTime createdAt) {
         this.commentContent = commentContent;
         this.memberId = memberId;
         this.postId = postId;
-        this.created_at = created_at;
+        this.createdAt = createdAt;
     }
 
 

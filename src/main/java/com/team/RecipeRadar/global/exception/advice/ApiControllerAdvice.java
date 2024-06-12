@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
+import java.util.NoSuchElementException;
+
 @Slf4j
 @RestControllerAdvice
 public class ApiControllerAdvice {
@@ -70,6 +72,21 @@ public class ApiControllerAdvice {
         ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
     }
+    
+    /* NoSuchElementException의 예외를 400예외 처리 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> noSuch_BadRequest(NoSuchElementException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
+    /* IllegalArgumentException 예외를 403예외 처리 사용자가 아닌 타인 사용시)*/
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> illegal_BadRequest(IllegalArgumentException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
 }
