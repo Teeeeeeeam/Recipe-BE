@@ -9,7 +9,6 @@ import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.Image.application.ImgServiceImpl;
-import com.team.RecipeRadar.domain.Image.utils.FileStore;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
@@ -51,7 +50,6 @@ class RecipeControllerTest {
     @MockBean
     private RecipeBookmarkService recipeBookmarkService;
     @MockBean RecipeServiceImpl recipeService;
-    @MockBean FileStore fileStore;
     @MockBean ImgServiceImpl imgService;
     @MockBean S3UploadService s3UploadService;
 
