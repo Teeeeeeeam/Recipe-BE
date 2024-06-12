@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "email_verifications")
 @NoArgsConstructor
-public class EmailVerification {
+public class EmailVerification{
 
     @Id
     @GeneratedValue(generator = "UUID_GENERATOR")
@@ -35,8 +35,4 @@ public class EmailVerification {
 
     private LocalDateTime lastTime;
 
-
-    public EmailVerification(String username) {
-        this.username = username;
-    }
 }

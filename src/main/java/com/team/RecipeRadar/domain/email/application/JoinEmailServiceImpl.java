@@ -71,7 +71,7 @@ public class JoinEmailServiceImpl implements MailService{
     public Integer getCode(String email, int code){
         EmailVerification byEmailAndCode = emailVerificationRepository.findByEmailAndCode(email, code);
         if (byEmailAndCode==null){
-            throw new BadRequestException("인증번호가 일치하지 않습니다.");
+            throw new IllegalStateException("인증번호가 일치하지 않습니다.");
         }
 
         return byEmailAndCode.getCode();
@@ -97,7 +97,7 @@ public class JoinEmailServiceImpl implements MailService{
                 isVerifyCode = true; // 인증번호가 일치하고 시간이 만료되지 않았을 경우에만 true
             }
         } else {
-            throw new BadRequestException("인증번호가 일치하지 않습니다.");
+            throw new IllegalStateException("인증번호가 일치하지 않습니다.");
         }
 
         result.put("isVerifyCode", isVerifyCode);

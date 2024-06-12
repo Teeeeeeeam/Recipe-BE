@@ -83,10 +83,18 @@ public class ApiControllerAdvice {
 
     /* IllegalArgumentException 예외를 403예외 처리 사용자가 아닌 타인 사용시)*/
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> illegal_BadRequest(IllegalArgumentException e){
+    public ResponseEntity<ErrorResponse> illegal_Forbidden(IllegalArgumentException e){
         log.error("Exception occurred:", e);
         ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> illegalState_BadRequest(IllegalStateException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
 
 }
