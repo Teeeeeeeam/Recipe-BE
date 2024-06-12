@@ -47,6 +47,7 @@ public class NotificationService {
 
     private final String QUESTION_ADMIN_URL= "/api/admin/question/";
     private final String QUESTION_USER_URL= "/api/user/question/";
+    private final String POST_URL = "/list-page/user-recipes/";
 
     public SseEmitter subscribe(Long memberId,String lastEventId){
         // 고유한 아이디 생성
@@ -118,7 +119,7 @@ public class NotificationService {
     public void sendCommentNotification(Post post, String nickName) {
         Member postAuthor = post.getMember();
         String content = nickName+"님이 댓글이 달렸습니다";
-        String url = "/api/user/posts/" + post.getId();
+        String url = POST_URL + post.getId();
 
         send(postAuthor, COMMENT, content, url,nickName);
     }
@@ -127,7 +128,7 @@ public class NotificationService {
     public void sendPostLikeNotification(Post post,String nickName) {
         Member postAuthor = post.getMember();
         String content = nickName+"님이 회원님의 게시글을 좋아합니다.";
-        String url = "/api/user/posts/" + post.getId();
+        String url = POST_URL + post.getId();
 
         send(postAuthor, POSTLIKE, content, url,nickName);
     }
