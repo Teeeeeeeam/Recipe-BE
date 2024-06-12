@@ -74,23 +74,18 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
         int key =100000 + random.nextInt(900000);
         return key;
     }
-    
+
     @Override
     public Map<String, Boolean> verifyCode(String email, int code) {
         Map<String, Boolean> result = new LinkedHashMap<>();
-        boolean isVerifyCode = false; // 기본값은 false.
+        boolean isVerifyCode = false;
 
-        EmailVerification byEmailAndCode = emailVerificationRepository.findByEmailAndCode(email, code);
+        EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
 
-        if (byEmailAndCode != null) {
-            LocalDateTime lastTime = byEmailAndCode.getLastTime();
-            LocalDateTime now = LocalDateTime.now();
-
-            if (now.isBefore(lastTime)) {
-                isVerifyCode = true; // 인증번호가 일치하고 시간이 만료되지 않았을 경우에만 true
-            }
+        if (emailVerification != null && isCodeValid(emailVerification)) {
+            isVerifyCode = true;
         } else {
-            throw new BadRequestException("인증번호가 일치하지 않습니다.");
+            throw new IllegalStateException("인증번호가 일치하지 않습니다.");
         }
 
         result.put("isVerifyCode", isVerifyCode);
@@ -102,4 +97,9 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
         emailVerificationRepository.deleteByEmailAndCode(email,code);
     }
 
+    private boolean isCodeValid(EmailVerification emailVerification) {
+        LocalDateTime lastTime = emailVerification.getLastTime();
+        LocalDateTime now = LocalDateTime.now();
+        return now.isBefore(lastTime);
+    }
 }

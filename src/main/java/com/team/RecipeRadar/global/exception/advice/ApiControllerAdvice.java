@@ -96,5 +96,12 @@ public class ApiControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    /* 숫자 아닐시 400 예외 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> number_BadRequest(NumberFormatException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, "숫자만 입력해주세요.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
 }
