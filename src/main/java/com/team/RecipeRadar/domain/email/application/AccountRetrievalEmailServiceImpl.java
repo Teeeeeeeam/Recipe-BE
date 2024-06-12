@@ -74,12 +74,7 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
         int key =100000 + random.nextInt(900000);
         return key;
     }
-
-    @Override
-    public Integer getCode(String email, int code) {
-        return null;
-    }
-
+    
     @Override
     public Map<String, Boolean> verifyCode(String email, int code) {
         Map<String, Boolean> result = new LinkedHashMap<>();
