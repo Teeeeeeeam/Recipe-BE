@@ -105,7 +105,7 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
 
         if (!comments.getContent().isEmpty()) {
-            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())
+            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent())
                     .nickName(comment.getMember().getNickName()).build());
         }else
             return new PageImpl<>(Collections.emptyList(), pageable, 0);

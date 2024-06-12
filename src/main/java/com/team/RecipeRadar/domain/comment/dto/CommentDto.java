@@ -5,13 +5,12 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
+import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(name = "댓글 DTO")
-public class CommentDto {
+public class CommentDto extends BaseTimeEntity {
     
     private Long id;
 
@@ -34,23 +33,11 @@ public class CommentDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PostDto articleDto;
 
-    private LocalDateTime create_at;        //등록일
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private LocalDateTime updated_at;       //수정일
-
-
-    public void setLocalDateTime(){
-        this.create_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-
     public static CommentDto of(Comment comment){
         return CommentDto.builder()
                 .id(comment.getId())
                 .comment_content(comment.getCommentContent())
-                .nickName(comment.getMember().getNickName())
-                .create_at(comment.getCreated_at())
-                .updated_at(comment.getUpdated_at()).build();
+                .nickName(comment.getMember().getNickName()).build();
     }
 
     public static CommentDto admin(Comment comment){
@@ -59,7 +46,6 @@ public class CommentDto {
         return CommentDto.builder()
                 .id(comment.getId())
                 .comment_content(comment.getCommentContent())
-                .create_at(comment.getCreated_at())
                 .member(memberDto).build();
     }
 }
