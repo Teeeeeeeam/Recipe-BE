@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.notice.application;
 
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.*;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
@@ -14,7 +15,7 @@ public interface NoticeService {
 
     void delete(List<Long> noticeIds);
 
-    void update(Long noticeId, AdminUpdateRequest adminUpdateNoticeDto, String loginId, MultipartFile file);
+    void update(Long noticeId, AdminUpdateRequest adminUpdateNoticeDto, MultipartFile file);
 
     List<NoticeDto> mainNotice();
 

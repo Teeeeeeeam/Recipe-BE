@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
@@ -13,6 +14,7 @@ import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -95,10 +97,9 @@ public class NoticeServiceImpl implements NoticeService {
      * @param adminUpdateRequest
      */
     @Override
-    public void update(Long noticeId, AdminUpdateRequest adminUpdateRequest, String loginId,MultipartFile file) {
+    public void update(Long noticeId, AdminUpdateRequest adminUpdateRequest, MultipartFile file) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("해당 공지사항을 찾을 수 없습니다."));
-        if(!notice.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("관리자만 삭제 가능합니다.");
 
         UploadFile uploadFile = imgRepository.getOriginalFileName(notice.getId());
         if(file!=null && uploadFile!=null) {

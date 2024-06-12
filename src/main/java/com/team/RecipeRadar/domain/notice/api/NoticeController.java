@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.notice.api;
 
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.application.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
@@ -11,6 +12,7 @@ import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -118,13 +121,12 @@ public class NoticeController {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
-            String loginId = authenticationLogin();
-            noticeService.update(noticeId,adminUpdateRequest,loginId,file);
+            noticeService.update(noticeId,adminUpdateRequest,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
         }catch (NoSuchElementException e){
             throw new BadRequestException(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
             throw new ServerErrorException("서버 오류 발생");
         }
