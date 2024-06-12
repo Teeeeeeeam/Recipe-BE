@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.*;
 @Slf4j
 @DataJpaTest
 @Import(QueryDslConfig.class)
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 @Transactional
 @ActiveProfiles("test")
@@ -43,7 +42,7 @@ class NotificationRepositoryTest {
     @Autowired PostRepository postRepository;
     @Autowired CommentRepository commentRepository;
 
-    private final String POST_URL ="/api/user/posts/";
+    private final String POST_URL ="/list-page/user-recipes/";
 
     @Test
     @DisplayName("알림기능 무한 페이징 기능")
