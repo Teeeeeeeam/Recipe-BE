@@ -56,17 +56,10 @@ public class PostController {
     })
     @PostMapping(value = "/api/user/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostRequest, BindingResult bindingResult, @RequestPart MultipartFile file) {
-        try {
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
             postService.save(userAddPostRequest,file);
             return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
-        }catch (NoSuchElementException e){
-            throw new PostException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
-        }
     }
 
     @Operation(summary = "전체 게시글 조회(페이징)", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있다.(무한페이징)")
@@ -92,14 +85,9 @@ public class PostController {
                             examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"해당하는 게시물이 없습니다.\"}")))
     })
     @GetMapping("/api/user/posts/{post-id}")
-    public  ResponseEntity<?> findPost(@PathVariable("post-id") long id) {
-        try {
-            PostDetailResponse postDetailResponse = postService.postDetail(id);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",postDetailResponse));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());
-        }
-
+    public ResponseEntity<?> findPost(@PathVariable("post-id") long id) {
+        PostDetailResponse postDetailResponse = postService.postDetail(id);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",postDetailResponse));
     }
 
     @Operation(summary = "게시글 삭제",description = "작성한 사용자만이 해당 레시피를 삭제할 수 있습니다. 삭제 시 해당 게시물과 관련된 모든 데이터가 삭제됩니다.")
@@ -113,17 +101,12 @@ public class PostController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
-
     })
     @DeleteMapping("/api/user/posts/{post-id}")
     public ResponseEntity<?> deletePost(@PathVariable("post-id") Long postId){
-        try{
             String loginId = authenticationLogin();
             postService.delete(loginId,postId);
             return ResponseEntity.ok(new ControllerApiResponse(true,"게시글 삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());         //예외처리-> 여기서 처리안하고  @ExceptionHandler로 예외처리함
-        }
     }
 
     @Operation(summary = "게시글 수정",  description = "로그인한 사용자만 수정이 가능하며, 작성자만 수정할 수 있습니다. 비밀번호 검증을 통해 사용자를 확인한 후 해당 API에 접근할 수 있습니다.")
@@ -141,7 +124,6 @@ public class PostController {
     @PostMapping(value = "/api/user/update/posts/{post-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest userUpdateRequest, BindingResult bindingResult,
                                          @RequestPart(required = false) MultipartFile file, @PathVariable("post-id") Long postId){
-        try{
             ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
             if (errorMap != null) return errorMap;
 
@@ -149,12 +131,6 @@ public class PostController {
             postService.update(postId,userUpdateRequest,loginId,file);
 
             return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류 발생");
-        }
     }
 
 
@@ -173,13 +149,9 @@ public class PostController {
     })
     @PostMapping("/api/valid/posts")
     public ResponseEntity<?> validPost(@RequestBody ValidPostRequest request){
-        try {
             String login = authenticationLogin();
             boolean valid = postService.validPostPassword(login, request);
             return ResponseEntity.ok(new ControllerApiResponse<>(valid,"비밀번호 인증 성공"));
-        }catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        }
     }
 
 

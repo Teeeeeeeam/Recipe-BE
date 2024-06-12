@@ -2,11 +2,9 @@ package com.team.RecipeRadar.global.exception.advice;
 
 
 import com.team.RecipeRadar.domain.like.ex.LikeException;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
-import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.*;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +99,14 @@ public class ApiControllerAdvice {
     public ResponseEntity<ErrorResponse> number_BadRequest(NumberFormatException e){
         log.error("Exception occurred:", e);
         ErrorResponse response = new ErrorResponse<>(false, "숫자만 입력해주세요.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /* 이미지 관련 예외 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> Image_BadRequest(ImageException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 

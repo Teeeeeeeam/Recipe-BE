@@ -6,6 +6,8 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
+import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+
+import static com.team.RecipeRadar.global.exception.ex.img.ImageErrorType.*;
 
 @Service
 @Transactional
@@ -35,7 +39,7 @@ public class S3UploadService {
     public String uploadFile(MultipartFile file){
 
         if (file.isEmpty()|| file==null){
-            throw new BadRequestException("대표 이미지를 등록해주세요");
+            throw new ImageException(MISSING_PRIMARY_IMAGE);
         }
 
         String originalFilename = file.getOriginalFilename();
@@ -50,7 +54,7 @@ public class S3UploadService {
             amazonS3.putObject(new PutObjectRequest(bucket,storeFile,inputStream,objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
         }catch (IOException e) {
             e.printStackTrace();
-            throw new BadRequestException("파일업로드 실패");
+            throw new ImageException(UPLOAD_FAILS);
         }
         return storeFile;
     }
@@ -65,7 +69,7 @@ public class S3UploadService {
                 amazonS3.deleteObject(bucket, uploadFileName);
             }
         }catch (SdkClientException e){
-            throw new BadRequestException("파일 삭제도중 오류 발생");
+            throw new ImageException(UPLOAD_FAILS);
         }
     }
 
@@ -75,7 +79,7 @@ public class S3UploadService {
 
         String extension = substring.toLowerCase();
         if (!extension.equals("jpeg") && !extension.equals("jpg") && !extension.equals("png")) {
-            throw new BadRequestException("이미지 파일만 등록 해주세요");
+            throw new ImageException(INVALID_IMAGE_FORMAT);
         }
 
         String uuid = UUID.randomUUID().toString();
