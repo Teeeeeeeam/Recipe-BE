@@ -149,9 +149,8 @@ class CommentServiceImplTest {
         // Comment 리포지토리 mock 설정
         when(commentRepository.findById(3L)).thenReturn(Optional.of(comment));
 
-        //CommentException에러가 나오는지 확인하는 메서드
         Assertions.assertThatThrownBy(() -> commentService.delete_comment(commentDto))
-                .isInstanceOf(CommentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
 
     }
 
@@ -238,7 +237,7 @@ class CommentServiceImplTest {
         when(memberRepository.findById(member_fail.getId())).thenReturn(Optional.of(member_fail));
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
 
-        assertThrows(CommentException.class ,()-> commentService.update(member_fail.getId(),comment.getId(),update_success));
+        assertThrows(IllegalArgumentException.class ,()-> commentService.update(member_fail.getId(),comment.getId(),update_success));
         assertThat(comment.getCommentContent()).isEqualTo("댓글 수정전");
 
     }

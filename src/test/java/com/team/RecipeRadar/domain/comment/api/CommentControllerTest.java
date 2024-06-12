@@ -179,7 +179,7 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.data.commentContent").value(update_content))
                 .andExpect(jsonPath("$.data.memberId").value(memberId))
                 .andExpect(jsonPath("$.data.commentId").value(commentId))
-                .andExpect(jsonPath("$.data.update_At").exists())
+                .andExpect(jsonPath("$.data.updateAt").exists())
                 .andDo(print());
     }
 
