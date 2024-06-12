@@ -22,7 +22,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Qualifier("JoinEmail")
 @Slf4j
-public class JoinEmailServiceImplV1 implements MailService{
+public class JoinEmailServiceImpl implements MailService{
 
     private final JavaMailSender mailSender;
     private final EmailVerificationRepository emailVerificationRepository;
