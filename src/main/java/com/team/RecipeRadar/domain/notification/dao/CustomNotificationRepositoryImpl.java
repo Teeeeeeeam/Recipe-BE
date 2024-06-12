@@ -9,7 +9,6 @@ import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.domain.QNotification;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
-import com.team.RecipeRadar.domain.questions.domain.QQuestion;
 import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
-import static com.team.RecipeRadar.domain.notification.domain.QNotification.*;
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.notification;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
 import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
@@ -97,14 +95,12 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
         for(Notification notification : notificationList){
             if(notification.getNotificationType().equals(POSTLIKE)){        //좋아여 타입인지 확인
                 Long replace = getReplace(notification.getUrl(), POST_URL);        // post ID 추출
-                if(replace == postId && notification.getToName().equals(nickName)){                                  // 넘어온 ID와 추출한 아이디 비교
+                if(replace.equals(postId) && notification.getToName().equals(nickName)){                                  // 넘어온 ID와 추출한 아이디 비교
                         jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
                         break;
                 }
             }
-
         }
-
     }
 
     /**
@@ -125,12 +121,6 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
                 List<Comment> allWithPostId = commentRepository.findAllByPostId(replace_postId);
                 for (Comment comment : allWithPostId) {
                     if(comment.getId() == commentId &&  notification.getToName().equals(nickName)) {
-//                        boolean existsByReceiverIdAndToName = existsByReceiverIdAndToName(notification.getReceiver().getId(), nickName); // 일치한다면 해당 레코드에서 사용자 비교
-//                        if(!existsByReceiverIdAndToName){        //존재했을때 ID획득
-//                            id= notification.getId();
-//                            break;
-//                        }
-//                    }
                         jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
                         delete= true;
                         break;
@@ -191,7 +181,12 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
                         .where(question.id.eq(questionId)).fetchFirst();
                 String body= questionType==QuestionType.ACCOUNT_INQUIRY ?"계정 문의" : "일반 문의";
                 content = toName+"님이 "+ body+" 사항을 등록했습니다.";
-            }else {
+            }else{
+                String notificationToName = notification.getToName();
+                Long replace_URL = getReplace(notification.getUrl(), QUESTION_USER_URL);
+                String question_title = jpaQueryFactory.select(question.title)
+                        .from(question).where(question.id.eq(replace_URL)).fetchFirst();
+                content = notificationToName+"님이 " +question_title+" 의 답변이 작성되었습니다.";
             }
         }
         return content;
