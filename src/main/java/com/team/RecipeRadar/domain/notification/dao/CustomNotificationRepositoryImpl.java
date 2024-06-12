@@ -34,7 +34,7 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
 
-    private final String POST_URL ="/api/user/posts/";
+    private final String POST_URL ="/list-page/user-recipes/";
     private final String QUESTION_USER_URL = "/api/user/question/";
     private final String QUESTION_ADMIN_URL = "/api/admin/question/";
 
