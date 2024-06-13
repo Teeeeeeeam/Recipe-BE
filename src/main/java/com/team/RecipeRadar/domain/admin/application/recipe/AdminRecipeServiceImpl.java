@@ -19,7 +19,8 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeUpdateRequest;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,52 +49,98 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
     private final S3UploadService s3UploadService;
 
     /**
-     * 레시피 저장하는 로직 s3에 이미지 저장
+     * 레시피를 저장하는 메서드.
+     * 이미지 파일과 재료를 저장하고, 요리 단계를 저장합니다.
      */
-
     @Override
     public void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename) {
+        Recipe savedRecipe = recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
 
-        Recipe save_Recipe= recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
+        // 이미지 파일 저장
+        saveImageAndIngredients(recipeSaveRequest.getIngredients(), savedRecipe, fileUrl, originalFilename);
 
-        String ingredient_stream = recipeSaveRequest.getIngredients().stream().collect(Collectors.joining("|"));
-
-        UploadFile uploadFile = UploadFile.builder().storeFileName(fileUrl).originFileName(originalFilename).recipe(save_Recipe).build();
-        imgRepository.save(uploadFile);
-
-        Ingredient ingredient = Ingredient.builder()
-                .ingredients(ingredient_stream)
-                .recipe(save_Recipe).build();
-
-        ingredientRepository.save(ingredient);
-
-        List<String> cookSteps = recipeSaveRequest.getCookSteps();
-        List<CookingStep> cookingSteps = new ArrayList<>();
-        for (String steps : cookSteps){
-            cookingSteps.add(CookingStep.builder().steps(steps).recipe(save_Recipe).build());
-        }
-        cookStepRepository.saveAll(cookingSteps);
+        // 요리 단계 저장
+        saveCookingSteps(recipeSaveRequest.getCookSteps(), savedRecipe);
     }
 
-
+    /**
+     * 모든 레시피의 수를 반환하는 메서드.
+     */
     @Override
     public long searchAllRecipes() {
         return recipeRepository.countAllBy();
     }
 
-
+    /**
+     * 여러 레시피를 삭제하는 메서드.
+     * 주어진 ID 목록에 포함된 모든 레시피를 삭제하고 관련된 데이터들도 함께 삭제합니다.
+     */
     @Override
     public void deleteRecipe(List<Long> ids) {
-        for (Long id : ids) {
-            deleteRecipeById(id);
-        }
+        ids.forEach(this::deleteRecipeById);
     }
 
+    /**
+     * 특정 레시피의 정보를 업데이트하는 메서드.
+     * 이미지 업로드 처리, 요리 단계 업데이트, 새로운 요리 단계 추가, 삭제할 요리 단계 삭제 등의 작업을 수행합니다.
+     */
+    @Override
+    public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) {
+        Recipe recipe = getRecipeById(recipeId);
+
+        // 파일 업로드 처리
+        handleFileUpload(file, recipe);
+
+        // 요리 단계 업데이트
+        updateCookingSteps(recipeUpdateRequest.getCookSteps());
+
+        // 새로운 요리 단계 추가
+        createNewCookingSteps(recipeUpdateRequest.getNewCookSteps(), recipe);
+
+        // 삭제할 요리 단계 삭제
+        deleteCookingSteps(recipeUpdateRequest.getDeleteCookStepsId());
+
+        // 재료 업데이트
+        updateIngredients(recipeUpdateRequest.getIngredients(), recipe);
+
+        // 레시피 정보 업데이트
+        recipe.update_recipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime());
+
+        recipeRepository.save(recipe);
+    }
+
+    /**
+     * 제목과 재료로 레시피를 검색하여 페이징된 결과를 반환하는 메서드.
+     * 관리자 페이지에서 사용하는 검색 기능입니다.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title, Long lastRecipeId, Pageable pageable) {
+        Slice<RecipeDto> recipeSlice = recipeRepository.adminSearchTitleOrIng(ingredients, title, lastRecipeId, pageable);
+        return new RecipeResponse(recipeSlice.getContent(), recipeSlice.hasNext());
+    }
+
+    // 아래는 private 메서드들입니다.
+
+    /**
+     * 특정 ID의 레시피를 삭제하는 메서드.
+     * 레시피와 관련된 이미지, 댓글, 좋아요, 북마크 등의 데이터도 함께 삭제합니다.
+     */
     private void deleteRecipeById(Long id) {
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("해당 레시피를 찾을수 없습니다."));
-        Long recipeId = recipe.getId();
+                .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
 
+        // 관련 데이터 삭제
+        deleteRecipeRelatedData(recipe.getId());
+
+        // 레시피 삭제
+        recipeRepository.deleteById(recipe.getId());
+    }
+
+    /**
+     * 특정 ID의 레시피와 관련된 데이터를 삭제하는 메서드.
+     */
+    private void deleteRecipeRelatedData(Long recipeId) {
         imageService.delete_Recipe(recipeId);
         commentRepository.delete_post(recipeId);
         postLikeRepository.deleteRecipeId(recipeId);
@@ -101,22 +148,38 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         recipeLikeRepository.deleteRecipeId(recipeId);
         recipeBookmarkRepository.deleteAllByRecipe_Id(recipeId);
         ingredientRepository.deleteRecipeId(recipeId);
-        recipeRepository.deleteById(recipeId);
     }
 
     /**
-     * 레시피의 정보를 수정하는 로직 해당 이미지파일의 정보가 db에 저장된 이미와 같을 경우 이미지 저장 로직 실행되지 않음
-     * @param recipeId
-     * @param recipeUpdateRequest
-     * @param file
+     * 레시피를 저장 하는 메서드.
+     * 새로운 레시피를 이미지와 함께 저장합니다.
      */
-    @Override
-    public void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("해당 레시피를 찾을수 없습니다."));
+    private void saveImageAndIngredients(List<String> ingredients, Recipe savedRecipe, String fileUrl, String originalFilename) {
+        UploadFile uploadFile = UploadFile.builder().storeFileName(fileUrl).originFileName(originalFilename).recipe(savedRecipe).build();
+        imgRepository.save(uploadFile);
 
-        UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipeId).get();
+        ingredientRepository.save(Ingredient.createIngredient(ingredients.stream().collect(Collectors.joining("|")), savedRecipe));
+    }
 
-        if(file!=null) {
+    /**
+     * 재료순서 저장 하는 메서드
+     * 레시피 저장하 조리 순서에 새로운 순서를 저장 합니다.
+     */
+    private void saveCookingSteps(List<String> cookSteps, Recipe savedRecipe) {
+        List<CookingStep> cookingSteps = cookSteps.stream()
+                .map(step -> CookingStep.createCookingStep(savedRecipe, step))
+                .collect(Collectors.toList());
+        cookStepRepository.saveAll(cookingSteps);
+    }
+    /**
+     * 이미지 파일 업로드 처리 메서드.
+     * 파일이 업로드되면 기존 이미지 파일을 삭제하고 새로운 파일을 업로드합니다.
+     */
+    private void handleFileUpload(MultipartFile file, Recipe recipe) {
+        if (file != null) {
+            UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipe.getId())
+                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_IMAGE));
+
             if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
                 s3UploadService.deleteFile(uploadFile.getStoreFileName());
                 String storedFile = s3UploadService.uploadFile(file);
@@ -124,47 +187,54 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
                 imgRepository.save(uploadFile);
             }
         }
-
-        List<Map<String, String>> cookeSteps = recipeUpdateRequest.getCookSteps();
-
-        if(cookeSteps!=null) {
-            for (Map<String, String> cookeStep : cookeSteps) {
-                long cookStepId = Long.parseLong(cookeStep.get("cook_step_id"));
-                Optional<CookingStep> byId = cookStepRepository.findById(cookStepId);
-                if (byId.isPresent()) {
-                    String cookSteps_Value = cookeStep.get("cook_steps");
-                    CookingStep cookingStep = byId.get();
-                    cookingStep.update(cookSteps_Value);
-                    cookStepRepository.save(cookingStep);
-                }
-            }
-        }
-        List<String> newCookSteps = recipeUpdateRequest.getNewCookSteps();
-
-        if (newCookSteps != null){
-            CookingStep.CookingStepBuilder recipe1 = CookingStep.builder().recipe(recipe);
-            newCookSteps.stream().forEach(s -> recipe1.steps(s).build());
-            cookStepRepository.save(recipe1.build());
-        }
-
-        if(recipeUpdateRequest.getDeleteCookStepsId()!=null){
-            recipeUpdateRequest.getDeleteCookStepsId().stream().forEach(s ->cookStepRepository.deleteById(s));
-        }
-
-        String ing = recipeUpdateRequest.getIngredients().stream().collect(Collectors.joining("|"));
-        ingredientRepository.updateRecipe_ing(recipe.getId(),ing);
-
-        recipe.s3_update_recipe(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getCookTime());
-        recipeRepository.save(recipe);
     }
 
-    /*
-   searchRecipesByIngredients와 검색 기능은 동일하나 해당 로직은 admin 사용자를 위한 검색 api
-    */
-    @Override
-    @Transactional(readOnly = true)
-    public RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title, Long lastRecipeId, Pageable pageable) {
-        Slice<RecipeDto> recipe = recipeRepository.adminSearchTitleOrIng(ingredients,title,lastRecipeId, pageable);
-        return new RecipeResponse(recipe.getContent(),recipe.hasNext());
+    /**
+     * 요리 단계들을 업데이트하는 메서드.
+     */
+    private void updateCookingSteps(List<Map<String, String>> cookSteps) {
+        if (cookSteps != null) {
+            cookSteps.forEach(cookStep -> {
+                long cookStepId = Long.parseLong(cookStep.get("cook_step_id"));
+                CookingStep cookingStep = cookStepRepository.findById(cookStepId)
+                        .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COOK_STEP));
+                cookingStep.update(cookStep.get("cook_steps"));
+                cookStepRepository.save(cookingStep);
+            });
+        }
+    }
+
+    /**
+     * 새로운 요리 단계들을 생성하는 메서드.
+     */
+    private void createNewCookingSteps(List<String> newCookSteps, Recipe recipe) {
+        if (newCookSteps != null) {
+            newCookSteps.forEach(step -> cookStepRepository.save(CookingStep.createCookingStep(recipe, step)));
+        }
+    }
+
+    /**
+     * 삭제할 요리 단계들을 삭제하는 메서드.
+     */
+    private void deleteCookingSteps(List<Long> deleteCookStepsIds) {
+        if (deleteCookStepsIds != null) {
+            deleteCookStepsIds.forEach(cookStepRepository::deleteById);
+        }
+    }
+
+    /**
+     * 재료를 업데이트하는 메서드.
+     */
+    private void updateIngredients(List<String> ingredients, Recipe recipe) {
+        String ingredientString = ingredients.stream().collect(Collectors.joining("|"));
+        ingredientRepository.updateRecipe_ing(recipe.getId(), ingredientString);
+    }
+
+    /**
+     * 특정 ID의 레시피를 조회하여 반환하는 메서드.
+     */
+    private Recipe getRecipeById(Long recipeId) {
+        return recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
     }
 }
