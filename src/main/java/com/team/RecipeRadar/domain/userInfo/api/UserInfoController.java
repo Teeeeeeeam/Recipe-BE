@@ -3,6 +3,7 @@ package com.team.RecipeRadar.domain.userInfo.api;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
@@ -48,6 +49,7 @@ public class UserInfoController {
 
 
     private final UserInfoService userInfoService;
+    private final CookieUtils cookieUtils;
 
     @Value("${disconnect.oauth2.redirect}")
     private String redirectUrl;
@@ -169,16 +171,9 @@ public class UserInfoController {
             MemberDto memberDto = getMemberDto();
 
             String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordRequest.getPassword(), passwordRequest.getLoginType());
-            String userEncodeToken = new String(Base64.getEncoder().encode(userToken.getBytes()));
+            ResponseCookie userInfoCookie = cookieUtils.createUserInfoCookie("login-id", userToken, 1200);
 
-            ResponseCookie responseCookie = ResponseCookie.from("login-id", userEncodeToken)
-                    .httpOnly(true)
-                    .secure(true)
-                    .sameSite("None")
-                    .path("/")
-                    .maxAge(1200)
-                    .build();
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, userInfoCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
 
         } catch (BadRequestException e){
             throw new BadRequestException(e.getMessage());
