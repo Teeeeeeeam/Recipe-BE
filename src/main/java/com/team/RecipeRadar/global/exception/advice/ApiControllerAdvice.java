@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.global.exception.advice;
 
 
-import com.team.RecipeRadar.domain.like.ex.LikeException;
 import com.team.RecipeRadar.global.exception.ex.*;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
@@ -42,12 +41,6 @@ public class ApiControllerAdvice {
 
     @ExceptionHandler(CommentException.class)
     public ResponseEntity<ErrorResponse> commentError(CommentException e){
-        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> LikeError(LikeException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
