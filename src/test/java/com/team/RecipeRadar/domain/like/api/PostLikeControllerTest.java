@@ -60,7 +60,7 @@ class PostLikeControllerTest {
         PostLikeRequest postLikeRequest = PostLikeRequest.builder().postId(1l).build();
         given(postLikeService.addLike(postLikeRequest,memberId)).willReturn(true);
 
-        mockMvc.perform(post("/api/user/post-like")
+        mockMvc.perform(post("/api/user/posts/like")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(postLikeRequest)))
                 .andDo(print())
@@ -77,7 +77,7 @@ class PostLikeControllerTest {
         PostLikeRequest postLikeRequest = PostLikeRequest.builder().postId(1l).build();
         given(postLikeService.addLike(postLikeRequest,memberId)).willReturn(false);
 
-        mockMvc.perform(post("/api/user/post-like")
+        mockMvc.perform(post("/api/user/posts/like")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(postLikeRequest)))
                 .andDo(print())
@@ -93,7 +93,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.checkLike(null,1l)).willReturn(true);
 
-        mockMvc.perform(get("/api/user/like-check")
+        mockMvc.perform(get("/api/user/posts/like/check")
                         .param("postId","1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -110,7 +110,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.checkLike(anyLong(), anyLong())).willReturn(true);
 
-        mockMvc.perform(get("/api/user/like-check")
+        mockMvc.perform(get("/api/user/posts/like/check")
                         .param("postId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인/
