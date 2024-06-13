@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,23 +20,18 @@ import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class RecipeLikeRepositoryImpl implements RecipeLikeRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
 
-    public RecipeLikeRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
-        this.queryFactory = jpaQueryFactory;
-    }
-
     /**
-     * Slice 이용한 무한 페이징 querydsl
-     * @param memberId  사용자의 id
-     * @param pageable  
-     * @return  new SliceImpl<> 페이지 정보 반환
+     * Slice 이용한 무한 페이징
      */
     @Override
     public Slice<UserLikeDto> userInfoRecipeLikes(Long memberId, Long recipeLike_lastId,Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
+
         if(recipeLike_lastId!=null){
             builder.and(recipeLike.id.lt(recipeLike_lastId));
         }

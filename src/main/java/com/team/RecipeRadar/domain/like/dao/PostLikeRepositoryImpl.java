@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.domain.QMember;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -19,19 +20,13 @@ import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
 
-    public PostLikeRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
-        this.queryFactory = jpaQueryFactory;
-    }
-
     /**
-     * Slice 이용한 무한 페이징 querydsl
-     * @param memberId  사용자의 id
-     * @param pageable
-     * @return  new SliceImpl<> 페이지 정보 반환
+     * Slice 이용한 무한 페이징
      */
     @Override
     public Slice<UserLikeDto> userInfoLikes(Long memberId, Long postLike_lastId,Pageable pageable) {
@@ -41,7 +36,7 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
             builder.and(postLike.id.lt(postLike_lastId));
         }
 
-        List<PostLike> result = queryFactory
+        List<PostLike> postLikeList = queryFactory
                 .selectFrom(postLike)
                 .innerJoin(postLike.member, QMember.member).fetchJoin()
                 .where(builder,postLike.member.id.eq(memberId))
@@ -50,7 +45,7 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
                 .fetch();
 
 
-        List<UserLikeDto> content = result.stream()
+        List<UserLikeDto> content = postLikeList.stream()
                 .map(UserLikeDto::Post_of)
                 .collect(Collectors.toList());
 
@@ -64,6 +59,9 @@ public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{
       return new SliceImpl<>(content,pageable,hasNext);
     }
 
+    /**
+     * 레시피 아이디와 일치하는 게시글 좋아요 삭제
+     */
     @Override
     public void deleteRecipeId(Long recipeId) {
         queryFactory
