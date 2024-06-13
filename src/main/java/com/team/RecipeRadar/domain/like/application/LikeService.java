@@ -5,9 +5,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface LikeService<T> {
 
-    Boolean addLike(T postLikeDto);
-    Boolean checkLike(String JwtToken, Long Id);
+    Boolean addLike(T postLikeDto,Long memberId);
+    Boolean checkLike(Long memberId,Long postId);
 
-    UserInfoLikeResponse getUserLikesByPage(String authenticationName, String  loginId, Long Like_lastId,Pageable pageable);
-
+    UserInfoLikeResponse getUserLikesByPage(Long memberId, Long Like_lastId,Pageable pageable);
 }

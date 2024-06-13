@@ -17,7 +17,6 @@ public class PostLikeRequest {
     @Schema(hidden = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long id;
-    private Long memberId;
     private Long postId;
 
 }
