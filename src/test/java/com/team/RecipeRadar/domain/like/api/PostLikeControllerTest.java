@@ -93,8 +93,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.checkLike(null,1l)).willReturn(true);
 
-        mockMvc.perform(get("/api/user/posts/like/check")
-                        .param("postId","1")
+        mockMvc.perform(get("/api/user/posts/1/like/check")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -110,8 +109,7 @@ class PostLikeControllerTest {
 
         given(postLikeService.checkLike(anyLong(), anyLong())).willReturn(true);
 
-        mockMvc.perform(get("/api/user/posts/like/check")
-                        .param("postId", "1")
+        mockMvc.perform(get("/api/user/posts/1/like/check")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인/
                 .andDo(print()); // 테스트 결과 출력
