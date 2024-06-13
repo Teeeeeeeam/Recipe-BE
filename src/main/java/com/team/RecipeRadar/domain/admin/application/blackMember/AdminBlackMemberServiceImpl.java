@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AdminBlackMemberServiceImpl implements AdminBlackMemberService{
+public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
 
     private final MemberRepository memberRepository;
     private final BlackListRepository blackListRepository;

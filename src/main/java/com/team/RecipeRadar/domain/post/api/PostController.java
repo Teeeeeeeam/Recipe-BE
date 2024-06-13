@@ -185,21 +185,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "게시글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)", tags = "어드민 - 게시글 컨트롤러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ControllerApiResponse.class)),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}},{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}}"))),
-    })
-    @GetMapping("/api/search")
-    public ResponseEntity<?> searchPost(@RequestParam(value = "login-id",required = false) String loginId,
-                                  @RequestParam(value = "recipe-title",required = false) String recipeTitle,
-                                  @RequestParam(value = "post-title",required = false) String postTitle,
-                                  @RequestParam(value = "post-id",required = false) Long lastPostId,
-                                  @Parameter(example = "{\"size\":10}") Pageable pageable){
-        PostResponse postResponse = postService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"검색 성공",postResponse));
-    }
+
 
     //로그인한 사용자의 loginId를 스프링 시큐리티에서 획득
     private static String authenticationLogin() {

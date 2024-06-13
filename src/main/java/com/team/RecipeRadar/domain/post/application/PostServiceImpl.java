@@ -189,29 +189,6 @@ public class PostServiceImpl implements PostService {
         return true;
     }
 
-    /**
-     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환
-     */
-    @Override
-    public PostResponse searchPost(String loginId, String recipeTitle, String postTitle, Long lastPostId, Pageable pageable) {
-        Slice<PostDto> postDtos = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
-        return new PostResponse(postDtos.hasNext(),postDtos.getContent());
-    }
 
-    /**
-     * 한개 이상의 게시글을 삭제할수 있다.
-     * @param postIds
-     */
-    @Override
-    public void deletePosts(List<Long> postIds) {
-
-        for (Long postId : postIds) {
-            Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
-            imgRepository.deletePostImg(post.getId(),post.getRecipe().getId());
-            commentRepository.deletePostID(post.getId());
-            postLikeRepository.deletePostID(postId);
-            postRepository.deleteById(post.getId());
-        }
-    }
 
 }
