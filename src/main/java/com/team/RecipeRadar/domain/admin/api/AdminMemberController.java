@@ -248,5 +248,20 @@ public class AdminMemberController {
         adminService.deleteBlackList(id);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
+
+    @Operation(summary = "블랙 리스트 이메일 검색",description = "블랙 리스트에서 이메일을 검색하는 API",tags = "어드민 - 회원 및 블랙리스트 관리")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"blackList\":[{\"id\":1,\"email\":\"user1@example.com\",\"black_check\":true},{\"id\":2,\"email\":\"user2@example.com\",\"black_check\":true}]}}")))
+    })
+    @GetMapping("/black/search")
+    public ResponseEntity<?> searchEmail(@RequestParam(value = "email",required = false)String email,
+                                         @RequestParam(value = "lastId",required = false) Long lastId,
+                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
+        BlackListResponse blackListResponse = adminService.searchEmailBlackList(email, lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",blackListResponse));
+    }
+
         
 }

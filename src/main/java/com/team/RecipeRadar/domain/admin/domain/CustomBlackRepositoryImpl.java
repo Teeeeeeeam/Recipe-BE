@@ -26,10 +26,7 @@ public class CustomBlackRepositoryImpl implements CustomBlackRepository{
     @Override
     public Slice<BlackListDto> allBlackList(Long lastId, Pageable pageable) {
 
-        BooleanBuilder builder = new BooleanBuilder();
-        if(lastId != null){
-            builder.and(blackList.id.lt(lastId));
-        }
+        BooleanBuilder builder = getBuilder(lastId);
         List<BlackList> blackListList = jpaQueryFactory.select(blackList)
                 .from(blackList)
                 .where(builder)
@@ -37,16 +34,45 @@ public class CustomBlackRepositoryImpl implements CustomBlackRepository{
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
+
+        List<BlackListDto> collectBlackListDtosList = blackListList.stream().map(b -> new BlackListDto(b.getId(), b.getEmail(), b.isBlack_check())).collect(Collectors.toList());
+
+        boolean hasNext = isHasNext(pageable,collectBlackListDtosList);
+
+        return  new SliceImpl<>(collectBlackListDtosList,pageable,hasNext);
+
+    }
+
+    @Override
+    public Slice<BlackListDto> searchEmailBlackList(String email, Long lastId,Pageable pageable){
+        BooleanBuilder builder = getBuilder(lastId);
+
+        List<BlackList> blackListList = jpaQueryFactory.select(blackList)
+                .from(blackList)
+                .where(builder,blackList.email.like("%" + email + "%"))
+                .limit(pageable.getPageSize()+1)
+                .orderBy(blackList.id.desc())
+                .fetch();
+
+        List<BlackListDto> blackListDtoList = blackListList.stream().map(b -> new BlackListDto(b.getId(), b.getEmail(), b.isBlack_check())).collect(Collectors.toList());
+        boolean hasNext = isHasNext(pageable, blackListDtoList);
+        return  new SliceImpl<>(blackListDtoList,pageable,hasNext);
+
+    }
+    private static <T> boolean isHasNext(Pageable pageable, List<T> collect) {
         boolean hasNext =false;
-
-        List<BlackListDto> collect = blackListList.stream().map(b -> new BlackListDto(b.getId(), b.getEmail(), b.isBlack_check())).collect(Collectors.toList());
-
         if (collect.size() > pageable.getPageSize()){
             collect.remove(pageable.getPageSize());
             hasNext= true;
         }
+        return hasNext;
+    }
 
-        return  new SliceImpl<>(collect,pageable,hasNext);
-
+    private static BooleanBuilder getBuilder(Long lastId) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(lastId != null){
+            builder.and(blackList.id.lt(lastId));
+        }
+        return builder;
     }
 }

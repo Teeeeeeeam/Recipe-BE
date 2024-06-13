@@ -31,4 +31,6 @@ public interface AdminService {
 
     void deleteBlackList(Long blackId);
 
+    BlackListResponse searchEmailBlackList(String email,Long lastId,Pageable pageable);
+
 }

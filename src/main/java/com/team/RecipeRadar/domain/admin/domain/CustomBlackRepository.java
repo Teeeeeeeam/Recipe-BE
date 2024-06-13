@@ -7,4 +7,6 @@ import org.springframework.data.domain.Slice;
 public interface CustomBlackRepository {
 
     Slice<BlackListDto> allBlackList(Long lastId, Pageable pageable);
+
+    Slice<BlackListDto> searchEmailBlackList(String email,Long lastId,Pageable pageable);
 }

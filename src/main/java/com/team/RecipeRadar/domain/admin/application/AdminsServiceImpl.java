@@ -161,6 +161,13 @@ public class AdminsServiceImpl implements AdminService {
         blackListRepository.deleteById(blackId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public BlackListResponse searchEmailBlackList(String email, Long lastId, Pageable pageable) {
+        Slice<BlackListDto> searchEmailBlackList = blackListRepository.searchEmailBlackList(email, lastId, pageable);
+        return new BlackListResponse(searchEmailBlackList.hasNext(),searchEmailBlackList.getContent());
+    }
+
     private void deleteRecipeById(Long id) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("해당 레시피를 찾을수 없습니다."));
