@@ -243,9 +243,9 @@ public class AdminMemberController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}")))
     })
-    @DeleteMapping("/blacklist/{id}")
-    public ResponseEntity<?> deleteBlack(@PathVariable Long id){
-        adminService.deleteBlackList(id);
+    @DeleteMapping("/blacklist")
+    public ResponseEntity<?> deleteBlack(@RequestParam(value = "ids") List<Long> blackId){
+        adminService.deleteBlackList(blackId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 

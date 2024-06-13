@@ -29,7 +29,7 @@ public interface AdminService {
     BlackListResponse getBlackList(Long lastId,Pageable pageable);
     boolean temporarilyUnblockUser(Long blackId);
 
-    void deleteBlackList(Long blackId);
+    void deleteBlackList(List<Long> blackId);
 
     BlackListResponse searchEmailBlackList(String email,Long lastId,Pageable pageable);
 
