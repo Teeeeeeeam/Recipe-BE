@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -41,25 +42,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 class UserInfoControllerTest {
 
-    @MockBean
-    private UserInfoService userInfoService;
-    @MockBean
-    KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
-    @MockBean
-    NaverUserDisConnectServiceImpl naverUserDisConnectService;
-    @Autowired
-    private MockMvc mockMvc;
+    @MockBean private UserInfoService userInfoService;
+    @MockBean KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
+    @MockBean NaverUserDisConnectServiceImpl naverUserDisConnectService;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    Oauth2UrlProvider oauth2UrlProvider;
-    @MockBean
-    JwtProvider jwtProvider;
-    @MockBean
-    MemberRepository memberRepository;
-    @MockBean
-    CustomOauth2Handler customOauth2Handler;
-    @MockBean
-    CustomOauth2Service customOauth2Service;
+    @MockBean CookieUtils cookieUtils;
+    @MockBean Oauth2UrlProvider oauth2UrlProvider;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean MemberRepository memberRepository;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean CustomOauth2Service customOauth2Service;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
