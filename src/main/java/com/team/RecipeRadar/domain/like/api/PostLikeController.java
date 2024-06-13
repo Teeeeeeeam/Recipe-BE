@@ -70,8 +70,8 @@ public class PostLikeController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                     examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
     })
-    @GetMapping("/posts/like/check")
-    public ResponseEntity<?> likeCheck(@Parameter(description = "게시글 Id") @RequestParam(value = "postId",required = false) Long postId,
+    @GetMapping("/posts/{postId}/like/check")
+    public ResponseEntity<?> likeCheck(@Parameter(description = "게시글 Id") @PathVariable(required = false) Long postId,
                                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
 
         Boolean checkLike = postLikeService.checkLike(principalDetails.getMemberId(), postId);
