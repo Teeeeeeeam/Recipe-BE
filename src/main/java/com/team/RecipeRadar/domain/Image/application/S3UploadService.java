@@ -5,8 +5,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.team.RecipeRadar.global.exception.ex.img.ImageErrorType.*;
@@ -29,12 +28,9 @@ public class S3UploadService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
-
+    
     /**
-     * s3에 이미지 업로드
-     * @param file
-     * @return
+     * s3에 이미지 업로드 하는 메서드
      */
     public String uploadFile(MultipartFile file){
 
@@ -60,8 +56,8 @@ public class S3UploadService {
     }
 
     /**
-     * 버킷에서 이미지 삭제
-     * @param uploadFileName  업로드된 파일명
+     * S3 이미지를 삭제하는 메서드
+     * 저장된 파일명을 사용해 S3 버킷에서 해당 이미지를 삭제
      */
     public void deleteFile(String uploadFileName){
         try{
@@ -75,14 +71,14 @@ public class S3UploadService {
 
     private String createStoreFile(String originalFilename) {
         int lastIndexOf = originalFilename.lastIndexOf(".");                    // 마지막 종류
-        String substring = originalFilename.substring(lastIndexOf + 1);     //확장자 종류
+        String extension = originalFilename.substring(lastIndexOf + 1);     //확장자 종류
 
-        String extension = substring.toLowerCase();
-        if (!extension.equals("jpeg") && !extension.equals("jpg") && !extension.equals("png")) {
+        Set<String> allowedExtensions = Set.of("jpeg", "jpg", "png");
+        if (!allowedExtensions.contains(extension)) {
             throw new ImageException(INVALID_IMAGE_FORMAT);
         }
 
         String uuid = UUID.randomUUID().toString();
-        return uuid+"."+substring;
+        return uuid+"."+extension;
     }
 }

@@ -15,11 +15,7 @@ public interface ImgRepository extends JpaRepository<UploadFile,Long> ,CustomImg
 
     @Query("select u from UploadFile u where u.recipe.id=:recipeId AND u.post.id is null")
     Optional<UploadFile> findrecipeIdpostNull(@Param("recipeId") Long recipe_id);
-    @Modifying
-    @Query("delete from UploadFile u where u.recipe.id=:recipeId")
-    void deleteRecipeId(@Param("recipeId") Long recipe_Id);
 
-    List<UploadFile> findAllByRecipeId(Long recipeId);
     UploadFile findByQuestionId(Long questionId);
     @Modifying
     @Query("delete from UploadFile u where u.post.id=:postId and u.recipe.id=:recipeId")
