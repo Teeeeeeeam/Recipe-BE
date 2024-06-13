@@ -84,7 +84,7 @@ class AdminPostControllerTest {
         PostsCommentResponse postsCommentResponse = new PostsCommentResponse(false, commentDtoList);
         given(adminService.getPostsComments(eq(post_id),isNull(),any())).willReturn(postsCommentResponse);
 
-        mockMvc.perform(get("/api/admin/posts/comments?post-id="+post_id))
+        mockMvc.perform(get("/api/admin/posts/"+post_id+"/comments"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()").value(2))
@@ -101,7 +101,7 @@ class AdminPostControllerTest {
         doNothing().when(adminService).deleteComments(anyList());
 
         mockMvc.perform(delete("/api/admin/posts/comments?")
-                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                        .param("commentIds", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("댓글 삭제 성공"));
@@ -132,7 +132,7 @@ class AdminPostControllerTest {
         doNothing().when(adminService).deletePosts(anyList());
 
         mockMvc.perform(delete("/api/admin/posts")
-                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                        .param("postIds", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("게시글 삭제 성공"));
@@ -153,8 +153,8 @@ class AdminPostControllerTest {
         given(adminService.searchPost(eq(loginId),isNull(), eq(postTitle),isNull(), any())).willReturn(postResponse);
 
         mockMvc.perform(get("/api/admin/posts/search")
-                        .param("login-id",loginId)
-                        .param("post-title",postTitle))
+                        .param("loginId",loginId)
+                        .param("postTitle",postTitle))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.nextPage").value(true))

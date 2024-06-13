@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.admin.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.admin.application.blackMember.AdminBlackMemberService;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -48,7 +47,6 @@ class BlackListMemberControllerTest {
     @MockBean JwtProvider jwtProvider;
     @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean CustomOauth2Service customOauth2Service;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Test
@@ -94,7 +92,7 @@ class BlackListMemberControllerTest {
         given(adminService.adminDeleteUsers(eq(list))).willReturn(emails);
 
         mockMvc.perform(delete("/api/admin/members")
-                        .param("ids", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
+                        .param("memberIds", list.stream().map(String::valueOf).collect(Collectors.joining(","))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("삭제 성공"));
 

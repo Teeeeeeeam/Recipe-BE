@@ -94,7 +94,7 @@ class AdminRecipeControllerTest {
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(
-                        multipart("/api/admin/save/recipe")
+                        multipart("/api/admin/save/recipes")
                                 .file(mockMultipartFile)
                                 .file(request)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -244,7 +244,7 @@ class AdminRecipeControllerTest {
         given(adminService.searchRecipesByTitleAndIngredients(isNull(), eq(title), isNull(), any(Pageable.class)))
                 .willReturn(recipeResponse);
 
-        mockMvc.perform(get("/api/admin/recipe?title="+title)
+        mockMvc.perform(get("/api/admin/recipes?title="+title)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -271,7 +271,7 @@ class AdminRecipeControllerTest {
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(
-                        multipart("/api/admin/save/recipe")
+                        multipart("/api/admin/save/recipes")
                                 .file(mockMultipartFile)
                                 .file(request)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -296,7 +296,7 @@ class AdminRecipeControllerTest {
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(
-                        multipart("/api/admin/save/recipe")
+                        multipart("/api/admin/save/recipes")
                                 .file(mockMultipartFile)
                                 .file(request)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
