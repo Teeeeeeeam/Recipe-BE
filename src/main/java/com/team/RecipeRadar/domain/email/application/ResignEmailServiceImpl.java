@@ -24,14 +24,18 @@ public class ResignEmailServiceImpl implements MailService{
     public String sensMailMessage(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
 
+        sendEmailVerification(email, message);
+
+        return "ok";
+    }
+
+    private void sendEmailVerification(String email, SimpleMailMessage message) {
         message.setSubject("나만의 냉장고 이용 제한");
         message.setText(createText());
         message.setFrom(emailFrom);
         message.setTo(email);
         mailSender.send(message);
         createText();
-
-        return "ok";
     }
 
     private String createText(){

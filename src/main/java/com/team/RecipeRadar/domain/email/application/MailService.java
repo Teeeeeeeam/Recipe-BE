@@ -16,10 +16,6 @@ public interface MailService {
         return null;
     }
 
-    default Integer getCode(String email, int code) {
-        return null;
-    }
-
     default Map<String, Boolean> verifyCode(String email, int code) {
         return null;
     }

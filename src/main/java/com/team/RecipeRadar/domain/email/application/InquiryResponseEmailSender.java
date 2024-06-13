@@ -27,17 +27,27 @@ public class InquiryResponseEmailSender implements MailService {
     public String sensMailMessage(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setSubject("나만의 냉장고 문의사항 답변 알림");
-        message.setText(createText());
-        message.setFrom(emailFrom);
-        message.setTo(email);
-        mailSender.send(message);
-        createText();
+        sendEmailVerification(email, message);
 
         return "ok";
     }
 
-    private String createText() {
+    /**
+     * 메일 전송 메서드
+     */
+    private void sendEmailVerification(String email, SimpleMailMessage message) {
+        message.setSubject("나만의 냉장고 문의사항 답변 알림");
+        message.setText(getText());
+        message.setFrom(emailFrom);
+        message.setTo(email);
+        mailSender.send(message);
+        getText();
+    }
+
+    /**
+     * 메일 내용 메서드
+     */
+    private String getText() {
         StringBuilder sb = new StringBuilder();
         sb.append("안녕하세요 나만의 냉장고 회원님").append("\n");
         sb.append(LocalDate.now()).append(" 문의사항에 대한 답변이 도착했습니다.").append("\n");
@@ -45,5 +55,4 @@ public class InquiryResponseEmailSender implements MailService {
         sb.append("감사합니다.");
         return sb.toString();
     }
-
 }

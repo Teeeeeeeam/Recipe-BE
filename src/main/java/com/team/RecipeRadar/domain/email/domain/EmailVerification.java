@@ -31,8 +31,12 @@ public class EmailVerification{
 
     private Integer code;
 
-    private LocalDateTime createTime;
+    private LocalDateTime creatAt;
 
-    private LocalDateTime lastTime;
+    private LocalDateTime expiredAt;
+
+    public static EmailVerification creatEmailVerification(LocalDateTime expiredAt,String email,int code){
+        return EmailVerification.builder().email(email).creatAt(LocalDateTime.now()).email(email).code(code).expiredAt(expiredAt).build();
+    }
 
 }

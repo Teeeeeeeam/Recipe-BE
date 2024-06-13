@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.email.application;
 
 import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
 import com.team.RecipeRadar.domain.email.domain.EmailVerification;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,37 +29,25 @@ public class JoinEmailServiceImpl implements MailService{
     @Value("${email}")
     private String emailFrom;
 
+    /**
+     * 이메일을 전송하기위한 메서드
+     * 이멤일을 전송하면 인증번호를 반환 합니다.
+     */
     public String sensMailMessage(String email){
         code=createCode();
 
-        LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(3);
-        EmailVerification emailVerification = EmailVerification.builder()
-                .createTime(LocalDateTime.now())
-                .lastTime(localDateTime)
-                .email(email)
-                .code(code).build();
-        emailVerificationRepository.save(emailVerification);
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
+        emailVerificationRepository.save(EmailVerification.creatEmailVerification(expiredAt,email,code));
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("나만의 냉장고 회원가입 인증번호 안내."); // 이메일 제목 설정
-        message.setText(getText()); // 이메일 내용 설정
-        message.setFrom(emailFrom); // 발신자 이메일 주소 설정
-        message.setTo(email); // 수신자 이메일 주소 설정
-        mailSender.send(message); // 이메일 발송
+        sendEmailVerification(email);
 
         return String.valueOf(code);
     }
 
-    private String getText(){
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("회원 가입을 진행하기 위해서 아래절차를 따라해주세요. "); // 회원 가입 안내 메시지 추가
-        buffer.append("아래의 코드를 인증번호 칸에 입력해주세요. "); // 회원 가입 안내 메시지 추가
-        buffer.append(code);
-        buffer.append(System.lineSeparator()).append(System.lineSeparator()); // 공백 라인 추가
-        buffer.append("Regards,").append(System.lineSeparator()).append("나만의 냉장고"); // 문서 마무리 부분 추가
-        return buffer.toString(); // 완성된 이메일 내용 반환
-    }
-
+    /**
+     * 인증번호 생성 메서드
+     * 임의의 난수 6자리를 생성합니다.
+     */
     public Integer createCode(){
         Random random = new Random();
         int key =100000 + random.nextInt(900000);
@@ -68,34 +55,17 @@ public class JoinEmailServiceImpl implements MailService{
     }
 
 
-    public Integer getCode(String email, int code){
-        EmailVerification byEmailAndCode = emailVerificationRepository.findByEmailAndCode(email, code);
-        if (byEmailAndCode==null){
-            throw new IllegalStateException("인증번호가 일치하지 않습니다.");
-        }
-
-        return byEmailAndCode.getCode();
-    }
-
-
     /**
-     * 회원가입시 이메일 인증번호 유호성 검사
-     * @param code
-     * @return 인증 성공시 true, 실패시 false
+     * 인증 번호 검증 메서드
+     * 인증번호가 유효한지 검증하는 역활을 합니다.
      */
     public Map<String, Boolean> verifyCode(String email, int code) {
         Map<String, Boolean> result = new LinkedHashMap<>();
         boolean isVerifyCode = false; // 기본값은 false.
 
-        EmailVerification byEmailAndCode = emailVerificationRepository.findByEmailAndCode(email, code);
-
-        if (byEmailAndCode != null) {
-            LocalDateTime lastTime = byEmailAndCode.getLastTime();
-            LocalDateTime now = LocalDateTime.now();
-
-            if (now.isBefore(lastTime)) {
-                isVerifyCode = true; // 인증번호가 일치하고 시간이 만료되지 않았을 경우에만 true
-            }
+        EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
+        if (emailVerification != null && isCodeValid(emailVerification)) {
+            isVerifyCode = true;
         } else {
             throw new IllegalStateException("인증번호가 일치하지 않습니다.");
         }
@@ -104,8 +74,47 @@ public class JoinEmailServiceImpl implements MailService{
         return result;
     }
 
+
+    /**
+     * 인증 번호 만료 검증 메서드
+     */
+    private boolean isCodeValid(EmailVerification emailVerification) {
+        LocalDateTime expiredAt = emailVerification.getExpiredAt();
+        LocalDateTime now = LocalDateTime.now();
+        return now.isBefore(expiredAt);
+    }
+
+    /**
+     * 인증번호 삭제 메서드
+     */
     @Override
     public void deleteCode(String email, int code) {
         emailVerificationRepository.deleteByEmailAndCode(email,code);
+    }
+
+    /**
+     * 메일 전송 메서드
+     */
+    private void sendEmailVerification(String email) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setSubject("나만의 냉장고 회원가입 인증번호 안내."); // 이메일 제목 설정
+        message.setText(getText()); // 이메일 내용 설정
+        message.setFrom(emailFrom); // 발신자 이메일 주소 설정
+        message.setTo(email); // 수신자 이메일 주소 설정
+        mailSender.send(message); // 이메일 발송
+    }
+
+
+    /**
+     * 메일 내용 메서드
+     */
+    private String getText(){
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("회원 가입을 진행하기 위해서 아래절차를 따라해주세요. "); // 회원 가입 안내 메시지 추가
+        buffer.append("아래의 코드를 인증번호 칸에 입력해주세요. "); // 회원 가입 안내 메시지 추가
+        buffer.append(code);
+        buffer.append(System.lineSeparator()).append(System.lineSeparator()); // 공백 라인 추가
+        buffer.append("Regards,").append(System.lineSeparator()).append("나만의 냉장고"); // 문서 마무리 부분 추가
+        return buffer.toString(); // 완성된 이메일 내용 반환
     }
 }
