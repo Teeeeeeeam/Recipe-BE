@@ -75,7 +75,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"question_content\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"create_at\":\"2024-06-10T08:03:37.126042\",\"answer_email\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
+            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"question_content\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"create_at\":\"2024-06-10T08:03:37.126042\",\"img_url\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"answer_email\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"관리자만 접근 가능 가능합니다.\"}")))
