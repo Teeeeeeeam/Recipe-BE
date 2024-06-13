@@ -12,6 +12,8 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,49 +37,54 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
     private final ImgRepository imgRepository;
     private final RecipeBookmarkRepository recipeBookmarkRepository;
 
+    /**
+     * 사용자 수를 조회하는 메서드
+     */
     @Override
     public long searchAllMembers() {
         return memberRepository.countAllBy();
     }
 
 
+    /**
+     * 사용자의 정보를 모두 조회하는 메서드
+     * 무한페이징 방식을 지원합니다.
+     */
     @Override
     public MemberInfoResponse memberInfos(Long lastMemberId,Pageable pageable) {
         Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(lastMemberId,pageable);
         boolean hasNext = memberInfo.hasNext();
-        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberInfo.getContent(), hasNext);
-        return memberInfoResponse;
+        return new MemberInfoResponse(memberInfo.getContent(), hasNext);
     }
 
     /**
-     * 여러명의 회원을 한번에 삭제 시킨다.
-     * @param memberIds
+     * 회원 탈퇴 메서드
+     * 어드민 사용자는 회원을 강제로 삭제 시키며, 블랙리스트에 추가됩니다.
      */
     @Override
     public List<String> adminDeleteUsers(List<Long> memberIds) {
-
-        List<String> emailList = new ArrayList<>();
+        List<String> deletedEmails = new ArrayList<>();
 
         for (Long memberId : memberIds) {
-            Member member =memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자를 찾을수 없습니다."));
-            boolean existsByEmail = blackListRepository.existsByEmail(member.getEmail());
-            if (!existsByEmail) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+            // 블랙리스트에 추가
+            if (!blackListRepository.existsByEmail(member.getEmail())) {
                 BlackList blackList = BlackList.toEntity(member.getEmail());
-                emailList.add(member.getEmail());
                 blackListRepository.save(blackList);
+                deletedEmails.add(member.getEmail());
             }
-
-            Long save_memberId = member.getId();
-            commentRepository.deleteMember_comment(save_memberId);
-            imgRepository.deleteMemberImg(save_memberId);
-            recipeBookmarkRepository.deleteByMember_Id(save_memberId);
-            jwtRefreshTokenRepository.DeleteByMemberId(save_memberId);
-            memberRepository.deleteById(save_memberId);
+            // 사용자와 관련된 데이터 삭제
+            deleteMemberRelatedData(memberId);
         }
 
-        return emailList;
+        return deletedEmails;
     }
 
+    /**
+     * 사용자를 검색하는 메서드
+     * 사용자의 대해서 로그인아이디, 닉네임, 실명, 사용자 번호 를사용해 사용자를 검색 할 수 있습니다.
+     */
     @Override
     public MemberInfoResponse searchMember(String loginId, String nickname, String email, String username,Long lastMemberId,Pageable pageable) {
         Slice<MemberDto> memberDtoSlice = memberRepository.searchMember(loginId, nickname, email, username, lastMemberId,pageable);
@@ -86,7 +93,7 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
 
 
     /**
-     * 블랙리스트 무한 페이징
+     * 블랙리스트 저장된 모든 정보를 조회하는 메서드
      */
     @Override
     public BlackListResponse getBlackList(Long lastId, Pageable pageable) {
@@ -94,17 +101,33 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
         return new BlackListResponse(blackListDtoList.hasNext(),blackListDtoList.getContent());
     }
 
+    /**
+     * 블랙리스트 임시 차단 메서드
+     * 블랙리스트의 대해서 임시적으로 관리자가 차단/해제를 할수 있습니다.
+     */
     @Override
     public boolean temporarilyUnblockUser(Long blackId) {
-        BlackList blackList = blackListRepository.findById(blackId).orElseThrow(() -> new BadRequestException("이메일이 존재하지 않습니다."));
+        BlackList blackList = blackListRepository.findById(blackId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_EMAIL));
         blackList.unLock(blackList.isBlack_check());
         BlackList update_black = blackListRepository.save(blackList);
 
         return update_black.isBlack_check();
     }
+
+    /**
+     * 블랙리스트를 해제하는 메서드
+     */
     @Override
     public void deleteBlackList(Long blackId) {
         blackListRepository.deleteById(blackId);
     }
 
+    /* 사용자를 삭제 시킬때 관련된 모든 정보를 삭제하는 메서드 */
+    private void deleteMemberRelatedData(Long memberId) {
+        commentRepository.deleteMember_comment(memberId);
+        imgRepository.deleteMemberImg(memberId);
+        recipeBookmarkRepository.deleteByMember_Id(memberId);
+        jwtRefreshTokenRepository.DeleteByMemberId(memberId);
+        memberRepository.deleteById(memberId);
+    }
 }

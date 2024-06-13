@@ -5,7 +5,6 @@ import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.global.event.email.MailEvent;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,10 +19,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 @RestController
@@ -43,7 +40,7 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\":\"조회 성공\", \"data\":\"10\"}"))),
     })
     @GetMapping("/members/count")
-    public ResponseEntity<?> getAllMembersCount(){
+    public ResponseEntity<ControllerApiResponse> getAllMembersCount(){
         long searchAllMembers = blackMemberService.searchAllMembers();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
@@ -56,7 +53,7 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"blackList\":[{\"id\":1,\"email\":\"user1@example.com\",\"black_check\":true}]}}")))
     })
     @GetMapping("/black")
-    public ResponseEntity<?> getBlackList(@RequestParam(name = "last-id",required = false) Long lastId,
+    public ResponseEntity<ControllerApiResponse> getBlackList(@RequestParam(name = "lastId",required = false) Long lastId,
                                           @Parameter(example = "{\"size\":10}") Pageable pageable){
         BlackListResponse blackList = blackMemberService.getBlackList(lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",blackList));
@@ -69,9 +66,9 @@ public class BlackListMemberController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"임시 차단 해제\"}")))
     })
-    @PostMapping("/blacklist/temporary-unblock/{id}")
-    public ResponseEntity<?> unBlock(@Schema(example = "1")@PathVariable Long id){
-        boolean unblockUser = blackMemberService.temporarilyUnblockUser(id);
+    @PostMapping("/blacklist/temporary-unblock/{blackId}")
+    public ResponseEntity<ControllerApiResponse> unBlock(@Schema(example = "1")@PathVariable(value = "blackId") Long blackId){
+        boolean unblockUser = blackMemberService.temporarilyUnblockUser(blackId);
         return ResponseEntity.ok(new ControllerApiResponse<>(unblockUser,"임시 차단 유뮤"));
     }
 
@@ -82,9 +79,9 @@ public class BlackListMemberController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}")))
     })
-    @DeleteMapping("/blacklist/{id}")
-    public ResponseEntity<?> deleteBlack(@PathVariable Long id){
-        blackMemberService.deleteBlackList(id);
+    @DeleteMapping("/blacklist/{blackId}")
+    public ResponseEntity<ControllerApiResponse> deleteBlack(@PathVariable(value = "blackId") Long blackId){
+        blackMemberService.deleteBlackList(blackId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 
@@ -95,9 +92,9 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfos\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
     })
     @GetMapping("/members/info")
-    public ResponseEntity<?> getMemberInfos(@RequestParam(value = "member-id",required = false) Long memberId ,
+    public ResponseEntity<ControllerApiResponse> getMemberInfos(@PathVariable(value = "lastId",required = false) Long lastMemberId ,
                                             @Parameter(example = "{\"size\":10}")Pageable pageable){
-        MemberInfoResponse memberInfoResponse = blackMemberService.memberInfos(memberId,pageable);
+        MemberInfoResponse memberInfoResponse = blackMemberService.memberInfos(lastMemberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
     }
 
@@ -111,20 +108,13 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"사용자를 찾을수 없습니다.\"}")))
     })
     @DeleteMapping("/members")
-    public ResponseEntity<?> deleteAllUser(@RequestParam("ids") List<Long> memberIds){
-        try {
-            List<String> emailList = blackMemberService.adminDeleteUsers(memberIds);
+    public ResponseEntity<ControllerApiResponse> deleteAllUser(@RequestParam("memberIds") List<Long> memberIds){
+        List<String> emailList = blackMemberService.adminDeleteUsers(memberIds);
 
-            for (String email : emailList) {;
-                eventPublisher.publishEvent(new MailEvent(email));
-            }
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException("사용자를 찾을수 없습니다.");
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류");
-        }
+        for (String email : emailList)
+            eventPublisher.publishEvent(new MailEvent(email));
+
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 
     @Operation(summary = "사용자 검색", description = "가입된 회원의 정보를 검색하는 API(무한 스크롤 방식)",tags = "어드민 - 회원 및 블랙리스트 관리")
@@ -134,11 +124,11 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfos\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
     })
     @GetMapping("/members/search")
-    public ResponseEntity<?> searchMember(@Schema(example = "admin1234")@RequestParam(value = "login-id",required = false) String loginId,
-                                          @RequestParam(required = false) String username,
-                                          @RequestParam(required = false) String email,
-                                          @RequestParam(required = false) String nickname,
-                                          @RequestParam(value = "member-id",required = false) Long memberId,
+    public ResponseEntity<ControllerApiResponse> searchMember(@Schema(example = "admin1234")@RequestParam(value = "login-id",required = false) String loginId,
+                                          @RequestParam(value = "username",required = false) String username,
+                                          @RequestParam(value = "email",required = false) String email,
+                                          @RequestParam(value = "nickname",required = false) String nickname,
+                                          @RequestParam(value = "memberId",required = false) Long memberId,
                                           @Parameter(example = "{\"size\":10}")Pageable pageable){
         MemberInfoResponse memberInfoResponse = blackMemberService.searchMember(loginId, nickname, email, username, memberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
