@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class PostsCommentResponse {
 
-    private Boolean nextPage;;
+    private Boolean nextPage;
     private List<CommentDto> comment;
 }

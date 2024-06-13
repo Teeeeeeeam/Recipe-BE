@@ -4,7 +4,6 @@ import com.team.RecipeRadar.domain.admin.application.post.AdminPostService;
 import com.team.RecipeRadar.domain.admin.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,9 +49,9 @@ public class AdminPostController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comment\":[{\"id\":16,\"comment_content\":\"댓글 내용 1\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"},{\"id\":17,\"comment_content\":\"댓글 내용 2\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"},\"create_at\":\"2024-05-23T17:37:53\"}]}}"))),
     })
-    @GetMapping("/posts/comments")
-    public ResponseEntity<?> getPostsContainsComments( @RequestParam("post-id") Long postId,@RequestParam(value = "last-id",required = false)Long lastId,
-                                                       @Parameter(example = "{\"size\":10}") Pageable pageable){
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
+                                                      @Parameter(example = "{\"size\":10}") Pageable pageable){
         PostsCommentResponse postsComments = adminService.getPostsComments(postId, lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }
@@ -66,10 +63,10 @@ public class AdminPostController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}},{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"create_at\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}}"))),
     })
     @GetMapping("/posts/search")
-    public ResponseEntity<?> searchPost(@RequestParam(value = "login-id",required = false) String loginId,
-                                        @RequestParam(value = "recipe-title",required = false) String recipeTitle,
-                                        @RequestParam(value = "post-title",required = false) String postTitle,
-                                        @RequestParam(value = "post-id",required = false) Long lastPostId,
+    public ResponseEntity<?> searchPost(@RequestParam(value = "loginId",required = false) String loginId,
+                                        @RequestParam(value = "recipeTitle",required = false) String recipeTitle,
+                                        @RequestParam(value = "postTitle",required = false) String postTitle,
+                                        @RequestParam(value = "lastId",required = false) Long lastPostId,
                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
         PostResponse postResponse = adminService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"검색 성공",postResponse));
@@ -85,16 +82,9 @@ public class AdminPostController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"댓글을 찾을수 없습니다.\"}"))),
     })
     @DeleteMapping("/posts/comments")
-    public ResponseEntity<?> deleteComments(@RequestParam(value = "ids") List<Long> commentsIds){
-        try{
-            adminService.deleteComments(commentsIds);
-            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류");
-        }
+    public ResponseEntity<?> deleteComments(@RequestParam(value = "commentIds") List<Long> commentsIds){
+        adminService.deleteComments(commentsIds);
+        return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
     }
 
     @Operation(summary = "게시글 삭제",description = "요리글을 단일, 일괄 삭제하는 API",tags = "어드민 - 게시글 컨트롤러")
@@ -107,15 +97,8 @@ public class AdminPostController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"게시글을 찾을수 없습니다.\"}"))),
     })
     @DeleteMapping("/posts")
-    public ResponseEntity<?> deletePost(@RequestParam(value = "ids") List<Long> postIds){
-        try{
-            adminService.deletePosts(postIds);
-            return ResponseEntity.ok(new ControllerApiResponse(true,"게시글 삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류");
-        }
+    public ResponseEntity<?> deletePost(@RequestParam(value = "postIds") List<Long> postIds){
+        adminService.deletePosts(postIds);
+        return ResponseEntity.ok(new ControllerApiResponse(true,"게시글 삭제 성공"));
     }
 }

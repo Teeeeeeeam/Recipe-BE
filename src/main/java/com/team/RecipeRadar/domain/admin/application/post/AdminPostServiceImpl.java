@@ -10,6 +10,8 @@ import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -34,6 +35,10 @@ public class AdminPostServiceImpl implements AdminPostService{
         return postRepository.countAllBy();
     }
 
+    /**
+     * 게시글의 작성된 댓글을 조회하는 메서드
+     * 게시글의 작성된 모든 데이터를 무한 페이징으로 처리합니다.
+     */
     @Override
     public PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable) {
         Slice<CommentDto> postComment = commentRepository.getPostComment(postId, lastId, pageable);
@@ -43,39 +48,42 @@ public class AdminPostServiceImpl implements AdminPostService{
 
 
     /**
-     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환
+     * 게시글을 조회하는 메서드
+     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환합니다.
      */
     @Override
     public PostResponse searchPost(String loginId, String recipeTitle, String postTitle, Long lastPostId, Pageable pageable) {
-        Slice<PostDto> postDtos = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
-        return new PostResponse(postDtos.hasNext(),postDtos.getContent());
+        Slice<PostDto> postDtoList = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
+        return new PostResponse(postDtoList.hasNext(),postDtoList.getContent());
     }
 
     /**
-     * 어디민 사용자는 댓글을 단일,일괄 삭제
-     * @param ids
+     * 게시글의 댓글 삭제하는 메서드
+     * 어드민 사용자는 게시글의 작성된 댓글을 삭제 가능합니다.
      */
     @Override
-    public void deleteComments(List<Long> ids) {
-        for (Long id : ids) {
-            Comment comment = commentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("댓글을 찾을수 없습니다."));
+    public void deleteComments(List<Long> commentsIds) {
+        commentsIds.forEach(id -> {
+            Comment comment = commentRepository.findById(id)
+                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COMMENT));
             commentRepository.deleteById(comment.getId());
-        }
+        });
     }
 
     /**
-     * 한개 이상의 게시글을 삭제할수 있다.
-     * @param postIds
+     * 게스글을 삭제하는 메서드
+     * 한개 이상의 게시글을 삭제할수 있습니다.
      */
     @Override
     public void deletePosts(List<Long> postIds) {
+        postIds.forEach(postId -> {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
 
-        for (Long postId : postIds) {
-            Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
-            imgRepository.deletePostImg(post.getId(),post.getRecipe().getId());
+            imgRepository.deletePostImg(post.getId(), post.getRecipe().getId());
             commentRepository.deletePostID(post.getId());
             postLikeRepository.deletePostID(postId);
             postRepository.deleteById(post.getId());
-        }
+        });
     }
 }
