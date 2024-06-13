@@ -13,6 +13,5 @@ import lombok.NoArgsConstructor;
 @Schema(name = "레시피 좋아요 Request")
 public class RecipeLikeRequest {
 
-    private Long memberId;
     private Long recipeId;
 }

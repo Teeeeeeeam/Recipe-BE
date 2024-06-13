@@ -29,4 +29,7 @@ public class RecipeLike {
     private Recipe recipe;
 
 
+    public static RecipeLike createRecipeLike(Member member, Recipe recipe){
+        return RecipeLike.builder().member(member).recipe(recipe).build();
+    }
 }
