@@ -80,8 +80,8 @@ public class CommentController {
             ))
     })
     @GetMapping("/api/comments")
-    public ResponseEntity<?> comment_Page(@Parameter(example = "{\"size\":10}") Pageable pageable,
-                                          @Parameter(description = "게시글 Id")@RequestParam(value = "posts",required = false)Long postId){
+    public ResponseEntity<?> comment_Page(@Parameter(description = "게시글 Id")@RequestParam(value = "postId",required = false)Long postId,
+                                          Pageable pageable){
             Page<CommentDto> comments = commentService.commentPage(postId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", comments));
     }
