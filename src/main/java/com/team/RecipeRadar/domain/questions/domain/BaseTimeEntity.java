@@ -17,9 +17,9 @@ public class BaseTimeEntity {
 
     //저장될 때 시간이 자동 저장
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private LocalDateTime modifiedDate;
+    private LocalDateTime updatedAt;
 }

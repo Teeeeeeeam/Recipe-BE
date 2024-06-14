@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.notice.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
@@ -13,7 +12,8 @@ import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -39,79 +36,40 @@ public class NoticeServiceImpl implements NoticeService {
     private final S3UploadService s3UploadService;
 
     /**
-     * 공지사항 저장을 저장하는 로직
-     * @param adminAddNoticeDto
+     * 공지사항 저장을 저장하는 메서드
      */
     @Override
-    public void save(AdminAddRequest adminAddNoticeDto,String fileUrl,String originalFilename) {
-        Long memberId = adminAddNoticeDto.getMemberId();
+    public void save(AdminAddRequest adminAddNoticeDto, Long memberId, MultipartFile file) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
 
-        Optional<Member> op_member = memberRepository.findById(memberId);
-
-        if(op_member.isPresent()) {
-            Member member = op_member.get();
-            LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);
-
-
-            Notice notice = Notice.builder()
-                    .noticeTitle(adminAddNoticeDto.getNoticeTitle())
-                    .noticeContent(adminAddNoticeDto.getNoticeContent())
-                    .member(member)
-                    .created_at(localDateTime)
-                    .build();
-
-            Notice notice_save = noticeRepository.save(notice);
-            UploadFile uploadFile = UploadFile.builder().originFileName(originalFilename).storeFileName(fileUrl).notice(notice_save).build();
-            imgRepository.save(uploadFile);
-
-        } else {
-            throw new NoSuchElementException("공지사항 저장에 실패했습니다.");
-        }
+        Notice notice = noticeRepository.save(Notice.createNotice(adminAddNoticeDto.getNoticeTitle(), adminAddNoticeDto.getNoticeContent(),member));
+        saveOrUpdateUploadFile(file,notice);
     }
 
-
     /**
-     * 공지사항을 삭제하는 로직
+     * 공지사항을 삭제하는 메서드
      */
     @Override
     public void delete(List<Long> noticeIds) {
 
-        List<Notice> allById = noticeRepository.findAllById(noticeIds);
-        if(allById.isEmpty()) throw new BadRequestException("해당 공지 사항이 존재하지 않습니다.");
+        List<Notice> notices = noticeRepository.findAllById(noticeIds);
+        if(notices.isEmpty()) throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_NOTICE);
 
-        for (Notice notice : allById) {
-            UploadFile byNoticeId = imgRepository.findByNoticeId(notice.getId());
-            if(byNoticeId!=null) {
-                if(byNoticeId.getOriginFileName()!=null)
-                    s3UploadService.deleteFile(byNoticeId.getStoreFileName());
-                imgRepository.deleteNoticeId(notice.getId());
-            }
+        notices.forEach( notice -> {
+            deleteUploadFile(notice);
             noticeRepository.delete(notice);
-        }
+        });
     }
 
     /**
      * 공지사항을 수정하는 로직
-     * @param adminUpdateRequest
      */
     @Override
     public void update(Long noticeId, AdminUpdateRequest adminUpdateRequest, MultipartFile file) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchElementException("해당 공지사항을 찾을 수 없습니다."));
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_NOTICE));
 
-        UploadFile uploadFile = imgRepository.getOriginalFileName(notice.getId());
-        if(file!=null && uploadFile!=null) {
-            if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
-                s3UploadService.deleteFile(uploadFile.getStoreFileName());
-                String storedFileName = s3UploadService.uploadFile(file);
-                uploadFile.update(storedFileName, file.getOriginalFilename());
-                imgRepository.save(uploadFile);
-            }
-        }else if(file!=null && uploadFile==null){// 처음부터 파일을 저장하지 않았을때 저장
-            String uploadedFile = s3UploadService.uploadFile(file);
-            UploadFile new_notice = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(uploadedFile).notice(notice).build();
-            imgRepository.save(new_notice);
-        }
+        saveOrUpdateUploadFile(file, notice);
         notice.update(adminUpdateRequest.getNoticeTitle(), adminUpdateRequest.getNoticeContent());
         noticeRepository.save(notice);
     }
@@ -136,4 +94,55 @@ public class NoticeServiceImpl implements NoticeService {
         NoticeDto noticeDto = noticeRepository.detailsPage(noticeId);
         return InfoDetailsResponse.of(noticeDto);
     }
+
+    /**
+     * 이미지 저장 또는 업데이트 메서드
+     */
+    private void saveOrUpdateUploadFile(MultipartFile file, Notice notice) {
+        if (file != null && !file.isEmpty()) {
+            UploadFile uploadFile = imgRepository.findByNoticeId(notice.getId());
+            String storedFileName = saveImage(file);
+
+            if (uploadFile != null) {
+                if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
+                    deleteS3Image(uploadFile);
+                    uploadFile.update(storedFileName, file.getOriginalFilename());
+                    imgRepository.save(uploadFile);
+                }
+            } else
+                imgRepository.save(UploadFile.createUploadFile(notice, file.getOriginalFilename(), storedFileName));
+
+        }
+    }
+
+    /**
+     * 이미지 저장 메서드
+     */
+    private String saveImage(MultipartFile file) {
+        return s3UploadService.uploadFile(file);
+    }
+
+    /**
+     * 이미지를 삭제 하는 메서드
+     * s3버킷에 저장된 이미지 파일과 upload에 저장된 파일을 삭제합니다.
+     */
+    private void deleteUploadFile(Notice notice) {
+        UploadFile uploadFile = imgRepository.findByNoticeId(notice.getId());
+        if (existsFile(uploadFile)) {
+            deleteS3Image(uploadFile);
+            imgRepository.deleteNoticeId(notice.getId());
+        }
+    }
+
+
+    /* S3 에서 이미지 삭제*/
+    private void deleteS3Image(UploadFile uploadFile) {
+        s3UploadService.deleteFile(uploadFile.getStoreFileName());
+    }
+
+    /* 이미지가 존재하는지 검증 */
+    private boolean existsFile(UploadFile uploadFile) {
+        return uploadFile != null && uploadFile.getStoreFileName() != null;
+    }
+
 }

@@ -14,8 +14,8 @@ public class InfoDetailsResponse {
     private Long id;
     private String noticeTitle;
     private String noticeContent;
-    private LocalDateTime created_at;
-    private String img_url;
+    private LocalDateTime createdAt;
+    private String imgUrl;
     private MemberDto member;
 
     public static InfoDetailsResponse of(NoticeDto noticeDto){
@@ -23,9 +23,9 @@ public class InfoDetailsResponse {
                 .id(noticeDto.getId())
                 .noticeTitle(noticeDto.getNoticeTitle())
                 .noticeContent(noticeDto.getNoticeContent())
-                .created_at(noticeDto.getCreated_at())
+                .createdAt(noticeDto.getCreatedAt())
                 .member(noticeDto.getMember())
-                .img_url(noticeDto.getImgUrl())
+                .imgUrl(noticeDto.getImgUrl())
                 .build();
     }
 

@@ -4,9 +4,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.member.domain.QMember;
-import com.team.RecipeRadar.domain.notice.domain.Notice;
-import com.team.RecipeRadar.domain.notice.domain.QNotice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
@@ -19,8 +16,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
@@ -41,7 +36,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         List<Tuple> list = jpaQueryFactory.select(notice.id, notice.noticeTitle, uploadFile.storeFileName)
                 .from(notice)
                 .join(uploadFile).on(uploadFile.notice.id.eq(notice.id))
-                .orderBy(notice.created_at.desc())
+                .orderBy(notice.createdAt.desc())
                 .limit(5).fetch();
 
         return list.stream().map(tuple -> NoticeDto.of(tuple.get(notice.id), tuple.get(notice.noticeTitle), getImageUrl(tuple)))

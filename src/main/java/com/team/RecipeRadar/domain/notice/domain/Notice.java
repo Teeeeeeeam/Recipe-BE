@@ -1,24 +1,19 @@
 package com.team.RecipeRadar.domain.notice.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
+import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.aspectj.weaver.ast.Not;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @ToString(exclude = "member")
+@AllArgsConstructor
 @NoArgsConstructor
-public class Notice {
+public class Notice extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,42 +26,17 @@ public class Notice {
     @Column(name = "notice_content", nullable = false)
     private String noticeContent;
 
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Schema(hidden = true)
     @JoinColumn(name = "member_id")
     private Member member;
-
-    @JsonIgnore
-    public LocalDateTime getLocDateTime(){
-        return this.created_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-    @JsonIgnore
-    public LocalDateTime getUpdate_LocDateTime(){
-        return this.updated_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-
     public void update(String noticeTitle, String noticeContent) {
         this.noticeTitle = noticeTitle;
         this.noticeContent = noticeContent;
-        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
-
+    }
+    public static Notice createNotice(String noticeTitle, String noticeContent, Member member){
+        return Notice.builder().noticeTitle(noticeTitle).noticeContent(noticeContent).member(member).build();
     }
 
-    public void updateTime(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
-    }
-
-    static public NoticeDto of(Notice notice){
-
-        return NoticeDto.builder()
-                .id(notice.getId())
-                .noticeTitle(notice.getNoticeTitle())
-                .noticeContent(notice.getNoticeContent())
-                .member(MemberDto.builder().nickname(notice.getMember().getNickName()).build())
-                .build();
-    }
 }

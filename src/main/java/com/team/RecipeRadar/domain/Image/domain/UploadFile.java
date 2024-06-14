@@ -54,4 +54,18 @@ public class UploadFile {
         this.storeFileName = storeFileName;
         this.originFileName = originFileName;
     }
+
+    public static UploadFile createUploadFile(Object entity,String originFileName,String storeFileName){
+        UploadFileBuilder uploadFileBuilder = UploadFile.builder().originFileName(originFileName).storeFileName(storeFileName);
+        if (entity instanceof Question) {
+            uploadFileBuilder.question((Question) entity);
+        } else if (entity instanceof Notice) {
+            uploadFileBuilder.notice((Notice) entity);
+        } else if (entity instanceof Post) {
+            uploadFileBuilder.post((Post) entity);
+        } else if (entity instanceof Recipe) {
+            uploadFileBuilder.recipe((Recipe) entity);
+        }
+        return uploadFileBuilder.build();
+    }
 }

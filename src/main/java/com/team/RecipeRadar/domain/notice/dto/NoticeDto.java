@@ -23,11 +23,12 @@ public class NoticeDto {
 
     private String noticeContent;
 
-    private LocalDateTime created_at;        //등록일
+    private LocalDateTime createdAt;        //등록일
 
-    private LocalDateTime updated_at;       //수정일
+    private LocalDateTime updatedAt;       //수정일
 
     private String imgUrl;
+
     private MemberDto member;
 
 
@@ -46,8 +47,7 @@ public class NoticeDto {
         return NoticeDto.builder()
                 .id(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
-                .member(memberDto)
-                .created_at(notice.getCreated_at()).build();
+                .member(memberDto).build();
     }
 
     public static NoticeDto detailsOf(Notice notice, String imgUrl){
@@ -57,8 +57,7 @@ public class NoticeDto {
                 .imgUrl(imgUrl)
                 .noticeContent(notice.getNoticeContent())
                 .noticeTitle(notice.getNoticeTitle())
-                .member(memberDto)
-                .created_at(notice.getCreated_at()).build();
+                .member(memberDto).build();
     }
 
 }

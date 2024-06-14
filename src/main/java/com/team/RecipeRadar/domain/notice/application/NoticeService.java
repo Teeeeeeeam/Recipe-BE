@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.notice.application;
 
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.*;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
@@ -11,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface NoticeService {
-    void save(AdminAddRequest adminAddNoticeDto,String fileUrl,String originalFilename);
+    void save(AdminAddRequest adminAddNoticeDto,Long memberId, MultipartFile file);
 
     void delete(List<Long> noticeIds);
 

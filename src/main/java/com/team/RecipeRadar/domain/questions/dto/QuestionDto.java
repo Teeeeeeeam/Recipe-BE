@@ -60,7 +60,7 @@ public class QuestionDto {
         QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
                 .id(question.getId())
                 .title(question.getTitle())
-                .create_at(question.getCreatedDate())
+                .create_at(question.getCreatedAt())
                 .status(question.getStatus())
                 .questionType(question.getQuestionType());
         MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
@@ -81,7 +81,7 @@ public class QuestionDto {
                 .title(question.getTitle())
                 .answerType(question.getAnswer())
                 .questionType(question.getQuestionType())
-                .create_at(question.getCreatedDate())
+                .create_at(question.getCreatedAt())
                 .question_content(question.getQuestion_content())
                 .status(question.getStatus());
 
@@ -101,7 +101,7 @@ public class QuestionDto {
     }
 
    public static QuestionDto of(Question question, Answer answer, String img_url){
-       LocalDateTime createdDate = question.getCreatedDate();
+       LocalDateTime createdDate = question.getCreatedAt();
 
        QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder().id(question.getId())
                .status(question.getStatus()).title(question.getTitle())
