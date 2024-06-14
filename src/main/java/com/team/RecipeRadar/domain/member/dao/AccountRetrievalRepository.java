@@ -7,10 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountRetrievalRepository extends JpaRepository<AccountRetrieval, String> {
 
-    AccountRetrieval findByLoginId(String loginId);
-
-    Boolean existsByVerificationId(String verificationId);
-
     void deleteByVerificationId(String verificationId);
 
     boolean existsByLoginIdAndVerificationId(String loginId,String  verificationId);

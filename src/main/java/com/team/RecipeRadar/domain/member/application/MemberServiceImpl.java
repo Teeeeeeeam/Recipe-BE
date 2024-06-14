@@ -5,7 +5,10 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.email.application.MailService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
+import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
+import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,46 +27,21 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
-    private static String LOGIN_TYPE = "normal";
-
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final BlackListRepository blackListRepository;
-
+    private final NoticeRepository noticeRepository;
+    private final NotificationRepository notificationRepository;
+    private final QuestionRepository questionRepository;
 
     @Qualifier("JoinEmail")
     private final MailService mailService;
 
-
     @Override
-    public Member saveEntity(Member member) {
-        return memberRepository.save(member);
-    }
-
-    @Override
-    public void saveDto(MemberDto memberDto) {
-        Member memberEntity = Member.builder()
-                .loginId(memberDto.getLoginId())
-                .password(passwordEncoder.encode(memberDto.getPassword()))
-                .username(memberDto.getUsername())
-                .nickName(memberDto.getNickname())
-                .login_type(LOGIN_TYPE)
-                .email(memberDto.getEmail())
-                .join_date(LocalDate.now())
-                .roles("ROLE_USER")
-                .verified(true)
-                .build();
-        memberRepository.save(memberEntity);
-    }
-
-    @Override
-    public MemberDto findByLoginId(String loginId) {
-        Member byLoginId = memberRepository.findByLoginId(loginId);
-        if (byLoginId == null) {
-           log.info("오류발생");
-        }
-        return MemberDto.from(byLoginId);
+    public void joinMember(MemberDto memberDto) {
+        Member entity = MemberDto.toEntity(memberDto,passwordEncoder);
+        memberRepository.save(entity);
     }
 
     /**
@@ -73,29 +51,13 @@ public class MemberServiceImpl implements MemberService {
      */
     public Map<String, Boolean> LoginIdValid(String loginId) {
         Map<String, Boolean> result = new LinkedHashMap<>();
-            boolean isLoginIdValid = isLoginIdValid(loginId);
+            boolean loginIdDuplicated = isLoginIdDuplicated(loginId);
             Member member = memberRepository.findByCaseSensitiveLoginId(loginId);
-            if (member==null && isLoginIdValid) {
-                result.put("use_loginId", true);
+            if (member==null && !loginIdDuplicated) {
+                result.put("useLoginId", true);
             }else
-                throw new BadRequestException("사용할수 없는 아이디입니다.");
+                throw new InvalidIdException("사용할수 없는 아이디입니다.");
             return result;
-    }
-
-    /**
-     * 아이디 조건검사 대문자나 소문자(5~16)자리 입력시 사용할수있다.
-     * @param loginId
-     * @return 대문자나 소문자일시 true, 아닐시 false
-     */
-    private boolean isLoginIdValid(String loginId) {
-        Member member = memberRepository.findByCaseSensitiveLoginId(loginId);
-
-        boolean  pattern= Pattern.compile("^[a-zA-Z0-9]{5,16}$").matcher(loginId).find();
-        if (member!=null||!pattern) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -117,16 +79,11 @@ public class MemberServiceImpl implements MemberService {
      * @return 닉네임이 유효할 경우 true, 그렇지 않을 경우 false
      */
     @Override
-    public Map<String, Boolean> nickNameValid(String nickName) {
-        try{
-            Map<String, Boolean> result = new LinkedHashMap<>();
-            Boolean existsByNickName = memberRepository.existsByNickName(nickName);
-            boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,}$").matcher(nickName).matches();
-            result.put("nicknameValid",valid && !existsByNickName);
-            return result;
-        }catch (Exception e){
-            throw new RuntimeException();
-        }
+    public void nickNameValid(String nickName) {
+        Boolean existsByNickName = memberRepository.existsByNickName(nickName);
+
+        boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,12}$").matcher(nickName).matches();
+        if(!valid || existsByNickName) throw  new InvalidIdException("사용 불가능한 닉네임 입니다.");
     }
 
     /**
@@ -134,17 +91,17 @@ public class MemberServiceImpl implements MemberService {
      * @param memberDto 회원가입의 정보
      * @return  모두 사용시 true, 하나라도 검사 안했을시 false
      */
-    public boolean ValidationOfSignUp(MemberDto memberDto,int code) {
-        Map<String, Boolean> validationResult = validateSignUp(memberDto,code);
+    @Override
+    public boolean ValidationOfSignUp(MemberDto memberDto) {
+        Map<String, Boolean> validationResult = validateSignUp(memberDto);
 
-        for (Map.Entry<String, Boolean> entry : validationResult.entrySet   ()) {
+        for (Map.Entry<String, Boolean> entry : validationResult.entrySet()) {
             if (!entry.getValue()) {
-                log.info("entry={}",entry.getKey());
                 log.error("Failed validation: {}", entry.getKey());
                 return false;
             }
         }
-        mailService.deleteCode(memberDto.getEmail(),code);
+        mailService.deleteCode(memberDto.getEmail(), memberDto.getCode());
 
         return true;
     }
@@ -155,35 +112,12 @@ public class MemberServiceImpl implements MemberService {
      * @return 강력한 비밀번호시 true, 아닐시 false 반환
      */
     public Map<String, Boolean> checkPasswordStrength(String password) {
-        try {
-            Map<String, Boolean> result = new LinkedHashMap<>();
-            // 특수 문자 포함 여부, 대문자 알파벳 포함 여부, 비밀번호의 길이가 8자리 이상인지를 한 번에 확인
-            boolean checkStrength = Pattern.compile("^(?=.*[`~!@#$%^&*()_+])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,16}$").matcher(password).find();
-            result.put("passwordStrength", checkStrength);
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
+        Map<String, Boolean> result = new LinkedHashMap<>();
+        // 특수 문자 포함 여부, 대문자 알파벳 포함 여부, 비밀번호의 길이가 8자리 이상인지를 한 번에 확인
+        boolean checkStrength = Pattern.compile("^(?=.*[`~!@#$%^&*()_+])(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,16}$").matcher(password).find();
+        result.put("passwordStrength", checkStrength);
+        return result;
     }
-
-    /**
-     * 회원가입시 이름이 한국어이며 2글자 이상시에만 회원가입 가능
-     * @param username 회원가입시 사용된 실명
-     * @return  한국어로 작성된 이름시 true 그외 false
-     */
-    public Map<String, Boolean> userNameValid(String username) {
-        try {
-            Map<String, Boolean> result = new LinkedHashMap<>();
-
-            boolean isKorean = Pattern.compile("^[가-힣]+.{1,}$").matcher(username).matches();
-            // 한국어로 작성된 이름인 경우 true, 그 외에는 false
-            result.put("isKorean", isKorean);
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
-    }
-
 
     /**
      * 이메일주소가 올바른 주소인지 확인
@@ -191,35 +125,24 @@ public class MemberServiceImpl implements MemberService {
      * @return  올바른이메일 주소시 true, 아닐시 false
      */
     public Map<String, Boolean> emailValid(String email) {
-        try {
-            Map<String, Boolean> result = new LinkedHashMap<>();
 
-            boolean blackList = blackListRepository.existsByEmail(email);
+        Map<String, Boolean> result = new LinkedHashMap<>();
 
-            boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
+        boolean blackList = blackListRepository.existsByEmail(email);
 
-            if (valid && !blackList) {
-                // 이메일이 데이터베이스에 존재하는지 확인
-                List<Member> member = memberRepository.findByEmail(email);
-                for (Member m : member) {
-                    if (m.getLogin_type().equals("normal")) {
-                        result.put("duplicateEmail",false);
-                    } else {
-                        result.put("duplicateEmail",true);
-                    }
-                }
-                if (member.isEmpty()){
-                    result.put("duplicateEmail",true);
-                }
-                result.put("useEmail",true);
-            }else
-                result.put("useEmail",false);
+        boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
+        boolean duplicateEmail = true;
+        boolean useEmail = true;
 
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
+        if (valid && !blackList) {
+            // 이메일이 데이터베이스에 존재하는지 확인
+            duplicateEmail = isDuplicateEmail(email);
+        }else
+            useEmail = false;
+
+        result.put("duplicateEmail",duplicateEmail);
+        result.put("useEmail",useEmail);
+        return result;
     }
 
     /**
@@ -228,16 +151,13 @@ public class MemberServiceImpl implements MemberService {
      @param memberDto 검증할 회원 정보가 포함된 MemberDto 객체
      @return 각 검증 항목의 이름과 해당 검증 결과로 이루어진 맵
      */
-    private Map<String, Boolean> validateSignUp(MemberDto memberDto,int code) {
+    private Map<String, Boolean> validateSignUp(MemberDto memberDto) {
         Map<String, Boolean> validationResult = new LinkedHashMap<>();
-
-        validationResult.put("isLoginValid",isLoginIdValid(memberDto.getLoginId()));
+        validationResult.put("isLoginValid",!isLoginIdDuplicated(memberDto.getLoginId()));
         validationResult.putAll(duplicatePassword(memberDto.getPassword(), memberDto.getPasswordRe()));
-        validationResult.putAll(checkPasswordStrength(memberDto.getPassword()));
-        validationResult.putAll(userNameValid(memberDto.getUsername()));
+        validationResult.put("duplicateEmail",!isDuplicateEmail(memberDto.getEmail()));
         validationResult.putAll(emailValid(memberDto.getEmail()));
-        validationResult.putAll(nickNameValid(memberDto.getNickname()));
-        validationResult.putAll(verifyCode(memberDto.getEmail(),code));
+        validationResult.putAll(verifyCode(memberDto.getEmail(), memberDto.getCode()));
 
         return validationResult;
     }
@@ -247,16 +167,80 @@ public class MemberServiceImpl implements MemberService {
      * @param code
      * @return 인증 성공시 true, 실패시 false
      */
+    @Override
     public Map<String, Boolean> verifyCode(String email, int code){
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,code);
-        log.info("str={}",stringBooleanMap);
         return stringBooleanMap;
     }
 
+    /**
+     * 사용자의 정보를 탈퇴하는 메서드
+     */
     @Override
-    public void deleteMember(Long memberId) {
-        jwtRefreshTokenRepository.DeleteByMemberId(memberId);
-        memberRepository.deleteById(memberId);
+    public void deleteMember(String loginId) {
+        Member member = memberRepository.findByLoginId(loginId);
+        noticeRepository.deleteMemberId(member.getId());
+        notificationRepository.deleteMember(member.getId());
+        jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
+        questionRepository.deleteAllByMemberId(member.getId());
+        memberRepository.delete(member);
     }
 
+    /**
+     * 회원가입시 오류 메시지를 추출하는 메서드
+     * 비밀번호 중복검사, 이메일 중복검사, 아이디 중복검사를 최종적으로 한번 더하는 메서드
+     */
+    @Override
+    public Map<String,String> ValidationErrorMessage(MemberDto memberDto) {
+        Map<String, Boolean> validationResult = validateSignUp(memberDto);
+
+        Map<String,String> result = new HashMap<>();
+
+        for (Map.Entry<String, Boolean> entry : validationResult.entrySet()){
+            if(!entry.getValue()){
+                String key = entry.getKey();
+                if(key.equals("duplicate_password"))
+                    result.put("passwordRe","비밀 번호가 일치하지 않습니다.");
+                else if(key.equals("isLoginValid")){
+                    result.put("loginId","중복된 아이디 입니다.");
+                }else if(key.equals("duplicateEmail")){
+                    result.put("email","종복된 이메일 입니다.");
+                } else
+                    result.put("code","인증 번호가 일치하지 않습니다.");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void emailValidCon(String email) {
+        boolean duplicateEmail = isDuplicateEmail(email);
+
+        boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
+        if(!duplicateEmail || !valid)
+            throw new InvalidIdException("이메일 사용 불가능");
+    }
+
+    /**
+     * 이메일을 중복검사하는 메서드
+     * 일반 사용자의 이메일의 대해서만 검사한다.
+     */
+    private boolean isDuplicateEmail(String email) {
+        List<Member> member = memberRepository.findByEmail(email);
+        for (Member m : member) {
+            if (m.getLogin_type().equals("normal")) {
+                return  false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 아이디 조건검사 중복검사
+     * @param loginId
+     * @return 대문자나 소문자일시 true, 아닐시 false
+     */
+    private boolean isLoginIdDuplicated(String loginId) {
+        return  memberRepository.existsByLoginId(loginId);
+    }
 }

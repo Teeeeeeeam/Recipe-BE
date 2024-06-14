@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.recipe.domain.RecipeBookmark;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,17 +26,25 @@ public class Member {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    Long id;
+    private Long id;
 
-    String username;
-    String nickName;
-    String password;
-    String loginId;
-    String email;
+    private String username;
+
+    private String nickName;
+
+    private String password;
+
+    private String loginId;
+
+    private String email;
+
     @JsonIgnore
-    String roles;
-    LocalDate join_date;
-    String login_type;
+    private String roles;
+
+    private LocalDate createAt;
+
+    private String login_type;
+
     private boolean verified;
 
 
@@ -54,6 +63,10 @@ public class Member {
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)
     List<RecipeLike> recipeLikes = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)
+    List<RecipeBookmark> recipeBookmarks = new ArrayList<>();
 
     public List<String> getRoleList(){
         if(this.roles != null && this.roles.length() > 0){

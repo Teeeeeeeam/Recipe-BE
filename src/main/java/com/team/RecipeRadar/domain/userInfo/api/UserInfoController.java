@@ -38,7 +38,6 @@ import org.springframework.web.server.ServerErrorException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Base64;
 
 @RestController
 @RequiredArgsConstructor
@@ -171,7 +170,7 @@ public class UserInfoController {
             MemberDto memberDto = getMemberDto();
 
             String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordRequest.getPassword(), passwordRequest.getLoginType());
-            ResponseCookie userInfoCookie = cookieUtils.createUserInfoCookie("login-id", userToken, 1200);
+            ResponseCookie userInfoCookie = cookieUtils.createCookie("login-id", userToken, 1200);
 
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, userInfoCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
 

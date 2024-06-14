@@ -4,8 +4,8 @@ import com.team.RecipeRadar.domain.member.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,13 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +35,10 @@ import java.util.*;
 public class AccountRetrievalController {
 
     private final AccountRetrievalService accountRetrievalService;
+    private final CookieUtils cookieUtils;
+
+    private final String ACCOUNT = "account-token";
+    private final String LOGIN = "login-id";
 
     @Operation(summary = "아이디찾기",description = "사용자의 이름과 이메일을 통해 인증코드를 받아 아이디를 찾는 API")
     @ApiResponses(value = {
@@ -49,33 +51,12 @@ public class AccountRetrievalController {
     })
     @PostMapping("/api/search/login-id")
     public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdRequest findLoginIdRequest, BindingResult bindingResult){
-        try {
-            if (bindingResult.hasErrors()){
-                Map<String, String> result = new LinkedHashMap<>();
-                for (FieldError error : bindingResult.getFieldErrors()) {
-                    result.put(error.getField(),error.getDefaultMessage());
-                }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
-            }
-            String username = findLoginIdRequest.getUsername();
-            String email = findLoginIdRequest.getEmail();
-            Integer code = findLoginIdRequest.getCode();
-
-            List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email,code);
-
-            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
-                    .success(true)
-                    .message("성공")
-                    .data(loginId).build();
-
-            return ResponseEntity.ok(response);
-        }catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
+        if (bindingResult.hasErrors()){
+            return getErrorResponseResponse(bindingResult);
         }
-        catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("오류발생");
-        }
+        List<Map<String, String>> accountRetrievalServiceLoginId = accountRetrievalService.findLoginId(findLoginIdRequest.getUsername(), findLoginIdRequest.getEmail(),findLoginIdRequest.getCode());
+
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",accountRetrievalServiceLoginId));
     }
 
     @Operation(summary = "비밀번호 찾기",
@@ -83,46 +64,22 @@ public class AccountRetrievalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"회원 정보\":true,\"이메일 인증\":true}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
     })
     @PostMapping("/api/search/password")
     public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordDto, BindingResult bindingResult){
-        try {
-            if (bindingResult.hasErrors()){
-                Map<String, String> result = new LinkedHashMap<>();
-                for (FieldError error : bindingResult.getFieldErrors()) {
-                    result.put(error.getField(),error.getDefaultMessage());
-                }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패",result));
-            }
-            Map<String, Object> pwd = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(),findPasswordDto.getCode());
+        if (bindingResult.hasErrors())
+            return getErrorResponseResponse(bindingResult);
 
-            String token = (String) pwd.get("token");
+        String token = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode());
 
-            ResponseCookie accountToken = ResponseCookie.from("account-token", token)
-                    .maxAge(60 * 3)
-                    .secure(true)
-                    .httpOnly(true)
-                    .path("/")
-                    .sameSite("None")
-                    .build();
-            pwd.remove("token");
+        ResponseCookie responseCookie = cookieUtils.createCookie("account-token", token, 60 * 3);
 
-            ControllerApiResponse<Object> response = ControllerApiResponse.builder()
-                    .success(true)
-                    .message("성공")
-                    .data(pwd).build();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(new ControllerApiResponse<>(true,"성공"));
 
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,accountToken.toString()).body(response);
-        } catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
-        }
     }
 
     @Operation(summary = "비밀번호 변경",description = "'account-token' 쿠키가 존재하면(비밀번호 찾기 후 비밀번호 변경), 'login-id' 쿠키가 존재하면(사용자 페이지에서 비밀번호 변경) 해당 엔드포인트에 접속하여 비밀번호를 변경할 수 있습니다.")
@@ -132,41 +89,38 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"비밀번호 변경 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]"))),
-            @ApiResponse(responseCode = "500", description = "SERVER ERROR",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]")))
     })
     @PutMapping("/api/password/update")
     public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult, HttpServletRequest request){
-        try {
-            if (bindingResult.hasErrors()){
-                Map<String, String> result = new LinkedHashMap<>();
-                for (FieldError error : bindingResult.getFieldErrors()) {
-                    result.put(error.getField(),error.getDefaultMessage());
-                }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"실패", result));
-            }
-            Cookie[] cookies = request.getCookies();
-            String accountId = "";
+        if (bindingResult.hasErrors()){
+
+            return getErrorResponseResponse(bindingResult);
+        }
+        Cookie[] cookies = request.getCookies();
+        String accountId = "";
+        String cookieId = "";
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if(cookie.getName().equals("account-token")){
+                if (cookie.getName().equals(ACCOUNT) || cookie.getName().equals(LOGIN)) {
                     accountId = cookie.getValue();
-                }if(cookie.getName().equals("login-id")){
-                    accountId = cookie.getValue();
+                    cookieId = cookie.getName();
+                    break;
                 }
             }
-            ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto,accountId);
-            return ResponseEntity.ok(apiResponse);
-        }catch (NoSuchElementException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false,e.getMessage()));
         }
-        catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse<>(false, "잘못된 접근"));
+
+        accountRetrievalService.updatePassword(updatePasswordDto,accountId);
+
+        ResponseCookie deleteCookie = cookieUtils.deleteCookie(cookieId);
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
+    }
+
+    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponse(BindingResult bindingResult) {
+        Map<String, String> result = new LinkedHashMap<>();
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            result.put(error.getField(),error.getDefaultMessage());
         }
-        catch (Exception e){
-            throw new ServerErrorException("서버 오류");
-        }
+        return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
     }
 }

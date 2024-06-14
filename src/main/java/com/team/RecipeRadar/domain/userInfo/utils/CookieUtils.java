@@ -13,7 +13,7 @@ public class CookieUtils {
 
     private final AccountRetrievalRepository accountRetrievalRepository;
 
-    public ResponseCookie createUserInfoCookie(String cookieName,String value,int expiredTime){
+    public ResponseCookie createCookie(String cookieName, String value, int expiredTime){
 
         String userEncodeToken = new String(Base64.getEncoder().encode(value.getBytes()));
 
@@ -29,8 +29,15 @@ public class CookieUtils {
 
     public boolean validCookie(String cookieValue,String loginId){
         String decodeCookie = new String(Base64.getDecoder().decode(cookieValue.getBytes()));
-        System.out.println(decodeCookie);
         boolean existCookie = accountRetrievalRepository.existsByLoginIdAndVerificationId(loginId, decodeCookie);
         return existCookie;
+    }
+
+    public ResponseCookie deleteCookie(String cookieName){
+        return ResponseCookie.from(cookieName,null)
+                .secure(true)
+                .httpOnly(true)
+                .sameSite("None")
+                .maxAge(0).path("/").build();
     }
 }

@@ -71,18 +71,16 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
     @Override
     public Map<String, Boolean> verifyCode(String email, int code) {
         Map<String, Boolean> result = new LinkedHashMap<>();
-        boolean isVerifyCode = false;
 
         EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
 
         if (emailVerification != null && isCodeValid(emailVerification)) {
-            isVerifyCode = true;
+            result.put("isVerifyCode",true);
+            return result;
         } else {
             throw new IllegalStateException("인증번호가 일치하지 않습니다.");
         }
 
-        result.put("isVerifyCode", isVerifyCode);
-        return result;
     }
 
     /**
