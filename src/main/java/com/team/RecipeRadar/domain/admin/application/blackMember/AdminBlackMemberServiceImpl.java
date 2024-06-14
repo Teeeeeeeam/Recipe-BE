@@ -7,11 +7,11 @@ import com.team.RecipeRadar.domain.admin.dto.BlackListDto;
 import com.team.RecipeRadar.domain.admin.dto.BlackListResponse;
 import com.team.RecipeRadar.domain.admin.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
+import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -31,11 +30,8 @@ import java.util.NoSuchElementException;
 public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final BlackListRepository blackListRepository;
-    private final CommentRepository commentRepository;
-    private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
-    private final ImgRepository imgRepository;
-    private final RecipeBookmarkRepository recipeBookmarkRepository;
 
     /**
      * 사용자 수를 조회하는 메서드
@@ -75,7 +71,7 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
                 deletedEmails.add(member.getEmail());
             }
             // 사용자와 관련된 데이터 삭제
-            deleteMemberRelatedData(memberId);
+            deleteMemberRelatedData(member.getLoginId());
         }
 
         return deletedEmails;
@@ -123,11 +119,7 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
     }
 
     /* 사용자를 삭제 시킬때 관련된 모든 정보를 삭제하는 메서드 */
-    private void deleteMemberRelatedData(Long memberId) {
-        commentRepository.deleteMember_comment(memberId);
-        imgRepository.deleteMemberImg(memberId);
-        recipeBookmarkRepository.deleteByMember_Id(memberId);
-        jwtRefreshTokenRepository.DeleteByMemberId(memberId);
-        memberRepository.deleteById(memberId);
+    private void deleteMemberRelatedData(String loginId) {
+        memberService.deleteMember(loginId);
     }
 }

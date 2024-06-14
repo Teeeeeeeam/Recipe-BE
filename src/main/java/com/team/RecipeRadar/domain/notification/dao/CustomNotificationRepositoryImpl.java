@@ -1,10 +1,12 @@
 package com.team.RecipeRadar.domain.notification.dao;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.QMember;
 import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.domain.QNotification;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.notification;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
@@ -129,6 +132,18 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
             }
         }
 
+    }
+
+    /**
+     * 사용자 탈퇴사 관련된 알림 삭제
+     */
+    @Override
+    public void deleteMember(Long memberId) {
+        jpaQueryFactory.delete(notification)
+                .where(notification.receiver.id.in(
+                        JPAExpressions.select(member.id)
+                                .from(member).where(member.id.eq(memberId))
+                )).execute();
     }
 
     private List<Notification> getNotificationList(Long fromId) {
