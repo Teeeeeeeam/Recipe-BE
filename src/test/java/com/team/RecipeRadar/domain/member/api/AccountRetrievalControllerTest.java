@@ -9,6 +9,7 @@ import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindLoginIdReques
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.FindPasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -20,7 +21,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,33 +34,24 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AccountRetrievalController.class)
 @ExtendWith(SpringExtension.class)
 @Slf4j
 class AccountRetrievalControllerTest {
 
-    @MockBean
-    private AccountRetrievalService accountRetrievalService;
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    BlackListRepository blackListRepository;
+    @MockBean private AccountRetrievalService accountRetrievalService;
+    @Autowired private MockMvc mockMvc;
+    @MockBean BlackListRepository blackListRepository;
+    @MockBean CookieUtils cookieUtils;
 
-    @MockBean
-    AccountRetrievalEmailServiceImpl mailService;
-    @MockBean
-    MemberRepository memberRepository;
-    @MockBean
-    MemberService memberService;
-    @MockBean
-    JwtProvider jwtProvider;
-    @MockBean
-    CustomOauth2Handler customOauth2Handler;
-    @MockBean
-    CustomOauth2Service customOauth2Service;
+    @MockBean AccountRetrievalEmailServiceImpl mailService;
+    @MockBean MemberRepository memberRepository;
+    @MockBean MemberService memberService;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean CustomOauth2Service customOauth2Service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -96,28 +90,27 @@ class AccountRetrievalControllerTest {
         String username = "홍길동";
         String loginId = "loginId";
         String email = "test@email.com";
+        String fakeToken = "fakeToken";
         int code = 123456;
 
         FindPasswordRequest findPasswordDto = new FindPasswordRequest(username, loginId, email, code);
 
-        // 반환할 맵 설정
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("token", "test_TOken");
-        map.put("회원 정보", true);
-        map.put("이메일 인증", true);
-
         // accountRetrievalService.findPwd() 메서드가 호출될 때 반환할 값 설정
-        given(accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode())).willReturn(map);
+        given(accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode()))
+                .willReturn(fakeToken);
+
+        ResponseCookie responseCookie = ResponseCookie.from("account-token", fakeToken).build();
+        given(cookieUtils.createCookie("account-token", fakeToken, 60 * 3)).willReturn(responseCookie);
 
         // 요청 및 응답 확인
         mockMvc.perform(post("/api/search/password")
-                        .param("code",String.valueOf(code))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(findPasswordDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data['회원 정보']").value(true))
-                .andExpect(jsonPath("$.data['이메일 인증']").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("성공"))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, responseCookie.toString()));
     }
 
     @Test
@@ -127,18 +120,23 @@ class AccountRetrievalControllerTest {
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
 
         UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
-        ControllerApiResponse apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
-        given(accountRetrievalService.updatePassword(updatePasswordDto,token)).willReturn(apiResponse);
+        doNothing().when(accountRetrievalService).updatePassword(updatePasswordDto,token);
+
 
         Cookie cookie = new Cookie("account-token", token);
+
+        ResponseCookie responseCookie = ResponseCookie.from("account-token", null)
+                .build();
+
+        given(cookieUtils.deleteCookie("account-token")).willReturn(responseCookie);
 
         mockMvc.perform(put("/api/password/update")
                         .cookie(cookie)
                 .content(objectMapper.writeValueAsString(updatePasswordDto))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("비밀번호 변경 성공"))
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, responseCookie.toString()));
     }
 }

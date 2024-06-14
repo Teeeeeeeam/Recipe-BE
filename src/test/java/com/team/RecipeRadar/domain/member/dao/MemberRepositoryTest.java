@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
@@ -73,8 +72,8 @@ class MemberRepositoryTest {
     @DisplayName("가입한 회원 모두 조회_무한 페이징")
     void findAllMembers(){
         String loginId = "loginId";
-        Member member_1 = Member.builder().username("회원1").email("email1").loginId(loginId).nickName("닉네임1").join_date(LocalDate.now()).build();
-        Member member_2 = Member.builder().username("회원2").email("email2").loginId("loginId2").nickName("닉네임2").join_date(LocalDate.now()).build();
+        Member member_1 = Member.builder().username("회원1").email("email1").loginId(loginId).nickName("닉네임1").createAt(LocalDate.now()).build();
+        Member member_2 = Member.builder().username("회원2").email("email2").loginId("loginId2").nickName("닉네임2").createAt(LocalDate.now()).build();
 
         Member save = memberRepository.save(member_1);
         memberRepository.save(member_2);
@@ -94,8 +93,8 @@ class MemberRepositoryTest {
 
         String meme1_loginId = "loginId";
         String meme2_loginId = "loginId";
-        Member member_1 = Member.builder().username("회원1").email("email1").loginId(meme1_loginId).nickName("닉네임1").join_date(LocalDate.now()).build();
-        Member member_2 = Member.builder().username("회원2").email("email2").loginId(meme2_loginId).nickName("닉네임2").join_date(LocalDate.now()).build();
+        Member member_1 = Member.builder().username("회원1").email("email1").loginId(meme1_loginId).nickName("닉네임1").createAt(LocalDate.now()).build();
+        Member member_2 = Member.builder().username("회원2").email("email2").loginId(meme2_loginId).nickName("닉네임2").createAt(LocalDate.now()).build();
 
         memberRepository.save(member_1);
         memberRepository.save(member_2);

@@ -6,8 +6,7 @@ import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.payload.ControllerApiResponse;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -119,7 +118,7 @@ class AccountRetrievalServiceImplTest {
     }
 
     @Test
-    @DisplayName("비밀번호 찾기 성공시")
+    @DisplayName("비밀번호 찾기 성공시 토큰 발급")
     void find_pwd_success(){
         String email = "test@email.com";
         String username = "username";
@@ -137,12 +136,9 @@ class AccountRetrievalServiceImplTest {
         // accountRetrievalRepository.save 메서드에 대한 스텁 설정
         when(accountRetrievalRepository.save(any(AccountRetrieval.class))).thenReturn(accountRetrieval);
 
-        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email, code);
+        String pwd = accountRetrievalService.findPwd(username, loginId, email, code);
 
-        // 회원 정보와 이메일 인증이 모두 true인지 확인
-        assertThat(pwd.get("회원 정보")).isEqualTo(true);
-        assertThat(pwd.get("이메일 인증")).isEqualTo(true);
-        assertThat(pwd.get("token")).isNotNull();
+        assertThat(pwd).isEqualTo("accountRetrieval");
     }
 
 
@@ -152,19 +148,11 @@ class AccountRetrievalServiceImplTest {
         String email = "test@email.com";
         String username = "username";
         String loginId = "loginId";
-        int code = 1234; // 코드는 int 형식으로 설정되어 있는 것으로 보입니다.
+        int code = 1234;
 
-        // 아이디와 사용자 이름과 이메일로 등록된 회원이 없음을 설정
-        when(memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email)).thenReturn(false);
+        when(memberRepository.existsByUsernameAndLoginIdAndEmail(eq(username),eq(loginId),eq(email))).thenReturn(false);
 
-        // 임의의 코드 반환
-        int realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
-
-        Map<String, Object> pwd = accountRetrievalService.findPwd(username, loginId, email, code);
-
-        assertThat(pwd.get("회원 정보")).isEqualTo(false);
-        assertThat(pwd.get("이메일 인증")).isEqualTo(false);
+        assertThatThrownBy(() -> accountRetrievalService.findPwd(username,loginId,email,code)).isInstanceOf(NoSuchDataException.class);
     }
 
 
@@ -193,10 +181,8 @@ class AccountRetrievalServiceImplTest {
         when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        ControllerApiResponse apiResponse = accountRetrievalService.updatePassword(updatePasswordDto, token);
+        accountRetrievalService.updatePassword(updatePasswordDto, token);
 
-        assertThat(apiResponse.isSuccess()).isTrue();
-        assertThat(apiResponse.getMessage()).isEqualTo("비밀번호 변경 성공");
     }
 
     @Test
@@ -220,10 +206,9 @@ class AccountRetrievalServiceImplTest {
         passwordStrengthMap.put("passwordStrength", false);
         Map<String, Boolean> duplicatePasswordMap = new HashMap<>();
         duplicatePasswordMap.put("duplicate_password", true);
-        when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             accountRetrievalService.updatePassword(updatePasswordDto, token);
         });
 
@@ -254,11 +239,11 @@ class AccountRetrievalServiceImplTest {
         when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> {
             accountRetrievalService.updatePassword(updatePasswordDto, token);
         });
 
         // 예외 메시지가 일치하는지 확인
-        assertThat(exception.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");
+        assertThat(illegalStateException.getMessage()).isEqualTo("비밀번호가 일치하지 않습니다.");
     }
 }
