@@ -137,7 +137,7 @@ class CommentControllerTest {
 
         // GET 요청 수행 및 응답 확인
         mockMvc.perform(get("/api/comments")
-                        .param("posts", "55")
+                        .param("postId", "55")
                         .param("page","0")
                         .param("size","5")
                         .contentType(MediaType.APPLICATION_JSON))
