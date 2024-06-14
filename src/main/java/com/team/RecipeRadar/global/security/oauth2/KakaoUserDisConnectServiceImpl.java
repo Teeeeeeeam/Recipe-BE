@@ -4,7 +4,8 @@ package com.team.RecipeRadar.global.security.oauth2;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.application.MemberService;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,10 +50,7 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(tokenUrl, requestEntity, String.class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                log.info("aaasdasda={}",responseEntity.getBody());
-
                 JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-                log.info("js={}",jsonNode);
                 String accessToken = jsonNode.get("access_token").asText();
                 return accessToken;
             } else {
@@ -70,14 +68,10 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
         try {
 
             String requestUrl = "https://kapi.kakao.com/v1/user/unlink";
-            String memberId = getUserNumber(accessToken);
-            log.info("member={}",memberId);
+            String loginId = getUserNumber(accessToken);
 
-            MemberDto memberDto = memberService.findByLoginId(memberId);
+            memberService.deleteMember(loginId);
 
-            memberService.deleteMember(memberDto.getId());
-
-            log.info("사용자 정보={}",memberDto);
             RestTemplate restTemplate = new RestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
@@ -124,8 +118,7 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
 
             if (responseEntity.getStatusCode().is2xxSuccessful()){;
                 JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-                String member_id = jsonNode.get("id").asText();
-                return member_id;
+                return jsonNode.get("id").asText();
             }else
                 throw new ServerErrorException("정보 가저오기 실패");
         }catch (Exception e){

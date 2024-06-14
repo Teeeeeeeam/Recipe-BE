@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,4 +27,9 @@ public class AccountRetrieval {
     private String loginId;
 
     private LocalDateTime expireAt;
+
+    public static AccountRetrieval createAccount(String loginId){
+        LocalDateTime expiration = LocalDateTime.now().plusMinutes(3);
+        return AccountRetrieval.builder().loginId(loginId).expireAt(expiration).build();
+    }
 }

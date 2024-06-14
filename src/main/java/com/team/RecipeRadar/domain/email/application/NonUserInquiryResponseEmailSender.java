@@ -25,17 +25,26 @@ public class NonUserInquiryResponseEmailSender implements MailService {
     @Override
     public String sendMail(String email, String subject, String body) {
 
-        SimpleMailMessage message = new SimpleMailMessage();
+        sendEmailVerification(email, subject, body);
 
+        return "ok";
+    }
+
+    /**
+     * 메일 전송 메서드
+     */
+    private void sendEmailVerification(String email, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("나만의 냉장고 이용 제한");
         message.setText(createText(subject, body));
         message.setFrom(emailFrom);
         message.setTo(email);
         mailSender.send(message);
-
-        return "ok";
     }
 
+    /**
+     * 메일 내용 메서드
+     */
     private String createText(String subject, String body) {
         StringBuilder sb = new StringBuilder();
         sb.append(LocalDate.now()).append("에 문의사항에 대한 답변이 도착했습니다.").append("\n");

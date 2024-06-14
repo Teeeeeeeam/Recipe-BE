@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -64,12 +63,12 @@ public class CommentServiceImpl implements CommentService {
             notificationService.sendCommentNotification(post,savedComment.getMember().getNickName());
             return savedComment;
         } else {
-            throw new NoSuchElementException("회원정보나 게시글을 찾을수 없습니다.");     //사용자 및 게시글이 없을시에는 해당 예외발생
+            throw new NoSuchElementException("회원정보나 게시글을 찾을수 없습니다. 게시글 ID = "+postId);     //사용자 및 게시글이 없을시에는 해당 예외발생
         }
     }
     @Override
     public Comment findById(long id) {
-        return commentRepository.findById(id).orElseThrow(() -> new CommentException("찾을 수 없습니다."));
+        return commentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("댓글 "+id+"을 찾을 수 없습니다."));
     }
 
     /**
@@ -87,12 +86,11 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentDtoId).orElseThrow(() -> new NoSuchElementException("해당 댓글 찾을 수없습니다. " + commentDtoId));
 
         if (comment.getMember().getId().equals(memberDtoId)){           // 댓글을 등록한 사용자 일경우
-            log.info("여기`~~");
             notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());
 
             commentRepository.deleteMemberId(member.getId(),comment.getId());
         }else
-            throw new CommentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
+            throw new IllegalArgumentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
     }
 
     /**
@@ -107,7 +105,7 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
 
         if (!comments.getContent().isEmpty()) {
-            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent()).create_at(comment.getLocDateTime())
+            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent())
                     .nickName(comment.getMember().getNickName()).build());
         }else
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -130,7 +128,7 @@ public class CommentServiceImpl implements CommentService {
             comment.update(comment_content);
             comment.updateTime(localDateTime);
         }else
-            throw new CommentException("작성자만 수정 가능합니다.");
+            throw new IllegalArgumentException("작성자만 수정 가능합니다.");
     }
 
     private Member getMemberThrows(Long member_id) {

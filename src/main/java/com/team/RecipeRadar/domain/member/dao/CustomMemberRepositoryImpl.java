@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
-import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.recipe;
 
 @Slf4j
 @Repository
@@ -33,14 +32,14 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
             builder.and(member.id.gt(lastMemberId));
         }
 
-        List<Tuple> list = jpaQueryFactory.select(member.id,member.loginId, member.nickName, member.email, member.join_date, member.username)
+        List<Tuple> list = jpaQueryFactory.select(member.id,member.loginId, member.nickName, member.email, member.createAt, member.username)
                 .from(member)
                 .where(builder)
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         List<MemberDto> memberDtoList = list.stream().map(tuple -> MemberDto.of(tuple.get(member.id), tuple.get(member.loginId), tuple.get(member.email), tuple.get(member.username),
-                        tuple.get(member.nickName), tuple.get(member.join_date)))
+                        tuple.get(member.nickName), tuple.get(member.createAt)))
                 .collect(Collectors.toList());
 
 
@@ -76,7 +75,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
                 .fetch();
 
 
-        List<MemberDto> memberDtoList = memberList.stream().map(m -> MemberDto.of(m.getId(), m.getLoginId(), m.getEmail(), m.getUsername(), m.getNickName(), m.getJoin_date())).collect(Collectors.toList());
+        List<MemberDto> memberDtoList = memberList.stream().map(m -> MemberDto.of(m.getId(), m.getLoginId(), m.getEmail(), m.getUsername(), m.getNickName(), m.getCreateAt())).collect(Collectors.toList());
         boolean hasNext = isHasNext(pageable, memberDtoList);
 
 

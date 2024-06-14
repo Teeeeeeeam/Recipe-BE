@@ -1,13 +1,12 @@
 package com.team.RecipeRadar.domain.like.api;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -25,9 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -41,30 +38,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 class RecipeLikeControllerTest {
 
-    @MockBean
-    private RecipeLikeServiceImpl recipeLikeService;
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    ObjectMapper objectMapper;
+    @MockBean private RecipeLikeServiceImpl recipeLikeService;
+    @Autowired private MockMvc mockMvc;
+    @Autowired ObjectMapper objectMapper;
 
-    @MockBean
-    MemberRepository memberRepository;
-    @MockBean
-    JwtProvider jwtProvider;
-    @MockBean
-    CustomOauth2Handler customOauth2Handler;
-    @MockBean
-    CustomOauth2Service customOauth2Service;
+    @MockBean MemberRepository memberRepository;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean CustomOauth2Service customOauth2Service;
+    @MockBean CookieUtils cookieUtils;
 
 
     @Test
     @CustomMockUser
     @DisplayName("좋아요 해제하기")
     void add_like_recipe() throws Exception {
-        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).memberId(2l).build();
+        Long memberId = 1l;
+        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).build();
 
-        given(recipeLikeService.addLike(recipeLikeDto)).willReturn(true);
+        given(recipeLikeService.addLike(recipeLikeDto,memberId)).willReturn(true);
 
         mockMvc.perform(post("/api/user/recipe/like")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,9 +71,10 @@ class RecipeLikeControllerTest {
     @CustomMockUser
     @DisplayName("좋아요 해제하기 테스트")
     void delete_like_test()throws Exception{
+        Long memberId = 2l;
 
-        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).memberId(2l).build();
-        given(recipeLikeService.addLike(recipeLikeDto)).willReturn(false);
+        RecipeLikeRequest recipeLikeDto = RecipeLikeRequest.builder().recipeId(1l).build();
+        given(recipeLikeService.addLike(recipeLikeDto,memberId)).willReturn(false);
 
         mockMvc.perform(post("/api/user/recipe/like")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,12 +86,15 @@ class RecipeLikeControllerTest {
     }
 
     @Test
+    @CustomMockUser
     @DisplayName("좋아요 목록 테스트")
     void get_likes() throws Exception {
 
-        given(recipeLikeService.checkLike(null,1l)).willReturn(true);
+        Long memberId = 1l;
+        Long recipeId = 123l;
+        given(recipeLikeService.checkLike(eq(memberId),eq(recipeId))).willReturn(false);
 
-        mockMvc.perform(get("/api/recipe/like/check/{recipe-id}", 123L)
+        mockMvc.perform(get("/api/user/recipe/{recipeId}/like/check", recipeId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -108,45 +104,42 @@ class RecipeLikeControllerTest {
     }
 
     @Test
+    @CustomMockUser
     @DisplayName("레시피 좋아요 테스트")
     void getLikes() throws Exception {
-        // JWT 토큰 생성
-        String sign = JWT.create()
-                .withClaim("id", "testId")
-                .withSubject("subject")
-                .withExpiresAt(new Date())
-                .sign(Algorithm.HMAC512("test"));
 
-        // recipeLikeService.checkLike 메서드가 호출될 때 true를 반환하도록 설정
-        given(recipeLikeService.checkLike(anyString(), anyLong())).willReturn(true);
+        Long memberId = 1l;
+        Long recipeId = 123l;
 
+        given(recipeLikeService.checkLike(eq(memberId),eq(recipeId))).willReturn(true);
         // GET 요청 수행 및 테스트
-        mockMvc.perform(get("/api/recipe/like/check/{recipe-id}", 123L) // recipe-id를 적절한 값으로 변경
-                        .header("Authorization", "Bearer " + sign)
+        mockMvc.perform(get("/api/user/recipe/{recipeId}/like/check/", recipeId)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()) // 응답 상태코드가 200 OK인지 확인
-                .andDo(print()); // 테스트 결과 출력
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
     @DisplayName("사용자페이지- 좋아요한 레시피의 대한 페이징 성공시")
     @CustomMockUser
     public void getUserLike_page_success() throws Exception {
-        String loginId = "test";
+        Long memberId = 1l;
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
         userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
         userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
+        given(cookieUtils.validCookie(anyString(),anyString())).willReturn(true);
         UserInfoLikeResponse response = UserInfoLikeResponse.builder()
                 .nextPage(true)
                 .content(userLikeDtos)
                 .build();
 
-        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(), isNull(),any(Pageable.class))).willReturn(response);
+        given(recipeLikeService.getUserLikesByPage(eq(memberId), isNull(),any(Pageable.class))).willReturn(response);
 
-        mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId).cookie(cookie))
+        mockMvc.perform(get("/api/user/info/recipe/likes")
+                        .cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("조회 성공"))
@@ -160,21 +153,19 @@ class RecipeLikeControllerTest {
     @DisplayName("사용자페이지- 좋아요한 레시피의 대한 페이징 실패시")
     @CustomMockUser
     public void getUserLike_page_fail() throws Exception {
-        String loginId = "test";
-
         Cookie cookie = new Cookie("login-id", "fakeCookie");
+
         List<UserLikeDto> userLikeDtos = new ArrayList<>();
         userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
         userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
 
-        given(recipeLikeService.getUserLikesByPage(anyString(), anyString(),isNull(), any(Pageable.class))).willThrow(new NoSuchElementException("접근 할 수 없는 페이지입니다."));
+        given(cookieUtils.validCookie(eq("login-id"),anyString())).willReturn(false);
 
-        mockMvc.perform(get("/api/user/info/{login-id}/recipes/likes", loginId).cookie(cookie))
-                .andExpect(status().isBadRequest())
+        mockMvc.perform(get("/api/user/info/recipe/likes")
+                        .cookie(cookie))
+                .andExpect(status().isForbidden())
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("접근 할 수 없는 페이지입니다."));
+                .andExpect(jsonPath("$.message").value("올바르지 않은 접근입니다."));
     }
-
-
 }

@@ -1,12 +1,9 @@
 package com.team.RecipeRadar.global.exception.advice;
 
 
-import com.team.RecipeRadar.domain.like.ex.LikeException;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
-import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.*;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -47,12 +46,6 @@ public class ApiControllerAdvice {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> LikeError(LikeException e){
-        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-    @ExceptionHandler
     public ResponseEntity<ErrorResponse> BadRequest(BadRequestException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
         e.printStackTrace();
@@ -70,6 +63,58 @@ public class ApiControllerAdvice {
         ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
     }
+    
+    /* NoSuchElementException의 예외를 400예외 처리 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> noSuch_BadRequest(NoSuchElementException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
+    /* IllegalArgumentException 예외를 403예외 처리 사용자가 아닌 타인 사용시)*/
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> illegal_Forbidden(IllegalArgumentException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> illegalState_BadRequest(IllegalStateException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /* 숫자 아닐시 400 예외 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> number_BadRequest(NumberFormatException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, "숫자만 입력해주세요.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /* 이미지 관련 예외 */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> Image_BadRequest(ImageException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> NoSuch_BadRequest(NoSuchDataException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> Invalid_BadRequest(InvalidIdException e){
+        log.error("Exception occurred:", e);
+        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
 }

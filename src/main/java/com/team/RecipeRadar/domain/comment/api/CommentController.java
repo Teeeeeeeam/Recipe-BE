@@ -7,7 +7,6 @@ import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,14 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.validation.Valid;
-import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -49,21 +45,13 @@ public class CommentController {
     })
     @PostMapping("/api/user/comments")
     public ResponseEntity<?> comment_add(@Valid @RequestBody UserAddCommentRequest userAddCommentRequest, BindingResult bindingResult){
-        try {
             if (bindingResult.hasErrors()){
                 return ResponseEntity.badRequest().body(new ErrorResponse<>(false, bindingResult.getFieldError().getDefaultMessage()));
             }
             Comment save = commentService.save(userAddCommentRequest);
-
             UserAddCommentRequest addResponse = new UserAddCommentRequest(save.getCommentContent(), save.getMember().getId(),save.getPost().getId(),save.getCreated_at());
-            
+
             return ResponseEntity.ok(new ControllerApiResponse(true,"성공",addResponse));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
-        }
     }
 
     @Operation(summary = "댓글 삭제",description = "로그인한 사용자만 댓글을 삭제할 수 있습니다.")
@@ -72,17 +60,16 @@ public class CommentController {
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"댓글 삭제 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"해당 댓글 찾을 수없습니다. 1\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
     @DeleteMapping("/api/user/comments")
     public ResponseEntity<?> comment_delete(@RequestBody UserDeleteCommentRequest userDeleteCommentRequest){
-        try{
            commentService.delete_comment(userDeleteCommentRequest);//반환타입 void
             return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());         //예외처리-> 여기서 처리안하고  @ExceptionHandler로 예외처리함
-        }
     }
 
     @Operation(summary = "댓글 모두 조회",description = "해당 게시글의 모든 댓글을 조회합니다.")
@@ -94,15 +81,9 @@ public class CommentController {
     })
     @GetMapping("/api/comments")
     public ResponseEntity<?> comment_Page(@Parameter(example = "{\"size\":10}") Pageable pageable,
-                                          @Parameter(description = "게시글 Id")@RequestParam(value = "posts",required = false)String postid){
-        try {
-            Page<CommentDto> comments = commentService.commentPage(Long.parseLong(postid), pageable);
-
+                                          @Parameter(description = "게시글 Id")@RequestParam(value = "posts",required = false)Long postId){
+            Page<CommentDto> comments = commentService.commentPage(postId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", comments));
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException(e.getMessage());
-        }
     }
 
     @Operation(summary = "댓글 수정 API",description = "로그인, 작성자만 수정가능")
@@ -112,28 +93,20 @@ public class CommentController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 수정 성공\" , \"data\" : {\"commentContent\": \"[수정한 댓글]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"update_At\": \"LocalDateTime\"}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"수정할 댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"[오류내용]\"}]")))
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"수정할 댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"[오류내용]\"}]"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
     @PutMapping("/api/user/comments")
     public ResponseEntity<?> comment_update(@Valid @RequestBody UserUpdateCommentRequest userUpdateCommentRequest, BindingResult bindingResult){
-        try {
-            if (bindingResult.hasErrors()){
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,bindingResult.getFieldError().getDefaultMessage()));
-            }
-
-            commentService.update(userUpdateCommentRequest.getMemberId(),userUpdateCommentRequest.getCommentId(),userUpdateCommentRequest.getCommentContent());
-            Comment comment = commentService.findById(userUpdateCommentRequest.getCommentId());
-            UserUpdateCommentRequest userUpdateCommentDto = new UserUpdateCommentRequest(comment.getCommentContent(), comment.getMember().getId(), comment.getId(), comment.getUpdated_at());
-
-            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공",userUpdateCommentDto));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, bindingResult.getFieldError().getDefaultMessage()));
         }
-        catch (CommentException e){
-            throw new CommentException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류 발생");
-        }
+        commentService.update(userUpdateCommentRequest.getMemberId(),userUpdateCommentRequest.getCommentId(),userUpdateCommentRequest.getCommentContent());
+        Comment comment = commentService.findById(userUpdateCommentRequest.getCommentId());
+        UserUpdateCommentRequest userUpdateCommentDto = new UserUpdateCommentRequest(comment.getCommentContent(), comment.getMember().getId(), comment.getId(), comment.getUpdated_at());
+
+        return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공",userUpdateCommentDto));
     }
 }

@@ -28,4 +28,8 @@ public class Ingredient {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    public static Ingredient createIngredient(String ingredients, Recipe recipe){
+        return Ingredient.builder().ingredients(ingredients).recipe(recipe).build();
+    }
 }

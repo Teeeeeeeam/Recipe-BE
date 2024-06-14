@@ -7,8 +7,8 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.email.application.MailService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.payload.ControllerApiResponse;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,112 +35,102 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
 
     /**
-     * 아이디 찾기시에 사용되는 로직
+     * 아이디 찾기시에 사용되는 메서드
      * @param username  가입한 사용자 이름
      * @param email     가입했던 이메일
      * @param code      이메일로 전송된 인증번호
      * @return      List로 반환
      */
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
-        List<MemberDto> byUsernameAndEmail = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
+        List<MemberDto> memberDtos = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
 
-    List<Map<String,String>> list = new LinkedList<>();     //순서를 보장하기 위해 LinkedList 사용
 
-    Boolean emailCode = emailCode(email,code);        //인증번호
-
-    Map<String, String> errorMap = new LinkedHashMap<>();
-
-    if (emailCode) {            //인증번호 검증
-        if (byUsernameAndEmail.isEmpty()) {
-            errorMap.put("가입 정보", "해당 정보로 가입된 회원은 없습니다.");
-            list.add(errorMap);
-        } else{
-            for (MemberDto memberDto : byUsernameAndEmail) {
-                Map<String, String> loginInfo = new LinkedHashMap<>();
-                loginInfo.put("login_type", memberDto.getLogin_type());
-                loginInfo.put("login_info", memberDto.getLoginId());
-                list.add(loginInfo);
-            }
-            mailService.deleteCode(email,code);
+        if (!emailCodeValid(email, code)) {
+            return List.of(Map.of("인증 번호", "인증번호가 일치하지 않습니다."));
         }
-    } else {
-        errorMap.put("인증 번호", "인증번호가 일치하지 않습니다.");
-        list.add(errorMap);
+
+        if (memberDtos.isEmpty()) {
+            return List.of(Map.of("가입 정보", "해당 정보로 가입된 회원은 없습니다."));
+        }
+
+        mailService.deleteCode(email, code);
+        return memberDtos.stream()
+                .map(dto -> Map.of("login_type", dto.getLogin_type(), "login_info", dto.getLoginId()))
+                .collect(Collectors.toList());
     }
 
-    return list;
-}
-
     /**
-     * 비밀번호 찾기 로직
+     * 비밀번호 찾는 메서드
      * @param username  가입한 사용자이름
      * @param loginId   가입한 로그인 아이디
      * @param email     가입한 이메일
      * @return
      */
     @Override
-    public Map<String, Object> findPwd(String username, String loginId, String email,int code) {
+    public String findPwd(String username, String loginId, String email,int code) {
         Boolean memberExists = memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email);
+        if (!memberExists) throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER);
+        Boolean emailCodeValid = emailCodeValid(email,code);
 
-        Boolean emailedCode = emailCode(email,code);
+        String token = "";
 
-        Map<String, Object> map = new LinkedHashMap<>();
-
-        if (memberExists&&emailedCode){
-            LocalDateTime expiration = LocalDateTime.now().plusMinutes(3);
-            AccountRetrieval save = accountRetrievalRepository.save(AccountRetrieval.builder().loginId(loginId).expireAt(expiration).build());
-            String verificationId = save.getVerificationId();
-            String token = new String(Base64.getEncoder().encode(verificationId.getBytes()));
-            map.put("token",token);
+        if (memberExists&&emailCodeValid){
+             token  = accountRetrievalRepository.save(AccountRetrieval.createAccount(loginId)).getVerificationId();
             mailService.deleteCode(email,code);
         }
 
-        map.put("회원 정보", memberExists);
-        map.put("이메일 인증", emailedCode);
-
-        return map;
+        return token;
     }
 
     /**
      * 비밀번호 수정 API DB-> 10분마다 스케쥴 이벤트 발생
      * @param updatePasswordRequest MemberDto 객체(username, loginId, password, passwordRe)
-     * @param id        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
+     * @param token        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
      * @return ControllerApiResponse 객체
      */
-    public ControllerApiResponse updatePassword(UpdatePasswordRequest updatePasswordRequest, String id){
+    public void updatePassword(UpdatePasswordRequest updatePasswordRequest, String token){
 
-        String validId = new String(Base64.getDecoder().decode(id.getBytes()));
+        String validId = new String(Base64.getDecoder().decode(token.getBytes()));
 
-        AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(validId).orElseThrow(() -> new BadRequestException("잘못된 접근"));
+        AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(validId).orElseThrow(() -> new IllegalStateException("접근할수 없습니다."));
 
-        Boolean expiration = false;
+        expiredAt(accountRetrieval);
 
-        if(accountRetrieval.getExpireAt().isAfter(LocalDateTime.now())){
-            expiration =true;
+        Member member = memberRepository.findByLoginId(updatePasswordRequest.getLoginId());
+        if (member==null) throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER);
+
+        // 비밀번호 유효성 검사 진행
+        validatePassword(updatePasswordRequest);
+
+        //비밀번호 저장
+        member.update(passwordEncoder.encode(updatePasswordRequest.getPassword()));
+        
+        //비밀번호 성공시 인증 DB 에서 삭제
+        accountRetrievalRepository.deleteByVerificationId(validId);
+
+    }
+
+    /**
+     * 만료되었는지 검증 하느 메서드
+     */
+    private static void expiredAt(AccountRetrieval accountRetrieval) {
+        if(accountRetrieval.getExpireAt().isBefore(LocalDateTime.now())){
+            throw new IllegalStateException("잘못된 접근");
         }
+    }
 
-        Member byLoginId = memberRepository.findByLoginId(updatePasswordRequest.getLoginId());
-        if (byLoginId==null) throw new NoSuchElementException("가입된 아이디를 찾을수 없습니다.");
-
-        Map<String, Boolean> stringBooleanMap = memberService.checkPasswordStrength(updatePasswordRequest.getPassword());     //성공시 true , 실패시 false
-        Map<String, Boolean> stringBooleanMap1 = memberService.duplicatePassword(updatePasswordRequest.getPassword(), updatePasswordRequest.getPasswordRe());        //성공시 true , 실패시 false
-
-        ControllerApiResponse apiResponse = null;
-
-        if (expiration) {
-            if (stringBooleanMap.get("passwordStrength")) {
-                if (stringBooleanMap1.get("duplicate_password")) {
-                    byLoginId.update(passwordEncoder.encode(updatePasswordRequest.getPassword()));
-                    apiResponse = new ControllerApiResponse(true, "비밀번호 변경 성공");
-                    accountRetrievalRepository.deleteByVerificationId(validId);
-                } else
-                   throw new BadRequestException("비밀번호가 일치하지 않습니다.");
-            } else
-                throw new BadRequestException("비밀번호가 안전하지 않습니다.");
-        }else
-            throw new BadRequestException("잘못된 접근");
-
-        return apiResponse;
+    /**
+     * 비밀번호 유효성 검사를 하는 메서드
+     * 강력도와 중복성의 대해서 검사를 하며 실패시 예외 발생
+     * @param updatePasswordRequest
+     */
+    private void validatePassword(UpdatePasswordRequest updatePasswordRequest) {
+        if (!memberService.checkPasswordStrength(updatePasswordRequest.getPassword()).getOrDefault("passwordStrength", false)) {
+            throw new IllegalStateException("비밀번호가 안전하지 않습니다.");
+        }
+        if (!memberService.duplicatePassword(updatePasswordRequest.getPassword(), updatePasswordRequest.getPasswordRe()).getOrDefault("duplicate_password", false)) {
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     /**
@@ -148,12 +138,8 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @param code  사용자가 입력한 인증번호
      * @return  일치시 -> true 불일치 false
      */
-    public Boolean emailCode(String email, int code){
-        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email, code);
-        if (stringBooleanMap.get("isVerifyCode")){
-            return true;
-        }
-        return false;
+    public Boolean emailCodeValid(String email, int code){
+        return mailService.verifyCode(email, code).getOrDefault("isVerifyCode",false);
     }
 
 }

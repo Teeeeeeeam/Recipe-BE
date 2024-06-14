@@ -24,7 +24,7 @@ public interface PostService {
 
     boolean validPostPassword(String login, ValidPostRequest request);
 
-    PostResponse searchPost(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable);
 
-    void deletePosts(List<Long> postIds);
+
+
 }

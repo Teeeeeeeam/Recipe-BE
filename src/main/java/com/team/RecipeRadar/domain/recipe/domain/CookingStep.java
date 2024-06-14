@@ -31,4 +31,8 @@ public class CookingStep {
     public void update(String steps){
         this.steps = steps;
     }
+
+    public static CookingStep createCookingStep(Recipe recipe,String steps){
+        return CookingStep.builder().recipe(recipe).steps(steps).build();
+    }
 }

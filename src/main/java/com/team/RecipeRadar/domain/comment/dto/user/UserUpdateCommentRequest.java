@@ -28,17 +28,17 @@ public class UserUpdateCommentRequest {
     private Long commentId;
 
     @Schema(hidden = true)
-    private LocalDateTime update_At;
+    private LocalDateTime updateAt;
 
     @JsonIgnore
     @JsonCreator
     public UserUpdateCommentRequest(@JsonProperty String commentContent,
                                     @JsonProperty Long memberId,
                                     @JsonProperty Long commentId,
-                                    @JsonProperty LocalDateTime update_At) {
+                                    @JsonProperty LocalDateTime updateAt) {
         this.commentContent = commentContent;
         this.memberId = memberId;
         this.commentId = commentId;
-        this.update_At = update_At;
+        this.updateAt = updateAt;
     }
 }

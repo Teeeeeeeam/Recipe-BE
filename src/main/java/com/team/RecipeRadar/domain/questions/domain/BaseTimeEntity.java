@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.questions.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,5 +20,6 @@ public class BaseTimeEntity {
     private LocalDateTime createdDate;
 
     @LastModifiedDate
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime modifiedDate;
 }

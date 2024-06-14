@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "email_verifications")
 @NoArgsConstructor
-public class EmailVerification {
+public class EmailVerification{
 
     @Id
     @GeneratedValue(generator = "UUID_GENERATOR")
@@ -31,12 +31,12 @@ public class EmailVerification {
 
     private Integer code;
 
-    private LocalDateTime createTime;
+    private LocalDateTime creatAt;
 
-    private LocalDateTime lastTime;
+    private LocalDateTime expiredAt;
 
-
-    public EmailVerification(String username) {
-        this.username = username;
+    public static EmailVerification creatEmailVerification(LocalDateTime expiredAt,String email,int code){
+        return EmailVerification.builder().email(email).creatAt(LocalDateTime.now()).email(email).code(code).expiredAt(expiredAt).build();
     }
+
 }

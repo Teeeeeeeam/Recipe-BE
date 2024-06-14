@@ -1,9 +1,12 @@
 package com.team.RecipeRadar.domain.questions.domain;
 
+import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -38,6 +41,9 @@ public class Question extends BaseTimeEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL,orphanRemoval = true)
+    List<UploadFile> uploadFiles = new ArrayList<>();
 
     //질문 상태 업데이트
     public void updateStatus(QuestionStatus questionStatus){

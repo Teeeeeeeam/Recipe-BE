@@ -1,18 +1,15 @@
 package com.team.RecipeRadar.domain.notice.api;
 
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.application.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.admin.AdminUpdateRequest;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.info.InfoNoticeResponse;
-import com.team.RecipeRadar.domain.notice.exception.NoticeException;
 import com.team.RecipeRadar.domain.notice.exception.ex.NoticeNotFoundException;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -59,27 +55,22 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\"}"))),
+                    examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"관련 오류 내용\"}"))),
     })
     @PostMapping(value = "/api/admin/notices", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddNoticeDto, BindingResult bindingResult, @RequestPart(required = false) MultipartFile file) {
-        try {
-            ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
-            if (errorMap != null) return errorMap;
-            String uploadFile=null;
-            String originalFilename =null;
-            if(file!=null){
-                uploadFile = s3UploadService.uploadFile(file);
-                originalFilename = file.getOriginalFilename();
-            }
-            noticeService.save(adminAddNoticeDto,uploadFile,originalFilename);
-            return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
-            }catch (NoSuchElementException e){
-                throw new NoticeException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
+    public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddNoticeDto, BindingResult bindingResult,
+                                       @RequestPart(required = false) MultipartFile file) {
+        ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
+        if (errorMap != null) return errorMap;
+        String uploadFile=null;
+        String originalFilename =null;
+        if(file!=null){
+            uploadFile = s3UploadService.uploadFile(file);
+            originalFilename = file.getOriginalFilename();
         }
+        noticeService.save(adminAddNoticeDto,uploadFile,originalFilename);
+        return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
+
     }
 
     @Operation(summary = "공지사항 삭제",description = "관리자만 문의사항 삭제가능 단일, 일괄 삭제가능")
@@ -89,17 +80,12 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"공지사항 삭제 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"해당 공지 사항이 존재하지 않습니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"관련 오류 내용\"}")))
     })
     @DeleteMapping("/api/admin/notices")
     public ResponseEntity<?> deleteNotice(@RequestParam("ids") List<Long> noticeIds) {
-        try{
-
-            noticeService.delete(noticeIds);
-            return ResponseEntity.ok(new ControllerApiResponse(true,"문의사항 삭제 성공"));
-        } catch (NoSuchElementException e) {
-            throw new NoticeNotFoundException(e.getMessage());
-        }
+        noticeService.delete(noticeIds);
+        return ResponseEntity.ok(new ControllerApiResponse(true,"문의사항 삭제 성공"));
     }
 
     @Operation(summary = "공지사항 수정", description = "관리자만 수정가능")
@@ -109,7 +95,7 @@ public class NoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"noticeTitle\": \"[수정한 공지사항 제목]\", \"memberId\": \"[사용자 ID]\", \"noitceId\": \"[공지사항 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"해당 공지사항을 찾을 수 없습니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"관련 오류 내용\"}"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"관리자만 수정할수 있습니다.\"}")))
@@ -117,19 +103,11 @@ public class NoticeController {
     @PutMapping(value = "/api/admin/notices/{notice-id}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest adminUpdateRequest, BindingResult bindingResult,
                                            @RequestPart(required = false) MultipartFile file, @PathVariable("notice-id") Long noticeId){
-        try{
-            ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
-            if (errorMap != null) return errorMap;
+        ResponseEntity<ErrorResponse<Map<String, String>>> errorMap = getErrorResponseResponseEntity(bindingResult);
+        if (errorMap != null) return errorMap;
+        noticeService.update(noticeId,adminUpdateRequest,file);
 
-            noticeService.update(noticeId,adminUpdateRequest,file);
-
-            return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
-        }catch (NoSuchElementException e){
-            throw new BadRequestException(e.getMessage());
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류 발생");
-        }
+        return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
     }
 
     @Operation(summary = "메인 공지사항", description = "메인 페이지에서 보여질 공지사항 총 5개의 공지사항을 조회 등록한 최신순으로 조회")
