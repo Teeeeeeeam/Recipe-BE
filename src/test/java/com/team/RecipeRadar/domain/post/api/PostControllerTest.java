@@ -3,13 +3,11 @@ package com.team.RecipeRadar.domain.post.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.*;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -31,7 +29,6 @@ import javax.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -198,7 +195,7 @@ class PostControllerTest {
     @CustomMockUser
     void details_posts() throws Exception {
         Long postId= 1l;
-        List<CommentDto> commentDtoListbuild = List.of(CommentDto.builder().id(1l).comment_content("댓글1").build(), CommentDto.builder().id(2l).comment_content("댓글12").build());
+        List<CommentDto> commentDtoListbuild = List.of(CommentDto.builder().id(1l).commentContent("댓글1").build(), CommentDto.builder().id(2l).commentContent("댓글12").build());
         PostDto postDto = PostDto.builder().id(postId).postContent("컨텐트").postTitle("제목").postCookingLevel("레밸").build();
         PostDetailResponse postDetailResponse = new PostDetailResponse(postDto, commentDtoListbuild);
         given(postService.postDetail(anyLong())).willReturn(postDetailResponse);

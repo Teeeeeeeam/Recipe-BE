@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.comment.dao;
 
-import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -12,19 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -174,7 +170,7 @@ class CommentRepositoryTest {
 
         List<CommentDto> content = postComment.getContent();
         assertThat(content).hasSize(2);
-        assertThat(content.get(0).getComment_content()).isEqualTo("댓글1");
+        assertThat(content.get(0).getCommentContent()).isEqualTo("댓글1");
         assertThat(content.get(0).getMember().getNickname()).isEqualTo("사용자1");
         assertThat(postComment.hasNext()).isFalse();
 

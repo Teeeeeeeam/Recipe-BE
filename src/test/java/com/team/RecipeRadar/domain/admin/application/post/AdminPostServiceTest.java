@@ -50,8 +50,8 @@ class AdminPostServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 2);
 
         List<CommentDto> commentDtoList = List.of(
-                CommentDto.builder().comment_content("댓글1").member(MemberDto.builder().loginId("testId").nickname("닉네임1").build()).build(),
-                CommentDto.builder().comment_content("댓글2").member(MemberDto.builder().loginId("testId1").nickname("닉네임2").build()).build()
+                CommentDto.builder().commentContent("댓글1").member(MemberDto.builder().loginId("testId").nickname("닉네임1").build()).build(),
+                CommentDto.builder().commentContent("댓글2").member(MemberDto.builder().loginId("testId1").nickname("닉네임2").build()).build()
         );
         SliceImpl<CommentDto> commentDtos = new SliceImpl<>(commentDtoList, pageRequest, false);
 
@@ -60,7 +60,7 @@ class AdminPostServiceTest {
         PostsCommentResponse postsComments = adminService.getPostsComments(post_id, null, pageRequest);
 
         assertThat(postsComments.getComment()).hasSize(2);
-        assertThat(postsComments.getComment().get(0).getComment_content()).isEqualTo("댓글1");
+        assertThat(postsComments.getComment().get(0).getCommentContent()).isEqualTo("댓글1");
         assertThat(postsComments.getNextPage()).isFalse();
     }
 

@@ -99,7 +99,7 @@ class PostRepositoryTest {
         PostDetailResponse postDetailResponse = postRepository.postDetails(post.getId());
         assertThat(postDetailResponse).isNotNull();
         assertThat(postDetailResponse.getPost().getPostTitle()).isEqualTo(post.getPostTitle());
-        assertThat(postDetailResponse.getComments().get(0).getComment_content()).isEqualTo(save1.getCommentContent());
+        assertThat(postDetailResponse.getComments().get(0).getCommentContent()).isEqualTo(save1.getCommentContent());
     }
 
     @Test

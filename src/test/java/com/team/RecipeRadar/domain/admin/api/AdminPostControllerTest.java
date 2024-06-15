@@ -78,8 +78,8 @@ class AdminPostControllerTest {
     void postsContainsComment() throws Exception {
         Long post_id= 1l;
         List<CommentDto> commentDtoList = List.of(
-                CommentDto.builder().comment_content("댓글1").member(MemberDto.builder().loginId("testId").username("실명1").nickname("닉네임1").build()).build(),
-                CommentDto.builder().comment_content("댓글2").member(MemberDto.builder().loginId("testId1").username("실명2").nickname("닉네임2").build()).build()
+                CommentDto.builder().commentContent("댓글1").member(MemberDto.builder().loginId("testId").username("실명1").nickname("닉네임1").build()).build(),
+                CommentDto.builder().commentContent("댓글2").member(MemberDto.builder().loginId("testId1").username("실명2").nickname("닉네임2").build()).build()
         );
         PostsCommentResponse postsCommentResponse = new PostsCommentResponse(false, commentDtoList);
         given(adminService.getPostsComments(eq(post_id),isNull(),any())).willReturn(postsCommentResponse);

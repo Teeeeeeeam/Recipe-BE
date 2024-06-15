@@ -1,15 +1,11 @@
 package com.team.RecipeRadar.domain.comment.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.comment.api.CommentController;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
@@ -30,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,21 +58,19 @@ class CommentControllerTest {
     @DisplayName("댓글 작성 Controller 테스트")
     void commnet_add_test() throws Exception {
 
-        UserAddCommentRequest commentDto = UserAddCommentRequest.builder().memberId(2l).postId(3l).commentContent("테스트 댓글").build();
 
-        given(commentService.save(commentDto))
-                .willReturn(Comment.builder().id(1l).commentContent("테스트 댓글").member(Member.builder().id(2l).build()).post(Post.builder().id(3l).build()).build());
+        UserAddCommentRequest userAddCommentRequest = new UserAddCommentRequest();
+        userAddCommentRequest.setPostId(1l);
+        userAddCommentRequest.setCommentContent("테스트 댓글");
+
+        doNothing().when(commentService).save(anyLong(),anyString(),anyLong());
 
         mockMvc.perform(post("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                        .content(objectMapper.writeValueAsString(userAddCommentRequest)))
                 .andDo(print())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("성공"))
-                .andExpect(jsonPath("$.data.commentContent").value("테스트 댓글"))
-                .andExpect(jsonPath("$.data.memberId").value(2))
-                .andExpect(jsonPath("$.data.postId").value(3))
-                .andExpect(jsonPath("$.data.created_at").doesNotExist())
+                .andExpect(jsonPath("$.message").value("댓글 작성 성공"))
                 .andExpect(status().isOk());
 
     }
@@ -87,20 +80,14 @@ class CommentControllerTest {
     @CustomMockUser
     @DisplayName("댓글 삭제 테스트 - 댓글이 존재하는 경우")
     void comment_delete_existing_comment_test() throws Exception {
-        // given
-        String nickName="testNickName";
-        UserDeleteCommentRequest userDeleteCommentDto = new UserDeleteCommentRequest(2l, 1l);
-        CommentDto commentDto = CommentDto.builder().id(1l).nickName(nickName).comment_content("테스트 댓글").build();
+        UserDeleteCommentRequest userDeleteCommentDto = new UserDeleteCommentRequest(2l);
 
-        Member member = Member.builder().id(2l).build();
-        Comment comment = Comment.builder().commentContent("테스트 댓글").id(1l).member(member).build();
-        doNothing().when(commentService).delete_comment(userDeleteCommentDto);
-//        given(commentService.delete_comment(commentDto)).willReturn(comment);
+        doNothing().when(commentService).deleteComment(anyLong(),anyLong());
 
         // when, then
         mockMvc.perform(delete("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
+                        .content(objectMapper.writeValueAsString(userDeleteCommentDto)))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -122,7 +109,7 @@ class CommentControllerTest {
         for (int i = 1; i <= 10; i++) {
             CommentDto commentDto = CommentDto.builder()
                     .id((long) i)
-                    .comment_content("테스트 댓글 내용 " + i)
+                    .commentContent("테스트 댓글 내용 " + i)
                     .nickName(nickName)
                     .articleDto(articleDto)
                     .build();
@@ -151,35 +138,20 @@ class CommentControllerTest {
     @CustomMockUser
     @DisplayName("댓글 업데이트")
     void update_comment() throws Exception {
-        String update_content = "변경된 댓글";
-        Long memberId = 2L;
-        Long commentId = 1L;
+        Long memberId = 1l;
+        Long commentId = 1l;
 
-        doNothing().when(commentService).update(memberId, commentId, update_content);
+        UserUpdateCommentRequest userUpdateCommentRequest = new UserUpdateCommentRequest();
+        userUpdateCommentRequest.setCommentContent("변경된 댓글");
+        userUpdateCommentRequest.setCommentId(commentId);
 
-        Comment updatedComment = Comment.builder()
-                .id(commentId)
-                .commentContent(update_content)
-                .member(Member.builder().id(memberId).build())
-                .updated_at(LocalDateTime.now())
-                .build();
-        given(commentService.findById(commentId)).willReturn(updatedComment);
-
-        UserUpdateCommentRequest updateCommentDto = UserUpdateCommentRequest.builder()
-                .commentContent(update_content)
-                .commentId(commentId)
-                .memberId(memberId)
-                .build();
+        doNothing().when(commentService).update(anyLong(),anyString(), eq(memberId));
 
         mockMvc.perform(put("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateCommentDto)))
+                        .content(objectMapper.writeValueAsString(userUpdateCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.commentContent").value(update_content))
-                .andExpect(jsonPath("$.data.memberId").value(memberId))
-                .andExpect(jsonPath("$.data.commentId").value(commentId))
-                .andExpect(jsonPath("$.data.updateAt").exists())
                 .andDo(print());
     }
 
