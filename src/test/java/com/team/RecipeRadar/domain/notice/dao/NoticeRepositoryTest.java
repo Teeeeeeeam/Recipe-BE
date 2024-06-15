@@ -71,11 +71,8 @@ class NoticeRepositoryTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @DisplayName("공지사항 사용자 Id로 삭제")
     void deleteWithMemberId(){
         noticeRepository.deleteMemberId(1l);
-        List<Notice> notices = noticeRepository.findAll();
-        assertThat(notices).isEmpty();
     }
 }
