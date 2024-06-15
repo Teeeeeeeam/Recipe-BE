@@ -72,7 +72,7 @@ public class NoticeController {
     @DeleteMapping("/admin/notices")
     public ResponseEntity<?> deleteNotice(@RequestParam("noticeIds") List<Long> noticeIds) {
         noticeService.delete(noticeIds);
-        return ResponseEntity.ok(new ControllerApiResponse(true,"문의사항 삭제 성공"));
+        return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 삭제 성공"));
     }
 
     @Operation(summary = "공지사항 수정", description = "관리자만 수정가능")
@@ -117,7 +117,7 @@ public class NoticeController {
     @GetMapping("/notices")
     public ResponseEntity<?> adminNotice(@RequestParam(value = "lastId",required = false)Long noticeId,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
-        InfoNoticeResponse inInfoNoticeResponse = noticeService.Notice(noticeId,pageable);
+        InfoNoticeResponse inInfoNoticeResponse = noticeService.noticeInfo(noticeId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",inInfoNoticeResponse));
     }
 

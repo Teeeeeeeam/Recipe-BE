@@ -5,8 +5,8 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,19 +35,22 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
     public List<NoticeDto> mainNotice(){
         List<Tuple> list = jpaQueryFactory.select(notice.id, notice.noticeTitle, uploadFile.storeFileName)
                 .from(notice)
-                .join(uploadFile).on(uploadFile.notice.id.eq(notice.id))
+                .leftJoin(uploadFile).on(uploadFile.notice.id.eq(notice.id))
                 .orderBy(notice.createdAt.desc())
                 .limit(5).fetch();
 
-        return list.stream().map(tuple -> NoticeDto.of(tuple.get(notice.id), tuple.get(notice.noticeTitle), getImageUrl(tuple)))
+        return list.stream()
+                .map(tuple -> NoticeDto.of(tuple.get(notice.id), tuple.get(notice.noticeTitle), getImageUrl(tuple)))
                 .collect(Collectors.toList());
     }
 
     public Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable){
         BooleanBuilder builder = new BooleanBuilder();
+
         if(noticeId!=null){
             builder.and(notice.id.lt(noticeId));
         }
+
         List<Tuple> list = jpaQueryFactory.select(notice, notice.member.nickName)
                 .from(notice)
                 .where(builder)
@@ -58,12 +61,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         List<NoticeDto> noticeDtoList = list.stream().map(tuple -> NoticeDto.of(tuple.get(notice), tuple.get(notice.member.nickName))).collect(Collectors.toList());
 
 
-        boolean isHasNext = false;
-
-        if(noticeDtoList.size()> pageable.getPageSize()){
-            noticeDtoList.remove(pageable.getPageSize());
-            isHasNext = true;
-        }
+        boolean isHasNext = isNext(pageable, noticeDtoList);
 
         return new SliceImpl<>(noticeDtoList,pageable,isHasNext);
     }
@@ -77,7 +75,9 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .where(notice.id.eq(noticeId))
                 .fetch();
 
-        return list.stream().map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst().orElseThrow(() -> new BadRequestException("공지사항을 찾을수 없습니다."));
+        return list.stream()
+                .map(tuple -> NoticeDto.detailsOf(tuple.get(notice), getImageUrl(tuple))).findFirst()
+                .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_NOTICE));
     }
 
     @Override
@@ -97,14 +97,14 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         return img;
     }
 
-    private static boolean isHasNext(Pageable pageable, List<RecipeDto> content) {
-        boolean hasNext =false;
+    private static boolean isNext(Pageable pageable, List<NoticeDto> noticeDtoList) {
+        boolean isHasNext = false;
 
-        if (content.size() > pageable.getPageSize()){
-            content.remove(pageable.getPageSize());
-            hasNext = true;
+        if(noticeDtoList.size()> pageable.getPageSize()){
+            noticeDtoList.remove(pageable.getPageSize());
+            isHasNext = true;
         }
-        return hasNext;
+        return isHasNext;
     }
 }
 

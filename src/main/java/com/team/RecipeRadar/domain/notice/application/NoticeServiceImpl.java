@@ -71,7 +71,6 @@ public class NoticeServiceImpl implements NoticeService {
 
         saveOrUpdateUploadFile(file, notice);
         notice.update(adminUpdateRequest.getNoticeTitle(), adminUpdateRequest.getNoticeContent());
-        noticeRepository.save(notice);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     @Transactional(readOnly = true)
-    public InfoNoticeResponse Notice(Long noticeId, Pageable pageable) {
+    public InfoNoticeResponse noticeInfo(Long noticeId, Pageable pageable) {
         Slice<NoticeDto> noticeDto = noticeRepository.adminNotice(noticeId,pageable);
 
         return new InfoNoticeResponse(noticeDto.hasNext(),noticeDto.getContent());
@@ -111,7 +110,6 @@ public class NoticeServiceImpl implements NoticeService {
                 }
             } else
                 imgRepository.save(UploadFile.createUploadFile(notice, file.getOriginalFilename(), storedFileName));
-
         }
     }
 

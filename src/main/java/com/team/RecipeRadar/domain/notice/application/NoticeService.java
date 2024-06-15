@@ -18,7 +18,7 @@ public interface NoticeService {
 
     List<NoticeDto> mainNotice();
 
-    InfoNoticeResponse Notice(Long noticeId, Pageable pageable);
+    InfoNoticeResponse noticeInfo(Long noticeId, Pageable pageable);
 
     InfoDetailsResponse detailNotice(Long noticeId);
 }
