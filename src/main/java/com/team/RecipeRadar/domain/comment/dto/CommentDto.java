@@ -23,7 +23,7 @@ public class CommentDto extends BaseTimeEntity {
     private Long id;
 
     @Schema(description = "댓글 내용", example = "댓글 작성!")
-    private String comment_content;
+    private String commentContent;
 
     @Schema(description = "작성자 닉네임", example = "나만의 냉장고")
     private String nickName;
@@ -36,7 +36,7 @@ public class CommentDto extends BaseTimeEntity {
     public static CommentDto of(Comment comment){
         return CommentDto.builder()
                 .id(comment.getId())
-                .comment_content(comment.getCommentContent())
+                .commentContent(comment.getCommentContent())
                 .nickName(comment.getMember().getNickName()).build();
     }
 
@@ -45,7 +45,7 @@ public class CommentDto extends BaseTimeEntity {
         MemberDto memberDto = MemberDto.builder().loginId(member.getLoginId()).nickname(member.getNickName()).username(member.getUsername()).build();
         return CommentDto.builder()
                 .id(comment.getId())
-                .comment_content(comment.getCommentContent())
+                .commentContent(comment.getCommentContent())
                 .member(memberDto).build();
     }
 }

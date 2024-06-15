@@ -67,13 +67,5 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
                 )).execute();
     }
 
-    @Override
-    public void deleteMember_comment(Long memberId) {
-        jpaQueryFactory.delete(comment)
-                .where(comment.post.id.in(
-                        JPAExpressions
-                                .select(post.id).from(post).where(post.member.id.eq(memberId)))
-                ).execute();
-    }
 }
 

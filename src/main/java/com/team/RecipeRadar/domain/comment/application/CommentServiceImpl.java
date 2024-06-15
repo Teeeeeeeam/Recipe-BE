@@ -4,11 +4,15 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
@@ -21,9 +25,6 @@ import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -37,101 +38,78 @@ public class CommentServiceImpl implements CommentService {
     private final NotificationService notificationService;
 
     /**
-     * 댓글 저장하는 기능 -> 게시글과 사용자의 정보를 이요해 Commnet 객체를 생성후 저장
-     * @param userAddCommentDto
-     * @return 저장된 Commnet객체
+     * 댓글 작성 메서드
+     * 댓글 등록시 작성자에게 알림 전송
      */
-    public Comment save(UserAddCommentRequest userAddCommentDto) {
-        Long memberId = userAddCommentDto.getMemberId();
-        Long postId = userAddCommentDto.getPostId();
+    public void save(Long postId, String content,Long memberId) {
+        Member member = getMember(memberId);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
 
-        Optional<Member> member = memberRepository.findById(memberId);
-        Optional<Post> postOptional = postRepository.findById(postId);
+        Comment savedComment = commentRepository.save(Comment.creatComment(content, member,post));
 
-        if (member.isPresent() && postOptional.isPresent()) {        //사용자 정보와 게시글의 정보가 존재할시에만 통과
-            Member member1 = member.get();
-            Post post = postOptional.get();
-            LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);        //yyy-dd-mm:hh-MM으로 저장 밀리세컨트는 모두 0초
-            Comment build = Comment.builder()                               //댓글 저장
-                    .commentContent(userAddCommentDto.getCommentContent())
-                    .member(member1)
-                    .post(post)
-                    .created_at(localDateTime)
-                    .build();
-            Comment savedComment = commentRepository.save(build);
-
-            notificationService.sendCommentNotification(post,savedComment.getMember().getNickName());
-            return savedComment;
-        } else {
-            throw new NoSuchElementException("회원정보나 게시글을 찾을수 없습니다. 게시글 ID = "+postId);     //사용자 및 게시글이 없을시에는 해당 예외발생
-        }
+        notificationService.sendCommentNotification(post,savedComment.getMember().getNickName());       //알림 전송
     }
+
     @Override
     public Comment findById(long id) {
-        return commentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("댓글 "+id+"을 찾을 수 없습니다."));
+        return commentRepository.findById(id).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COMMENT));
     }
 
     /**
      * 댓글의 Id와 사용자의 Id를 사용해서 댓글을 삭제한다.
      * 댓글의 작성자가 아닐경우 삭제시에는 ->CommentException 예외를 날린다.
-     * @param userDeleteCommentDto
      */
-    @Override
-    public void delete_comment(UserDeleteCommentRequest userDeleteCommentDto) {
+    public void deleteComment(Long commentId, Long memberId) {
+        Member member = getMember(memberId);
+        Comment comment = getComment(commentId);
 
-        Long memberDtoId = userDeleteCommentDto.getMemberId();
-        Long commentDtoId = userDeleteCommentDto.getCommentId();
-
-        Member member = getMemberThrows(memberDtoId);
-        Comment comment = commentRepository.findById(commentDtoId).orElseThrow(() -> new NoSuchElementException("해당 댓글 찾을 수없습니다. " + commentDtoId));
-
-        if (comment.getMember().getId().equals(memberDtoId)){           // 댓글을 등록한 사용자 일경우
-            notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());
-
-            commentRepository.deleteMemberId(member.getId(),comment.getId());
-        }else
-            throw new IllegalArgumentException("작성자만 삭제할수 있습니다.");      //댓글을 동락한 사용자가 아닐시
+        validateCommentOwner(member, comment);
+        notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());        //삭제 알림 전송
+        commentRepository.deleteMemberId(member.getId(),comment.getId());           //삭제
     }
 
     /**
-     * 댓글을 조회하는 메소드
-     * @param postId 게시글 아이디
-     * @param pageable
-     * @return Dto를 변환한 값을 반환한다.
+     * 댓글을 조회하는 메서드
+     * 댓글이 없을시에는 빈 페이지 네이션을 반환
      */
     @Transactional(readOnly = true)
     public Page<CommentDto> commentPage(Long postId,Pageable pageable){
-
         Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
 
-        if (!comments.getContent().isEmpty()) {
-            return comments.map(comment -> CommentDto.builder().id(comment.getId()).comment_content(comment.getCommentContent())
-                    .nickName(comment.getMember().getNickName()).build());
-        }else
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        return comments.isEmpty() ?
+                new PageImpl<>(Collections.emptyList(), pageable, 0) :
+                comments.map(comment -> CommentDto.of(comment));
     }
 
     /**
-     * 댓글 수정 기능 -> 작성자만 댓글을 수정가능하다.
-     * @param member_id     사용자 id
-     * @param comment_id    댓글 id
-     * @param comment_content 수정할 댓글 내용
+     * 댓글 수정 메서드
+     * 작성자만이 해당 댓글을 수정 가능 하다.
      */
     @Override
-    public void update(Long member_id,Long comment_id, String comment_content) {
+    public void update(Long commentId,String newComment, Long memberId) {
+        Member member = getMember(memberId);
+        Comment comment = getComment(commentId);
 
-        Member member = getMemberThrows(member_id);
-        Comment comment = commentRepository.findById(comment_id).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을수 없습니다."));
-        LocalDateTime localDateTime = LocalDateTime.now().withNano(0).withSecond(0);
-
-        if (comment.getMember().equals(member)){        //Comment 엔티티에 Mmeber가 있는지 없는지 확인
-            comment.update(comment_content);
-            comment.updateTime(localDateTime);
-        }else
-            throw new IllegalArgumentException("작성자만 수정 가능합니다.");
+        validateCommentOwner(member,comment);
+        comment.update(newComment);
+    }
+    
+    /* 사용자 정보를 조회하는 메서드 */
+    private Member getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+        return member;
     }
 
-    private Member getMemberThrows(Long member_id) {
-        return memberRepository.findById(member_id).orElseThrow(() -> new NoSuchElementException("해당 회원을 찾을수 없습니다."));
+    /* 댓글을 조회하는 메서드*/
+    private Comment getComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COMMENT));
+        return comment;
+    }
+
+    /* 댓글을 작성한 작성자인지 검증하는 메서드*/
+    private static void validateCommentOwner(Member member, Comment comment) {
+        if (!comment.getMember().getId().equals(member.getId()) && !member.getRoles().equals("ROLE_ADMIN"))
+            throw new UnauthorizedException("작성자만 삭제할 수 있습니다.");
+
     }
 }
