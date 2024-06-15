@@ -25,6 +25,4 @@ public class ResponseNotification {
     public static ResponseNotification from(Notification notification) {
         return new ResponseNotification(notification);
     }
-
-
 }

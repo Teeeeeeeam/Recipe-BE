@@ -42,7 +42,7 @@ public class AnswerServiceImpl implements AnswerService{
 
         //일반 문의 사항의 답변의 대해서는 알림이 가도록 사용
         if(question.getQuestionType().equals(GENERAL_INQUIRY)) {
-            notificationService.complete_question(question, adminNickName);
+            notificationService.completeQuestion(question, adminNickName);
             if(question.getAnswer().equals(EMAIL)){     //이메일 선택시 이메일로 전송
                 eventPublisher.publishEvent(new QuestionMailEvent(question.getAnswer_email()));
             }

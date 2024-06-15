@@ -47,11 +47,11 @@ public class NotificationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =   "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":false,\"notification\":[{\"id\":274,\"url\":\"/api/user/question/6\"},{\"id\":272,\"url\":\"/api/user/question/11\"},{\"id\":260,\"url\":\"/api/user/question/5\"}]}}")))
+                            examples = @ExampleObject(value =   "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":false,\"notification\":[{\"id\":274,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/6\"},{\"id\":272,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/11\"},{\"id\":260,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/5\"}]}}")))
     })
     @GetMapping("/info/notification")
     public ResponseEntity<?> notificationPage(@Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
-                                              @RequestParam(value = "last-id",required = false) Long lasId,
+                                              @RequestParam(value = "lastId",required = false) Long lasId,
                                               @Parameter(example = "{\"size\":10}")Pageable pageable){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
         ResponseUserInfoNotification responseUserInfoNotification = notificationService.userInfoNotification(memberDto.getId(), lasId, pageable);
@@ -62,7 +62,7 @@ public class NotificationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"notification\":[{\"id\":1,\"url\":\"/api/user/question/1\"},{\"id\":2,\"url\":\"/api/user/question/2\"}]}}")))
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"notification\":[{\"id\":1,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/1\"},{\"id\":2,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/2\"}]}}")))
     })
     @GetMapping("/main/notification")
     public ResponseEntity<?> notificationMainPage(@Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
@@ -81,7 +81,7 @@ public class NotificationController {
                             examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"해당 알림을 찾을수 없습니다.\"}")))
     })
     @DeleteMapping("/user/notification")
-    public ResponseEntity<?> deleteNotification(@RequestParam("ids")List<Long> ids){
+    public ResponseEntity<?> deleteNotification(@RequestParam("notificationIds")List<Long> ids){
         notificationService.deleteAllNotification(ids);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }

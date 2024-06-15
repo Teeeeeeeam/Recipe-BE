@@ -25,9 +25,9 @@ public class EmitterRepositoryImpl implements EmitterRepository{
     }
 
     @Override
-    public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(String memberId) {
+    public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(String emitterId) {
         return emitters.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(memberId))
+                .filter(entry -> entry.getKey().startsWith(emitterId))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -45,10 +45,10 @@ public class EmitterRepositoryImpl implements EmitterRepository{
     }
 
     @Override
-    public void deleteAllEmitterStartWithId(String memberId) {
+    public void deleteAllEmitterStartWithEmitterId(String emitterId) {
         emitters.forEach(
                 (key,emitter) -> {
-                    if(key.startsWith(memberId)){
+                    if(key.startsWith(emitterId)){
                         emitters.remove(key);
                     }
                 }
