@@ -3,14 +3,12 @@ package com.team.RecipeRadar.domain.post.domain;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.post.dto.PostDto;
+import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "member")
-public class Post {
+public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -31,10 +29,6 @@ public class Post {
 
     @Column(name = "post_content",length = 1000)
     private String postContent;
-
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
 
     private String postPassword;
 
@@ -48,9 +42,6 @@ public class Post {
     private String postCookingLevel;
 
     private Integer postLikeCount;
-
-    @Column(name = "post_image_url")
-    private String postImageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Schema(hidden = true)
@@ -74,25 +65,25 @@ public class Post {
         this.postCookingTime = postCookingTime;
         this.postCookingLevel = postCookingLevel;
         this.postPassword= postPassword;
-        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
     }
 
-    public void updateTime(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
+    public static Post createPost(String postTitle,String postContent,String postServing,String postCookingTime,
+                                  String postCookingLevel,Member member,Recipe recipe,String password){
+        return Post.builder().postTitle(postTitle).postContent(postContent).postServing(postServing).postCookingTime(postCookingTime)
+                .postCookingLevel(postCookingLevel).postLikeCount(0).member(member).recipe(recipe).postPassword(password).build();
     }
-
-    static public PostDto of(Post post){
-
-        return PostDto.builder()
-                .id(post.getId())
-                .postTitle(post.getPostTitle())
-                .postContent(post.getPostContent())
-                .postServing(post.getPostServing())
-                .postCookingTime(post.getPostCookingTime())
-                .postCookingLevel(post.getPostCookingLevel())
-                .postImageUrl(post.getPostImageUrl())
-                .postLikeCount(post.postLikeCount)
-                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
-                .build();
-    }
+//
+//    static public PostDto of(Post post){
+//        return PostDto.builder()
+//                .id(post.getId())
+//                .postTitle(post.getPostTitle())
+//                .postContent(post.getPostContent())
+//                .postServing(post.getPostServing())
+//                .postCookingTime(post.getPostCookingTime())
+//                .postCookingLevel(post.getPostCookingLevel())
+//                .postImageUrl(post.getPostImageUrl())
+//                .postLikeCount(post.postLikeCount)
+//                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
+//                .build();
+//    }
 }

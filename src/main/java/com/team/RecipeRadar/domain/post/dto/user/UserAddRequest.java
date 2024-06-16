@@ -13,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
 public class UserAddRequest {
 
     @Schema(description = "요리글 제목", example = "요리제목!")
-    @NotEmpty(message = "요리 제목을 입력해주세요")
+    @NotBlank(message = "요리 제목을 입력해주세요")
     private String postTitle;
 
     @Schema(description = "요리글 내용", example = "요리글 작성!")
@@ -32,15 +32,11 @@ public class UserAddRequest {
     @NotEmpty(message = "인원수를 선택해 주세요")
     private String postServing;
 
-    @Schema(description = "사용자 id", example = "1")
-    private Long memberId;
-
     @Schema(description = "레시피 id", example = "1")
-    private Long recipe_id;
+    private Long recipeId;
     
     @NotEmpty(message = "비밀번호를 입력해주세요")
     @Schema(description = "게시글 비밀번호", example = "123456")
     private String postPassword;
-
 
 }

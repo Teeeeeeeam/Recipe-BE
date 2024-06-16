@@ -1,6 +1,8 @@
 package com.team.RecipeRadar.domain.post.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
@@ -10,10 +12,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
+@Slf4j
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,9 +33,7 @@ public class PostDto {
 
     private String postContent;     //요리글 내용
 
-    private LocalDateTime create_at;        //등록일
-
-    private LocalDateTime updated_at;       //수정일
+    private LocalDate createAt;        //등록일
 
     private String postServing;     // 요리 제공 인원
 
@@ -45,7 +49,9 @@ public class PostDto {
 
     private RecipeDto recipe;
 
-    private PostDto(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at) {
+    private List<CommentDto> comments;
+
+    private PostDto(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime creatAt) {
         this.id = id;
         this.member = new MemberDto();
         this.member.setLoginId(loginId);
@@ -53,7 +59,7 @@ public class PostDto {
         this.recipe.setId(recipeId);
         this.recipe.setTitle(recipeTitle);
         this.postTitle = postTitle;
-        this.create_at=create_at;
+        this.createAt = creatAt.toLocalDate();
         this.postImageUrl = img;
         this.member.setNickname(nickName);
     }
@@ -61,24 +67,19 @@ public class PostDto {
     public static PostDto of(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at){
         return new PostDto(id,loginId,postTitle,img,nickName,recipeTitle,recipeId,create_at);
     }
-    public static PostDto of(Post post, String imgUrl, Recipe recipe){
-        MemberDto memberDto = new MemberDto();
-        memberDto.setNickname(post.getMember().getNickName());
-
-        RecipeDto recipeDto = new RecipeDto();
-        recipeDto.setId(recipe.getId());
-        recipeDto.setTitle(recipe.getTitle());
+    public static PostDto of(Post post, String imgUrl, Recipe recipe,List<CommentDto> comments){
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
                 .postContent(post.getPostContent())
-                .member(memberDto)
-                .recipe(recipeDto)
-                .create_at(post.getCreated_at())
+                .createAt(post.getCreatedAt().toLocalDate())
                 .postServing(post.getPostServing())
                 .postCookingTime(post.getPostCookingTime())
                 .postCookingLevel(post.getPostCookingLevel())
                 .postLikeCount(post.getPostLikeCount())
+                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
+                .recipe(RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).build())
+                .comments(comments)
                 .postImageUrl(imgUrl).build();
     }
 }

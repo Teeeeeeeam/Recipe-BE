@@ -1,30 +1,24 @@
 package com.team.RecipeRadar.domain.post.application;
 
-import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 public interface PostService {
-    void save(UserAddRequest userAddPostDto, MultipartFile file);
+    void save(UserAddRequest userAddRequest,Long memberId, MultipartFile file);
 
     PostResponse postPage(Long postId,Pageable pageable);
 
-    Post findById(long id);
-
-    void delete(String loginId, Long postId);
+    void delete(Long memberId, Long postId);
 
     PostDetailResponse postDetail(Long postId);
-    void update(Long postId,UserUpdateRequest userUpdatePostDto,String loginId,MultipartFile file);
 
-    UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable);
+    void update(Long postId, Long memberId ,UserUpdateRequest userUpdateRequest,MultipartFile file);
 
-    boolean validPostPassword(String login, ValidPostRequest request);
+    UserInfoPostResponse userPostPage(Long memberId,Long lastId, Pageable pageable);
 
-
-
+    void validPostPassword(Long memberId, ValidPostRequest validPostRequest);
 
 }

@@ -10,13 +10,11 @@ import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.user.*;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
-import com.team.RecipeRadar.domain.post.exception.PostException;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
-import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -50,77 +45,39 @@ public class PostServiceImpl implements PostService {
 
 
     /**
-     * 게시글 저장을 저장하는 로직
-     * @param userAddPostDto
+     * 게시글 저장을 저장하는 메서드
      */
     @Override
-    public void save(UserAddRequest userAddPostDto, MultipartFile file) {
-        Long memberId = userAddPostDto.getMemberId();
+    public void save(UserAddRequest userAddRequest, Long memberId ,MultipartFile file) {
+        Member member = getMember(memberId);
+        Recipe recipe = recipeRepository.findById(userAddRequest.getRecipeId()).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
 
-        Optional<Member> op_member = memberRepository.findById(memberId);
-        Optional<Recipe> op_recipe = recipeRepository.findById(userAddPostDto.getRecipe_id());
+        Post post = Post.createPost(userAddRequest.getPostTitle(), userAddRequest.getPostContent(), userAddRequest.getPostServing(), userAddRequest.getPostCookingTime(),
+                userAddRequest.getPostCookingLevel(), member, recipe, passwordEncoder.encode(userAddRequest.getPostPassword()));
 
-        if(op_member.isPresent()&& op_recipe.isPresent()) {
-            Member member= op_member.get();
-            Recipe recipe = op_recipe.get();
-            String storedFileName = s3UploadService.uploadFile(file);       //s3에 이미지 저장
+        s3UploadService.uploadFile(file,List.of(post,recipe));
 
-            Post post = Post.builder()
-                    .postTitle(userAddPostDto.getPostTitle())
-                    .postContent(userAddPostDto.getPostContent())
-                    .postServing(userAddPostDto.getPostServing())
-                    .postCookingTime(userAddPostDto.getPostCookingTime())
-                    .postCookingLevel(userAddPostDto.getPostCookingLevel())
-                    .postLikeCount(0) // 좋아요 초기값 설정
-                    .member(member)
-                    .postPassword(passwordEncoder.encode(userAddPostDto.getPostPassword()))
-                    .recipe(recipe)
-                    .created_at(LocalDateTime.now())
-                    .build();
-
-            UploadFile uploadFile = UploadFile.builder().originFileName(file.getOriginalFilename()).storeFileName(storedFileName).recipe(recipe).post(post).build();
-            imgRepository.save(uploadFile);
-            postRepository.save(post);
-        } else {
-            // 데이터베이스 저장 중에 문제가 발생한 경우
-            throw new NoSuchElementException("요리글 저장에 실패했습니다.");
-        }
+        postRepository.save(post);
     }
 
     /**
      * 게시글의모든 데이터를 무한 페이징 최신순으로 내림차순
-     * @param pageable
-     * @return
      */
     @Override
     public PostResponse postPage(Long postId,Pageable pageable) {
         Slice<PostDto> allPost = postRepository.getAllPost(postId,pageable);
-
         return new PostResponse(allPost.hasNext(),allPost.getContent());
     }
 
-    @Override
-    public Post findById(long id) {
-        return postRepository.findById(id)
-                .orElseThrow(() -> new PostException("찾을 수 없습니다." + id));
-    }
-
     /**
-     * 게시글을 삭제하는 로직
-     * @param loginId   로그인한 사용자의 loginId
-     * @param postId    삭제할 게시글 id
+     * 게시글을 삭제하는 메서드
      */
     @Override
-    public void delete(String loginId, Long postId) {
-
-        Member member = memberRepository.findByLoginId(loginId);
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("게시글을 찾을수 없습니다."));
-        if(!post.getMember().getLoginId().equals(member.getLoginId())) throw new AccessDeniedException("작성자만 삭제할수 있습니다.");
-
-        imgRepository.deletePostImg(post.getId(),post.getRecipe().getId());
-        commentRepository.deletePostID(post.getId());
-        postLikeRepository.deletePostID(postId);
-        postRepository.deleteMemberId(member.getId(),postId);
+    public void delete(Long memberId, Long postId) {
+        Member member = getMember(memberId);
+        Post post = getPost(postId);
+        validatePostOwner(member, post);
+        delete(member, post);
     }
 
     /**
@@ -128,67 +85,80 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     public PostDetailResponse postDetail(Long postId) {
-        return postRepository.postDetails(postId);
+        PostDto postDto = postRepository.postDetails(postId);
+        return new PostDetailResponse(postDto);
     }
 
     /**
-     * 게시글을 업데이트 하기 위한 로직
+     * 게시글을 업데이트 하기 위한 메서드
      */
     @Override
-    public void update(Long postId,UserUpdateRequest userUpdateRequest,String loginId,MultipartFile file) {
+    public void update(Long postId,Long memberId,UserUpdateRequest userUpdateRequest,MultipartFile file) {
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
-        if(!post.getMember().getLoginId().equals(loginId)) throw new AccessDeniedException("작성자만 삭제 가능합니다.");
+        Member member = getMember(memberId);
+        Post post = getPost(postId);
+        validatePostOwner(member,post);
 
-        UploadFile uploadFile = imgRepository.getOriginalFileName(post.getId());
-        if(file!=null) {
-            if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {       // 원본파일명이 다를경우에만 s3에 기존 사진을 삭제 후 새롭게 저장
-                s3UploadService.deleteFile(uploadFile.getStoreFileName());
-                String storedFileName = s3UploadService.uploadFile(file);
-                uploadFile.update(storedFileName, file.getOriginalFilename());
-                imgRepository.save(uploadFile);
-            }
-        }
+        s3UploadService.updateFile(file,List.of(post));
 
         post.update(userUpdateRequest.getPostTitle(), userUpdateRequest.getPostContent(), userUpdateRequest.getPostServing(),
                 userUpdateRequest.getPostCookingTime(), userUpdateRequest.getPostCookingLevel(),passwordEncoder.encode(userUpdateRequest.getPostPassword()));
-
-        postRepository.save(post);
     }
 
+    /**
+     * 마이페이지에서 사용자가 작성한 게시글을 조회하는 메서드
+     *
+     */
     @Override
-    public UserInfoPostResponse userPostPage(String authenticationName,Long lastId, String loginId, Pageable pageable) {
-        Member member = memberRepository.findByLoginId(loginId);
-
-        if (member==null||!member.getUsername().equals(authenticationName)){
-            throw new AccessDeniedException("접근할 수 없는 사용자입니다.");
-        }
+    public UserInfoPostResponse userPostPage(Long memberId,Long lastId, Pageable pageable) {
+        Member member = getMember(memberId);
 
         Slice<UserInfoPostRequest> userInfoPostDto = postRepository.userInfoPost(member.getId(),lastId, pageable);
 
-        return UserInfoPostResponse.builder()
-                .nextPage(userInfoPostDto.hasNext())
-                .content(userInfoPostDto.getContent()).build();
+        return new UserInfoPostResponse(userInfoPostDto.hasNext(),userInfoPostDto.getContent());
     }
 
     /**
      * 게시글 수정,삭제를하기전에 해당 게시글 등록시 비밀번호 사용해 해당 접근하려는 사용자가 작성한 사용자인지 검증하는 로직
      */
     @Override
-    public boolean validPostPassword(String loginId, ValidPostRequest request) {
-        Member byLoginId = memberRepository.findByLoginId(loginId);
-
-        Post post = postRepository.findById(request.getPostId()).orElseThrow(() -> new NoSuchElementException("게시글을 찾을수 없습니다."));
-
-        if(!post.getMember().getId().equals(byLoginId.getId()))
-            throw new AccessDeniedException("작성한 사용자만 가능합니다.");
-
-        if(!passwordEncoder.matches(request.getPassword(), post.getPostPassword()))
-            throw new BadRequestException("비밀번호가 일치하지 않습니다.");
-
-        return true;
+    public void validPostPassword(Long memberId, ValidPostRequest validPostRequest) {
+        Member member = getMember(memberId);
+        Post post = getPost(validPostRequest.getPostId());
+        validatePassword(validPostRequest, post);
+        validatePostOwner(member,post);
     }
 
+    /* 게시글의 비밀 번호를 검증하는 메서드 */
+    private void validatePassword(ValidPostRequest validPostRequest, Post post) {
+        if(!passwordEncoder.matches(validPostRequest.getPassword(), post.getPostPassword()))
+            throw new AccessDeniedException("비밀번호가 일치하지 않습니다.");
+    }
 
+    /* 사용자 정보 조회 메서드*/
+    private Member getMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+    }
+    
+    /*게시글 조회 메서드*/
+    private Post getPost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
+    }
+
+    /* 작성자 및 관리자인지 검증 메서드*/
+    private static void validatePostOwner(Member member, Post post) {
+        if(!post.getMember().getLoginId().equals(member.getLoginId()) && !member.getRoles().equals("ROLE_ADMIN"))
+            throw new UnauthorizedException("작성자만 이용 가능합니다.");
+    }
+
+    /* 삭제 메서드 */
+    private void delete(Member member, Post post) {
+        String storeFileName = imgRepository.findByPostId(post.getId()).getStoreFileName();
+        s3UploadService.deleteFile(storeFileName);
+        imgRepository.deletePostImg(post.getId(), post.getRecipe().getId());
+        commentRepository.deletePostID(post.getId());
+        postLikeRepository.deletePostID(post.getId());
+        postRepository.deleteMemberId(member.getId(), post.getId());
+    }
 
 }
