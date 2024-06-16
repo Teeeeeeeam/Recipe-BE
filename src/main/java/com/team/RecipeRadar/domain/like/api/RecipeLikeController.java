@@ -99,11 +99,9 @@ public class RecipeLikeController {
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
 
-        boolean validCookie = cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
-        if (cookieLoginId ==null || !validCookie)
-            throw new ForbiddenException("올바르지 않은 접근입니다.");
+       cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
 
-            UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(principalDetails.getMemberId(), recipeLike_lastId, pageable);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
+       UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(principalDetails.getMemberId(), recipeLike_lastId, pageable);
+       return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
     }
 }

@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.utils;
 
 import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -27,10 +28,15 @@ public class CookieUtils {
         return responseCookie;
     }
 
-    public boolean validCookie(String cookieValue,String loginId){
+    public void validCookie(String cookieValue,String loginId){
+        validStatCookie(cookieValue == null);
         String decodeCookie = new String(Base64.getDecoder().decode(cookieValue.getBytes()));
         boolean existCookie = accountRetrievalRepository.existsByLoginIdAndVerificationId(loginId, decodeCookie);
-        return existCookie;
+        validStatCookie(decodeCookie == null || !existCookie);
+    }
+
+    private static void validStatCookie(boolean cookieValue) {
+        if (cookieValue) throw new UnauthorizedException("올바르지 않은 접근입니다.");
     }
 
     public ResponseCookie deleteCookie(String cookieName){

@@ -97,13 +97,11 @@ public class PostLikeController {
          })
     @GetMapping("/info/posts/likes")
     public ResponseEntity<?> getUserLike(@RequestParam(value = "lastId",required = false)Long postLike_lastId,
-                                         @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                         @Parameter(hidden = true) @CookieValue(name = "login-id") String cookieLoginId,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
 
-        boolean validCookie = cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
-        if (cookieLoginId ==null || !validCookie)
-            throw new ForbiddenException("올바르지 않은 접근입니다.");
+        cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
 
         UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(principalDetails.getMemberId(), postLike_lastId, pageable);
 
