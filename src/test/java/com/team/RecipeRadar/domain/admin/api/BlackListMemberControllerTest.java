@@ -114,7 +114,7 @@ class BlackListMemberControllerTest {
         MemberInfoResponse memberInfoResponse = new MemberInfoResponse(memberDtoList, hasNext);
         given(adminService.searchMember(eq(loginId),eq(nickname),any(),any(),isNull(),any())).willReturn(memberInfoResponse);
 
-        mockMvc.perform(get("/api/admin/members/search?login-id="+loginId+"&nickname="+nickname))
+        mockMvc.perform(get("/api/admin/members/search?loginId="+loginId+"&nickname="+nickname))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
