@@ -58,12 +58,14 @@ public class S3UploadService{
         objectMetadata.setContentType(file.getContentType());
 
         List<Object> entitiesToSave = new ArrayList<>();
-        entities.forEach(entity -> {
-            if (entity instanceof Recipe || entity instanceof Post || entity instanceof Notice || entity instanceof Question) {
-                entitiesToSave.add(entity);
-            }
-        });
-        imgRepository.save(UploadFile.createUploadFile(entitiesToSave, file.getOriginalFilename(), storeFile));
+        if(!entities.isEmpty()) {
+            entities.forEach(entity -> {
+                if (entity instanceof Recipe || entity instanceof Post || entity instanceof Notice || entity instanceof Question) {
+                    entitiesToSave.add(entity);
+                }
+            });
+            imgRepository.save(UploadFile.createUploadFile(entitiesToSave, file.getOriginalFilename(), storeFile));
+        }
 
         try{
             InputStream inputStream = file.getInputStream();
