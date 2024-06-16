@@ -145,7 +145,8 @@ public class QuestionServiceImpl implements QuestionService {
     private void saveImageIfProvided(MultipartFile file, Question question) {
         if (file!=null) {
             String originalFilename = file.getOriginalFilename();
-            String storeName = s3UploadService.uploadFile(file);
+            // TODO: 2024-06-17  
+            String storeName = s3UploadService.uploadFile(file,List.of());
             UploadFile uploadFile = UploadFile.builder()
                     .originFileName(originalFilename)
                     .storeFileName(storeName)

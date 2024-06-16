@@ -97,8 +97,7 @@ public class AdminRecipeController {
         if (bindingResult.hasErrors())
             return getErrorResponse(bindingResult);
 
-        String uploadFile = s3UploadService.uploadFile(file);
-        adminService.saveRecipe(recipeSaveRequest,uploadFile,file.getOriginalFilename());
+        adminService.saveRecipe(recipeSaveRequest,file);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 등록 성공"));
     }
 

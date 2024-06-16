@@ -43,7 +43,9 @@ public class NoticeServiceImpl implements NoticeService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
 
         Notice notice = noticeRepository.save(Notice.createNotice(adminAddNoticeDto.getNoticeTitle(), adminAddNoticeDto.getNoticeContent(),member));
-        saveOrUpdateUploadFile(file,notice);
+
+        if(file!=null)
+            s3UploadService.uploadFile(file,List.of(notice));
     }
 
     /**
@@ -69,7 +71,8 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_NOTICE));
 
-        saveOrUpdateUploadFile(file, notice);
+        s3UploadService.updateFile(file,List.of(notice));
+
         notice.update(adminUpdateRequest.getNoticeTitle(), adminUpdateRequest.getNoticeContent());
     }
 
@@ -94,31 +97,6 @@ public class NoticeServiceImpl implements NoticeService {
         return InfoDetailsResponse.of(noticeDto);
     }
 
-    /**
-     * 이미지 저장 또는 업데이트 메서드
-     */
-    private void saveOrUpdateUploadFile(MultipartFile file, Notice notice) {
-        if (file != null && !file.isEmpty()) {
-            UploadFile uploadFile = imgRepository.findByNoticeId(notice.getId());
-            String storedFileName = saveImage(file);
-
-            if (uploadFile != null) {
-                if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
-                    deleteS3Image(uploadFile);
-                    uploadFile.update(storedFileName, file.getOriginalFilename());
-                    imgRepository.save(uploadFile);
-                }
-            } else
-                imgRepository.save(UploadFile.createUploadFile(notice, file.getOriginalFilename(), storedFileName));
-        }
-    }
-
-    /**
-     * 이미지 저장 메서드
-     */
-    private String saveImage(MultipartFile file) {
-        return s3UploadService.uploadFile(file);
-    }
 
     /**
      * 이미지를 삭제 하는 메서드
@@ -131,7 +109,6 @@ public class NoticeServiceImpl implements NoticeService {
             imgRepository.deleteNoticeId(notice.getId());
         }
     }
-
 
     /* S3 에서 이미지 삭제*/
     private void deleteS3Image(UploadFile uploadFile) {

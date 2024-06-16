@@ -3,7 +3,6 @@ package com.team.RecipeRadar.domain.admin.application.recipe;
 import com.team.RecipeRadar.domain.Image.application.ImageService;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
-import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
@@ -13,7 +12,6 @@ import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
-import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
@@ -44,7 +42,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
     private final CommentRepository commentRepository;
     private final ImageService imageService;
     private final CookStepRepository cookStepRepository;
-    private final ImgRepository imgRepository;
     private final IngredientRepository ingredientRepository;
     private final S3UploadService s3UploadService;
 
@@ -53,14 +50,12 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      * 이미지 파일과 재료를 저장하고, 요리 단계를 저장합니다.
      */
     @Override
-    public void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename) {
-        Recipe savedRecipe = recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
+    public void saveRecipe(RecipeSaveRequest recipeSaveRequest, MultipartFile file) {
+        Recipe recipe = recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
 
-        // 이미지 파일 저장
-        saveImageAndIngredients(recipeSaveRequest.getIngredients(), savedRecipe, fileUrl, originalFilename);
-
+        s3UploadService.uploadFile(file,List.of(recipe));
         // 요리 단계 저장
-        saveCookingSteps(recipeSaveRequest.getCookSteps(), savedRecipe);
+        saveCookingSteps(recipeSaveRequest.getCookSteps(), recipe);
     }
 
     /**
@@ -89,7 +84,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         Recipe recipe = getRecipeById(recipeId);
 
         // 파일 업로드 처리
-        handleFileUpload(file, recipe);
+        s3UploadService.updateFile(file,List.of(recipe));
 
         // 요리 단계 업데이트
         updateCookingSteps(recipeUpdateRequest.getCookSteps());
@@ -106,7 +101,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         // 레시피 정보 업데이트
         recipe.update_recipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime());
 
-        recipeRepository.save(recipe);
     }
 
     /**
@@ -151,17 +145,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
     }
 
     /**
-     * 레시피를 저장 하는 메서드.
-     * 새로운 레시피를 이미지와 함께 저장합니다.
-     */
-    private void saveImageAndIngredients(List<String> ingredients, Recipe savedRecipe, String fileUrl, String originalFilename) {
-        UploadFile uploadFile = UploadFile.builder().storeFileName(fileUrl).originFileName(originalFilename).recipe(savedRecipe).build();
-        imgRepository.save(uploadFile);
-
-        ingredientRepository.save(Ingredient.createIngredient(ingredients.stream().collect(Collectors.joining("|")), savedRecipe));
-    }
-
-    /**
      * 재료순서 저장 하는 메서드
      * 레시피 저장하 조리 순서에 새로운 순서를 저장 합니다.
      */
@@ -172,24 +155,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         cookStepRepository.saveAll(cookingSteps);
     }
     /**
-     * 이미지 파일 업로드 처리 메서드.
-     * 파일이 업로드되면 기존 이미지 파일을 삭제하고 새로운 파일을 업로드합니다.
-     */
-    private void handleFileUpload(MultipartFile file, Recipe recipe) {
-        if (file != null) {
-            UploadFile uploadFile = imgRepository.findrecipeIdpostNull(recipe.getId())
-                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_IMAGE));
-
-            if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
-                s3UploadService.deleteFile(uploadFile.getStoreFileName());
-                String storedFile = s3UploadService.uploadFile(file);
-                uploadFile.update(storedFile, file.getOriginalFilename());
-                imgRepository.save(uploadFile);
-            }
-        }
-    }
-
-    /**
      * 요리 단계들을 업데이트하는 메서드.
      */
     private void updateCookingSteps(List<Map<String, String>> cookSteps) {
@@ -199,7 +164,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
                 CookingStep cookingStep = cookStepRepository.findById(cookStepId)
                         .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COOK_STEP));
                 cookingStep.update(cookStep.get("cook_steps"));
-                cookStepRepository.save(cookingStep);
             });
         }
     }

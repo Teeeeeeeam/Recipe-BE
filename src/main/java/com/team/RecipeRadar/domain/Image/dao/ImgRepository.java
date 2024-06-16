@@ -25,6 +25,8 @@ public interface ImgRepository extends JpaRepository<UploadFile,Long> ,CustomImg
     UploadFile getOriginalFileName(@Param("postId")Long postId);
 
     UploadFile findByNoticeId(Long noticeId);
+
+    UploadFile findByPostId(Long postId);
     @Modifying
     @Query("delete from UploadFile u where u.notice.id =:noticeId")
     void deleteNoticeId(@Param("noticeId")Long noticeId);

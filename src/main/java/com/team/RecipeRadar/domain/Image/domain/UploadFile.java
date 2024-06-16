@@ -4,18 +4,17 @@ import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.questions.domain.Question;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "post")
 public class UploadFile {
 
     @Id
@@ -55,17 +54,16 @@ public class UploadFile {
         this.originFileName = originFileName;
     }
 
-    public static UploadFile createUploadFile(Object entity,String originFileName,String storeFileName){
+    public static<T> UploadFile createUploadFile(List<T> entities, String originFileName, String storeFileName){
         UploadFileBuilder uploadFileBuilder = UploadFile.builder().originFileName(originFileName).storeFileName(storeFileName);
-        if (entity instanceof Question) {
-            uploadFileBuilder.question((Question) entity);
-        } else if (entity instanceof Notice) {
-            uploadFileBuilder.notice((Notice) entity);
-        } else if (entity instanceof Post) {
-            uploadFileBuilder.post((Post) entity);
-        } else if (entity instanceof Recipe) {
-            uploadFileBuilder.recipe((Recipe) entity);
-        }
+
+        entities.forEach(entity -> {
+            if(entity instanceof Recipe) uploadFileBuilder.recipe((Recipe) entity);
+            else if (entity instanceof Post)  uploadFileBuilder.post((Post) entity);
+            else if (entity instanceof Notice) uploadFileBuilder.notice((Notice) entity);
+            else if (entity instanceof Question) uploadFileBuilder.question((Question) entity);
+        });
+
         return uploadFileBuilder.build();
     }
 }

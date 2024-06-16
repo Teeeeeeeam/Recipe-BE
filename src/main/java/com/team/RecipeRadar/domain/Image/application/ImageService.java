@@ -8,4 +8,5 @@ public interface ImageService {
     void saveRecipeImg(Recipe recipe, UploadFile uploadFile);
 
     void delete_Recipe(Long recipeId);
+
 }

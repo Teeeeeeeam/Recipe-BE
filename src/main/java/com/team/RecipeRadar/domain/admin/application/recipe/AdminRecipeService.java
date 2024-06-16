@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.admin.application.recipe;
 
-
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeUpdateRequest;
@@ -17,7 +16,7 @@ public interface AdminRecipeService {
 
     RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title, Long lastRecipeId, Pageable pageable);
 
-    void saveRecipe(RecipeSaveRequest recipeSaveRequest, String fileUrl, String originalFilename);
+    void saveRecipe(RecipeSaveRequest recipeSaveRequest, MultipartFile file);
 
     void updateRecipe(Long recipeId, RecipeUpdateRequest recipeUpdateRequest, MultipartFile file);
 }
