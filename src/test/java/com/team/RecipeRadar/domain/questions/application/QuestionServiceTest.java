@@ -54,7 +54,7 @@ class QuestionServiceTest {
 
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.jpg");
-        when(s3UploadService.uploadFile(file)).thenReturn("uploaded/test.jpg");
+        when(s3UploadService.uploadFile(eq(file),anyList())).thenReturn("uploaded/test.jpg");
 
         Question question = Question.builder()
                 .question_content("내용")
@@ -86,7 +86,7 @@ class QuestionServiceTest {
 
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.jpg");
-        when(s3UploadService.uploadFile(file)).thenReturn("uploaded/test.jpg");
+        when(s3UploadService.uploadFile(eq(file),anyList())).thenReturn("uploaded/test.jpg");
 
         Member member = Member.builder().id(1l).nickName("닉네임").build();
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));

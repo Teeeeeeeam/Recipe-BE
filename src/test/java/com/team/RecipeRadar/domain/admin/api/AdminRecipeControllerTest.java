@@ -10,6 +10,8 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeUpdateRequest;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
+import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.listener.ResignEmailHandler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -38,8 +40,7 @@ import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -88,8 +89,8 @@ class AdminRecipeControllerTest {
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
 
-        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willReturn(uploadFile);
-        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest),anyString(),eq(uploadFile));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile),anyList())).willReturn(uploadFile);
+        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest),eq(mockMultipartFile));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -115,8 +116,8 @@ class AdminRecipeControllerTest {
         String uploadFile= "test.jpg";
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
 
-        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willReturn(uploadFile);
-        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest), anyString(),eq(uploadFile));
+        given(s3UploadService.uploadFile(eq(mockMultipartFile),anyList())).willReturn(uploadFile);
+        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest), eq(mockMultipartFile));
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -266,7 +267,7 @@ class AdminRecipeControllerTest {
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.AAA", "image/jpeg", "test data".getBytes());
 
-        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willThrow(new BadRequestException("이미지 파일만 등록해 주세요"));
+        doThrow(new ImageException(ImageErrorType.INVALID_IMAGE_FORMAT)).when(adminService).saveRecipe(any(),any());
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -279,7 +280,7 @@ class AdminRecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("이미지 파일만 등록해 주세요"));
+                .andExpect(jsonPath("$.message").value("이미지 형식이 잘못되었습니다"));
     }
 
     @Test
@@ -291,9 +292,8 @@ class AdminRecipeControllerTest {
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", null, "image/jpeg", "test data".getBytes());
 
-        given(s3UploadService.uploadFile(eq(mockMultipartFile))).willThrow(new BadRequestException("대표 이미지를 등록해 주세요"));
-
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
+        doThrow(new ImageException(ImageErrorType.MISSING_PRIMARY_IMAGE)).when(adminService).saveRecipe(any(),any());
 
         mockMvc.perform(
                         multipart("/api/admin/save/recipes")
@@ -304,6 +304,6 @@ class AdminRecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("대표 이미지를 등록해 주세요"));
+                .andExpect(jsonPath("$.message").value("대표 이미지를 등록해주세요"));
     }
 }

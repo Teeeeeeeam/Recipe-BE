@@ -46,7 +46,7 @@ class NoticeServiceTest {
         Member member = getMember();
         Notice notice = getNotice(member);
         MockMultipartFile file = getMockMultipartFile();
-        UploadFile uploadFile = UploadFile.createUploadFile(notice, originalName, "store");
+        UploadFile uploadFile = UploadFile.createUploadFile(List.of(notice), originalName, "store");
 
         AdminAddRequest adminAddRequest = new AdminAddRequest();
         adminAddRequest.setNoticeTitle("제목");
@@ -54,13 +54,11 @@ class NoticeServiceTest {
 
         when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
         when(noticeRepository.save(any(Notice.class))).thenReturn(notice);
-        when(imgRepository.save(any(UploadFile.class))).thenReturn(uploadFile);
 
         noticeService.save(adminAddRequest,memberId,file);
 
-        verify(s3UploadService,times(1)).uploadFile(any());
+        verify(s3UploadService,times(1)).uploadFile(any(),anyList());
         verify(noticeRepository,times(1)).save(any(Notice.class));
-        verify(imgRepository,times(1)).save(any(UploadFile.class));
     }
 
     @Test
@@ -73,7 +71,7 @@ class NoticeServiceTest {
         List<Notice> noticeList = List.of(getNotice(member),notice1);
 
         noticeList.forEach(notice -> {
-            UploadFile uploadFile = UploadFile.createUploadFile(notice, originalName, "str");
+            UploadFile uploadFile = UploadFile.createUploadFile(List.of(notice), originalName, "str");
             when(imgRepository.findByNoticeId(anyLong())).thenReturn(uploadFile);
         });
 

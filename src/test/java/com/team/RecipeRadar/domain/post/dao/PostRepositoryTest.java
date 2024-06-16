@@ -6,7 +6,6 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
@@ -21,6 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +30,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
+@EnableJpaAuditing
 @Import(QueryDslConfig.class)
 @Transactional
 @ActiveProfiles("test")
@@ -75,7 +76,6 @@ class PostRepositoryTest {
 
         Slice<PostDto> allPost = postRepository.getAllPost(null,request);
 
-        log.info("aaNext={}",allPost);
         assertThat(allPost.hasNext()).isTrue();
         assertThat(allPost.getContent()).hasSize(2);
     }
@@ -96,10 +96,10 @@ class PostRepositoryTest {
         imgRepository.save(uploadFile);
 
         postRepository.save(post);
-        PostDetailResponse postDetailResponse = postRepository.postDetails(post.getId());
-        assertThat(postDetailResponse).isNotNull();
-        assertThat(postDetailResponse.getPost().getPostTitle()).isEqualTo(post.getPostTitle());
-        assertThat(postDetailResponse.getComments().get(0).getCommentContent()).isEqualTo(save1.getCommentContent());
+        PostDto postDto = postRepository.postDetails(post.getId());
+        assertThat(postDto).isNotNull();
+        assertThat(postDto.getPostTitle()).isEqualTo(post.getPostTitle());
+        assertThat(postDto.getComments().get(0).getCommentContent()).isEqualTo(save1.getCommentContent());
     }
 
     @Test

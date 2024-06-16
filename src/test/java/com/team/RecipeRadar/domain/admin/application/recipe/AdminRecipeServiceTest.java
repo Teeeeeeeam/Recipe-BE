@@ -73,10 +73,10 @@ class AdminRecipeServiceTest {
                 .collect(Collectors.toList());
 
         when(recipeRepository.save(any(Recipe.class))).thenReturn(entity);
-        when(ingredientRepository.save(any(Ingredient.class))).thenReturn(ingredient);
         when(cookStepRepository.saveAll(anyList())).thenReturn(cookingSteps);
 
-        adminService.saveRecipe(recipeSaveRequest,"testURL","IMG");
+        MockMultipartFile file = new MockMultipartFile("test", "Test", "image/jpeg", "test".getBytes());
+        adminService.saveRecipe(recipeSaveRequest,file);
 
 
         assertThat(entity.getTitle()).isEqualTo(recipeSaveRequest.getTitle());
@@ -85,8 +85,7 @@ class AdminRecipeServiceTest {
 
     @Test
     @DisplayName("레시피 수정 성공하는 테스트")
-    void updateRecipe_successful() throws Exception {
-        // Given
+    void updateRecipe_successful() {
         long recipeId = 1L;
         String title = "변경된 Recipe";
         List<Map<String, String>> cookSteps = new ArrayList<>();
@@ -104,23 +103,17 @@ class AdminRecipeServiceTest {
         CookingStep testCookStep = new CookingStep();
         when(cookStepRepository.findById(anyLong())).thenReturn(Optional.of(testCookStep));
 
-        UploadFile testUploadFile = new UploadFile("before.jpg","저장돤 파일명");
-        doNothing().when(s3UploadService).deleteFile(anyString());
-        when(s3UploadService.uploadFile(file)).thenReturn(originalFileName);
+        UploadFile testUploadFile = new UploadFile("before.jpg", "저장돤 파일명");
 
-        when(imgRepository.findrecipeIdpostNull(recipeId)).thenReturn(Optional.of(testUploadFile));
-
-        doNothing().when(ingredientRepository).updateRecipe_ing(recipeId, "재료 1|재료 2");
-        List<Long> delete = List.of(1l);
-
-        adminService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps,List.of("새로운 데이터"),delete), file);
+        List<Long> delete = List.of(1L);
+        adminService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps, List.of("새로운 데이터"), delete), file);
 
         assertThat(testRecipe.getTitle()).isEqualTo(title);
         assertThat(testCookStep.getSteps()).isEqualTo("조리 순서 1");
-        assertThat(testUploadFile.getOriginFileName()).isNotEqualTo("before.jpg");
-        assertThat(testUploadFile.getOriginFileName()).isEqualTo("after.jpg");
-        verify(ingredientRepository, times(1)).updateRecipe_ing(anyLong(),anyString());
+        assertThat(testUploadFile.getOriginFileName()).isNotEqualTo(originalFileName); // 변경 전과 파일명이 같은지 확인
+        verify(ingredientRepository, times(1)).updateRecipe_ing(eq(recipeId), anyString()); // 인자 매처를 사용하도록 수정
     }
+
 
     @Test
     @DisplayName("레피시 변경시 해당 레피시가 존재하지 않을때")

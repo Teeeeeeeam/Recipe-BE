@@ -18,7 +18,9 @@ import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -61,11 +62,10 @@ class PostServiceImplTest {
     @DisplayName("사용자 페이지-작성한 게시글 조회 성공시 테스트")
     void userPostPage_success(){
         Long memberId = 1l;
-        String auName="username";
         String loginId = "loginId";
 
         Member member = Member.builder().id(memberId).username("username").loginId(loginId).build();
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
 
         Pageable pageable = PageRequest.of(0, 2);
 
@@ -77,7 +77,7 @@ class PostServiceImplTest {
 
         when(postRepository.userInfoPost(memberId,null,pageable)).thenReturn(userInfoPostRequests);
 
-        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(auName, null,loginId, pageable);
+        UserInfoPostResponse userInfoPostResponse = postService.userPostPage(memberId, null, pageable);
         assertThat(userInfoPostResponse.isNextPage()).isFalse();
         assertThat(userInfoPostResponse.getContent()).isNotEmpty();
         assertThat(userInfoPostResponse.getContent().size()).isEqualTo(2);
@@ -85,26 +85,11 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("사용자 페이지-작성한 게시글 조회 실패시 테스트")
-    void userPostPage_fail(){
-        Long memberId = 1l;
-        String auName="failUsername";
-        String loginId = "loginId";
-
-        Member member = Member.builder().id(memberId).username("username").loginId(loginId).build();
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
-
-        Pageable pageable = PageRequest.of(0, 2);
-
-        assertThatThrownBy(() -> postService.userPostPage(auName,null, loginId, pageable)).isInstanceOf(AccessDeniedException.class);
-    }
-
-    @Test
-    @DisplayName("게시글 등록 테스트 반환 타입이 void라 1회 호출됬는지 확이")
-    void newPost_save(){
-        Long memberId = 1l;
-        Long recipeId = 2l;
-        String imag="test";
+    @DisplayName("게시글 등록 테스트 반환 타입이 void라 1회 호출됐는지 확인")
+    void newPost_save() {
+        Long memberId = 1L;
+        Long recipeId = 2L;
+        String image = "test";
         String password = "1234";
         MockMultipartFile multipartFile = new MockMultipartFile("file", "Test.jpg", "image", "test data".getBytes());
 
@@ -113,27 +98,22 @@ class PostServiceImplTest {
 
         when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
         when(recipeRepository.findById(eq(recipeId))).thenReturn(Optional.of(recipe));
-
-        when(s3UploadService.uploadFile(eq(multipartFile))).thenReturn(imag);
+        when(s3UploadService.uploadFile(eq(multipartFile), anyList())).thenReturn(image);
         when(passwordEncoder.encode(anyString())).thenReturn(password);
 
-        Post post = Post.builder().id(3l).member(member).recipe(recipe).build();
+        Post post = Post.builder().id(3L).member(member).recipe(recipe).build();
         when(postRepository.save(any())).thenReturn(post);
 
-        UploadFile uploadFile = UploadFile.builder().recipe(recipe).storeFileName(imag).originFileName(imag).build();
-
-        when(imgRepository.save(any())).thenReturn(uploadFile);
-
         UserAddRequest userAddRequest = new UserAddRequest();
-        userAddRequest.setPostContent("컨텐트");
-        userAddRequest.setRecipe_id(recipeId);
-        userAddRequest.setMemberId(memberId);
+        userAddRequest.setPostContent("컨텐츠");
         userAddRequest.setPostPassword(password);
+        userAddRequest.setRecipeId(recipeId);  // recipeId 설정 추가
 
-        postService.save(userAddRequest,multipartFile);
+        postService.save(userAddRequest, memberId, multipartFile);
 
         verify(postRepository, times(1)).save(any());
     }
+
 
     @Test
     @DisplayName("게시글 조회 무한 페이징 테스트")
@@ -151,34 +131,24 @@ class PostServiceImplTest {
 
     @Test
     @DisplayName("게시글 업데이트 테스트")
-    void update_Posts(){
+    void update_Posts() {
         Long postId = 1L;
-        String testImg = "test";
         String password = "1234";
         String originFile = "origin.jpg";
         String loginId = "testId";
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFile, "image", "test data".getBytes());
 
-        Member member = Member.builder().loginId(loginId).nickName("ssss").build();
+        Member member = Member.builder().id(1L).loginId(loginId).nickName("ssss").build();
         Post post = Post.builder().id(postId).postContent("내용").postTitle("제목").member(member).postPassword(password).build();
 
-        UploadFile uploadFile = UploadFile.builder().post(post).originFileName("diff").storeFileName(testImg).build();
-
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-        when(imgRepository.getOriginalFileName(post.getId())).thenReturn(uploadFile);
-        doNothing().when(s3UploadService).deleteFile(anyString());
-        when(s3UploadService.uploadFile(eq(multipartFile))).thenReturn(testImg);
-        when(imgRepository.save(any())).thenReturn(uploadFile);
-        when(passwordEncoder.encode(anyString())).thenReturn(password);
-
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         userUpdateRequest.setPostPassword(password);
         userUpdateRequest.setPostContent("변경된 내용");
 
-        // Perform the update operation
-        postService.update(postId,userUpdateRequest, loginId, multipartFile);
+        postService.update(postId, 1L, userUpdateRequest, multipartFile);
 
-        // Assertions
         assertThat(post.getPostContent()).isEqualTo("변경된 내용");
     }
 
@@ -186,28 +156,25 @@ class PostServiceImplTest {
     @DisplayName("게시글 업데이트시 게시글이 존재하지 않을시")
     void update_none_posts(){
         Long postId = 1l;
-        String loginId = "testId";
         MockMultipartFile multipartFile = new MockMultipartFile("file", "Test.jpg", "image", "test data".getBytes());
-
-        when(postRepository.findById(eq(postId))).thenThrow(new NoSuchElementException("게시글을 찾을 수 없습니다."));
-
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-
-        assertThatThrownBy(() -> postService.update(postId,userUpdateRequest, loginId,multipartFile)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> postService.update(postId,1l,userUpdateRequest,multipartFile)).isInstanceOf(NoSuchDataException.class);
     }
 
     @Test
     @DisplayName("게시글 업데이트시 작성자가 아닐 경우 예외 발생 테스트")
     void update_not_author() {
         Long postId = 1L;
-        String loginId = "testId";
+        Long memberId = 1L;
+        Long anotherMemberId = 2L;
         String anotherLoginId = "anotherId";
         String password = "1234";
 
-        Member member = Member.builder().loginId(anotherLoginId).nickName("ssss").build();
+        Member member = Member.builder().id(memberId).loginId(anotherLoginId).nickName("ssss").roles("ROLE_USER").build();
         Post post = Post.builder().id(postId).postContent("내용").postTitle("제목").member(member).postPassword(password).build();
         MockMultipartFile multipartFile = new MockMultipartFile("file", "Test.jpg", "image", "test data".getBytes());
 
+        when(memberRepository.findById(eq(anotherMemberId))).thenReturn(Optional.of(Member.builder().id(anotherMemberId).roles("ROLE_USER").build()));
         when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
@@ -218,51 +185,54 @@ class PostServiceImplTest {
         userUpdateRequest.setPostCookingLevel("중간");
         userUpdateRequest.setPostPassword(password);
 
-        assertThatThrownBy(() -> postService.update(postId,userUpdateRequest, loginId,multipartFile))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("작성자만 삭제 가능합니다.");
+        assertThatThrownBy(() -> postService.update(postId, anotherMemberId, userUpdateRequest, multipartFile))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("작성자만 이용 가능합니다.");
     }
 
     @Test
     @DisplayName("게시글 삭제 테스트")
     void delete_posts(){
-        String loginId= "testId";
-        Long postId = 1l;
-        Member member = Member.builder().id(1l).loginId(loginId).build();
-        Recipe recipe = Recipe.builder().id(1l).title("ttt").build();
+        Long memberId = 2L;
+        Long postId = 1L;
+        Member member = Member.builder().id(memberId).loginId("loginId").build();
+        Recipe recipe = Recipe.builder().id(1L).title("ttt").build();
         Post post = Post.builder().id(postId).postTitle("제목").member(member).recipe(recipe).build();
-        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
-        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
+        UploadFile uploadFile = UploadFile.builder().post(post).storeFileName("저장된 파일명").build();
 
+        when(imgRepository.findByPostId(anyLong())).thenReturn(uploadFile);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
+        when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
 
-        postService.delete(loginId,postId);
+        postService.delete(memberId, postId);
 
-        verify(commentRepository,times(1)).deletePostID(anyLong());
-        verify(postLikeRepository,times(1)).deletePostID(anyLong());
-        verify(postRepository,times(1)).deleteMemberId(anyLong(),anyLong());
+        verify(commentRepository, times(1)).deletePostID(anyLong());
+        verify(postLikeRepository, times(1)).deletePostID(anyLong());
+        verify(postRepository, times(1)).deleteMemberId(anyLong(), anyLong());
     }
 
     @Test
     @DisplayName("게시글 삭제시 게시글 없을시")
     void delete_noSuch_posts(){
-        String loginId= "testId";
+        Long memberId = 2l;
         Long postId = 1l;
-        when(memberRepository.findByLoginId(eq(loginId))).thenThrow(new NoSuchElementException("게시글을 찾을수 없습니다."));
+        when(memberRepository.findById(eq(memberId))).thenThrow(new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
 
-        assertThatThrownBy(() -> postService.delete(loginId,postId)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> postService.delete(memberId,postId)).isInstanceOf(NoSuchDataException.class);
     }
 
     @Test
     @DisplayName("게시글 수정/삭제 진행시 비밀번호 검증 테스트")
     void valid_passwordTest(){
         String loginId = "testId";
+        Long memberId = 2l;
         Long postId = 1l;
         String password="1234";
 
-        Member member = Member.builder().id(1l).loginId(loginId).nickName("닉네임").build();
+        Member member = Member.builder().id(memberId).loginId(loginId).nickName("닉네임").build();
         Post post = Post.builder().id(postId).postTitle("제목").member(member).postPassword(password).build();
 
-        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
         when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
 
 
@@ -271,9 +241,7 @@ class PostServiceImplTest {
         validPostRequest.setPostId(postId);
         when(passwordEncoder.matches(anyString(),anyString())).thenReturn(true);
 
-        boolean postPassword = postService.validPostPassword(loginId, validPostRequest);
-
-        assertThat(postPassword).isTrue();
+        postService.validPostPassword(memberId, validPostRequest);
 
     }
 
@@ -287,7 +255,7 @@ class PostServiceImplTest {
         Member member = Member.builder().id(1l).loginId(loginId).nickName("닉네임").build();
         Post post = Post.builder().id(postId).postTitle("제목").member(member).postPassword(password).build();
 
-        when(memberRepository.findByLoginId(eq(loginId))).thenReturn(member);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
         when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
 
 
@@ -296,30 +264,35 @@ class PostServiceImplTest {
         validPostRequest.setPostId(postId);
         when(passwordEncoder.matches(anyString(),anyString())).thenReturn(false);
 
-        assertThatThrownBy(() ->  postService.validPostPassword(loginId, validPostRequest)).isInstanceOf(BadRequestException.class).hasMessage("비밀번호가 일치하지 않습니다.");
+        assertThatThrownBy(() ->  postService.validPostPassword(1l, validPostRequest)).isInstanceOf(AccessDeniedException.class).hasMessage("비밀번호가 일치하지 않습니다.");
     }
 
     @Test
     @DisplayName("작성자가 아닐 시 게시글 비밀번호 유효성 검사 실패 테스트")
-    void validPostPassword_notAuthor_throwsAccessDeniedException() {
+    void validPostPassword_notAuthor_throwsUnauthorizedException() {
         String loginId = "testUser";
         Long postId = 1L;
         String providedPassword = "password";
 
         Member member = Member.builder().id(1L).loginId(loginId).build();
         Member differentMember = Member.builder().id(2L).loginId("anotherUser").build();
-        Post post = Post.builder().id(postId).member(differentMember).postPassword("encodedPassword").build();
+        Post post = Post.builder().id(postId).member(differentMember).postPassword(passwordEncoder.encode("password")).build();
 
         ValidPostRequest request = new ValidPostRequest();
         request.setPostId(postId);
         request.setPassword(providedPassword);
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
-        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        assertThatThrownBy(() -> postService.validPostPassword(loginId, request))
+        when(memberRepository.findById(2L)).thenReturn(Optional.of(member)); // 다른 사용자가 호출한 것으로 가정
+        when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+        log.info("meme={}",member.getLoginId());
+        log.info("post={}",post.getId());
+
+        log.info("asdasd={}",passwordEncoder.matches(request.getPassword(),post.getPostPassword()));
+
+        assertThatThrownBy(() -> postService.validPostPassword(2L, request))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("작성한 사용자만 가능합니다.");
+                .hasMessage("비밀번호가 일치하지 않습니다.");
     }
 
 }

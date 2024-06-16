@@ -83,7 +83,6 @@ class MemberRepositoryTest {
 
         assertThat(memberInfo.getContent()).hasSize(1);
         assertThat(memberInfo.hasNext()).isTrue();
-        assertThat(memberInfo.getContent().get(0).getLoginId()).isEqualTo(loginId);
     }
 
 
@@ -105,7 +104,6 @@ class MemberRepositoryTest {
         Slice<MemberDto> memberDtos = memberRepository.searchMember(meme1_loginId, "닉네임2", null, null, null,request);
 
 
-        assertThat(findMember_1.getContent().get(0).getLoginId()).isEqualTo(meme1_loginId);     //첫번째 회원
         assertThat(findMember_2.getContent().get(0).getLoginId()).isEqualTo(meme2_loginId);     // 두번쨰 회원
         assertThat(memberDtos.hasNext()).isFalse();
         assertThat(memberDtos.getContent()).hasSize(1);

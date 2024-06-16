@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.*;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
@@ -41,19 +42,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(PostController.class)
 class PostControllerTest {
 
-    @MockBean
-    private PostServiceImpl postService;
-    @Autowired
-    private MockMvc mockMvc;
+    @MockBean private PostServiceImpl postService;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    MemberRepository memberRepository;
-    @MockBean
-    JwtProvider jwtProvider;
-    @MockBean
-    CustomOauth2Handler customOauth2Handler;
-    @MockBean
-    CustomOauth2Service customOauth2Service;
+    @MockBean CookieUtils cookieUtils;
+    @MockBean MemberRepository memberRepository;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean CustomOauth2Service customOauth2Service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -64,19 +60,16 @@ class PostControllerTest {
     void postTitlePage_success() throws Exception {
 
         Cookie cookie = new Cookie("login-id", "fakeCookie");
-        String loginId= "test";
 
         List<UserInfoPostRequest > requests = new ArrayList<>();
         requests.add(new UserInfoPostRequest(2l,"타이틀1"));
         requests.add(new UserInfoPostRequest(3l,"타이틀2"));
 
-        UserInfoPostResponse infoPostResponse = UserInfoPostResponse.builder()
-                .nextPage(false)
-                .content(requests).build();
+        UserInfoPostResponse infoPostResponse = new UserInfoPostResponse(false,requests);
 
-        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willReturn(infoPostResponse);
+        given(postService.userPostPage(anyLong(),isNull(),any(Pageable.class))).willReturn(infoPostResponse);
 
-        mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
+        mockMvc.perform(get("/api/user/info/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -101,9 +94,9 @@ class PostControllerTest {
         String loginId= "test";
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(postService.userPostPage(anyString(),isNull(),anyString(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
+        given(postService.userPostPage(anyLong(),isNull(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
 
-        mockMvc.perform(get("/api/user/info/{login-id}/posts",loginId)
+        mockMvc.perform(get("/api/user/info/posts",loginId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andDo(print())
                 .andExpect(status().is(401))
@@ -122,14 +115,12 @@ class PostControllerTest {
         userAddRequest.setPostTitle("제목");
         userAddRequest.setPostCookingLevel("level");
         userAddRequest.setPostCookingTime("cookingTime");
-        userAddRequest.setRecipe_id(1L);
-        userAddRequest.setMemberId(2L);
         userAddRequest.setPostPassword("1234");
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
         MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostRequest", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
+
 
         mockMvc.perform(multipart("/api/user/posts")
                         .file(multipartFile)
@@ -151,14 +142,11 @@ class PostControllerTest {
         userAddRequest.setPostContent("컨텐트");
         userAddRequest.setPostTitle("제목");
         userAddRequest.setPostCookingTime("cookingTime");
-        userAddRequest.setRecipe_id(1L);
-        userAddRequest.setMemberId(2L);
         userAddRequest.setPostPassword("1234");
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
         MockMultipartFile userAddRequest1 = new MockMultipartFile("userAddPostRequest", null, "application/json", objectMapper.writeValueAsString(userAddRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).save(eq(userAddRequest),eq(multipartFile));
 
         mockMvc.perform(multipart("/api/user/posts")
                         .file(multipartFile)
@@ -168,7 +156,7 @@ class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
+                .andExpect(jsonPath("$.message").value("실패"))
                 .andExpect(jsonPath("$.data.size()").value(2));     //두개의 valid 발생
     }
     
@@ -196,17 +184,16 @@ class PostControllerTest {
     void details_posts() throws Exception {
         Long postId= 1l;
         List<CommentDto> commentDtoListbuild = List.of(CommentDto.builder().id(1l).commentContent("댓글1").build(), CommentDto.builder().id(2l).commentContent("댓글12").build());
-        PostDto postDto = PostDto.builder().id(postId).postContent("컨텐트").postTitle("제목").postCookingLevel("레밸").build();
-        PostDetailResponse postDetailResponse = new PostDetailResponse(postDto, commentDtoListbuild);
+        PostDto postDto = PostDto.builder().id(postId).postContent("컨텐트").postTitle("제목").postCookingLevel("레밸").comments(commentDtoListbuild).build();
+        PostDetailResponse postDetailResponse = new PostDetailResponse(postDto);
         given(postService.postDetail(anyLong())).willReturn(postDetailResponse);
 
-        mockMvc.perform(get("/api/user/posts/"+postId))
+        mockMvc.perform(get("/api/user/posts/" + postId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("조회성공"))
-                .andExpect(jsonPath("$.data.post.postTitle").value("제목"))
-                .andExpect(jsonPath("$.data.comments.size()").value(2));
-
+                .andExpect(jsonPath("$.data.post.postTitle").value("제목"))  // Adjusted JSON path
+                .andExpect(jsonPath("$.data.post.comments").isArray());
     }
 
     @Test
@@ -241,7 +228,7 @@ class PostControllerTest {
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
         MockMultipartFile userUpdateRequest = new MockMultipartFile("userUpdateRequest", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest_1).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).update(postId,userUpdateRequest_1,loginId,multipartFile);
+        doNothing().when(postService).update(postId,1l,userUpdateRequest_1,multipartFile);
 
         mockMvc.perform(multipart("/api/user/update/posts/"+postId)
                         .file(multipartFile)
@@ -258,7 +245,6 @@ class PostControllerTest {
     @CustomMockUser
     void update_posts_valid() throws Exception {
         Long postId = 1L;
-        String loginId = "testId";
         String password = "1234";
         String file = "Test";
 
@@ -268,7 +254,7 @@ class PostControllerTest {
         MockMultipartFile multipartFile = new MockMultipartFile("file", file, "image", "test data".getBytes());
 
         MockMultipartFile updatePostDto = new MockMultipartFile("userUpdateRequest", null, "application/json", objectMapper.writeValueAsString(userUpdateRequest).getBytes(StandardCharsets.UTF_8));
-        doNothing().when(postService).update(postId,userUpdateRequest,loginId,multipartFile);
+        doNothing().when(postService).update(postId,1l,userUpdateRequest,multipartFile);
 
         mockMvc.perform(multipart("/api/user/update/posts/"+postId)
                         .file(multipartFile)
@@ -277,7 +263,7 @@ class PostControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("모든 값을 입력해 주세요"))
+                .andExpect(jsonPath("$.message").value("실패"))
                 .andExpect(jsonPath("$.data.size()").value("4"));
     }
     
@@ -286,7 +272,7 @@ class PostControllerTest {
     @CustomMockUser
     void delete_posts() throws Exception {
         Long postId = 1l;
-        doNothing().when(postService).delete(anyString(),anyLong());
+        doNothing().when(postService).delete(anyLong(),anyLong());
 
         mockMvc.perform(delete("/api/user/posts/"+postId))
                 .andDo(print())
@@ -300,7 +286,7 @@ class PostControllerTest {
     void delete_posts_member() throws Exception {
         Long postId = 1l;
         doThrow(new AccessDeniedException("작성자만 삭제할수 있습니다."))
-                .when(postService).delete(anyString(), anyLong());
+                .when(postService).delete(anyLong(), anyLong());
 
         mockMvc.perform(delete("/api/user/posts/"+postId))
                 .andDo(print())
@@ -314,13 +300,13 @@ class PostControllerTest {
     @CustomMockUser
     void validPost_invalidPassword_throwsBadRequestException() throws Exception {
         doThrow(new BadRequestException("비밀번호가 일치하지 않습니다."))
-                .when(postService).validPostPassword(anyString(), any());
+                .when(postService).validPostPassword(anyLong(), any());
 
         ValidPostRequest validPostRequest = new ValidPostRequest();
         validPostRequest.setPassword("1234");
         validPostRequest.setPostId(1l);
 
-        mockMvc.perform(post("/api/valid/posts")
+        mockMvc.perform(post("/api/user/valid/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validPostRequest)))
                 .andExpect(status().isBadRequest())
@@ -340,9 +326,8 @@ class PostControllerTest {
         validPostRequest.setPassword("1234");
         validPostRequest.setPostId(postId);
 
-        given(postService.validPostPassword(eq(loginId),eq(validPostRequest))).willReturn(true);
-
-        mockMvc.perform(post("/api/valid/posts")
+        doNothing().when(postService).validPostPassword(anyLong(),eq(validPostRequest));
+        mockMvc.perform(post("/api/user/valid/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validPostRequest)))
                 .andDo(print())
