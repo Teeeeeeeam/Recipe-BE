@@ -124,7 +124,7 @@ public class BlackListMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfos\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
     })
     @GetMapping("/members/search")
-    public ResponseEntity<ControllerApiResponse> searchMember(@Schema(example = "admin1234")@RequestParam(value = "login-id",required = false) String loginId,
+    public ResponseEntity<ControllerApiResponse> searchMember(@Schema(example = "admin1234")@RequestParam(value = "loginId",required = false) String loginId,
                                           @RequestParam(value = "username",required = false) String username,
                                           @RequestParam(value = "email",required = false) String email,
                                           @RequestParam(value = "nickname",required = false) String nickname,
