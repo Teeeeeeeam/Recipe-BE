@@ -55,7 +55,9 @@ public class NoticeController {
     public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddRequest, BindingResult bindingResult,
                                        @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
                                        @RequestPart(required = false) MultipartFile file) {
-        getErrorResponseResponse(bindingResult);
+        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
+        if (result != null) return result;
+
         noticeService.save(adminAddRequest,principalDetails.getMemberId(),file);
         return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
     }
@@ -90,7 +92,8 @@ public class NoticeController {
     @PutMapping(value = "/admin/notices/{noticeId}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest adminUpdateRequest, BindingResult bindingResult,
                                            @RequestPart(required = false) MultipartFile file, @PathVariable("noticeId") Long noticeId){
-        getErrorResponseResponse(bindingResult);
+        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
+        if (result != null) return result;
         noticeService.update(noticeId,adminUpdateRequest,file);
 
         return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
@@ -136,13 +139,17 @@ public class NoticeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoDetailsResponse));
     }
 
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponse(BindingResult bindingResult) {
-        Map<String, String> result = new LinkedHashMap<>();
-        for (FieldError error : bindingResult.getFieldErrors()) {
-            result.put(error.getField(),error.getDefaultMessage());
+    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> result = new LinkedHashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                result.put(error.getField(), error.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
         }
-        return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
+        return null;
     }
+
 }
 
 
