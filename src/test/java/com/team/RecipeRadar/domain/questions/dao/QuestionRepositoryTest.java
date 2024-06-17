@@ -46,7 +46,7 @@ class QuestionRepositoryTest {
         QuestionDto result = questionRepository.details(question.getId());
         
         assertThat(result).isNotNull();
-        assertThat(result.getImg_url()).isEqualTo(s3URL + "testImage.jpg");
+        assertThat(result.getImgUrl()).isEqualTo(s3URL + "testImage.jpg");
     }
 
     @Test
@@ -58,7 +58,7 @@ class QuestionRepositoryTest {
         QuestionDto result = questionRepository.details(question.getId());
         
         assertThat(result).isNotNull();
-        assertThat(result.getImg_url()).isNull();
+        assertThat(result.getImgUrl()).isNull();
     }
 
     @Test

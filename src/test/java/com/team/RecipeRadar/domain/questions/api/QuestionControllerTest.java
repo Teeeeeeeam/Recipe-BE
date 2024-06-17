@@ -91,10 +91,10 @@ class QuestionControllerTest {
         Long questionId = 1L;
 
         QuestionDto questionDto = new QuestionDto();
-        questionDto.setQuestion_content("컨튼트");
-        questionDto.setAnswer_email("test@example.com");
+        questionDto.setQuestionContent("컨튼트");
+        questionDto.setAnswerEmail("test@example.com");
         
-        when(questionService.detailAdmin_Question(eq(questionId), anyString())).thenReturn(questionDto);
+        when(questionService.detailAdminQuestion(eq(questionId), anyLong())).thenReturn(questionDto);
 
         mockMvc.perform(get("/api/admin/question/{id}", questionId)
                         .contentType(MediaType.APPLICATION_JSON))
