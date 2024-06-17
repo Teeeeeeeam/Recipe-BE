@@ -222,7 +222,7 @@ class RecipeRepositoryTest {
         CookingStep cookingStep_save2 = cookStepRepository.save(cookingStep2);
 
         Recipe save_Recipe = recipeRepository.findById(recipe_save.getId()).get();
-        recipe_save.update_recipe("변경된 제목","변경된 레벨","변경된 인원수","변경된 시간");
+        recipe_save.updateRecipe("변경된 제목","변경된 레벨","변경된 인원수","변경된 시간");
 
         ingredient_save.setIngredients("변경한재료!");
 
