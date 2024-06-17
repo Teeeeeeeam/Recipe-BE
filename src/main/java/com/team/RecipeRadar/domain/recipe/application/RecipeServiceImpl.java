@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,32 +54,10 @@ public class RecipeServiceImpl implements RecipeService{
     public RecipeDetailsResponse getRecipeDetails(Long recipeId) {
         RecipeDto recipeDetails = recipeRepository.getRecipeDetails(recipeId);
 
-        List<Map<String,String>> cookList = new ArrayList<>();
-        List<CookingStep> cookingSteps = recipeDetails.getCookingSteps();
+        List<Map<String, String>> cookList = convertCookStepsToMap(recipeDetails.getCookSteps());
+        List<String> ingredients = convertIngredientStringToList(recipeDetails.getIngredient());
 
-        for (CookingStep cookingStep : cookingSteps){
-            Map<String, String> cookStepMap = new LinkedHashMap<>(); // 새로운 Map 객체 생성
-
-            cookStepMap.put("cook_step_id", String.valueOf(cookingStep.getId()));
-            cookStepMap.put("cook_steps", cookingStep.getSteps());
-
-            cookList.add(cookStepMap); // 새로운 Map 객체를 리스트에 추가
-        }
-
-
-        String ingredient = recipeDetails.getIngredient();
-        StringTokenizer st = new StringTokenizer(ingredient, "|");
-        List<String> ingredients =new ArrayList<>();
-
-        while (st.hasMoreTokens()){                     // 문자열로 저장된 레시시피 데이터를 | 기준으로 데이터를 배열로 변환
-            String ingred_token = st.nextToken();
-            if (ingred_token.charAt(0) == ' ') {        // 첫번째 인덱스가 빈 공간일때
-                ingred_token = ingred_token.substring(1);       // 다음 인덱스부터 출력
-            }
-            ingredients.add(ingred_token);
-        }
-
-        return RecipeDetailsResponse.of(recipeDetails.toDto(),ingredients,cookList);
+        return RecipeDetailsResponse.of(recipeDetails.toDto(), ingredients, cookList);
     }
 
     @Override
@@ -88,4 +67,22 @@ public class RecipeServiceImpl implements RecipeService{
         return MainPageRecipeResponse.of(recipeDtoList);
     }
 
+    /* Josn 형식으로 Map으로 담아서 변경 */
+    private List<Map<String, String>> convertCookStepsToMap(List<CookStepDto> cookSteps) {
+        return cookSteps.stream()
+                .map(cookStepDto -> {
+                    Map<String, String> cookStepMap = new LinkedHashMap<>();
+                    cookStepMap.put("cookStepId", String.valueOf(cookStepDto.getCookStepId()));
+                    cookStepMap.put("cookSteps", cookStepDto.getCookSteps());
+                    return cookStepMap;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /* 문자열의 | 기준으로 리스트를 만드는 메서드*/
+    private List<String> convertIngredientStringToList(String ingredient) {
+        return Arrays.stream(ingredient.split("\\|"))
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
 }

@@ -5,7 +5,6 @@ import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -95,12 +93,11 @@ public class RecipeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":{\"id\":128671,\"imageUrl\":\"링크.jpg\"," +
                                     "\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0},\"ingredients\":[\"어묵 2개\",\"재료 데이터\"]," +
-                                    "\"cookStep\":[{\"cook_step_id\":\"193\",\"cook_steps\":\"당근과 양파는 깨끗히 씻으신 후에 채썰어 준비한 후 후라이팬에 기름을 두르고 팬을 달군 후 당근| 양파를 살짝 볶아주세요.\"}]}}")))
+                                    "\"cookSteps\":[{\"cookStepId\":\"193\",\"cookSteps\":\"당근과 양파는 깨끗히 씻으신 후에 채썰어 준비한 후 후라이팬에 기름을 두르고 팬을 달군 후 당근| 양파를 살짝 볶아주세요.\"}]}}")))
     })
-    @GetMapping("/recipe/{id}")
-    public ResponseEntity<?> getDetials(@Schema(example = "221094")@PathVariable("id")Long recipe_id){
-        RecipeDetailsResponse recipeDetails = recipeService.getRecipeDetails(recipe_id);
-
+    @GetMapping("/recipe/{recipeId}")
+    public ResponseEntity<?> recipeDetails(@Schema(example = "221094")@PathVariable("recipeId")Long recipeId){
+        RecipeDetailsResponse recipeDetails = recipeService.getRecipeDetails(recipeId);
         return  ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공",recipeDetails));
     }
     @Operation(summary = "레시피 좋아요순 조회",description = "좋아요가 많은 레시피 중 상위 8개를 출력하는 API",tags ="사용자 - 레시피 컨트롤러")

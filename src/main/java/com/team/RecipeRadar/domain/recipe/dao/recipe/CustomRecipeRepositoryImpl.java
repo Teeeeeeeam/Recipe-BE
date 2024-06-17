@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -162,15 +163,14 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .leftJoin(recipe.cookingStepList, cookingStep)
                 .where(recipe.id.eq(recipeId).and(uploadFile.post.id.isNull())).fetch();
 
-        List<CookingStep> cookingSteps = details.stream().map(tuple -> tuple.get(cookingStep)).collect(Collectors.toList());
-
+        List<CookStepDto> cookStepDtoList = details.stream().map(tuple -> CookStepDto.of(tuple.get(cookingStep))).collect(Collectors.toList());
 
         String imgName = details.stream().map(tuple -> getImageUrl(tuple)).findFirst().get();
         Recipe recipeEntity = details.stream().map(tuple -> tuple.get(recipe)).collect(Collectors.toList()).stream().findFirst().get();
 
         String ingredients = details.stream().map(tuple -> tuple.get(ingredient.ingredients)).collect(Collectors.toList()).stream().findFirst().get();
 
-        return RecipeDto.of(recipeEntity,imgName,cookingSteps,ingredients);
+        return RecipeDto.of(recipeEntity,imgName,cookStepDtoList,ingredients);
     }
 
     @Override

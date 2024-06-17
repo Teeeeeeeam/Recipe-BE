@@ -12,12 +12,12 @@ public class RecipeDetailsResponse {
 
     private RecipeDto recipe;
     private List<String> ingredients;
-    private List<Map<String,String>> cookStep;
+    private List<Map<String,String>> cookSteps;
 
     private RecipeDetailsResponse(RecipeDto recipeDto, List<String> ingredients,   List<Map<String,String>> cookStep) {
         this.recipe = recipeDto;
         this.ingredients = ingredients;
-        this.cookStep = cookStep;
+        this.cookSteps = cookStep;
     }
 
     public static RecipeDetailsResponse of(RecipeDto recipeDto, List<String>  ingredients,    List<Map<String,String>> cookStep){

@@ -32,7 +32,7 @@ public class RecipeDto {
     private Integer likeCount;      // 좋아요 수
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<CookingStep> cookingSteps;         // 조리순서
+    private List<CookStepDto> cookSteps;         // 조리순서
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String ingredient;          // 재료
@@ -56,7 +56,7 @@ public class RecipeDto {
         return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
     }
 
-    public static RecipeDto of(Recipe recipe,String imageUrl,List<CookingStep> cookStep,String ingredient){
+    public static RecipeDto of(Recipe recipe,String imageUrl,List<CookStepDto> cookStep,String ingredient){
         return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
         ,cookStep,ingredient);
     }
