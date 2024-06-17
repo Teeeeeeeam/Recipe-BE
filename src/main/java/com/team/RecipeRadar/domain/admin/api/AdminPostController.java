@@ -46,7 +46,7 @@ public class AdminPostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
     })
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
