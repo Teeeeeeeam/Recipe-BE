@@ -40,7 +40,7 @@ public class RecipeServiceImpl implements RecipeService{
     @Transactional(readOnly = true)
     public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients,String title, Pageable pageable) {
         Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(ingredients, title, pageable);
-        return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages());
+        return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages(),recipeDtoPage.getTotalElements());
     }
 
     /**

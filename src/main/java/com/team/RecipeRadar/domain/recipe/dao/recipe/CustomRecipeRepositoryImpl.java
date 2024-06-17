@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
@@ -95,38 +96,55 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
      * @return              pageImpl을 반환
      */
     @Override
-    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title ,Pageable pageable) {
+    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        if(title!=null){
-            builder.and(recipe.title.like("%"+title+"%"));
+
+        // 제목이 있을 경우 제목 조건 추가
+        if (title != null) {
+            builder.and(recipe.title.like("%" + title + "%"));
         }
 
-        if(ingredients!=null) {
-            for (String ingredientList : ingredients) {
-                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
+        // 재료 목록이 있을 경우 재료 조건 추가
+        if (ingredients != null && !ingredients.isEmpty()) {
+            BooleanBuilder ingredientsBuilder = new BooleanBuilder();
+            for (String ingredient : ingredients) {
+                ingredientsBuilder.or(QIngredient.ingredient.ingredients.like("%" + ingredient + "%"));
             }
+            builder.and(ingredientsBuilder);
         }
 
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+        // 결과 페칭 쿼리
+        List<Tuple> result = queryFactory.select(
+                        recipe.title,
+                        recipe.id,
+                        uploadFile.storeFileName,
+                        recipe.likeCount,
+                        recipe.cookingTime,
+                        recipe.cookingLevel,
+                        recipe.people
+                )
                 .from(ingredient)
-                .join(ingredient.recipe,recipe)
+                .join(ingredient.recipe, recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder,uploadFile.post.isNull())
+                .where(builder, uploadFile.post.isNull())
+                .orderBy(recipe.id.asc()) // 정렬 조건 추가
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // 총 카운트 쿼리
         Long count = queryFactory.select(recipe.id.count())
                 .from(ingredient)
                 .join(ingredient.recipe, recipe)
                 .where(builder)
-                .orderBy(recipe.id.asc())
                 .fetchOne();
 
+        // 결과 DTO 리스트 변환
         List<RecipeDto> content = getRecipeDtoList(result);
 
-        return new PageImpl<>(content,pageable,count);
+        // 페이지 객체 생성
+        return new PageImpl<>(content, pageable, count);
     }
 
     /**

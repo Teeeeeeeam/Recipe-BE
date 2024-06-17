@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeNormalPageResponse {
 
-    List<RecipeDto> recipes;
-    int totalPage;
+    private List<RecipeDto> recipes;
+    private int totalPage;
+    private long totalElements;
 }
