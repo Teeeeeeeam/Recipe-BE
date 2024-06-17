@@ -51,9 +51,9 @@ public class AccountRetrievalController {
     })
     @PostMapping("/api/search/login-id")
     public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdRequest findLoginIdRequest, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            return getErrorResponseResponse(bindingResult);
-        }
+        if (bindingResult.hasErrors())
+            return getErrorResponseResponseEntity(bindingResult);
+
         List<Map<String, String>> accountRetrievalServiceLoginId = accountRetrievalService.findLoginId(findLoginIdRequest.getUsername(), findLoginIdRequest.getEmail(),findLoginIdRequest.getCode());
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",accountRetrievalServiceLoginId));
@@ -70,11 +70,11 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
     })
     @PostMapping("/api/search/password")
-    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordDto, BindingResult bindingResult){
+    public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){
         if (bindingResult.hasErrors())
-            return getErrorResponseResponse(bindingResult);
+            return getErrorResponseResponseEntity(bindingResult);
 
-        String token = accountRetrievalService.findPwd(findPasswordDto.getUsername(), findPasswordDto.getLoginId(), findPasswordDto.getEmail(), findPasswordDto.getCode());
+        String token = accountRetrievalService.findPwd(findPasswordRequest.getUsername(), findPasswordRequest.getLoginId(), findPasswordRequest.getEmail(), findPasswordRequest.getCode());
 
         ResponseCookie responseCookie = cookieUtils.createCookie("account-token", token, 60 * 3);
 
@@ -92,11 +92,10 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]")))
     })
     @PutMapping("/api/password/update")
-    public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordDto, BindingResult bindingResult, HttpServletRequest request){
-        if (bindingResult.hasErrors()){
+    public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, BindingResult bindingResult, HttpServletRequest request){
+        if (bindingResult.hasErrors())
+            return getErrorResponseResponseEntity(bindingResult);
 
-            return getErrorResponseResponse(bindingResult);
-        }
         Cookie[] cookies = request.getCookies();
         String accountId = "";
         String cookieId = "";
@@ -110,13 +109,13 @@ public class AccountRetrievalController {
             }
         }
 
-        accountRetrievalService.updatePassword(updatePasswordDto,accountId);
+        accountRetrievalService.updatePassword(updatePasswordRequest,accountId);
 
         ResponseCookie deleteCookie = cookieUtils.deleteCookie(cookieId);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
     }
 
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponse(BindingResult bindingResult) {
+    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
         Map<String, String> result = new LinkedHashMap<>();
         for (FieldError error : bindingResult.getFieldErrors()) {
             result.put(error.getField(),error.getDefaultMessage());
