@@ -71,7 +71,7 @@ public class RecipeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":{\"즐겨 찾기 상태\":true}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"즐겨찾기 상태\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"오류 내용\"}")))
