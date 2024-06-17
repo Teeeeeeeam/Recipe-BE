@@ -56,7 +56,7 @@ public class CommonCodeEmailController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[인증번호가 일치하지 않습니다. or 숫자만 입력해주세요.]\"}")))
     })
-    @PostMapping("/api/search/email-confirmation/verify")
+    @PostMapping("/api/code/email-confirmation/verify")
     public ResponseEntity<?> check(@RequestParam("email")String email, @RequestParam("code")String userCode){
             Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,Integer.parseInt(userCode));
             return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",stringBooleanMap));

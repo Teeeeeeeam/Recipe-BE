@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.email.api;
 
 import com.team.RecipeRadar.domain.email.application.MailService;
-import com.team.RecipeRadar.domain.email.dto.SignUpEmailVerificationRequest;
+import com.team.RecipeRadar.domain.email.dto.EmailVerificationRequest;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,7 +55,7 @@ public class SingUpEmailController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[오류 내용]\"}")))
     })
     @PostMapping("/email-confirmation/verify")
-    public ResponseEntity<?> check(@Valid @RequestBody SignUpEmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
+    public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
 
         ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
         if (result != null) return result;
