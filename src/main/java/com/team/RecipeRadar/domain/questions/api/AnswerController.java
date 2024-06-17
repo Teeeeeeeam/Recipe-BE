@@ -42,7 +42,7 @@ public class AnswerController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"답변 작성 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"오류 내용\"}")))
+                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[오류 내용]\"}")))
     })
     @PostMapping("/api/admin/questions/{questionId}/answers")
     public ResponseEntity<?> answer(@PathVariable Long questionId,
