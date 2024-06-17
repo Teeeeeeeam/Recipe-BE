@@ -59,7 +59,7 @@ public class AdminPostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ControllerApiResponse.class)),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"createAt\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}},{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"createAt\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"createdAt\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}},{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"createAt\":\"2024-05-23T14:20:34\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}}"))),
     })
     @GetMapping("/posts/search")
     public ResponseEntity<?> searchPost(@RequestParam(value = "loginId",required = false) String loginId,
