@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.domain.email.api;
 
 import com.team.RecipeRadar.domain.email.application.MailService;
+import com.team.RecipeRadar.domain.email.dto.SignUpEmailVerificationRequest;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,11 +15,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,16 +49,31 @@ public class SingUpEmailController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 검증 성공\",\"data\":{\"isVerifyCode\":true}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 검증 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[인증번호가 일치하지 않습니다. or 숫자만 입력해주세요.]\"}")))
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[오류 내용]\"}")))
     })
     @PostMapping("/email-confirmation/verify")
-    public ResponseEntity<?> check(@Parameter(description = "이메일 주소")@RequestParam("email") String email,
-                                   @Parameter(description = "인증 번호")@RequestParam("code")String UserCode){
+    public ResponseEntity<?> check(@Valid @RequestBody SignUpEmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
 
-            Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,Integer.parseInt(UserCode));
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 검증 성공",stringBooleanMap));
+        ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
+        if (result != null) return result;
+
+        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(signUpEmailVerificationRequest.getEmail(), signUpEmailVerificationRequest.getCode());
+        if(!stringBooleanMap.get("isVerifyCode")) throw new IllegalStateException("인증번호가 일치하지 않습니다.");
+
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 검증 성공"));
+    }
+
+    private static ResponseEntity<ErrorResponse<List<String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> result = new LinkedList<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                result.add( error.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
+        }
+        return null;
     }
 }

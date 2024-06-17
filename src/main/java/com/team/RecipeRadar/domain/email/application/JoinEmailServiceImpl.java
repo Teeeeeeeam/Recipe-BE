@@ -67,8 +67,6 @@ public class JoinEmailServiceImpl implements MailService{
         if (emailVerification != null && isCodeValid(emailVerification)) {
             isVerifyCode = true;
         }
-        log.info("검증 코드 ={}" ,isVerifyCode);
-
         result.put("isVerifyCode", isVerifyCode);
         return result;
     }
