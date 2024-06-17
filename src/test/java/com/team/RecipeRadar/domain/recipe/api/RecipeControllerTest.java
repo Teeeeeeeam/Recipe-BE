@@ -68,15 +68,14 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(false);
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookMarkRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("성공"))
-                .andExpect(jsonPath("$.data.['즐겨 찾기 상태']").value(false))
+                .andExpect(jsonPath("$.message").value("북마크 성공"))
                 .andDo(print());
     }
 
@@ -89,15 +88,14 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(true);
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookMarkRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("성공"))
-                .andExpect(jsonPath("$.data.['즐겨 찾기 상태']").value(true))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("북마크 해제"))
                 .andDo(print());
     }
 
@@ -110,7 +108,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willThrow(new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
 
-        BookMarkRequest bookMarkRequest = new BookMarkRequest(1l, recipe.getId());
+        BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
         mockMvc.perform(post("/api/user/recipe")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,59 +186,57 @@ class RecipeControllerTest {
     @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_제목으로만 검색")
     void Search_Recipe_Normal_Page() throws Exception {
 
-        List<String> ingredients = Arrays.asList("밥");
-        Pageable pageRequest = PageRequest.of(0, 2);
-
         List<RecipeDto> recipeDtoList = new ArrayList<>();
         recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0));
         recipeDtoList.add(new RecipeDto(2L, "url2", "레시피1", "level2", "2인분", "1시간", 0));
 
 
-        PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
+        List<RecipeDto> dummyRecipes = Arrays.asList(
+                RecipeDto.builder().id(1l).title("제목").build(),
+                RecipeDto.builder().id(2l).title("제목").build(),
+                RecipeDto.builder().id(3l).title("제목").build(),
+                RecipeDto.builder().id(4l).title("제목").build(),
+                RecipeDto.builder().id(5l).title("제목").build()
+        );
+
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
+
 
         given(recipeService.searchRecipeByIngredientsNormal(isNull(),eq("레시피1"),any(Pageable.class)))
-                .willReturn(dtoPage);
+                .willReturn(dummyResponse);
 
-        mockMvc.perform(get("/api/recipeV1?title=레시피1")
+        mockMvc.perform(get("/api/recipe/normal?title=레시피1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.[0].id").value(1))
-                .andExpect(jsonPath("$.data.content.[0].imageUrl").value("url1"))
-                .andExpect(jsonPath("$.data.content.[0].title").value("레시피1"))
-                .andExpect(jsonPath("$.data.content.[0].cookingLevel").value("level1"))
-                .andExpect(jsonPath("$.data.content.[0].people").value("1인분"))
-                .andExpect(jsonPath("$.data.content.[0].cookingTime").value("10분"))
-                .andExpect(jsonPath("$.data.content.size()").value(2));
+                .andExpect(jsonPath("$.data.recipes.[0].id").value(1))
+                .andExpect(jsonPath("$.data.recipes.size()").value(5));
     }
     @Test
     @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_재료으로만 검색")
     void Search_Recipe_Normal_Page_ing() throws Exception {
 
         List<String> ingredients = Arrays.asList("밥");
-        Pageable pageRequest = PageRequest.of(0, 2);
 
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0));
-        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피1", "level2", "2인분", "1시간", 0));
+        List<RecipeDto> dummyRecipes = Arrays.asList(
+                RecipeDto.builder().id(1l).title("제목1").build(),
+                RecipeDto.builder().id(2l).title("제목2").build(),
+                RecipeDto.builder().id(3l).title("제목3").build(),
+                RecipeDto.builder().id(4l).title("제목4").build(),
+                RecipeDto.builder().id(5l).title("제목5").build()
+        );
+
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
 
 
-        PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
+        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),any(Pageable.class))).willReturn(dummyResponse);
 
-        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),any(Pageable.class)))
-                .willReturn(dtoPage);
-
-        mockMvc.perform(get("/api/recipeV1?ingredients=밥")
+        mockMvc.perform(get("/api/recipe/normal?ingredients=밥")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.[0].id").value(1))
-                .andExpect(jsonPath("$.data.content.[0].imageUrl").value("url1"))
-                .andExpect(jsonPath("$.data.content.[0].title").value("레시피1"))
-                .andExpect(jsonPath("$.data.content.[0].cookingLevel").value("level1"))
-                .andExpect(jsonPath("$.data.content.[0].people").value("1인분"))
-                .andExpect(jsonPath("$.data.content.[0].cookingTime").value("10분"))
-                .andExpect(jsonPath("$.data.content.size()").value(2));
+                .andExpect(jsonPath("$.data.recipes.[0].id").value(1))
+                .andExpect(jsonPath("$.data.recipes.size()").value(5));
     }
 
     @Test

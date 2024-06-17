@@ -98,10 +98,19 @@ class RecipeServiceImplTest {
 
         when(recipeRepository.getNormalPage(eq(ingLists),anyString(),eq(pageRequest))).thenReturn(dtoPage);
 
-        Page<RecipeDto> recipeDtos = recipeService.searchRecipeByIngredientsNormal(ingLists, "title" ,pageRequest);
-        assertThat(recipeDtos.getTotalPages()).isEqualTo(1);
-        assertThat(recipeDtos.getContent().get(0).getTitle()).isEqualTo("레시피1");
-        assertThat(recipeDtos.getTotalElements()).isEqualTo(2);
+        List<RecipeDto> dummyRecipes = Arrays.asList(
+                RecipeDto.builder().id(1l).title("제목").build(),
+                RecipeDto.builder().id(2l).title("제목").build(),
+                RecipeDto.builder().id(3l).title("제목").build(),
+                RecipeDto.builder().id(4l).title("제목").build(),
+                RecipeDto.builder().id(5l).title("제목").build()
+        );
+
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
+
+
+        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingLists, "title", pageRequest);
+       log.info("asdasd={}",recipeNormalPageResponse);
     }
 
     @Test

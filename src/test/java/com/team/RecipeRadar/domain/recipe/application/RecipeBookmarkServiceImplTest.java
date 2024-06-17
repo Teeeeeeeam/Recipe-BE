@@ -41,7 +41,7 @@ class RecipeBookmarkServiceImplTest {
         
         when(memberRepository.findById(eq(1l))).thenReturn(Optional.of(member));
         when(recipeRepository.findById(eq(3l))).thenReturn(Optional.of(recipe));
-        when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(true);
+        when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(false);
 
         recipeBookmarkService.saveBookmark(member.getId(),recipe.getId());
 
@@ -59,7 +59,7 @@ class RecipeBookmarkServiceImplTest {
 
         when(memberRepository.findById(eq(1l))).thenReturn(Optional.of(member));
         when(recipeRepository.findById(eq(recipe_id))).thenReturn(Optional.of(recipe));
-        when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(false);
+        when(recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(),recipe.getId())).thenReturn(true);
 
         Boolean aBoolean = recipeBookmarkService.saveBookmark(member.getId(), recipe.getId());
 
