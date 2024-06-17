@@ -164,8 +164,8 @@ class RecipeControllerTest {
 
         for (CookingStep cookingStep : cookingStepList) {
             Map<String,String> map = new LinkedHashMap<>();
-            map.put("cook_step_id", String.valueOf(cookingStep.getId()));
-            map.put("cook_steps", cookingStep.getSteps());
+            map.put("cookStepId", String.valueOf(cookingStep.getId()));
+            map.put("cookSteps", cookingStep.getSteps());
             cookSetp.add(map);
         }
 
@@ -179,7 +179,7 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipe.id").value("1"))
                 .andExpect(jsonPath("$.data.recipe.title").value("title"))
                 .andExpect(jsonPath("$.data.ingredients.size()").value(3))
-                .andExpect(jsonPath("$.data.cookStep.size()").value(3));
+                .andExpect(jsonPath("$.data.cookSteps.size()").value(3));
     }
 
     @Test

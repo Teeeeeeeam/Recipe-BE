@@ -4,6 +4,7 @@ import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
@@ -115,11 +116,11 @@ class RecipeRepositoryTest {
         RecipeDto recipeDetails = recipeRepository.getRecipeDetails(save.getId());
         RecipeDto dto = recipeDetails.toDto();
         String ing = recipeDetails.getIngredient();
-        List<CookingStep> cookingSteps = recipeDetails.getCookingSteps();
+        List<CookStepDto> cookSteps = recipeDetails.getCookSteps();
 
         assertThat(dto.getTitle()).isEqualTo(save.getTitle());
         assertThat(ing).isEqualTo(ingredient1.getIngredients());
-        assertThat(cookingSteps.get(0).getSteps()).isEqualTo(save1.getSteps());
+        assertThat(cookSteps.get(0).getCookSteps()).isEqualTo(save1.getSteps());
         
     }
     

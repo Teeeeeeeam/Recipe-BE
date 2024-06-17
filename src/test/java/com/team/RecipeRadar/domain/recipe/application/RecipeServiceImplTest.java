@@ -1,14 +1,8 @@
 package com.team.RecipeRadar.domain.recipe.application;
 
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.post.dao.PostRepository;
-import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
-import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.dto.*;
-import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
-import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,19 +52,19 @@ class RecipeServiceImplTest {
     @DisplayName("레시피 상세 페이지")
     void get_Details_Recipe(){
 
-        List<CookingStep> cookingSteps = new ArrayList<>();
+        List<CookStepDto> cookingSteps = new ArrayList<>();
 
-        CookingStep cookingStep = CookingStep.builder().steps("순서 1").build();
-        CookingStep cookingStep1 = CookingStep.builder().steps("순서 2").build();
+        CookStepDto cookStepDto = new CookStepDto(1l,"순서1");
+        CookStepDto cookStepDto1 = new CookStepDto(2l,"순서2");
+        cookingSteps.add(cookStepDto);
+        cookingSteps.add(cookStepDto1);
 
-        cookingSteps.add(cookingStep);
-        cookingSteps.add(cookingStep1);
 
         RecipeDto fakeRecipeDto = new RecipeDto();
         fakeRecipeDto.setId(1L);
         fakeRecipeDto.setTitle("title");
         fakeRecipeDto.setIngredient("재료1|재료2");
-        fakeRecipeDto.setCookingSteps(cookingSteps);
+        fakeRecipeDto.setCookSteps(cookingSteps);
 
         when(recipeRepository.getRecipeDetails(1L)).thenReturn(fakeRecipeDto);
 
@@ -78,8 +72,8 @@ class RecipeServiceImplTest {
 
         assertThat(response.getRecipe().getTitle()).isEqualTo(fakeRecipeDto.getTitle());
         assertThat(response.getIngredients().get(0)).isEqualTo("재료1");
-        assertThat(response.getCookStep().get(0).get("cook_steps")).isEqualTo("순서 1");
-        assertThat(response.getCookStep().size()).isEqualTo(2);
+        assertThat(response.getCookSteps().get(0).get("cookSteps")).isEqualTo("순서1");
+        assertThat(response.getCookSteps().size()).isEqualTo(2);
 
     }
 
