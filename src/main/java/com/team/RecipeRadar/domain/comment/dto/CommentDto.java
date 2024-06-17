@@ -29,7 +29,7 @@ public class CommentDto {
     @Schema(description = "작성자 닉네임", example = "나만의 냉장고")
     private String nickName;
 
-    private LocalDateTime creatAt;
+    private LocalDateTime createdAt;
 
     private MemberDto member;
 
@@ -41,7 +41,7 @@ public class CommentDto {
                 .id(comment.getId())
                 .commentContent(comment.getCommentContent())
                 .nickName(comment.getMember().getNickName())
-                .creatAt(truncateNanos(comment))
+                .createdAt(truncateNanos(comment))
                 .build();
     }
 
@@ -51,7 +51,7 @@ public class CommentDto {
         return CommentDto.builder()
                 .id(comment.getId())
                 .commentContent(comment.getCommentContent())
-                .creatAt(truncateNanos(comment))
+                .createdAt(truncateNanos(comment))
                 .member(memberDto).build();
     }
 
