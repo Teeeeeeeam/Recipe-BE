@@ -1,15 +1,15 @@
 package com.team.RecipeRadar.domain.visit.dao;
 
 
-import com.team.RecipeRadar.domain.visit.domain.VisitData;
+import com.team.RecipeRadar.domain.visit.domain.VisitStatistics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VisitCountRepository extends JpaRepository<VisitData,Long>, CustomVisitAdminRepository {
+public interface VisitStatisticsRepository extends JpaRepository<VisitStatistics,Long>, CustomVisitAdminRepository {
 
-    @Query("SELECT SUM(v.visited_count) AS count FROM VisitData v")
+    @Query("SELECT SUM(v.visitCount) AS count FROM VisitStatistics v")
     int getAllCount();
 
 }

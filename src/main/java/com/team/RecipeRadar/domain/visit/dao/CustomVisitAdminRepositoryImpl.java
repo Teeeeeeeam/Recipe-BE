@@ -3,7 +3,8 @@ package com.team.RecipeRadar.domain.visit.dao;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.visit.domain.VisitData;
+import com.team.RecipeRadar.domain.visit.domain.QVisitStatistics;
+import com.team.RecipeRadar.domain.visit.domain.VisitStatistics;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
@@ -15,7 +16,8 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.team.RecipeRadar.domain.visit.domain.QVisitData.*;
+import static com.team.RecipeRadar.domain.visit.domain.QVisitStatistics.*;
+
 
 @Slf4j
 @Repository
@@ -36,25 +38,25 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
                 LocalDateTime startDay = LocalDateTime.now().minusDays(13).withHour(0).withMinute(0);
                 LocalDateTime endDateTime = LocalDateTime.now();
 
-                builder.and(visitData.days.goe(startDay))       // >=
-                        .and(visitData.days.loe(endDateTime));       // <=
+                builder.and(visitStatistics.day.goe(startDay))       // >=
+                        .and(visitStatistics.day.loe(endDateTime));       // <=
             }
         } else {        // 아무 값도 입력하지 않았으면 현재 선택한 달에 한달만 보여짐, 기본
             LocalDate firstDayOfThisMonth = LocalDate.now().minusDays(30);
             LocalDateTime dateTime = LocalDateTime.of(firstDayOfThisMonth, LocalTime.MIN);
 
             LocalDateTime now = LocalDateTime.now();
-            builder.and(visitData.days.goe(dateTime))
-                    .and(visitData.days.loe(now));
+            builder.and(visitStatistics.day.goe(dateTime))
+                    .and(visitStatistics.day.loe(now));
         }
 
-        List<VisitData> result = jpaQueryFactory.select(visitData)
-                .from(visitData)
+        List<VisitStatistics> result = jpaQueryFactory.select(visitStatistics)
+                .from(visitStatistics)
                 .where(builder)
-                .orderBy(visitData.days.desc())
+                .orderBy(visitStatistics.day.desc())
                 .fetch();
 
-        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(LocalDate.of(v.getDays().getYear(),v.getDays().getMonth(),v.getDays().getDayOfMonth()), v.getVisited_count())).collect(Collectors.toList());
+        List<DayDto> dayDtos = result.stream().map(v -> new DayDto(LocalDate.of(v.getDay().getYear(),v.getDay().getMonth(),v.getDay().getDayOfMonth()), v.getVisitCount())).collect(Collectors.toList());
         return dayDtos;
     }
 
@@ -63,12 +65,12 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
     public int getBeforeCount() {
         LocalDateTime previousDay = LocalDateTime.now().minusDays(1); // 하루 전날
 
-        VisitData visitedAdmin1 = jpaQueryFactory.selectFrom(visitData)
-                .where(visitData.days.year().eq(previousDay.getYear())
-                        .and(visitData.days.month().eq(previousDay.getMonthValue()))
-                        .and(visitData.days.dayOfMonth().eq(previousDay.getDayOfMonth())))
+        VisitStatistics visitedAdmin1 = jpaQueryFactory.selectFrom(visitStatistics)
+                .where(visitStatistics.day.year().eq(previousDay.getYear())
+                        .and(visitStatistics.day.month().eq(previousDay.getMonthValue()))
+                        .and(visitStatistics.day.dayOfMonth().eq(previousDay.getDayOfMonth())))
                 .fetchOne();
-        return visitedAdmin1.getVisited_count();
+        return visitedAdmin1.getVisitCount();
     }
 
     /**
@@ -95,16 +97,16 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
         LocalDateTime dateTime = LocalDateTime.now().minusWeeks(10);        //10주전
 
         List<Tuple> list = jpaQueryFactory.select(
-                        visitData.days,
-                        visitData.visited_count.sum()
-                ).from(visitData)
-                .where(visitData.days.goe(dateTime).and(visitData.days.loe(LocalDateTime.now())))
-                .groupBy(visitData.days.yearWeek())
-                .orderBy(visitData.days.desc())
+                        visitStatistics.day,
+                        visitStatistics.visitCount.sum()
+                ).from(visitStatistics)
+                .where(visitStatistics.day.goe(dateTime).and(visitStatistics.day.loe(LocalDateTime.now())))
+                .groupBy(visitStatistics.day.yearWeek())
+                .orderBy(visitStatistics.day.desc())
                 .limit(10)
                 .fetch();
 
-        List<WeekDto> weekDtoList = list.stream().map(tuple -> new WeekDto(toLocalDate(tuple), tuple.get(visitData.visited_count.sum()))).collect(Collectors.toList());
+        List<WeekDto> weekDtoList = list.stream().map(tuple -> new WeekDto(toLocalDate(tuple), tuple.get(visitStatistics.visitCount.sum()))).collect(Collectors.toList());
 
         return weekDtoList;
     }
@@ -134,16 +136,16 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
     public List<MonthDto> getCountMoth() {
         LocalDateTime dateTime = LocalDateTime.now().minusYears(10);
         List<Tuple> list = jpaQueryFactory.select(
-                        visitData.days,
-                        visitData.visited_count.sum()
-                ).from(visitData)
-                .where(visitData.days.goe(dateTime).and(visitData.days.loe(LocalDateTime.now())))
-                .groupBy(visitData.days.year(), visitData.days.month())
-                .orderBy(visitData.days.desc())
+                        visitStatistics.day,
+                        visitStatistics.visitCount.sum()
+                ).from(visitStatistics)
+                .where(visitStatistics.day.goe(dateTime).and(visitStatistics.day.loe(LocalDateTime.now())))
+                .groupBy(visitStatistics.day.year(), visitStatistics.day.month())
+                .orderBy(visitStatistics.day.desc())
                 .limit(10)
                 .fetch();
 
-        List<MonthDto> collect1 = list.stream().map(tuple -> new MonthDto(toLocalDate(tuple), tuple.get(visitData.visited_count.sum()))).collect(Collectors.toList());
+        List<MonthDto> collect1 = list.stream().map(tuple -> new MonthDto(toLocalDate(tuple), tuple.get(visitStatistics.visitCount.sum()))).collect(Collectors.toList());
 
         return collect1;
     }
@@ -152,7 +154,7 @@ public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepositor
 
     //LocalDateTime -> LocalDate로 변환
     static LocalDate toLocalDate(Tuple tuple) {
-        LocalDateTime dateTime = tuple.get(visitData.days);
+        LocalDateTime dateTime = tuple.get(visitStatistics.day);
 
         return LocalDate.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth());
     }

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.visit.application;
 
-import com.team.RecipeRadar.domain.visit.dao.VisitCountRepository;
-import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
+import com.team.RecipeRadar.domain.visit.dao.VisitStatisticsRepository;
+import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
@@ -18,8 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VisitServiceImpl implements VisitService{
 
-    private final VisitCountRepository visitCountRepository;
-    private final VisitRepository visitRepository;
+    private final VisitStatisticsRepository visitCountRepository;
+    private final VisitSessionRepository visitRepository;
 
     /**
      * 일 조회 specificDay null 아니고 ture시에는 14일간의 일간 데이터조회 없을시 기본페이지의 30일간의 데이터 조회

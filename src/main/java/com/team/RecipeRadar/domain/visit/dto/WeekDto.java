@@ -14,6 +14,5 @@ import java.util.List;
 public class WeekDto {
 
     public LocalDate week;
-
     public Integer count;
 }

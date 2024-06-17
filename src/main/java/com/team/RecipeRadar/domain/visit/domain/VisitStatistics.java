@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,13 +13,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VisitData {
+public class VisitStatistics {
 
     @Id
+    @Column(name = "visitStatistics_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    private Integer visited_count;
-    private LocalDateTime days;
+    private Integer visitCount;  // 방문 횟수
+    private LocalDateTime day;   // 일자
 
 }

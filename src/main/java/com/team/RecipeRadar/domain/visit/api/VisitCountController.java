@@ -1,8 +1,8 @@
 package com.team.RecipeRadar.domain.visit.api;
 
 import com.team.RecipeRadar.domain.visit.application.VisitService;
-import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
-import com.team.RecipeRadar.domain.visit.domain.VisitCount;
+import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
+import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
@@ -37,7 +37,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VisitCountController {
 
-    private final VisitRepository visitRepository;
+    private final VisitSessionRepository visitRepository;
     private final VisitService visitService;
 
     @Operation(summary = "최초 방문시 쿠키 발급",
@@ -86,7 +86,7 @@ public class VisitCountController {
                 .maxAge((int) secondsUntilMidnight)
                 .build();
         LocalDateTime db = now.toLocalDate().atStartOfDay().plusDays(1).minusSeconds(5);
-        VisitCount entity = VisitCount.toEntity(ipAddress, db);
+        VisitSession entity = VisitSession.toEntity(ipAddress, db);
 
         Cookie[] cookies = request.getCookies();
         for(Cookie cookie : cookies){

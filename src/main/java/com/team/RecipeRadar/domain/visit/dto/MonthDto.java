@@ -13,6 +13,5 @@ import java.time.LocalDateTime;
 public class MonthDto {
 
     public LocalDate month;
-
     public Integer count;
 }

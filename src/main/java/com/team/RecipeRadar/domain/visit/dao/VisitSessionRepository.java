@@ -1,14 +1,14 @@
 package com.team.RecipeRadar.domain.visit.dao;
 
-import com.team.RecipeRadar.domain.visit.domain.VisitCount;
+import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VisitRepository extends JpaRepository<VisitCount,Long> {
+public interface VisitSessionRepository extends JpaRepository<VisitSession,Long> {
 
-    @Query("SELECT count(v) FROM VisitCount v WHERE DATE(v.expired_at) = CURRENT_DATE")
+    @Query("SELECT count(v) FROM VisitSession v WHERE DATE(v.expiredAt) = CURRENT_DATE")
     Integer getCurrentCount();
     boolean existsByIpAddress(String uuid);
 }

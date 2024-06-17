@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.visit.domain;
+package com.team.RecipeRadar.domain.visit.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
