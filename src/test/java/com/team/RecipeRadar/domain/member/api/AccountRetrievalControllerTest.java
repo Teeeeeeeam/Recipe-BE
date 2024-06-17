@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.member.dto.AccountRetrieval.UpdatePasswordReq
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
-import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,6 @@ class AccountRetrievalControllerTest {
         String username = "홍길동";
         String email="test@email.com";
         int code = 123456;
-
 
         FindLoginIdRequest findLoginIdDto = new FindLoginIdRequest(username, email, code);
 
@@ -119,20 +117,19 @@ class AccountRetrievalControllerTest {
         String loginId="loginId";
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
 
-        UpdatePasswordRequest updatePasswordDto = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
-        doNothing().when(accountRetrievalService).updatePassword(updatePasswordDto,token);
-
+        UpdatePasswordRequest updatePasswordRequest = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
+        doNothing().when(accountRetrievalService).updatePassword(updatePasswordRequest,token);
 
         Cookie cookie = new Cookie("account-token", token);
 
         ResponseCookie responseCookie = ResponseCookie.from("account-token", null)
                 .build();
 
-        given(cookieUtils.deleteCookie("account-token")).willReturn(responseCookie);
+        given(cookieUtils.deleteCookie(eq("account-token"))).willReturn(responseCookie);
 
         mockMvc.perform(put("/api/password/update")
                         .cookie(cookie)
-                .content(objectMapper.writeValueAsString(updatePasswordDto))
+                .content(objectMapper.writeValueAsString(updatePasswordRequest))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value("비밀번호 변경 성공"))
