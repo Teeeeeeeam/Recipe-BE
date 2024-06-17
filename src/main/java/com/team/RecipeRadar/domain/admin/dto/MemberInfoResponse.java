@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MemberInfoResponse {
 
-    private List<MemberDto> memberInfos;
+    private List<MemberDto> memberInfoes;
     private Boolean nextPage;
 
 }
