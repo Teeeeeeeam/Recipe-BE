@@ -138,7 +138,7 @@ public class BlackListMemberController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"blackList\":[{\"id\":1,\"email\":\"user1@example.com\",\"blackCheck\":true},{\"id\":2,\"email\":\"user2@example.com\",\"black_check\":true}]}}")))
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"blackList\":[{\"id\":1,\"email\":\"user1@example.com\",\"blackCheck\":true},{\"id\":2,\"email\":\"user2@example.com\",\"blackCheck\":true}]}}")))
     })
     @GetMapping("/black/search")
     public ResponseEntity<?> searchEmail(@RequestParam(value = "email",required = false)String email,
