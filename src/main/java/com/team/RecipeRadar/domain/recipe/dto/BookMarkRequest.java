@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @Schema(name = "즐겨찾기 Request")
 public class BookMarkRequest {
 
-    private Long memberId;
     private Long recipeId;
 }

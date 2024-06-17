@@ -6,6 +6,8 @@ import com.team.RecipeRadar.domain.recipe.dao.bookmark.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.domain.RecipeBookmark;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,18 +33,26 @@ public class RecipeBookmarkServiceImpl implements RecipeBookmarkService{
      */
     @Override
     public Boolean saveBookmark(Long memberId, Long recipeId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchElementException("사용자 및 레시피를 찾을수 없습니다."));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
 
-        boolean exists = recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(), recipe.getId());
-        if (!exists){
-            recipeBookmarkRepository.save(RecipeBookmark.toEntity(member,recipe));
-            return true;
-        }else {
-            recipeBookmarkRepository.deleteByMember_IdAndRecipe_Id(member.getId(), recipe.getId());
-            return false;
-        }
+        boolean alreadyBookmark = recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(member.getId(), recipe.getId());
+        if (!alreadyBookmark){
+            addBookmark(member, recipe);
+        }else
+            removeBookmark(member, recipe);
+
+        return alreadyBookmark;
     }
+
+    private void removeBookmark(Member member, Recipe recipe) {
+        recipeBookmarkRepository.deleteByMember_IdAndRecipe_Id(member.getId(), recipe.getId());
+    }
+
+    private void addBookmark(Member member, Recipe recipe) {
+        recipeBookmarkRepository.save(RecipeBookmark.toEntity(member, recipe));
+    }
+
     @Override
     public Boolean checkBookmark(Long memberId, Long recipeId) {
         return recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(memberId,recipeId);
