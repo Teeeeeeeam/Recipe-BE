@@ -2,13 +2,12 @@ package com.team.RecipeRadar.domain.visit.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.visit.api.VisitCountController;
+import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
-import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
-import com.team.RecipeRadar.domain.visit.domain.VisitCount;
+import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
@@ -36,9 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(VisitCountController.class)
-class VisitCountControllerTest {
+class VisitSessionControllerTest {
 
-    @MockBean private VisitRepository visitRepository;
+    @MockBean private VisitSessionRepository visitRepository;
     @MockBean private VisitService visitService;
 
     @Autowired
@@ -59,7 +58,7 @@ class VisitCountControllerTest {
     @DisplayName("처음 방문할시에 쿠키 발급후 db에 저장")
     void ipCount() throws Exception {
         given(visitRepository.existsByIpAddress(any())).willReturn(false);
-        given(visitRepository.save(any(VisitCount.class))).willReturn(new VisitCount());
+        given(visitRepository.save(any(VisitSession.class))).willReturn(new VisitSession());
 
         Cookie cookie = new Cookie("visitors", "fakeCookie");
         mockMvc.perform(post("/api/visit")

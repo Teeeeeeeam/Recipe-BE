@@ -1,8 +1,7 @@
 package com.team.RecipeRadar.domain.visit.dao;
 
-import com.team.RecipeRadar.domain.visit.dao.VisitRepository;
+import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
-import com.team.RecipeRadar.domain.visit.domain.VisitCount;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,23 +21,22 @@ import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 @Import(QueryDslConfig.class)
-@Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Slf4j
 class VisitRepositoryTest {
 
     @Autowired
-    VisitRepository visitRepository;
+    VisitSessionRepository visitRepository;
 
     @Test
     @DisplayName("일간 조회수 카운트")
     void dayCount(){
-        List<VisitCount> visitCountList = new ArrayList<>();
+        List<VisitSession> visitCountList = new ArrayList<>();
         for(int i = 0; i< 10;i++) {
-            visitCountList.add(VisitCount.toEntity(String.valueOf(i), now()));
+            visitCountList.add(VisitSession.toEntity(String.valueOf(i), now()));
         }
-        VisitCount entity = VisitCount.toEntity("ip", now().plusDays(1));
+        VisitSession entity = VisitSession.toEntity("ip", now().plusDays(1));
         visitRepository.save(entity);
         visitRepository.saveAll(visitCountList);
 
@@ -52,8 +50,8 @@ class VisitRepositoryTest {
     @DisplayName("IP가 존재하는지 유무 테스트")
     void existIpAddress(){
         String ipAddress = "111.11.1";
-        VisitCount entity = VisitCount.toEntity(ipAddress, now());
-        VisitCount entity1 = VisitCount.toEntity("111.11.2",now());
+        VisitSession entity = VisitSession.toEntity(ipAddress, now());
+        VisitSession entity1 = VisitSession.toEntity("111.11.2",now());
 
         visitRepository.save(entity);
         visitRepository.save(entity1);
