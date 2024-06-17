@@ -72,18 +72,4 @@ public class Post extends BaseTimeEntity {
         return Post.builder().postTitle(postTitle).postContent(postContent).postServing(postServing).postCookingTime(postCookingTime)
                 .postCookingLevel(postCookingLevel).postLikeCount(0).member(member).recipe(recipe).postPassword(password).build();
     }
-//
-//    static public PostDto of(Post post){
-//        return PostDto.builder()
-//                .id(post.getId())
-//                .postTitle(post.getPostTitle())
-//                .postContent(post.getPostContent())
-//                .postServing(post.getPostServing())
-//                .postCookingTime(post.getPostCookingTime())
-//                .postCookingLevel(post.getPostCookingLevel())
-//                .postImageUrl(post.getPostImageUrl())
-//                .postLikeCount(post.postLikeCount)
-//                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
-//                .build();
-//    }
 }
