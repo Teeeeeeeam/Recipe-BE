@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,7 +24,7 @@ public class NoticeDto {
 
     private String noticeContent;
 
-    private LocalDateTime createdAt;        //등록일
+    private LocalDate createdAt;        //등록일
 
     private LocalDateTime updatedAt;       //수정일
 
@@ -46,6 +47,7 @@ public class NoticeDto {
         MemberDto memberDto = MemberDto.builder().nickname(nickName).build();
         return NoticeDto.builder()
                 .id(notice.getId())
+                .createdAt(notice.getCreatedAt().toLocalDate())
                 .noticeTitle(notice.getNoticeTitle())
                 .member(memberDto).build();
     }
@@ -55,6 +57,7 @@ public class NoticeDto {
         return NoticeDto.builder()
                 .id(notice.getId())
                 .imgUrl(imgUrl)
+                .createdAt(notice.getCreatedAt().toLocalDate())
                 .noticeContent(notice.getNoticeContent())
                 .noticeTitle(notice.getNoticeTitle())
                 .member(memberDto).build();
