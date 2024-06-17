@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.admin.application.recipe;
 
 import com.team.RecipeRadar.domain.Image.application.ImageService;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
@@ -51,7 +50,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      */
     @Override
     public void saveRecipe(RecipeSaveRequest recipeSaveRequest, MultipartFile file) {
-        Recipe recipe = recipeRepository.save(Recipe.toEntity_s3(recipeSaveRequest));
+        Recipe recipe = recipeRepository.save(Recipe.toEntity(recipeSaveRequest));
 
         s3UploadService.uploadFile(file,List.of(recipe));
         // 요리 단계 저장
@@ -99,7 +98,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         updateIngredients(recipeUpdateRequest.getIngredients(), recipe);
 
         // 레시피 정보 업데이트
-        recipe.update_recipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime());
+        recipe.updateRecipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime());
 
     }
 

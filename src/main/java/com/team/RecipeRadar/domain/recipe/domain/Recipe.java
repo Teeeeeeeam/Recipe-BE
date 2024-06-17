@@ -3,8 +3,6 @@ package com.team.RecipeRadar.domain.recipe.domain;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,7 +13,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@OnDelete(action = OnDeleteAction.CASCADE)
 @ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "likeCount"),
@@ -48,29 +45,13 @@ public class Recipe {
         this.likeCount = count;
     }
 
-    public void update_recipe(String title, String cookingLevel, String people, String cookingTime){
-        this.title=title;
-        this.cookingLevel=cookingLevel;
-        this.people=people;
-        this.cookingTime=cookingTime;
-    }
-
-    public void s3_update_recipe(String title, String cookingLevel, String people, String cookingTime){
+    public void updateRecipe(String title, String cookingLevel, String people, String cookingTime){
         this.title=title;
         this.cookingLevel=cookingLevel;
         this.people=people;
         this.cookingTime=cookingTime;
     }
     public static Recipe toEntity(RecipeSaveRequest recipeSaveRequest){
-        return  Recipe.builder()
-                .title(recipeSaveRequest.getTitle())
-                .cookingTime(recipeSaveRequest.getCookTime())
-                .cookingLevel(recipeSaveRequest.getCookLevel())
-                .likeCount(0)
-                .people(recipeSaveRequest.getPeople()).build();
-    }
-
-    public static Recipe toEntity_s3(RecipeSaveRequest recipeSaveRequest){
         return  Recipe.builder()
                 .title(recipeSaveRequest.getTitle())
                 .cookingTime(recipeSaveRequest.getCookTime())

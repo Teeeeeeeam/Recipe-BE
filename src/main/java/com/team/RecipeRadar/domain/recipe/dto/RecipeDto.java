@@ -31,10 +31,8 @@ public class RecipeDto {
 
     private Integer likeCount;      // 좋아요 수
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<CookStepDto> cookSteps;         // 조리순서
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String ingredient;          // 재료
 
 
