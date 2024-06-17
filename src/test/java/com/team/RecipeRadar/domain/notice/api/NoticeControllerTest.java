@@ -147,7 +147,7 @@ class NoticeControllerTest {
     void adminDetailNotice() throws Exception {
         Member member = Member.builder().id(1l).nickName("닉네임").loginId("로그인아이디").build();
         InfoDetailsResponse infoDetailsResponse = InfoDetailsResponse.builder().noticeTitle("제목").noticeContent("내용")
-                .createdAt(LocalDateTime.now()).imgUrl("https://www.example.com/image").member(MemberDto.from(member)).build();
+                .createdAt(LocalDateTime.now().toLocalDate()).imgUrl("https://www.example.com/image").member(MemberDto.from(member)).build();
 
         given(noticeService.detailNotice(anyLong())).willReturn(infoDetailsResponse);
 
@@ -170,7 +170,7 @@ class NoticeControllerTest {
                             .id(i)
                             .noticeTitle("제목" + i)
                             .member(MemberDto.from(member))
-                            .createdAt(LocalDateTime.now())
+                            .createdAt(LocalDateTime.now().toLocalDate())
                             .imgUrl("https://www.example.com/image" + i + ".jpg")
                             .build()
             );
