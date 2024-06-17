@@ -133,7 +133,7 @@ class CommentServiceImplTest {
                     .commentContent("테스트 댓글 내용 " + i)
                     .nickName(nickName)
                     .articleDto(articleDto)
-                    .creatAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now())
                     .build();
             commentDtos.add(commentDto);
         }
