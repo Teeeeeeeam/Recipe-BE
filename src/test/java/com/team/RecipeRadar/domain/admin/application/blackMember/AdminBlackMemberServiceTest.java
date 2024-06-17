@@ -65,8 +65,8 @@ class AdminBlackMemberServiceTest {
         MemberInfoResponse memberInfoResponse = adminService.memberInfos(1l,pageRequest);
 
         assertThat(memberInfoResponse.getNextPage()).isTrue();
-        assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);
-        assertThat(memberInfoResponse.getMemberInfos().get(0).getLoginId()).isEqualTo(loginId);
+        assertThat(memberInfoResponse.getMemberInfoes()).hasSize(2);
+        assertThat(memberInfoResponse.getMemberInfoes().get(0).getLoginId()).isEqualTo(loginId);
     }
 
     @Test
@@ -86,8 +86,8 @@ class AdminBlackMemberServiceTest {
         MemberInfoResponse memberInfoResponse = adminService.searchMember(loginId,"닉네임2",null,null,null,pageRequest);
 
         assertThat(memberInfoResponse.getNextPage()).isTrue();
-        assertThat(memberInfoResponse.getMemberInfos()).hasSize(2);
-        assertThat(memberInfoResponse.getMemberInfos().get(0).getLoginId()).isEqualTo(loginId);
+        assertThat(memberInfoResponse.getMemberInfoes()).hasSize(2);
+        assertThat(memberInfoResponse.getMemberInfoes().get(0).getLoginId()).isEqualTo(loginId);
     }
 
     @Test

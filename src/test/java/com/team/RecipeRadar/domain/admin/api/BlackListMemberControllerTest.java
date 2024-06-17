@@ -78,8 +78,8 @@ class BlackListMemberControllerTest {
         mockMvc.perform(get("/api/admin/members/info"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
-                .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
+                .andExpect(jsonPath("$.data.memberInfoes.[0].username").value("회원1"))
+                .andExpect(jsonPath("$.data.memberInfoes.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
     }
     @Test
@@ -117,8 +117,8 @@ class BlackListMemberControllerTest {
         mockMvc.perform(get("/api/admin/members/search?loginId="+loginId+"&nickname="+nickname))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.memberInfos.[0].username").value("회원1"))
-                .andExpect(jsonPath("$.data.memberInfos.[0].loginId").value(loginId))
+                .andExpect(jsonPath("$.data.memberInfoes.[0].username").value("회원1"))
+                .andExpect(jsonPath("$.data.memberInfoes.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
     }
 
