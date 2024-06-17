@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.post.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
@@ -33,7 +32,7 @@ public class PostDto {
 
     private String postContent;     //요리글 내용
 
-    private LocalDate createAt;        //등록일
+    private LocalDate createdAt;        //등록일
 
     private String postServing;     // 요리 제공 인원
 
@@ -59,7 +58,7 @@ public class PostDto {
         this.recipe.setId(recipeId);
         this.recipe.setTitle(recipeTitle);
         this.postTitle = postTitle;
-        this.createAt = creatAt.toLocalDate();
+        this.createdAt = creatAt.toLocalDate();
         this.postImageUrl = img;
         this.member.setNickname(nickName);
     }
@@ -72,7 +71,7 @@ public class PostDto {
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
                 .postContent(post.getPostContent())
-                .createAt(post.getCreatedAt().toLocalDate())
+                .createdAt(post.getCreatedAt().toLocalDate())
                 .postServing(post.getPostServing())
                 .postCookingTime(post.getPostCookingTime())
                 .postCookingLevel(post.getPostCookingLevel())
