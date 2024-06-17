@@ -75,14 +75,14 @@ public class MemberServiceImpl implements MemberService {
 
     /**
      * 회원가입시 닉네임이 유효한지 확인합니다.
-     * @param nickName 회원가입시 사용할 닉네임
+     * @param nickname 회원가입시 사용할 닉네임
      * @return 닉네임이 유효할 경우 true, 그렇지 않을 경우 false
      */
     @Override
-    public void nickNameValid(String nickName) {
-        Boolean existsByNickName = memberRepository.existsByNickName(nickName);
+    public void nickNameValid(String nickname) {
+        Boolean existsByNickName = memberRepository.existsByNickName(nickname);
 
-        boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,12}$").matcher(nickName).matches();
+        boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,12}$").matcher(nickname).matches();
         if(!valid || existsByNickName) throw  new InvalidIdException("사용 불가능한 닉네임 입니다.");
     }
 

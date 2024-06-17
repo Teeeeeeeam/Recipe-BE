@@ -8,5 +8,5 @@ import lombok.Data;
 public class NicknameValidRequest {
 
     @Schema(description = "사용자 닉네임", example = "나만냉장고")
-    private String nickName;
+    private String nickname;
 }

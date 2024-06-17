@@ -68,7 +68,7 @@ public class SingUpValidController {
     })
     @PostMapping("/nickname/validation")
     public ResponseEntity<?> nickName(@RequestBody NicknameValidRequest nicknameValidRequest){
-        memberService.nickNameValid(nicknameValidRequest.getNickName());
+        memberService.nickNameValid(nicknameValidRequest.getNickname());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"닉네임 사용 가능"));
     }
 }
