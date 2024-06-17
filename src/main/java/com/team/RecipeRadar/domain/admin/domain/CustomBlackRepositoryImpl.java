@@ -46,10 +46,13 @@ public class CustomBlackRepositoryImpl implements CustomBlackRepository{
     @Override
     public Slice<BlackListDto> searchEmailBlackList(String email, Long lastId,Pageable pageable){
         BooleanBuilder builder = getBuilder(lastId);
+        if(email!=null){
+            builder.and(blackList.email.like("%" + email + "%"));
+        }
 
         List<BlackList> blackListList = jpaQueryFactory.select(blackList)
                 .from(blackList)
-                .where(builder,blackList.email.like("%" + email + "%"))
+                .where(builder)
                 .limit(pageable.getPageSize()+1)
                 .orderBy(blackList.id.desc())
                 .fetch();

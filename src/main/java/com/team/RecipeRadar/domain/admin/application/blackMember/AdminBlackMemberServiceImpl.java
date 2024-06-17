@@ -114,6 +114,16 @@ public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
         blackListRepository.deleteById(blackId);
     }
 
+    /**
+     * 블랙리스트된 이메일을 조회하는 메서드
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public BlackListResponse searchEmailBlackList(String email, Long lastId, Pageable pageable) {
+        Slice<BlackListDto> searchEmailBlackList = blackListRepository.searchEmailBlackList(email, lastId, pageable);
+        return new BlackListResponse(searchEmailBlackList.hasNext(),searchEmailBlackList.getContent());
+    }
+
     /* 사용자를 삭제 시킬때 관련된 모든 정보를 삭제하는 메서드 */
     private void deleteMemberRelatedData(String loginId) {
         memberService.deleteMember(loginId);

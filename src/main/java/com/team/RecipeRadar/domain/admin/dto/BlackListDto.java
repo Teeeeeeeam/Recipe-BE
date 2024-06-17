@@ -11,7 +11,6 @@ public class BlackListDto {
 
     private Long id;
     private String email;
-    private Boolean black_check;
-
+    private Boolean blackCheck;
 
 }

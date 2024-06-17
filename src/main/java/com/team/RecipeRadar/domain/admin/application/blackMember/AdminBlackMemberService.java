@@ -28,4 +28,7 @@ public interface AdminBlackMemberService{
 
     /* 블랙 리스트 삭제*/
     void deleteBlackList(Long blackId);
+
+    /* 블랙 리스트 이메일 조회 */
+    BlackListResponse searchEmailBlackList(String email,Long lastId,Pageable pageable);
 }
