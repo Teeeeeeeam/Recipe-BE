@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.questions.application;
 
 
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.questions.domain.QuestionStatus;
 import com.team.RecipeRadar.domain.questions.domain.QuestionType;
 import com.team.RecipeRadar.domain.questions.dto.QuestionAllResponse;
@@ -14,14 +13,14 @@ import java.util.List;
 
 public interface QuestionService {
 
-    void account_Question(QuestionRequest questionRequest, MultipartFile file);
+    void accountQuestion(QuestionRequest questionRequest, MultipartFile file);
 
-    void general_Question(QuestionRequest questionRequest,Long memberId, MultipartFile file);
+    void generalQuestion(QuestionRequest questionRequest, Long memberId, MultipartFile file);
 
-    QuestionDto detailAdmin_Question(Long questionId,String loginId);
+    QuestionDto detailAdminQuestion(Long questionId, Long memberId);
 
     QuestionAllResponse allQuestion(Long lasId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
 
     QuestionAllResponse allUserQuestion(Long lasId, Long memberId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable);
-    void deleteQuestions(List<Long> ids, MemberDto memberDto);
+    void deleteQuestions(List<Long> ids, Long memberId);
 }

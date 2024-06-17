@@ -19,12 +19,12 @@ public class QuestionRequest {
     private String title;
 
     @Schema(example = "문의 사항 내용")
-    private String question_content;
+    private String questionContent;
 
     @Schema(example = "EMAIL", description = "문의 사항 작성시 알림 받기 서비스")
     private AnswerType answer;
 
     @Schema(example = "keuye06380618@gmail.com", description = "알림 받을 이메일 주소")
-    private String answer_email;
+    private String answerEmail;
 
 }

@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 
 public interface AnswerService {
 
-    void question_answer(Long questId,QuestionAnswerRequest questionAnswerRequest,String adminNickName);
+    void questionAnswer(Long questId, QuestionAnswerRequest questionAnswerRequest, String adminNickName);
 
     QuestionDto viewResponse(MemberDto memberDto, Long questionId);
 }

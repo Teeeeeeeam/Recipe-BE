@@ -9,10 +9,10 @@ import lombok.Data;
 public class QuestionAnswerRequest {
 
     @Schema(example = "답변 제목")
-    private String answer_title;
+    private String answerTitle;
     
     @Schema(example = "답변 내용")
-    private String answer_content;
+    private String answerContent;
 
     @Schema(example = "COMPLETED")
     QuestionStatus questionStatus;

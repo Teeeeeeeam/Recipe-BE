@@ -8,6 +8,7 @@ public enum NoSuchErrorType {
     NO_SUCH_IMAGE("이미지 파일을 찾을 수 없습니다."),
     NO_SUCH_EMAIL("해당 이메일을 찾을 수 없습니다."),
     NO_SUCH_NOTICE("해당 공지사항을 찾을 수 없습니다."),
+    NO_SUCH_QUESTION("해당 문의사항을 찾을 수 없습니다."),
     NO_SUCH_DATA("해당 데이터를 찾을수 업습니다."),
     NO_SUCH_COMMENT("해당 댓글을 찾을 수 없습니다."),
     NO_SUCH_NOTIFICATION("해당 알림을 찾을 수 없습니다."),

@@ -25,32 +25,32 @@ public class QuestionDto {
 
     private String title;
 
-    private String question_content;
+    private String questionContent;
 
     private QuestionStatus status;
 
     private AnswerType answerType;
 
-    private LocalDateTime create_at;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime answer_at;
+    private LocalDateTime answeredAt;
 
-    private String img_url;
+    private String imgUrl;
 
-    private String answer_email;
+    private String answerEmail;
 
     private MemberDto member;
 
     private AnswerDto answer;
 
 
-    private QuestionDto(QuestionType questionType, String title, String question_content, QuestionStatus status, AnswerType answer,String answer_email, MemberDto memberDto) {
+    private QuestionDto(QuestionType questionType, String title, String questionContent, QuestionStatus status, AnswerType answer,String answerEmail, MemberDto memberDto) {
         this.questionType = questionType;
         this.title = title;
-        this.question_content = question_content;
+        this.questionContent = questionContent;
         this.status = status;
         this.answerType = answer;
-        this.answer_email=answer_email;
+        this.answerEmail =answerEmail;
         this.member = memberDto;
     }
 
@@ -60,7 +60,7 @@ public class QuestionDto {
         QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
                 .id(question.getId())
                 .title(question.getTitle())
-                .create_at(question.getCreatedAt())
+                .createdAt(question.getCreatedAt())
                 .status(question.getStatus())
                 .questionType(question.getQuestionType());
         MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
@@ -81,8 +81,8 @@ public class QuestionDto {
                 .title(question.getTitle())
                 .answerType(question.getAnswer())
                 .questionType(question.getQuestionType())
-                .create_at(question.getCreatedAt())
-                .question_content(question.getQuestion_content())
+                .createdAt(question.getCreatedAt())
+                .questionContent(question.getQuestionContent())
                 .status(question.getStatus());
 
 
@@ -90,11 +90,11 @@ public class QuestionDto {
             MemberDto memberDto = MemberDto.builder().id(question.getMember().getId()).nickname(question.getMember().getNickName()).loginId(question.getMember().getLoginId()).build();
             questionDtoBuilder.member(memberDto);
         }
-        if (question.getAnswer_email()!=null){
-            questionDtoBuilder.answer_email(question.getAnswer_email());
+        if (question.getAnswerEmail()!=null){
+            questionDtoBuilder.answerEmail(question.getAnswerEmail());
         }
         if(url!=null){
-            questionDtoBuilder.img_url(url);
+            questionDtoBuilder.imgUrl(url);
         }
 
         return questionDtoBuilder.build();
@@ -105,20 +105,20 @@ public class QuestionDto {
 
        QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder().id(question.getId())
                .status(question.getStatus()).title(question.getTitle())
-               .question_content(question.getQuestion_content())
-               .create_at(createdDate.withSecond(0).withNano(0));
+               .questionContent(question.getQuestionContent())
+               .createdAt(createdDate.withSecond(0).withNano(0));
 
        if(question.getMember()!=null){
            MemberDto memberDto = MemberDto.builder().id(question.getMember().getId()).loginId(question.getMember().getLoginId()).build();
            questionDtoBuilder.member(memberDto);
        }
        if(img_url!=null){
-           questionDtoBuilder.img_url(img_url);
+           questionDtoBuilder.imgUrl(img_url);
        }
 
        if(answer!=null) {
            questionDtoBuilder.answer(AnswerDto.fromDto(answer));
-           questionDtoBuilder.answer_at(createdDate.withSecond(0).withNano(0));
+           questionDtoBuilder.answeredAt(createdDate.withSecond(0).withNano(0));
        }
        return questionDtoBuilder.build();
    }

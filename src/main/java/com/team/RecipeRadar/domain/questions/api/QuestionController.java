@@ -46,7 +46,7 @@ public class QuestionController {
     })
     @PostMapping(value = "/api/question",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> accountQuestion(@RequestPart QuestionRequest questionRequest, @RequestPart(required = false) MultipartFile file){
-        questionService.account_Question(questionRequest,file);
+        questionService.accountQuestion(questionRequest,file);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"비로그인 문의 사항 등록"));
     }
 
@@ -65,7 +65,7 @@ public class QuestionController {
                                              @RequestPart(required = false) MultipartFile file,
                                              @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = getMemberDto(principalDetails);
-        questionService.general_Question(questionRequest,memberDto.getId(),file);
+        questionService.generalQuestion(questionRequest,memberDto.getId(),file);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"문의 사항 등록"));
     }
 
@@ -75,16 +75,15 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"question_content\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"create_at\":\"2024-06-10T08:03:37.126042\",\"img_url\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"answer_email\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
+            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"questionContent\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"createdAt\":\"2024-06-10T08:03:37.126042\",\"imgUrl\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"answerEmail\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"관리자만 접근 가능 가능합니다.\"}")))
     })
-    @GetMapping("/api/admin/question/{id}")
-    public ResponseEntity<?> details_Question(@PathVariable("id") Long questionId,
-                                              @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
-        MemberDto memberDto = getMemberDto(principalDetails);
-        QuestionDto questionDto = questionService.detailAdmin_Question(questionId, memberDto.getLoginId());
+    @GetMapping("/api/admin/question/{questionId}")
+    public ResponseEntity<?> detailsQuestion(@PathVariable("questionId") Long questionId,
+                                             @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
+        QuestionDto questionDto = questionService.detailAdminQuestion(questionId, principalDetails.getMemberId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));
     }
 
@@ -92,13 +91,13 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"create_at\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
     })
     @GetMapping("/api/admin/questions")
-    public ResponseEntity<?> question_all(@RequestParam(name = "last-id",required = false)Long lastId,
-                                          @RequestParam(name = "question-type",required = false) QuestionType questionType,
-                                          @RequestParam(name = "question_status",required = false) QuestionStatus questionStatus,
-                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
+    public ResponseEntity<?> questionAll(@RequestParam(name = "lastId",required = false)Long lastId,
+                                         @RequestParam(name = "questionType",required = false) QuestionType questionType,
+                                         @RequestParam(name = " questionStatus",required = false) QuestionStatus questionStatus,
+                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
 
         QuestionAllResponse questionAllResponse = questionService.allQuestion(lastId, questionType, questionStatus, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
@@ -109,16 +108,15 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"create_at\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
     })
     @GetMapping("/api/user/questions")
-    public ResponseEntity<?> question_user_all(@RequestParam(name = "last-id",required = false)Long lastId,
-                                          @RequestParam(name = "question-type",required = false) QuestionType questionType,
-                                          @RequestParam(name = "question_status",required = false) QuestionStatus questionStatus,
+    public ResponseEntity<?> question_user_all(@RequestParam(name = "lastId",required = false)Long lastId,
+                                          @RequestParam(name = "questionType",required = false) QuestionType questionType,
+                                          @RequestParam(name = "questionStatus",required = false) QuestionStatus questionStatus,
                                           @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
                                           @Parameter(example = "{\"size\":10}") Pageable pageable){
-        MemberDto memberDto = getMemberDto(principalDetails);
-        QuestionAllResponse questionAllResponse = questionService.allUserQuestion(lastId,memberDto.getId(), questionType, questionStatus, pageable);
+        QuestionAllResponse questionAllResponse = questionService.allUserQuestion(lastId,principalDetails.getMemberId(), questionType, questionStatus, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionAllResponse));
     }
     @Operation(summary = "문의사항 삭제",description = "사용자는 작성한 문의사항의 대해서 삭제가능하며 단일,일괄 삭제가능",tags = {"사용자 - 마이페이지 컨트롤러","사용자 - 문의사항 컨트롤러"})
@@ -126,20 +124,18 @@ public class QuestionController {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"삭제 성공\"}"))),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+            @ApiResponse(responseCode = "403",description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"작성자만 삭제 가능합니다.\"}")))
     })
     @DeleteMapping("/api/user/questions")
-    public ResponseEntity<?> question_delete(@RequestParam("ids") List<Long> ids,
+    public ResponseEntity<?> question_delete(@RequestParam("questionIds") List<Long> questionIds,
                                              @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
-        MemberDto memberDto = getMemberDto(principalDetails);
-        questionService.deleteQuestions(ids,memberDto);
+        questionService.deleteQuestions(questionIds,principalDetails.getMemberId());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
     }
 
     private static MemberDto getMemberDto(PrincipalDetails principalDetails) {
-        MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
-        return memberDto;
+        return principalDetails.getMemberDto(principalDetails.getMember());
     }
 }

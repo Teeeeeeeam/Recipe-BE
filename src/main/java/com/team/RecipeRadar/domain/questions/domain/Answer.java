@@ -28,4 +28,7 @@ public class Answer{
     @JoinColumn(name = "question_id")
     private Question question;
 
+    public static Answer createAanswer(String answerTitle,String answerContent,String answerAdminNickname, Question question){
+        return Answer.builder().answerTitle(answerTitle).answerContent(answerContent).answerAdminNickname(answerAdminNickname).question(question).build();
+    }
 }

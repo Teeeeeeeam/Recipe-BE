@@ -10,8 +10,7 @@ import com.team.RecipeRadar.domain.questions.dto.QuestionAnswerRequest;
 import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
 import com.team.RecipeRadar.global.event.email.NoneQuestionMailEvent;
 import com.team.RecipeRadar.global.event.email.QuestionMailEvent;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
+import com.team.RecipeRadar.global.exception.ex.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,31 +33,17 @@ public class AnswerServiceImpl implements AnswerService{
     private final ApplicationEventPublisher eventPublisher;
 
 
+    /**
+     * 문의사항의 답변을 등록하는 메서드
+     * 문의사항 등록시 선택한 알림받기 상태의 따라 이메이로 알림이 전송된다.
+     */
     @Override
-    public void question_answer(Long questId,QuestionAnswerRequest questionAnswerRequest,String adminNickName) {
+    public void questionAnswer(Long questId, QuestionAnswerRequest questionAnswerRequest, String adminNickName) {
 
-        Question question = questionRepository.findById(questId).orElseThrow(() -> new BadRequestException("문의사항이 존재하지 않습니다."));
+        Question question = getQuestion(questId);
         question.updateStatus(questionAnswerRequest.getQuestionStatus());   //문의사항 진행을 답변완료 변경
-
-        //일반 문의 사항의 답변의 대해서는 알림이 가도록 사용
-        if(question.getQuestionType().equals(GENERAL_INQUIRY)) {
-            notificationService.completeQuestion(question, adminNickName);
-            if(question.getAnswer().equals(EMAIL)){     //이메일 선택시 이메일로 전송
-                eventPublisher.publishEvent(new QuestionMailEvent(question.getAnswer_email()));
-            }
-        }else{  //계정일떄는 이메일 이벤트가 가도록
-            if(question.getAnswer().equals(EMAIL)){     //이메일 선택시 이메일로 전송
-                eventPublisher.publishEvent(new NoneQuestionMailEvent(question.getAnswer_email(),questionAnswerRequest.getAnswer_title(),questionAnswerRequest.getAnswer_content()));
-            }
-        }
-
-        Answer build = Answer.builder()
-                .question(question)
-                .answerContent(questionAnswerRequest.getAnswer_content())
-                .answerTitle(questionAnswerRequest.getAnswer_title())
-                .answerAdminNickname(adminNickName)
-                .build();
-        answerRepository.save(build);
+        handleNotificationAndEmail(questionAnswerRequest, adminNickName, question);
+        answerRepository.save(Answer.createAanswer(questionAnswerRequest.getAnswerTitle(),questionAnswerRequest.getAnswerContent(),adminNickName,question));
     }
 
     /**
@@ -72,12 +57,31 @@ public class AnswerServiceImpl implements AnswerService{
         QuestionDto questionDto = answerRepository.viewResponse(questionId);
 
         if(questionDto.getMember() == null){
-            throw new BadRequestException("존재하지 않습니다.");
+            throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER);
         }
         if(!memberDto.getId().equals(questionDto.getMember().getId()) && !memberDto.getRoles().equals("ROLE_ADMIN")){
-            throw new ForbiddenException("작성자만 열람 가능합니다.");
+            throw new UnauthorizedException("작성자만 열람 가능합니다.");
         }
 
         return questionDto;
+    }
+
+    private void handleNotificationAndEmail(QuestionAnswerRequest questionAnswerRequest, String adminNickName, Question question) {
+        //일반 문의 사항의 답변의 대해서는 알림이 가도록 사용
+        if(question.getQuestionType().equals(GENERAL_INQUIRY)) {
+            notificationService.completeQuestion(question, adminNickName);
+            if(question.getAnswer().equals(EMAIL)){     //이메일 선택시 이메일로 전송
+                eventPublisher.publishEvent(new QuestionMailEvent(question.getAnswerEmail()));
+            }
+        }else{  //계정일떄는 이메일 이벤트가 가도록
+            if(question.getAnswer().equals(EMAIL)){     //이메일 선택시 이메일로 전송
+                eventPublisher.publishEvent(new NoneQuestionMailEvent(question.getAnswerEmail(),
+                        questionAnswerRequest.getAnswerTitle(),
+                        questionAnswerRequest.getAnswerContent()));
+            }
+        }
+    }
+    private Question getQuestion(Long questId) {
+        return questionRepository.findById(questId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_QUESTION));
     }
 }

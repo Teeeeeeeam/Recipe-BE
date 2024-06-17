@@ -44,7 +44,7 @@ public class AnswerController {
                                     @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
         try {
             MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
-            answerService.question_answer(questionId, questionAnswerRequest, memberDto.getNickname());
+            answerService.questionAnswer(questionId, questionAnswerRequest, memberDto.getNickname());
 
             return ResponseEntity.ok(new ControllerApiResponse<>(true, "답변 작성 성공"));
         }catch (Exception e){

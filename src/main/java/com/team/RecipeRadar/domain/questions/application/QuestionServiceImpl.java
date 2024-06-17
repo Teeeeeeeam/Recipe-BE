@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.questions.application;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.questions.dao.AnswerRepository;
 import com.team.RecipeRadar.domain.questions.dao.QuestionRepository;
@@ -16,6 +15,9 @@ import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -38,13 +40,14 @@ public class QuestionServiceImpl implements QuestionService {
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
     private final AnswerRepository answerRepository;
+
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
     /**
      * 계정이 정지되었을때 문의사항 보낼떄 사용
      */
     @Override
-    public void account_Question(QuestionRequest questionRequest, MultipartFile file) {
-        Question question = buildQuestion(questionRequest);
-        
+    public void accountQuestion(QuestionRequest questionRequest, MultipartFile file) {
+        Question question = getQuestion(questionRequest);
         setMemberIfProvided(null, question);
 
         Question savedQuestion = questionRepository.save(question);
@@ -58,8 +61,8 @@ public class QuestionServiceImpl implements QuestionService {
      * 일반 문의사항일때 문의사항 로직
      */
     @Override
-    public void general_Question(QuestionRequest questionRequest,Long memberId, MultipartFile file) {
-        Question question = buildQuestion(questionRequest);  // 질문 생성
+    public void generalQuestion(QuestionRequest questionRequest, Long memberId, MultipartFile file) {
+        Question question = getQuestion(questionRequest);
 
         setMemberIfProvided(memberId,question);        // 사용자 설정
 
@@ -72,21 +75,18 @@ public class QuestionServiceImpl implements QuestionService {
 
     /**
      * 문의사항 상세보기
-     * @param questionId
-     * @param loginId
-     * @return
      */
     @Override
     @Transactional(readOnly = true)
-    public QuestionDto detailAdmin_Question(Long questionId,String loginId) {
-        Member member = memberRepository.findByLoginId(loginId);
-
-        if(member.getRoles().equals("ROLE_ADMIN")){
-            return questionRepository.details(questionId);
-        }else
-            throw new BadRequestException("관리자만 접근 가능 가능합니다.");
+    public QuestionDto detailAdminQuestion(Long questionId, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+        validateAdminAccess(member);
+        return questionRepository.details(questionId);
     }
 
+    /**
+     * 문의사항 전체 보기
+     */
     @Override
     @Transactional(readOnly = true)
     public QuestionAllResponse allQuestion(Long lasId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable) {
@@ -101,58 +101,51 @@ public class QuestionServiceImpl implements QuestionService {
         Slice<QuestionDto> allQuestion = questionRepository.getUserAllQuestion(lasId,memberId, questionType, questionStatus, pageable);
         return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
     }
-
     /* 사용자가 작성한 문의사항을 삭제한다. 단일 및 일괄 삭제 가능 */
-    @Override
-    public void deleteQuestions(List<Long> ids, MemberDto memberDto) {
-        List<Question> questions = questionRepository.findAllById(ids);
-        if (questions.isEmpty()) throw new BadRequestException("해당 문의사항이 존재하지 않습니다.");
-        
-        boolean isMember = questions.get(0).getMember().getId().equals(memberDto.getId());
 
-        if(isMember) {
-            for (Question question : questions) {
-                UploadFile byQuestionId = imgRepository.findByQuestionId(question.getId());
-                if (byQuestionId != null) {
-                    imgRepository.deleteById(byQuestionId.getId());
-                    s3UploadService.deleteFile(byQuestionId.getStoreFileName());
+    @Override
+    public void deleteQuestions(List<Long> ids, Long memberId) {
+        List<Question> questions = questionRepository.findAllById(ids);
+        if (questions.isEmpty()) throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_QUESTION);
+
+        boolean isMember = questions.stream()
+                .anyMatch(question -> question.getMember().getId().equals(memberId));
+
+        if (isMember) {
+            questions.forEach(question -> {
+                UploadFile uploadFile = imgRepository.findByQuestionId(question.getId());
+                if (uploadFile != null) {
+                    imgRepository.deleteById(uploadFile.getId());
+                    s3UploadService.deleteFile(uploadFile.getStoreFileName());
                 }
                 answerRepository.deleteByQuestionId(question.getId());
                 questionRepository.delete(question);
-            }
-        }else throw new BadRequestException("작성자만 삭제 가능합니다.");
-    }
+            });
+        } else
+            throw new UnauthorizedException("작성자만 삭제 가능합니다.");
 
-    private Question buildQuestion(QuestionRequest questionRequest) {
-        return Question.builder()
-                .question_content(questionRequest.getQuestion_content())
-                .title(questionRequest.getTitle())
-                .answer(questionRequest.getAnswer())
-                .status(QuestionStatus.PENDING)
-                .answer_email(questionRequest.getAnswer_email())
-                .questionType(questionRequest.getQuestionType())
-                .build();
+    }
+    private static Question getQuestion(QuestionRequest questionRequest) {
+        return  Question.createQuestion(questionRequest.getTitle(), questionRequest.getQuestionContent(), questionRequest.getAnswer(), questionRequest.getAnswerEmail(), questionRequest.getQuestionType());
     }
 
     private void setMemberIfProvided(Long memberId ,Question question) {
         if (memberId != null) {
             Member member = memberRepository.findById(memberId)
-                    .orElseThrow(() -> new BadRequestException("사용자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
             question.setMember(member);
+        }
+    }
+
+    private void validateAdminAccess(Member member) {
+        if (!member.getRoles().contains(ROLE_ADMIN)) {
+            throw new BadRequestException("관리자만 접근 가능 가능합니다.");
         }
     }
 
     private void saveImageIfProvided(MultipartFile file, Question question) {
         if (file!=null) {
-            String originalFilename = file.getOriginalFilename();
-            // TODO: 2024-06-17  
-            String storeName = s3UploadService.uploadFile(file,List.of());
-            UploadFile uploadFile = UploadFile.builder()
-                    .originFileName(originalFilename)
-                    .storeFileName(storeName)
-                    .question(question)
-                    .build();
-            imgRepository.save(uploadFile);
+         s3UploadService.uploadFile(file,List.of(question));
         }
     }
 }
