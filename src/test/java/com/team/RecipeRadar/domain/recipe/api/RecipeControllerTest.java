@@ -270,9 +270,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
 
-        mockMvc.perform(get("/api/check/bookmarks")
-                        .param("recipe-id", recipeId.toString()))
-                .andDo(print())
+        mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -286,8 +284,7 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
 
-        mockMvc.perform(get("/api/check/bookmarks")
-                        .param("recipe-id", recipeId.toString()))
+        mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
@@ -301,10 +298,8 @@ class RecipeControllerTest {
 
         given(recipeBookmarkService.checkBookmark(isNull() ,eq(recipeId))).willReturn(false);
 
-        mockMvc.perform(get("/api/check/bookmarks")
-                        .param("recipe-id", recipeId.toString()))
+        mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(false));
+                .andExpect(status().is(302));
     }
 }
