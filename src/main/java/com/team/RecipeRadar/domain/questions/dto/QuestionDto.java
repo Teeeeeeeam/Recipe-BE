@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.questions.domain.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -31,9 +32,9 @@ public class QuestionDto {
 
     private AnswerType answerType;
 
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
-    private LocalDateTime answeredAt;
+    private LocalDate answeredAt;
 
     private String imgUrl;
 
@@ -60,7 +61,7 @@ public class QuestionDto {
         QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
                 .id(question.getId())
                 .title(question.getTitle())
-                .createdAt(question.getCreatedAt())
+                .createdAt(question.getCreatedAt().toLocalDate())
                 .status(question.getStatus())
                 .questionType(question.getQuestionType());
         MemberDto.MemberDtoBuilder memberDtoBuilder = MemberDto.builder();
@@ -81,7 +82,7 @@ public class QuestionDto {
                 .title(question.getTitle())
                 .answerType(question.getAnswer())
                 .questionType(question.getQuestionType())
-                .createdAt(question.getCreatedAt())
+                .createdAt(question.getCreatedAt().toLocalDate())
                 .questionContent(question.getQuestionContent())
                 .status(question.getStatus());
 
@@ -106,7 +107,7 @@ public class QuestionDto {
        QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder().id(question.getId())
                .status(question.getStatus()).title(question.getTitle())
                .questionContent(question.getQuestionContent())
-               .createdAt(createdDate.withSecond(0).withNano(0));
+               .createdAt(createdDate.toLocalDate());
 
        if(question.getMember()!=null){
            MemberDto memberDto = MemberDto.builder().id(question.getMember().getId()).loginId(question.getMember().getLoginId()).build();
@@ -118,7 +119,7 @@ public class QuestionDto {
 
        if(answer!=null) {
            questionDtoBuilder.answer(AnswerDto.fromDto(answer));
-           questionDtoBuilder.answeredAt(createdDate.withSecond(0).withNano(0));
+           questionDtoBuilder.answeredAt(createdDate.toLocalDate());
        }
        return questionDtoBuilder.build();
    }
