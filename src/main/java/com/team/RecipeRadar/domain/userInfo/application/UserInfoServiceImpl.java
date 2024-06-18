@@ -12,6 +12,8 @@ import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,40 +49,30 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     /**
      * 사용자의 정보(이름,이메일,닉네임,로그인 타입)등을 조회하는 로직
-     * @param loginId   로그인아이디
-     * @param authName  시큐리티 컨텍스트의 저장된 이름
+     * @param memberId   로그인아이디
      * @return  userInfoResponse 데이터 반환
      */
     @Override
-    public UserInfoResponse getMembers(String loginId,String authName) {
-        Member member = throwsMember(loginId, authName);
+    public UserInfoResponse getMembers(Long memberId) {
+        Member member = getMember(memberId);
 
-        UserInfoResponse userInfoResponse = UserInfoResponse.builder()
+        return UserInfoResponse.builder()
                 .nickName(member.getNickName())
                 .username(member.getUsername())
                 .email(member.getEmail())
                 .loginType(member.getLogin_type()).build();
-
-        return userInfoResponse;
     }
 
     /**
-     * 사용자 닉네임 변경 
-     * @param nickName  변경할 닉네임
-     * @param loginId   로그안한 아이디
-     * @param authName  로그인한 사용자 이름
+     * 사용자 닉네임 변경 메서드
      */
-    public void updateNickName(String nickName,String loginId,String authName){
-
-        Member member = throwsMember(loginId, authName);
-
+    public void updateNickName(String nickName,Long memberId){
+        Member member = getMember(memberId);
         member.updateNickName(nickName);
-
-        memberRepository.save(member);
     }
 
     /**
-     *  사용자의 이메일 변경 
+     *  사용자의 이메일 변경
      * @param email     변경할 이메일
      * @param code      이메일 인증번호
      * @param loginId   로그인 아이디
@@ -186,6 +178,11 @@ public class UserInfoServiceImpl implements UserInfoService {
         if (member == null || !member.getUsername().equals(authName)) {
             throw new AccessDeniedException("잘못된 접근입니다.");
         }
+        return member;
+    }
+
+    private Member getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
         return member;
     }
 }

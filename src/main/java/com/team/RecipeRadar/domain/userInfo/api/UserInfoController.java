@@ -31,6 +31,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerErrorException;
@@ -39,11 +40,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 
-@RestController
-@RequiredArgsConstructor
 @Slf4j
 @Tag(name = "사용자 - 마이페이지 컨트롤러",description = "사용자 페이지 API 사용자의 정보 및 활동 기록을 확인할 수 있습니다.")
+@RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class UserInfoController {
 
 
@@ -63,28 +64,21 @@ public class UserInfoController {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"조회성공\", \"data\": {\"username\": \"홍길동\", \"nickName\":\"홍길동\", \"email\":\"test@naver.com\",\"loginType\":\"normal\" }}"))),
-            @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"사용자를 찾을 수 없습니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
-    @GetMapping("/user/info/{login-id}")
-    public ResponseEntity<?> userInfo(@PathVariable("login-id")String loginId,
-                                      @CookieValue(name = "login-id",required = false) String cookieLoginId){
-        try{
-            MemberDto memberDto = getMemberDto();
-            cookieValid(cookieLoginId,memberDto.getLoginId());
+    @GetMapping("/user/info")
+    public ResponseEntity<?> userInfo(@Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                      @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        validCookie(cookieLoginId, principalDetails);
 
-            UserInfoResponse members = userInfoService.getMembers(loginId,memberDto.getUsername());
+        UserInfoResponse members = userInfoService.getMembers(principalDetails.getMemberId());
 
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",members));
-        }catch (AccessDeniedException e){
-            throw new AccessDeniedException(e.getMessage());
-        }catch (ServerErrorException e){
-            throw new ServerErrorException(e.getMessage());
-        }
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",members));
     }
 
     @Operation(summary = "닉네임 변경", description = "회원의 닉네임을 변경한다.")
@@ -92,32 +86,20 @@ public class UserInfoController {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"변경 성공\"}"))),
-            @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"사용자를 찾을 수 없습니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
     @PutMapping("/user/info/update/nickname")
     public ResponseEntity<?> userInfoNickNameUpdate(@RequestBody UserInfoUpdateNickNameRequest userInfoUpdateNickNameRequest,
-                                                    @CookieValue(name = "login-id",required = false) String cookieLoginId){
-        try {
-            MemberDto memberDto = getMemberDto();
-            cookieValid(cookieLoginId,memberDto.getLoginId());
-            String nickName = userInfoUpdateNickNameRequest.getNickName();
-            String loginId = userInfoUpdateNickNameRequest.getLoginId();
-
-            userInfoService.updateNickName(nickName,loginId,memberDto.getUsername());
-
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
-        }catch (ForbiddenException e){
-            throw new ForbiddenException(e.getMessage());
-        } catch (AccessDeniedException e){
-            throw new AccessDeniedException(e.getMessage());
-        }catch (ServerErrorException e){
-            throw new ServerErrorException(e.getMessage());
-        }
+                                                    @Parameter(hidden = true)@CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        validCookie(cookieLoginId, principalDetails);
+        userInfoService.updateNickName(userInfoUpdateNickNameRequest.getNickName(), principalDetails.getMemberId());
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
     }
 
     @Operation(summary = "이메일 변경",description = "회원은 변경할 이메일에 대해 이메일 인증을 진행한 후 성공하면 이메일 변경이 가능합니다.")
@@ -215,6 +197,7 @@ public class UserInfoController {
         }
 
     }
+
     @Operation(summary = "즐겨찾기 내역(페이징)", description = "사용자가 즐겨찾기한 레시피에 대해 무한 페이징을 제공합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
@@ -246,7 +229,6 @@ public class UserInfoController {
             throw new ServerErrorException("서버오류");
         }
     }
-
     @GetMapping ("/oauth2/social/unlink")
     @Hidden
     public void socialUnlink(@RequestParam(value = "social-id") String loginType, HttpServletResponse response) throws IOException {
@@ -295,5 +277,9 @@ public class UserInfoController {
         MemberDto memberDto = principal.getMemberDto(principal.getMember());
         log.info("memberDot={}",memberDto);
         return memberDto;
+    }
+
+    private void validCookie(String cookieLoginId, PrincipalDetails principalDetails) {
+        cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
     }
 }
