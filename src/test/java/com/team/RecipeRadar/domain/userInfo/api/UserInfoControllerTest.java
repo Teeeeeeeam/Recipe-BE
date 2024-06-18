@@ -42,10 +42,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 class UserInfoControllerTest {
 
-    @MockBean private UserInfoService userInfoService;
+    @MockBean UserInfoService userInfoService;
     @MockBean KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
     @MockBean NaverUserDisConnectServiceImpl naverUserDisConnectService;
-    @Autowired private MockMvc mockMvc;
+    @Autowired MockMvc mockMvc;
 
     @MockBean CookieUtils cookieUtils;
     @MockBean Oauth2UrlProvider oauth2UrlProvider;
@@ -158,10 +158,8 @@ class UserInfoControllerTest {
     void userInfo_Update_Email_Success_Test() throws Exception {
         // Given
         String email = "test@email.com";
-        String loginId = "loginId";
-        String code = "123456";
-        String loginType = "normal";
-        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
+        int code = 123456;
+        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
@@ -173,8 +171,8 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("변경 성공"));
 
-        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
-        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+        verify(userInfoService).updateEmail(eq(email),eq(code),anyLong());
+        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),anyLong());
     }
 
 
@@ -185,13 +183,12 @@ class UserInfoControllerTest {
         // Given
         String email = "test@email.com";
         String loginId = "loginId";
-        String code = "123456";
-        String loginType = "normal";
-        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code, loginId,loginType);
+        int code = 123456;
+        UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+        doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),anyLong());
 
         // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
@@ -202,8 +199,8 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("접근할수 없는 페이지 입니다."));
 
-        verify(userInfoService).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
-        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),eq(loginId),anyString(),anyString());
+        verify(userInfoService).updateEmail(eq(email),eq(code),anyLong());
+        verify(userInfoService,times(1)).updateEmail(eq(email),eq(code),anyLong());
     }
 
     @Test

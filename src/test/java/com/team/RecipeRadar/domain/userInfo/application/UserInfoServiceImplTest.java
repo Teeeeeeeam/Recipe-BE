@@ -1,5 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.application;
 
+import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
+import com.team.RecipeRadar.domain.email.domain.EmailVerification;
 import com.team.RecipeRadar.domain.member.application.MemberServiceImpl;
 import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -11,6 +13,7 @@ import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -38,25 +41,18 @@ import static org.mockito.Mockito.*;
 class UserInfoServiceImplTest {
 
 
-    @Mock
-    MemberRepository memberRepository;
+    @Mock MemberRepository memberRepository;
+    @Mock RecipeBookmarkRepository recipeBookmarkRepository;
+    @Mock MemberServiceImpl memberService;
+    @Mock EmailVerificationRepository emailVerificationRepository;
+    @Mock AccountRetrievalRepository accountRetrievalRepository;
+    @Mock JWTRefreshTokenRepository jwtRefreshTokenRepository;
+    @Mock AccountRetrievalEmailServiceImpl accountRetrievalEmailService;
 
-    @Mock
-    RecipeBookmarkRepository recipeBookmarkRepository;
-    @Mock
-    MemberServiceImpl memberService;
-    @Mock
-    AccountRetrievalEmailServiceImpl accountRetrievalEmailService;
-    @Mock
-    AccountRetrievalRepository accountRetrievalRepository;
 
-    @Mock
-    JWTRefreshTokenRepository jwtRefreshTokenRepository;
-    @Mock
-    PasswordEncoder passwordEncoder;
+    @Mock PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    UserInfoServiceImpl userInfoService;
+    @InjectMocks UserInfoServiceImpl userInfoService;
 
     private static Long memberId = 1l;
     @Test
@@ -108,10 +104,11 @@ class UserInfoServiceImplTest {
     void update_email_success(){
         String loginId = "testId";
         String AfterEmail = "afEmail@email.com";
-        String autName = "username";
-        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
+        Member member = Member.builder().id(memberId).username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
+        EmailVerification emailVerification = EmailVerification.builder().expiredAt(LocalDateTime.now().plusMinutes(3)).code(123456).email(AfterEmail).build();
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(emailVerificationRepository.findByEmailAndCode(anyString(),anyInt())).thenReturn(emailVerification);
 
         Map<String,Boolean> emailValidMap = new HashMap<>();
         emailValidMap.put("duplicateEmail",true);
@@ -122,35 +119,32 @@ class UserInfoServiceImplTest {
         Map<String,Boolean> verifyCodeMap = new HashMap<>();
         verifyCodeMap.put("isVerifyCode",true);
 
-        when(memberService.verifyCode(AfterEmail,123456)).thenReturn(verifyCodeMap);
-
-        userInfoService.updateEmail(AfterEmail,"123456",loginId,autName,"normal");
+        userInfoService.updateEmail(AfterEmail,123456,memberId);
 
         assertThat(member.getEmail()).isEqualTo(AfterEmail);
     }
 
     @Test
     @DisplayName("사용자 페이지에서 이메일 변경주 이메일 관련 예외 테스트")
-    void update_email_fail(){
+    void update_email_fail() {
         String loginId = "testId";
-        String AfterEmail = "afEmail@email.com";
-        String autName = "username";
-        Member member = Member.builder().username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
+        String afterEmail = "afEmail@email.com";
+        Member member = Member.builder().id(memberId).username("username").nickName("nickName").loginId(loginId).email("test@email.com").login_type("normal").build();
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        Map<String, Boolean> emailValidMap = new HashMap<>();
+        emailValidMap.put("duplicateEmail", false);
+        emailValidMap.put("useEmail", true);
 
-        Map<String,Boolean> emailValidMap = new HashMap<>();
-        emailValidMap.put("duplicateEmail",false);
-        emailValidMap.put("useEmail",true);
+        Map<String, Boolean> verifyCodeMap = new HashMap<>();
+        verifyCodeMap.put("isVerifyCode", true);
 
-        when(memberService.emailValid(AfterEmail)).thenReturn(emailValidMap);
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
 
-        Map<String,Boolean> verifyCodeMap = new HashMap<>();
-        verifyCodeMap.put("isVerifyCode",true);
+        when(memberService.emailValid(eq(afterEmail))).thenReturn(emailValidMap);
+        when(emailVerificationRepository.findByEmailAndCode(anyString(), anyInt())).thenReturn(null);
 
-        when(memberService.verifyCode(AfterEmail,123456)).thenReturn(verifyCodeMap);
-
-        assertThatThrownBy(() -> userInfoService.updateEmail(AfterEmail,"123456",loginId,autName,"normal")).isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> userInfoService.updateEmail(afterEmail, 123456, memberId))
+                .isInstanceOf(InvalidIdException.class);
     }
 
     @Test
