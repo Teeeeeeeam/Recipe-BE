@@ -66,7 +66,7 @@ class AdminRecipeServiceTest {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
         RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe entity = Recipe.toEntity(recipeSaveRequest);
+        Recipe entity = Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(),recipeSaveRequest.getPeople());
         Ingredient ingredient = Ingredient.builder().id(1L).ingredients("재료").recipe(entity).build();
         List<CookingStep> cookingSteps = cooksteps.stream()
                 .map(s -> CookingStep.builder().steps(s).recipe(entity).build())
