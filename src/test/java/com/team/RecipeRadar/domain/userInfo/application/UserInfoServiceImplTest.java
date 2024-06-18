@@ -14,6 +14,7 @@ import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
+import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -151,8 +152,8 @@ class UserInfoServiceImplTest {
     @DisplayName("사용자 페이지 접근시 비밀번호가 일치하면 토큰 생성")
     void cookie_Token_Access_PasswordMatch() {
         String loginId = "testId";
-        String autName = "username";
         Member member = Member.builder()
+                .id(memberId)
                 .username("username")
                 .nickName("nickName")
                 .password("1234")
@@ -161,7 +162,7 @@ class UserInfoServiceImplTest {
                 .login_type("normal")
                 .build();
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
 
         boolean machPassword = true; // 비밀번호 일치하는 상황
         when(passwordEncoder.matches("1234", member.getPassword())).thenReturn(machPassword);
@@ -175,7 +176,7 @@ class UserInfoServiceImplTest {
                 .build();
         when(accountRetrievalRepository.save(any())).thenReturn(accountRetrieval);
 
-        String token = userInfoService.userToken(loginId, autName, "1234","normal");
+        String token = userInfoService.userToken(memberId,"1234");
 
         assertThat(token).isEqualTo(uuidId);
     }
@@ -185,8 +186,8 @@ class UserInfoServiceImplTest {
     @DisplayName("사용자 페이지 접근시 비밀번호가 일치하지않아 예외 발생")
     void cookie_Token_Access_PasswordMatch_Fail() {
         String loginId = "testId";
-        String autName = "username";
         Member member = Member.builder()
+                .id(memberId)
                 .username("username")
                 .nickName("nickName")
                 .password("1234")
@@ -195,37 +196,37 @@ class UserInfoServiceImplTest {
                 .login_type("normal")
                 .build();
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
 
         boolean machPassword = false; // 비밀번호 일치하는 상황
         when(passwordEncoder.matches("1111", member.getPassword())).thenReturn(machPassword);
 
-        assertThatThrownBy(() -> userInfoService.userToken(loginId,autName,"1111","normal")).isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> userInfoService.userToken(memberId,"1111")).isInstanceOf(InvalidIdException.class);
     }
 
     @Test
     @DisplayName("회원 탈퇴 테스트")
     void delete_Member(){
         Member member = Member.builder()
-                .id(1l)
+                .id(memberId)
                 .login_type("normal")
                 .username("test")
                 .loginId("loginId").build();
 
-        when(memberRepository.findByLoginId("loginId")).thenReturn(member);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
 
-        userInfoService.deleteMember("loginId",true,"test");
+        userInfoService.deleteMember(memberId,true);
 
-        verify(memberRepository, times(1)).deleteById(member.getId());
+        verify(memberService, times(1)).deleteMember(member.getLoginId());
     }
 
     @Test
     @DisplayName("회원 탈퇴시 예외 발생 테스트")
     void delete_Member_throws(){
 
-       when(memberRepository.findByLoginId("loginid")).thenThrow(AccessDeniedException.class);
+       when(memberRepository.findById(anyLong())).thenThrow(NoSuchDataException.class);
 
-       assertThatThrownBy(() -> userInfoService.deleteMember("loginid",true,"test")).isInstanceOf(AccessDeniedException.class);
+       assertThatThrownBy(() -> userInfoService.deleteMember(memberId,true)).isInstanceOf(NoSuchDataException.class);
 
     }
     

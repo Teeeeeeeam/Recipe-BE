@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
 import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -210,11 +211,11 @@ class UserInfoControllerTest {
         String loginId = "loginId";
         String username = "test";
 
-        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, true);
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(true);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
-        doNothing().when(userInfoService).deleteMember(loginId, true, username); // username 값 설정
+        doNothing().when(userInfoService).deleteMember(anyLong(),eq(true)); // username 값 설정
 
         mockMvc.perform(delete("/api/user/info/disconnect")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +227,7 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.message").value("탈퇴 성공"));
 
         //void 반환타입 1회 실행되었는지 확인
-        verify(userInfoService, times(1)).deleteMember(anyString(), anyBoolean(), eq(username));
+        verify(userInfoService, times(1)).deleteMember(anyLong(), anyBoolean());
     }
 
 
@@ -236,11 +237,11 @@ class UserInfoControllerTest {
     void none_MissCheck_throw()throws Exception{
         String loginId = "test";
 
-        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        doThrow(new BadRequestException("약관 미체크")).when(userInfoService).deleteMember(loginId,false,"test");
+        doThrow(new BadRequestException("약관 미체크")).when(userInfoService).deleteMember(anyLong(),eq(false));
 
         mockMvc.perform(delete("/api/user/info/disconnect")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -256,19 +257,16 @@ class UserInfoControllerTest {
     @CustomMockUser
     @DisplayName("잘못된 사용자 접근시 예외")
     void no_accessMember_throw()throws Exception{
-        String loginId = "loginId";
-
-        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(loginId, false);
+        UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        doThrow(new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(userInfoService).deleteMember(loginId,false,"test");
+        doThrow(new UnauthorizedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(cookieUtils).validCookie(anyString(),anyString());
 
         mockMvc.perform(delete("/api/user/info/disconnect")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(cookie)
                         .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
-                .andExpect(status().is(401))
+                .andExpect(status().is(403))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("잘못된 접근 이거나 일반 사용자만 가능합니다."))
                 .andDo(print());
