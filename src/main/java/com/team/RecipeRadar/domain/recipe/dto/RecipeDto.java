@@ -2,11 +2,12 @@ package com.team.RecipeRadar.domain.recipe.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -35,8 +36,10 @@ public class RecipeDto {
 
     private String ingredient;          // 재료
 
+    private LocalDate createdAt;
 
-    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount) {
+
+    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount,LocalDateTime createdAt) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.title = title;
@@ -44,18 +47,19 @@ public class RecipeDto {
         this.people = people;
         this.cookingTime = cookingTime;
         this.likeCount = likeCount;
+        this.createdAt =createdAt.toLocalDate();
     }
 
     public RecipeDto toDto(){
-        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
+        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount, createdAt.atStartOfDay());
     }
 
-    public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount){
-        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
+    public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, LocalDateTime createdAt){
+        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount,createdAt);
     }
 
     public static RecipeDto of(Recipe recipe,String imageUrl,List<CookStepDto> cookStep,String ingredient){
         return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
-        ,cookStep,ingredient);
+        ,cookStep,ingredient,recipe.getCreatedAt().toLocalDate());
     }
 }

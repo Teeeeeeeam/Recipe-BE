@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -18,7 +19,7 @@ import java.util.List;
         @Index(columnList = "recipe_title")
 })
 @Schema(hidden = true, name = "레시피")
-public class Recipe {
+public class Recipe extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")

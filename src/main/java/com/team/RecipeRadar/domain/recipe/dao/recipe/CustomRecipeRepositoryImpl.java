@@ -116,14 +116,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
         // 결과 페칭 쿼리
         List<Tuple> result = queryFactory.select(
-                        recipe.title,
-                        recipe.id,
-                        uploadFile.storeFileName,
-                        recipe.likeCount,
-                        recipe.cookingTime,
-                        recipe.cookingLevel,
-                        recipe.people
-                )
+                recipe.title,recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime,recipe.cookingLevel, recipe.people, recipe.createdAt)
                 .from(ingredient)
                 .join(ingredient.recipe, recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
@@ -175,7 +168,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Override
     public List<RecipeDto> mainPageRecipe() {
 
-        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people)
+        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people,recipe.createdAt)
                 .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(uploadFile.post.id.isNull())
@@ -184,13 +177,13 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
         return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id),
                 getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
-                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount),tuple.get(recipe.createdAt))).collect(Collectors.toList());
     }
 
 
 
     private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people)
+        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people,recipe.createdAt)
                 .from(ingredient)
                 .join(ingredient.recipe,recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
@@ -203,7 +196,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
     private List<RecipeDto> getRecipeDtoList(List<Tuple> result) {
         List<RecipeDto> content = result.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id), getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
-                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount))).collect(Collectors.toList());
+                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount),tuple.get(recipe.createdAt))).collect(Collectors.toList());
         return content;
     }
 
