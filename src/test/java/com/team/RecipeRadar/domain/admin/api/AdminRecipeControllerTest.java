@@ -33,6 +33,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +237,7 @@ class AdminRecipeControllerTest {
 
         String title= "recipe";
         List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", title, "level1", "1인분", "10분", 0));
+        recipeDtoList.add(new RecipeDto(1L, "url1", title, "level1", "1인분", "10분", 0, LocalDateTime.now()));
 
         boolean paged = pageRequest.next().isPaged();
 

@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -127,8 +128,8 @@ class RecipeControllerTest {
         Pageable pageRequest = PageRequest.of(0, 2);
 
         List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0));
-        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피2", "level2", "2인분", "1시간", 0));
+        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0, LocalDateTime.now()));
+        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피2", "level2", "2인분", "1시간", 0, LocalDateTime.now()));
 
         boolean paged = pageRequest.next().isPaged();
 
@@ -187,8 +188,8 @@ class RecipeControllerTest {
     void Search_Recipe_Normal_Page() throws Exception {
 
         List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0));
-        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피1", "level2", "2인분", "1시간", 0));
+        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0, LocalDateTime.now()));
+        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피1", "level2", "2인분", "1시간", 0, LocalDateTime.now()));
 
 
         List<RecipeDto> dummyRecipes = Arrays.asList(
@@ -243,9 +244,9 @@ class RecipeControllerTest {
     @DisplayName("메인 페이지에서 레시피 좋아요순으로 출력")
     void main_Page_Recipe_like_desc() throws Exception {
         List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16));
-        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13));
-        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3));
+        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16, LocalDateTime.now()));
+        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13, LocalDateTime.now()));
+        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3, LocalDateTime.now()));
         MainPageRecipeResponse of = MainPageRecipeResponse.of(recipeDtoList);
 
         given(recipeService.mainPageRecipe()).willReturn(of);
