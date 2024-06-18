@@ -96,7 +96,7 @@ public class QuestionController {
     @GetMapping("/api/admin/questions")
     public ResponseEntity<?> questionAll(@RequestParam(name = "lastId",required = false)Long lastId,
                                          @RequestParam(name = "questionType",required = false) QuestionType questionType,
-                                         @RequestParam(name = " questionStatus",required = false) QuestionStatus questionStatus,
+                                         @RequestParam(name = "questionStatus",required = false) QuestionStatus questionStatus,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
 
         QuestionAllResponse questionAllResponse = questionService.allQuestion(lastId, questionType, questionStatus, pageable);
