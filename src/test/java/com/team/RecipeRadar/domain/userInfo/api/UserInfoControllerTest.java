@@ -69,8 +69,6 @@ class UserInfoControllerTest {
                 .loginType("normal")
                 .email("test@naver.com").build();
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-
         given(userInfoService.getMembers(anyLong())).willReturn(expectedResponse);
 
         // When, Then
@@ -93,7 +91,6 @@ class UserInfoControllerTest {
     public void userInfo_AccessDeniedException() throws Exception {
         // Given
         Cookie cookie = new Cookie("login-id", "fakeCookie");
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         when(userInfoService.getMembers(anyLong()))
                 .thenThrow(new AccessDeniedException("Access Denied"));
 
@@ -116,7 +113,6 @@ class UserInfoControllerTest {
         request.setNickName(nickName);
 
         Cookie cookie = new Cookie("login-id", "fakeCookie");
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
@@ -140,7 +136,6 @@ class UserInfoControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         request.setNickName(nickName);
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new AccessDeniedException("접근 불가한 페이지")).when(userInfoService).updateNickName(eq(nickName), anyLong());
 
         mockMvc.perform(put("/api/user/info/update/nickname")
@@ -162,7 +157,6 @@ class UserInfoControllerTest {
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
@@ -184,7 +178,6 @@ class UserInfoControllerTest {
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),anyLong());
 
         mockMvc.perform(put("/api/user/info/update/email")
@@ -206,7 +199,6 @@ class UserInfoControllerTest {
 
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(true);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
         doNothing().when(userInfoService).deleteMember(anyLong(),eq(true)); // username 값 설정
 
@@ -231,7 +223,6 @@ class UserInfoControllerTest {
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new BadRequestException("약관 미체크")).when(userInfoService).deleteMember(anyLong(),eq(false));
 
         mockMvc.perform(delete("/api/user/info/disconnect")
