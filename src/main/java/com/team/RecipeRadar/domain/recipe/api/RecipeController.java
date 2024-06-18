@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.recipe.api;
 
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.recipe.application.RecipeBookmarkService;
 import com.team.RecipeRadar.domain.recipe.application.RecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.*;
@@ -19,12 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import java.util.*;
 
