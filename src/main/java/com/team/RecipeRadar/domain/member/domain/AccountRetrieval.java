@@ -28,8 +28,8 @@ public class AccountRetrieval {
 
     private LocalDateTime expireAt;
 
-    public static AccountRetrieval createAccount(String loginId){
-        LocalDateTime expiration = LocalDateTime.now().plusMinutes(3);
+    public static AccountRetrieval createAccount(String loginId,int plusMinute){
+        LocalDateTime expiration = LocalDateTime.now().plusMinutes(plusMinute);
         return AccountRetrieval.builder().loginId(loginId).expireAt(expiration).build();
     }
 }

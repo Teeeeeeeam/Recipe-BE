@@ -129,7 +129,8 @@ public class UserInfoController {
     }
 
     @Operation(summary = "사용자 페이지 쿠키 발급",
-            description = "사용자 페이지에서 기능을 사용하기 위해 해당 API에서 비밀번호를 통해 사용자를 인증합니다. 인증에 성공하면 20분 동안 유효한 쿠키를 발급하여 사용자 페이지에서 사용할 수 있습니다. 만약 쿠키가 발급되지 않은 상태에서 사용자 페이지를 URL로 직접 접근하면 403 Forbidden 에러가 발생합니다.")
+            description = "사용자 페이지에서 기능을 사용하기 위해 해당 API에서 비밀번호를 통해 사용자를 인증합니다. 인증에 성공하면 20분 동안 유효한 쿠키를 발급하여 사용자 페이지에서 사용할 수 있습니다. 만약 쿠키가 발급되지 않은 상태에서 사용자 페이지를 URL로 직접 접근하면 403 Forbidden 에러가 발생합니다." +
+                    "소렬로그인 사용자가 접근시 JSON의 아무런 데이터를 넣지않고 보냅니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -139,20 +140,11 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"비밀번호가 일치하지 않습니다.\"}")))
     })
     @PostMapping("/user/info/valid")
-    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordRequest){
-        try {
-            MemberDto memberDto = getMemberDto();
-
-            String userToken=userInfoService.userToken(memberDto.getLoginId(), memberDto.getUsername(), passwordRequest.getPassword(), passwordRequest.getLoginType());
-            ResponseCookie userInfoCookie = cookieUtils.createCookie("login-id", userToken, 1200);
-
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, userInfoCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
-
-        } catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        } catch (ServerErrorException e) {
-            throw new ServerErrorException(e.getMessage());
-        }
+    public ResponseEntity<?> userInfoValid(@RequestBody UserValidRequest passwordRequest,
+                                           @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        String userToken=userInfoService.userToken(principalDetails.getMemberId(), passwordRequest.getPassword());
+        ResponseCookie userInfoCookie = cookieUtils.createCookie("login-id", userToken, 1200);
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, userInfoCookie.toString()).body(new ControllerApiResponse<>(true, "인증 성공"));
     }
 
     @Operation(summary = "회원 탈퇴",description = "일반 사용자가 해당 사이트를 탈퇴합니다. 간단한 동의를 체크한 경우에만 회원 탈퇴가 가능합니다.")
@@ -165,28 +157,18 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"약관 동의를 해주세요\"}"))),
             @ApiResponse(responseCode = "401", description = "UNAUTHORIZED",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 가능합니다.\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"일반 사용자만 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 쿠키값으로 접근\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
     @DeleteMapping("/user/info/disconnect")
-    public ResponseEntity<?> deleteMember(@RequestBody UserDeleteIdRequest userDeleteIdRequest,@CookieValue(name = "login-id",required = false) String cookieLoginId){
-        try {
-            MemberDto memberDto = getMemberDto();
-            cookieValid(cookieLoginId,memberDto.getLoginId());
-            userInfoService.deleteMember(userDeleteIdRequest.getLoginId(),userDeleteIdRequest.isCheckBox(),memberDto.getUsername());
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"탈퇴 성공"));
-        }catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        }catch (ForbiddenException e){
-            throw new ForbiddenException(e.getMessage());
-        } catch (AccessDeniedException e){
-            throw new AccessDeniedException(e.getMessage());
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException(e.getMessage());
-        }
+    public ResponseEntity<?> deleteMember(@RequestBody UserDeleteIdRequest userDeleteIdRequest,
+                                          @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+       validCookie(cookieLoginId,principalDetails);
+        userInfoService.deleteMember(principalDetails.getMemberId(), userDeleteIdRequest.isCheckBox());
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"탈퇴 성공"));
 
     }
 

@@ -14,8 +14,8 @@ public interface UserInfoService {
 
     void updateEmail(String email,Integer code,Long memberId);
 
-    String userToken(String loginId,String authenticationName, String password,String loginType);
-    void deleteMember(String loginId, boolean checkType ,String authenticationName);
+    String userToken(Long loginId, String password);
+    void deleteMember(Long memberId, boolean checkType);
 
     boolean validUserToken(String encodeToken,String loginId);
 

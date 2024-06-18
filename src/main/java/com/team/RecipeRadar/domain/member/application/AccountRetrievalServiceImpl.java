@@ -75,7 +75,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         String token = "";
 
         if (memberExists&&emailCodeValid){
-             token  = accountRetrievalRepository.save(AccountRetrieval.createAccount(loginId)).getVerificationId();
+             token  = accountRetrievalRepository.save(AccountRetrieval.createAccount(loginId,3)).getVerificationId();
             mailService.deleteCode(email,code);
         }
 

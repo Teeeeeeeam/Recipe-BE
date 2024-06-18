@@ -94,50 +94,28 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     /**
      * 일반 사용자 페이지 접근시 비밀번호 재 검증후 쿠키생성
-     * @param loginId       로그인 아이디
-     * @param authenticationName    시큐리티 정보
-     * @param password      비밀번호
-     * @return      ID반환
      */
     @Override
-    public String userToken(String loginId,String authenticationName, String password,String loginType) {
+    public String userToken(Long memberId, String password) {
+        Member member = getMember(memberId);
 
-        Member member = memberRepository.findByLoginId(loginId);
-        if (member == null || !member.getUsername().equals(authenticationName)) {
-            throw new AccessDeniedException("잘못된 접근입니다.");
-        }
+        validPassword(password, member);
 
-        if (loginType.equals("normal")) {
-            boolean matches = passwordEncoder.matches(password, member.getPassword());
-            if (!matches) {
-                throw new BadRequestException("비밀번호가 일치하지 않습니다.");
-            }
-        }
-
-        LocalDateTime expireTime = LocalDateTime.now().plusMinutes(20); //쿠키의 만료 시간을 20분 후로 설정
-        AccountRetrieval accountRetrieval = AccountRetrieval.builder().loginId(member.getLoginId()).expireAt(expireTime).build();
-        return accountRetrievalRepository.save(accountRetrieval).getVerificationId();
-
+        return accountRetrievalRepository.save(AccountRetrieval.createAccount(member.getLoginId(),20)).getVerificationId();
     }
 
     /**
-     * 회원 탈퇴 로직
-     * @param loginId 사용자 아이디
-     * @param checkType 약관 동의
-     * @param authenticationName 현재 로그인한 사용자 이름
+     * 회원 탈퇴 메서드
      */
     @Override
-    public void deleteMember(String loginId, boolean checkType, String authenticationName) {
-        Member member = memberRepository.findByLoginId(loginId);;
-
-        if (member == null || !member.getUsername().equals(authenticationName)||!member.getLogin_type().equals("normal"))
-            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
+    public void deleteMember(Long memberId, boolean checkType) {
+        Member member = getMember(memberId);
+        validateNormalUser(member);
 
         if (!checkType)
-            throw new BadRequestException("약관 동의를 주세요");
+            throw new InvalidIdException("약관 동의를 주세요.");
 
-        jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
-        memberRepository.deleteById(member.getId());
+        memberService.deleteMember(member.getLoginId());
     }
 
     @Override
@@ -174,11 +152,22 @@ public class UserInfoServiceImpl implements UserInfoService {
         return member;
     }
 
-    private Member getMember(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
-        return member;
+    /* 비밀번호 검증 테스트 */
+    private void validPassword(String password, Member member) {
+        if (member.getLogin_type().equals("normal")) {
+            boolean matches = passwordEncoder.matches(password, member.getPassword());
+            if (!matches) {
+                throw new InvalidIdException("비밀번호가 일치하지 않습니다.");
+            }
+        }
     }
 
+    /* 사용자 정보 조회 */
+    private Member getMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
+    }
+
+    /* 일반 사용자 인지 검증 메서드*/
     private static void validateNormalUser(Member member) {
         if (!member.getLogin_type().equals("normal"))
             throw new AccessDeniedException("일반 사용자만 가능합니다.");
