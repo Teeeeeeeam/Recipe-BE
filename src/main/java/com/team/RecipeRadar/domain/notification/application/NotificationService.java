@@ -45,7 +45,7 @@ public class NotificationService {
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
     private final String NON_LOGIN = "비로그인";
 
-    private final String QUESTION_ADMIN_URL= "/api/admin/question/";
+    private final String QUESTION_ADMIN_URL= "/admin/questions/";
     private final String QUESTION_USER_URL= "/my-page/success/answer/";
     private final String POST_URL = "/list-page/user-recipes/";
 

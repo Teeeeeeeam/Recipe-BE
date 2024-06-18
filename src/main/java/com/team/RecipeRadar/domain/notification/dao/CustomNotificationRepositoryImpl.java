@@ -37,7 +37,7 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
 
     private final String POST_URL ="/list-page/user-recipes/";
     private final String QUESTION_USER_URL = "/my-page/success/answer/";
-    private final String QUESTION_ADMIN_URL = "/api/admin/question/";
+    private final String QUESTION_ADMIN_URL = "/admin/questions/";
 
     @Override
     public Slice<NotificationDto> notificationPage(Long memberId, Pageable pageable, Long lastId) {
