@@ -12,7 +12,6 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
@@ -26,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -249,8 +247,8 @@ class UserInfoServiceImplTest {
         when(recipeBookmarkRepository.userInfoBookmarks(eq(memberId),isNull(),eq(pageRequest))).thenReturn(recipeDtoSlice);
 
         UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(memberId, null, pageRequest);
-        assertThat(userInfoBookmarkResponse.getBookmark_list()).hasSize(3);
-        assertThat(userInfoBookmarkResponse.getHasNext()).isFalse();
+        assertThat(userInfoBookmarkResponse.getBookmarkList()).hasSize(3);
+        assertThat(userInfoBookmarkResponse.getNextPage()).isFalse();
     }
 
 }

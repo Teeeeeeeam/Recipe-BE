@@ -157,14 +157,12 @@ class UserInfoControllerTest {
     @DisplayName("사용자 페이지 이메일 변경 성공 테스트")
     @CustomMockUser
     void userInfo_Update_Email_Success_Test() throws Exception {
-        // Given
         String email = "test@email.com";
         int code = 123456;
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
@@ -181,9 +179,7 @@ class UserInfoControllerTest {
     @DisplayName("사용자 페이지 이메일 변경 실패 테스트")
     @CustomMockUser
     void userInfo_Update_Email_Fail_Test() throws Exception {
-        // Given
         String email = "test@email.com";
-        String loginId = "loginId";
         int code = 123456;
         UserInfoEmailRequest request = new UserInfoEmailRequest(email, code);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
@@ -191,7 +187,6 @@ class UserInfoControllerTest {
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
         doThrow(new BadRequestException("접근할수 없는 페이지 입니다.")).when(userInfoService).updateEmail(eq(email),eq(code),anyLong());
 
-        // When, Then
         mockMvc.perform(put("/api/user/info/update/email")
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
@@ -208,8 +203,6 @@ class UserInfoControllerTest {
     @CustomMockUser
     @DisplayName("회원 탈퇴 성공 테스트")
     void Delete_Member_Site_SUCCESS() throws Exception {
-        String loginId = "loginId";
-        String username = "test";
 
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(true);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
@@ -235,8 +228,6 @@ class UserInfoControllerTest {
     @CustomMockUser
     @DisplayName("약관 미체크시 예외")
     void none_MissCheck_throw()throws Exception{
-        String loginId = "test";
-
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(false);
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
@@ -287,24 +278,20 @@ class UserInfoControllerTest {
                         .cookie(cookie))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.hasNext").value(false))
-                .andExpect(jsonPath("$.data.bookmark_list.size()").value(3));
+                .andExpect(jsonPath("$.data.nextPage").value(false))
+                .andExpect(jsonPath("$.data.bookmarkList.size()").value(3));
     }
 
     @Test
     @CustomMockUser
     @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징(쿠키가 없을때 접근)")
     void bookmark_page_NONECOOKIE() throws Exception {
-        Long memberId =  1l;
-        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
 
-        UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
-        given(userInfoService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
+        doThrow(new UnauthorizedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(cookieUtils).validCookie(isNull(),anyString());
 
         mockMvc.perform(get("/api/user/info/bookmark"))
-                .andDo(print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("쿠키값이 없을때 접근"));
+                .andExpect(jsonPath("$.message").value("잘못된 접근 이거나 일반 사용자만 가능합니다."));
     }
 
     @Test
