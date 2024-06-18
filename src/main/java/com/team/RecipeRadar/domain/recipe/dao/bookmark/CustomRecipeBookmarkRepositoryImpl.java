@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.recipe.dao.bookmark;
 
-
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -44,9 +43,7 @@ public class CustomRecipeBookmarkRepositoryImpl implements CustomRecipeBookmarkR
             recipeDtoList.remove(pageable.getPageSize());
             hasNext = true;
         }
-
         return  new SliceImpl<>(recipeDtoList,pageable,hasNext);
     }
-
 
 }

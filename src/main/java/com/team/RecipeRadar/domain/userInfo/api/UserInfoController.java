@@ -176,32 +176,19 @@ public class UserInfoController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":true,\"bookmark_list\":[{\"id\":128671,\"title\":\"어묵김말이\"}]}}"))),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage \":true,\"bookmarkList\":[{\"id\":128671,\"title\":\"어묵김말이\"}]}}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"쿠키값이 없을때 접근\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
     @GetMapping("/user/info/bookmark")
-    public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "last-id",required = false)Long lastId,
-                                              @CookieValue(name = "login-id",required = false) String cookieLoginId,
+    public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "lastId",required = false)Long lastId,
+                                              @Parameter(hidden = true)@CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                               @Parameter(example = "{\"size\":10}")Pageable pageable){
-        try {
-            if (cookieLoginId == null) {
-                throw new ForbiddenException("쿠키값이 없을때 접근");
-            }
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-
-            Long member_id = principal.getMemberDto(principal.getMember()).getId();
-
-            UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(member_id, lastId, pageable);
-
+            validCookie(cookieLoginId,principalDetails);
+            UserInfoBookmarkResponse userInfoBookmarkResponse = userInfoService.userInfoBookmark(principalDetails.getMemberId(), lastId, pageable);
             return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", userInfoBookmarkResponse));
-        }catch (ForbiddenException e){
-            throw new ForbiddenException(e.getMessage());
-        } catch (Exception e){
-            throw new ServerErrorException("서버오류");
-        }
     }
     @GetMapping ("/oauth2/social/unlink")
     @Hidden

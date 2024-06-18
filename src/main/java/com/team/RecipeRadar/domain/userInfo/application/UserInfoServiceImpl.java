@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -36,7 +35,6 @@ import java.util.NoSuchElementException;
 public class UserInfoServiceImpl implements UserInfoService {
 
     private final MemberRepository memberRepository;
-    private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final AccountRetrievalRepository accountRetrievalRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
@@ -45,7 +43,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Qualifier("AccountEmail")
     private final MailService mailService;
     private final MemberService memberService;
-
 
     /**
      * 사용자의 정보(이름,이메일,닉네임,로그인 타입)등을 조회하는 로직
@@ -136,11 +133,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserInfoBookmarkResponse userInfoBookmark(Long memberId, Long lastId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("사용자를 찾을수 없습니다."));
-
+        Member member = getMember(memberId);
         Slice<RecipeDto> recipeDtos = recipeBookmarkRepository.userInfoBookmarks(member.getId(), lastId, pageable);
-
         return new UserInfoBookmarkResponse(recipeDtos.hasNext(),recipeDtos.getContent());
     }
 

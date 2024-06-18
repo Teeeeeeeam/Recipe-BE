@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserInfoBookmarkResponse {
 
-    Boolean hasNext;
-    List<RecipeDto> bookmark_list;
+    private Boolean nextPage;
+    private List<RecipeDto> bookmarkList;
 
 }
