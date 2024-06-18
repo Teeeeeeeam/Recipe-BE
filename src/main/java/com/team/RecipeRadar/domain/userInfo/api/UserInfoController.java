@@ -1,12 +1,9 @@
 package com.team.RecipeRadar.domain.userInfo.api;
 
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.*;
 import com.team.RecipeRadar.domain.userInfo.application.UserInfoService;
 import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import com.team.RecipeRadar.global.security.oauth2.UserDisConnectService;
@@ -29,12 +26,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -214,32 +207,6 @@ public class UserInfoController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl+disconnected)).build();
     }
-
-    private void cookieValid(String cookieLoginId,String loginId ) {
-
-        boolean validUserToken = userInfoService.validUserToken(cookieLoginId, loginId);
-        if (cookieLoginId ==null||!validUserToken){
-            throw new ForbiddenException("올바르지 않은 쿠키값으로 접근");
-        }
-
-    }
-
-    private static String getAuthenticationName() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String authenticationName = authentication.getName();
-        log.info("au={}",authentication);
-        return authenticationName;
-    }
-
-    private static MemberDto getMemberDto() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        MemberDto memberDto = principal.getMemberDto(principal.getMember());
-        log.info("memberDot={}",memberDto);
-        return memberDto;
-    }
-
     private void validCookie(String cookieLoginId, PrincipalDetails principalDetails) {
         cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
     }

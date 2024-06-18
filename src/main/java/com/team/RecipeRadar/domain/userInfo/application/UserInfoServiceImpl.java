@@ -13,7 +13,6 @@ import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.*;
-import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,8 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Map;
 
 @Service
@@ -45,9 +42,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final MemberService memberService;
 
     /**
-     * 사용자의 정보(이름,이메일,닉네임,로그인 타입)등을 조회하는 로직
-     * @param memberId   로그인아이디
-     * @return  userInfoResponse 데이터 반환
+     * 사용자의 정보(이름,이메일,닉네임,로그인 타입)등을 조회하는 메서드
      */
     @Override
     public UserInfoResponse getMembers(Long memberId) {
@@ -114,38 +109,13 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         memberService.deleteMember(member.getLoginId());
     }
-
-    @Override
-    public boolean validUserToken(String encodeToken,String loginId) {
-        if(encodeToken==null){
-            throw new ForbiddenException("잘못된 접근입니다.");
-        }
-        String decodeToken = new String(Base64.getDecoder().decode(encodeToken.getBytes()));
-        AccountRetrieval accountRetrieval = accountRetrievalRepository.findById(decodeToken).orElseThrow(() -> new AccessDeniedException("잘못된 접근입니다."));
-        Member byLoginId = memberRepository.findByLoginId(loginId);
-        if(!accountRetrieval.getExpireAt().isAfter(LocalDateTime.now())){       // 토큰 시간이 현재 시간보다 전이라면 false
-            return false;
-        }
-        if (byLoginId==null||!accountRetrieval.getLoginId().equals(byLoginId.getLoginId())){
-            return false;
-        }
-        return true;
-    }
-
+    
     @Override
     @Transactional(readOnly = true)
     public UserInfoBookmarkResponse userInfoBookmark(Long memberId, Long lastId, Pageable pageable) {
         Member member = getMember(memberId);
         Slice<RecipeDto> recipeDtos = recipeBookmarkRepository.userInfoBookmarks(member.getId(), lastId, pageable);
         return new UserInfoBookmarkResponse(recipeDtos.hasNext(),recipeDtos.getContent());
-    }
-
-    private Member throwsMember(String loginId, String authName) {
-        Member member = memberRepository.findByLoginId(loginId);
-        if (member == null || !member.getUsername().equals(authName)) {
-            throw new AccessDeniedException("잘못된 접근입니다.");
-        }
-        return member;
     }
 
     /* 비밀번호 검증 테스트 */
