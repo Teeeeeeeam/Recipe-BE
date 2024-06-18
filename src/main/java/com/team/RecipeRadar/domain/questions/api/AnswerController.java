@@ -62,7 +62,7 @@ public class AnswerController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value ="{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":9,\"title\":\"문의 사항 제목\",\"question_content\":\"문의 사항 내용\",\"status\":\"COMPLETED\",\"create_at\":\"2024-06-10T16:37:00\",\"answer_at\":\"2024-06-11T16:37:00\",\"img_url\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"member\":{\"id\":1,\"loginId\":\"user1234\"},\"answer\":{\"id\":3,\"answer_title\":\"답변 제목\",\"answer_content\":\"답변 내용\",\"answer_admin_nickname\":\"어드민사용자\"}}}"))),
+                            examples = @ExampleObject(value ="{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\":9,\"title\":\"문의 사항 제목\",\"questionContent\":\"문의 사항 내용\",\"status\":\"COMPLETED\",\"createAt\":\"2024-06-10\",\"answerAt\":\"2024-06-11\",\"imgUrl\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"member\":{\"id\":1,\"loginId\":\"user1234\"},\"answer\":{\"id\":3,\"answerTitle\":\"답변 제목\",\"answerContent\":\"답변 내용\",\"answerAdminNickname\":\"어드민사용자\"}}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"존재하지 않습니다.\"}"))),

@@ -75,7 +75,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"questionContent\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"createdAt\":\"2024-06-10T08:03:37.126042\",\"imgUrl\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"answerEmail\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
+            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의사항 질문 \",\"questionContent\":\"질문 내용\",\"status\":\"COMPLETED\",\"answerType\":\"EMAIL\",\"createdAt\":\"2024-06-10\",\"imgUrl\" :\"https://www.recipe.o-r.kr/aad8ae64-d30f-4b73-99e0-09c50b7e9379.png\",\"answerEmail\":\"keuye06380618@naver.com\",\"member\":{\"id\":1,\"nickname\":\"일반사용자\",\"loginId\":\"user1234\"}}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"관리자만 접근 가능 가능합니다.\"}")))
@@ -91,7 +91,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
     })
     @GetMapping("/api/admin/questions")
     public ResponseEntity<?> questionAll(@RequestParam(name = "lastId",required = false)Long lastId,
@@ -108,7 +108,7 @@ public class QuestionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10T16:41:01.300294\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"questions\":[{\"id\":1,\"questionType\":\"GENERAL_INQUIRY\",\"title\":\"문의 사항 제목\",\"status\":\"PENDING\",\"createdAt\":\"2024-06-10\",\"member\":{\"id\":1,\"loginId\":\"user1234\"}}]}}")))
     })
     @GetMapping("/api/user/questions")
     public ResponseEntity<?> question_user_all(@RequestParam(name = "lastId",required = false)Long lastId,
