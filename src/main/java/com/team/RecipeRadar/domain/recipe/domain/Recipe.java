@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
-import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -51,12 +50,12 @@ public class Recipe {
         this.people=people;
         this.cookingTime=cookingTime;
     }
-    public static Recipe toEntity(RecipeSaveRequest recipeSaveRequest){
+    public static Recipe createRecipe(String title,String cookingTime, String cookingLevel, String people){
         return  Recipe.builder()
-                .title(recipeSaveRequest.getTitle())
-                .cookingTime(recipeSaveRequest.getCookTime())
-                .cookingLevel(recipeSaveRequest.getCookLevel())
+                .title(title)
+                .cookingTime(cookingTime)
+                .cookingLevel(cookingLevel)
                 .likeCount(0)
-                .people(recipeSaveRequest.getPeople()).build();
+                .people(people).build();
     }
 }

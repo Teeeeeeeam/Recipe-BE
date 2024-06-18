@@ -11,6 +11,7 @@ import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeResponse;
@@ -50,10 +51,9 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      */
     @Override
     public void saveRecipe(RecipeSaveRequest recipeSaveRequest, MultipartFile file) {
-        Recipe recipe = recipeRepository.save(Recipe.toEntity(recipeSaveRequest));
-
+        Recipe recipe = recipeRepository.save(Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(), recipeSaveRequest.getPeople()));
+        saveIngredient(recipeSaveRequest, recipe);
         s3UploadService.uploadFile(file,List.of(recipe));
-        // 요리 단계 저장
         saveCookingSteps(recipeSaveRequest.getCookSteps(), recipe);
     }
 
@@ -113,8 +113,8 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         return new RecipeResponse(recipeSlice.getContent(), recipeSlice.hasNext());
     }
 
-    // 아래는 private 메서드들입니다.
 
+    // 아래는 private 메서드들입니다.
     /**
      * 특정 ID의 레시피를 삭제하는 메서드.
      * 레시피와 관련된 이미지, 댓글, 좋아요, 북마크 등의 데이터도 함께 삭제합니다.
@@ -153,6 +153,17 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
                 .collect(Collectors.toList());
         cookStepRepository.saveAll(cookingSteps);
     }
+
+    private void saveIngredient(RecipeSaveRequest recipeSaveRequest, Recipe recipe) {
+        String ingredients = getIngredients(recipeSaveRequest.getIngredients());
+        ingredientRepository.save(Ingredient.createIngredient(ingredients, recipe));
+    }
+
+    /* 재료 리스트를 문자열로 바꾸는 메서드 */
+    private static String getIngredients(List<String> recipeSaveRequest) {
+        return  recipeSaveRequest.stream().collect(Collectors.joining("|"));
+    }
+
     /**
      * 요리 단계들을 업데이트하는 메서드.
      */
@@ -189,7 +200,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      * 재료를 업데이트하는 메서드.
      */
     private void updateIngredients(List<String> ingredients, Recipe recipe) {
-        String ingredientString = ingredients.stream().collect(Collectors.joining("|"));
+        String ingredientString = getIngredients(ingredients);
         ingredientRepository.updateRecipe_ing(recipe.getId(), ingredientString);
     }
 
