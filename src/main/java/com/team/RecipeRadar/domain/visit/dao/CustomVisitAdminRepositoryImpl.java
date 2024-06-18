@@ -3,7 +3,6 @@ package com.team.RecipeRadar.domain.visit.dao;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.visit.domain.QVisitStatistics;
 import com.team.RecipeRadar.domain.visit.domain.VisitStatistics;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;

@@ -10,5 +10,5 @@ public interface VisitSessionRepository extends JpaRepository<VisitSession,Long>
 
     @Query("SELECT count(v) FROM VisitSession v WHERE DATE(v.expiredAt) = CURRENT_DATE")
     Integer getCurrentCount();
-    boolean existsByIpAddress(String uuid);
+    boolean existsByIpAddress(String ipaddress);
 }

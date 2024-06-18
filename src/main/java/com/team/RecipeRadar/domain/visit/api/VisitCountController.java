@@ -1,8 +1,7 @@
 package com.team.RecipeRadar.domain.visit.api;
 
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
-import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
-import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
@@ -37,8 +36,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VisitCountController {
 
-    private final VisitSessionRepository visitRepository;
     private final VisitService visitService;
+    private final CookieUtils cookieUtils;
+
 
     @Operation(summary = "최초 방문시 쿠키 발급",
             description = "최초 방문 시 해당 API 요청을 보내면 DB에 저장한 후 쿠키를 반환합니다. 쿠키의 만료 시간은 당일 23시 59분까지이며, 쿠키가 있으면 해당 API 요청을 보내지 않아도 됩니다.")
@@ -52,52 +52,23 @@ public class VisitCountController {
     })
     @PostMapping("/api/visit")
     public ResponseEntity<?> ipCount(HttpServletRequest request) {
-        String ipAddress = request.getHeader("X-Forwarded-For");
+        String ipAddress = getClientIpAddress(request);
 
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = request.getRemoteAddr();
-        }
         LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-
         // 오늘 자정 시간 (UTC)
         LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
         ZonedDateTime midnightUTC = midnight.atZone(ZoneId.of("UTC"));
-
         // 현재 시간부터 자정까지의 초 단위 차이 계산
         long secondsUntilMidnight = ChronoUnit.SECONDS.between(now, midnightUTC);
-        log.info("sss={}",secondsUntilMidnight);
-        String uuid = UUID.randomUUID().toString();
-        ResponseCookie responseCookie = ResponseCookie.from("visitors", uuid)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .maxAge((int) secondsUntilMidnight)
-                .build();
-        LocalDateTime db = now.toLocalDate().atStartOfDay().plusDays(1).minusSeconds(5);
-        VisitSession entity = VisitSession.toEntity(ipAddress, db);
 
-        Cookie[] cookies = request.getCookies();
-        for(Cookie cookie : cookies){
-            if(cookie.getName().equals("visitors")){
+        ResponseCookie responseCookie = cookieUtils.createCookie("visitors", UUID.randomUUID().toString(), (int) secondsUntilMidnight);
+        LocalDateTime expireAdAt = now.toLocalDate().atStartOfDay().plusDays(1).minusSeconds(5);
 
-                boolean existsByIpAddress = visitRepository.existsByIpAddress(ipAddress);
-                if(!existsByIpAddress){
-                    visitRepository.save(entity);
-                }else return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"현재 조회된 IP주소 입니다."));
-            }
+        boolean ipTracked = isIpTracked(request, ipAddress, expireAdAt);
+        if(!ipTracked){
+            visitService.save(ipAddress,expireAdAt);
         }
+
         log.info("============== 현재 Client ip=============={}",ipAddress);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(new ControllerApiResponse<>(true,"방문 성공"));
     }
@@ -173,5 +144,35 @@ public class VisitCountController {
     public ResponseEntity<?> month(){
         List<MonthDto> monthlyVisitCount = visitService.getMonthlyVisitCount();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"월간 방문자수 조회",monthlyVisitCount));
+    }
+
+    private  String getClientIpAddress(HttpServletRequest request) {
+        String[] headers = {
+                "X-Forwarded-For",
+                "Proxy-Client-IP",
+                "WL-Proxy-Client-IP",
+                "HTTP_CLIENT_IP",
+                "HTTP_X_FORWARDED_FOR"
+        };
+
+        for (String header : headers) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip;
+            }
+        }
+        return request.getRemoteAddr();
+    }
+
+    private boolean isIpTracked(HttpServletRequest request, String ipAddress, LocalDateTime expireAt) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("visitors".equals(cookie.getName())) {
+                    return visitService.ipExists(ipAddress);
+                }
+            }
+        }
+        return false;
     }
 }
