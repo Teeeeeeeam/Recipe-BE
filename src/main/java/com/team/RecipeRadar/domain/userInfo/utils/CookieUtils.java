@@ -1,11 +1,13 @@
 package com.team.RecipeRadar.domain.userInfo.utils;
 
 import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
+import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 
 @Component
@@ -31,8 +33,8 @@ public class CookieUtils {
     public void validCookie(String cookieValue,String loginId){
         validStatCookie(cookieValue == null);
         String decodeCookie = new String(Base64.getDecoder().decode(cookieValue.getBytes()));
-        boolean existCookie = accountRetrievalRepository.existsByLoginIdAndVerificationId(loginId, decodeCookie);
-        validStatCookie(decodeCookie == null || !existCookie);
+        AccountRetrieval accountRetrieval = accountRetrievalRepository.findByLoginIdAndVerificationId(loginId, decodeCookie);
+        validStatCookie(decodeCookie == null || accountRetrieval ==null || !accountRetrieval.getExpireAt().isAfter(LocalDateTime.now()));
     }
 
     private static void validStatCookie(boolean cookieValue) {
