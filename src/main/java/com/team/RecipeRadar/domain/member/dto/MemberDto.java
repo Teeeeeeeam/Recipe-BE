@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 
 @Data
+@Schema(name = "사용자 DTO")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

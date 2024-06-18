@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.*;
 
 @Data
+@Schema(name = "회원가입 Request")
 public class JoinRequest {
 
     @NotEmpty(message = "이름을 입력주세요")
