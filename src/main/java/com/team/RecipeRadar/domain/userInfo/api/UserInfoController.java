@@ -115,25 +115,17 @@ public class UserInfoController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근 이거나 일반 사용자만 변경 가능합니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"잘못된 접근입니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\" 올바르지 않은 접근입니다.\"}")))
     })
     @PutMapping("/user/info/update/email")
     public ResponseEntity<?> userInfoEmailUpdate(@RequestBody UserInfoEmailRequest userInfoEmailRequest,
-                                                 @CookieValue(name = "login-id",required = false) String cookieLoginId){
-        try {
-            MemberDto memberDto = getMemberDto();
-            cookieValid(cookieLoginId,memberDto.getLoginId());
+                                                 @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
+                                                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        validCookie(cookieLoginId, principalDetails);
 
-            userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),userInfoEmailRequest.getLoginId(),memberDto.getUsername(),userInfoEmailRequest.getLoginType());
+        userInfoService.updateEmail(userInfoEmailRequest.getEmail(),userInfoEmailRequest.getCode(),principalDetails.getMemberId());
 
-            return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
-        }catch (BadRequestException e){
-            throw new BadRequestException(e.getMessage());
-        } catch (AccessDeniedException e){
-            throw new AccessDeniedException(e.getMessage());
-        }catch (ServerErrorException e){
-            throw new ServerErrorException(e.getMessage());
-        }
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"변경 성공"));
     }
 
     @Operation(summary = "사용자 페이지 쿠키 발급",

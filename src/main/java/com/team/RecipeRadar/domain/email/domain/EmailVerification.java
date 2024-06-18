@@ -38,5 +38,8 @@ public class EmailVerification{
     public static EmailVerification creatEmailVerification(LocalDateTime expiredAt,String email,int code){
         return EmailVerification.builder().email(email).creatAt(LocalDateTime.now()).email(email).code(code).expiredAt(expiredAt).build();
     }
+    public boolean expired(EmailVerification emailVerification){
+        return  emailVerification.getExpiredAt().isAfter(LocalDateTime.now());
+    }
 
 }

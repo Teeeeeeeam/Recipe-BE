@@ -15,12 +15,5 @@ public class UserInfoEmailRequest {
     private String email;
 
     @Schema(example = "123456")
-    private String code;
-
-    @Schema(example = "user1234")
-    private String loginId;
-
-    @Schema(example = "normal")
-    private String loginType;
-
+    private Integer code;
 }

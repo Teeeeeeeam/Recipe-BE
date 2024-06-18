@@ -12,7 +12,7 @@ public interface UserInfoService {
 
     void updateNickName(String nickName,Long memberId);
 
-    void updateEmail(String email,String code,String loginId,String authName,String loginType);
+    void updateEmail(String email,Integer code,Long memberId);
 
     String userToken(String loginId,String authenticationName, String password,String loginType);
     void deleteMember(String loginId, boolean checkType ,String authenticationName);

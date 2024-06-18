@@ -1,5 +1,7 @@
 package com.team.RecipeRadar.domain.userInfo.application;
 
+import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
+import com.team.RecipeRadar.domain.email.domain.EmailVerification;
 import com.team.RecipeRadar.domain.member.application.MemberService;
 import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -10,10 +12,7 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.userInfo.dto.info.UserInfoResponse;
 import com.team.RecipeRadar.domain.email.application.MailService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
-import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
-import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.*;
 import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +39,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
     private final AccountRetrievalRepository accountRetrievalRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationRepository emailVerificationRepository;
     private final RecipeBookmarkRepository recipeBookmarkRepository;
 
     @Qualifier("AccountEmail")
@@ -75,28 +75,21 @@ public class UserInfoServiceImpl implements UserInfoService {
      *  사용자의 이메일 변경
      * @param email     변경할 이메일
      * @param code      이메일 인증번호
-     * @param loginId   로그인 아이디
-     * @param authName  로그인한 사용자 정보
      */
     @Override
-    public void updateEmail(String email, String code, String loginId, String authName,String loginType) {
-        Member member = memberRepository.findByLoginId(loginId);;
-        if (member == null || !member.getUsername().equals(authName)||!member.getLogin_type().equals("normal")) {
-            throw new AccessDeniedException("잘못된 접근 이거나 일반 사용자만 가능합니다.");
+    public void updateEmail(String email, Integer code,Long memberId) {
+        Member member = getMember(memberId);
+        validateNormalUser(member);
+
+        Map<String, Boolean> emailValid = memberService.emailValid(email);//이메일 유효성검사
+        EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
+
+        for (Map.Entry<String, Boolean> valid :emailValid.entrySet()) {
+            if (valid.getValue() && emailVerification != null && emailVerification.expired(emailVerification)) {
+                member.updateEmail(email);
+                mailService.deleteCode(email,code);
+            }else throw new InvalidIdException("인증번호 및 이메일이 잘못되었습니다.");
         }
-
-        Map<String, Boolean> emailValid = memberService.emailValid(email);      //이메일 유효성검사
-        Boolean duplicateEmail = emailValid.get("duplicateEmail");
-        Boolean useEmail = emailValid.get("useEmail");
-        Map<String, Boolean> verifyCode = memberService.verifyCode(email, Integer.parseInt(code));      //이메일 인증 코드 검사
-        Boolean aBoolean = verifyCode.get("isVerifyCode");
-
-        if (aBoolean&&duplicateEmail&&useEmail){
-            member.updateEmail(email);
-            memberRepository.save(member);
-            mailService.deleteCode(email,Integer.parseInt(code));
-        }else
-            throw new BadRequestException("인증번호 및 이메일이 잘못되었습니다.");
     }
 
     /**
@@ -184,5 +177,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     private Member getMember(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));
         return member;
+    }
+
+    private static void validateNormalUser(Member member) {
+        if (!member.getLogin_type().equals("normal"))
+            throw new AccessDeniedException("일반 사용자만 가능합니다.");
     }
 }
