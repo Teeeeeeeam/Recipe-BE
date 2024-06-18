@@ -58,6 +58,7 @@ class UserInfoServiceImplTest {
     @InjectMocks
     UserInfoServiceImpl userInfoService;
 
+    private static Long memberId = 1l;
     @Test
     @DisplayName("사용자 페이지의 개인 정보를 불러오는 테스트")
     void getMembers() {
@@ -67,7 +68,7 @@ class UserInfoServiceImplTest {
 
         // 가짜 멤버 객체 생성
         Member member = Member.builder()
-                .id(1L)
+                .id(memberId)
                 .loginId(loginId)
                 .username(username)
                 .nickName("닉네임")
@@ -75,10 +76,10 @@ class UserInfoServiceImplTest {
                 .login_type("normal").build();
 
         // 가짜 멤버 객체 반환 설정
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // getMembers 메서드 호출 및 반환된 UserInfoResponse 객체 저장
-        UserInfoResponse members = userInfoService.getMembers(loginId, username);
+        UserInfoResponse members = userInfoService.getMembers(memberId);
 
         // 검증
         assertThat(members.getUsername()).isEqualTo("이름");
@@ -88,59 +89,18 @@ class UserInfoServiceImplTest {
     }
 
     @Test
-    @DisplayName("사용자 페이지의 다른 사용자 접근시 예외 발생 테스트")
-    void getMembers_AccessDenied() {
-        String loginId = "testId";
-        String differentUsername= "differentUsername";       //다른 사용자 ID
-
-
-        // 가짜 멤버 객체 생성
-        Member member = Member.builder()
-                .id(1L)
-                .loginId(loginId)
-                .username("이름")
-                .nickName("닉네임")
-                .email("이메일")
-                .login_type("normal").build();
-
-        // 가짜 멤버 객체 반환 설정
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
-
-        // AccessDeniedException 예외 발생
-        assertThatThrownBy(() -> userInfoService.getMembers(loginId,differentUsername)).isInstanceOf(AccessDeniedException.class);
-
-    }
-
-    @Test
     @DisplayName("사용자 페이지에서 닉네임을 변경하는 테스트")
     void update_NickName_success(){
         String loginId = "loginId";
         String aFNickName = "afterName";
-        String authName = "username";
 
+        Member member = Member.builder().id(memberId).loginId(loginId).username("username").nickName("before").login_type("normal").build();
 
-        Member member = Member.builder().id(1l).loginId(loginId).username("username").nickName("before").login_type("normal").build();
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
 
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
-
-        userInfoService.updateNickName(aFNickName,loginId,authName);
+        userInfoService.updateNickName(aFNickName,1L);
 
         assertThat(member.getNickName()).isEqualTo(aFNickName);
-    }
-
-    @Test
-    @DisplayName("사용자 페이지에서 닉네임을 변경중 실패하는 테스트")
-    void update_NickName_fail(){
-        String loginId = "loginId";
-        String aFNickName = "afterName";
-        String fakeAuthName = "fakeUsername";
-
-
-        Member member = Member.builder().id(1l).loginId(loginId).username("username").nickName("before").build();
-
-        when(memberRepository.findByLoginId(loginId)).thenReturn(member);
-
-        assertThatThrownBy(() -> userInfoService.updateNickName(aFNickName,loginId,fakeAuthName)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

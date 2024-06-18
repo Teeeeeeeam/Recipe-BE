@@ -61,7 +61,6 @@ class UserInfoControllerTest {
     @CustomMockUser
     public void userInfo_Success() throws Exception {
         // Given
-        String loginId = "test";
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         UserInfoResponse expectedResponse = UserInfoResponse.builder()
                 .nickName("나만냉장고")
@@ -71,10 +70,10 @@ class UserInfoControllerTest {
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
-        given(userInfoService.getMembers(eq(loginId), anyString())).willReturn(expectedResponse);
+        given(userInfoService.getMembers(anyLong())).willReturn(expectedResponse);
 
         // When, Then
-        mockMvc.perform(get("/api/user/info/{login-id}", loginId)
+        mockMvc.perform(get("/api/user/info")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(cookie))
                 .andExpect(status().isOk())
@@ -92,15 +91,13 @@ class UserInfoControllerTest {
     @CustomMockUser
     public void userInfo_AccessDeniedException() throws Exception {
         // Given
-        String loginId = "testId";
-
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        when(userInfoService.getMembers(eq(loginId), anyString()))
+        when(userInfoService.getMembers(anyLong()))
                 .thenThrow(new AccessDeniedException("Access Denied"));
 
         // When, Then
-        mockMvc.perform(get("/api/user/info/{login-id}", loginId)
+        mockMvc.perform(get("/api/user/info/")
                         .cookie(cookie))
                 .andExpect(status().is(401))
                 .andExpect(jsonPath("$.success").value(false))
@@ -113,11 +110,10 @@ class UserInfoControllerTest {
     @CustomMockUser
     public void userInfoUpdate_SuccessTest() throws Exception {
         String nickName ="newNickname";
-        String loginId = "testId";
 
         UserInfoUpdateNickNameRequest request = new UserInfoUpdateNickNameRequest();
         request.setNickName(nickName);
-        request.setLoginId(loginId);
+
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
 
@@ -129,8 +125,8 @@ class UserInfoControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("변경 성공"));
 
-        verify(userInfoService).updateNickName(eq(nickName), eq(loginId), anyString());
-        verify(userInfoService, times(1)).updateNickName(eq(nickName), eq(loginId), anyString());
+        verify(userInfoService).updateNickName(eq(nickName),anyLong());
+        verify(userInfoService, times(1)).updateNickName(eq(nickName),anyLong());
     }
 
     @Test
@@ -138,15 +134,13 @@ class UserInfoControllerTest {
     @CustomMockUser
     public void userInfoUpdate_FailTest() throws Exception {
         String nickName ="newNickname";
-        String loginId = "testId";
 
         UserInfoUpdateNickNameRequest request = new UserInfoUpdateNickNameRequest();
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         request.setNickName(nickName);
-        request.setLoginId(loginId);
 
         given(userInfoService.validUserToken(anyString(), anyString())).willReturn(true);
-        doThrow(new AccessDeniedException("접근 불가한 페이지")).when(userInfoService).updateNickName(eq(nickName), eq(loginId), anyString());
+        doThrow(new AccessDeniedException("접근 불가한 페이지")).when(userInfoService).updateNickName(eq(nickName), anyLong());
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
