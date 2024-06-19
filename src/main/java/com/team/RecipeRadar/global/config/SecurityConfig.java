@@ -1,9 +1,6 @@
 package com.team.RecipeRadar.global.config;
 
-import com.team.RecipeRadar.global.jwt.utils.ExceptionHandlerFilter;
-import com.team.RecipeRadar.global.jwt.utils.JwtLoginFilter;
-import com.team.RecipeRadar.global.jwt.utils.JwtAuthorizationFilter;
-import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
+import com.team.RecipeRadar.global.jwt.utils.*;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
@@ -38,8 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-
-                .addFilterBefore(new ExceptionHandlerFilter(),UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
@@ -50,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         http
+                .addFilterBefore(new SecurityExceptionHandlerFilter(),UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthorizationFilter(authenticationManager(),memberRepository,jwtProvider), JwtLoginFilter.class)
                 .addFilterAt(new JwtLoginFilter(authenticationManager(),jwtProvider), UsernamePasswordAuthenticationFilter.class);
         http
