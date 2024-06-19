@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.team.RecipeRadar.domain.bookmark.domain.QRecipeBookmark.recipeBookmark;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
-import static com.team.RecipeRadar.domain.recipe.domain.QRecipeBookmark.*;
 
 @Repository
 @RequiredArgsConstructor
