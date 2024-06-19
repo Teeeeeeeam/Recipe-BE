@@ -170,10 +170,10 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
     private void updateCookingSteps(List<Map<String, String>> cookSteps) {
         if (cookSteps != null) {
             cookSteps.forEach(cookStep -> {
-                long cookStepId = Long.parseLong(cookStep.get("cook_step_id"));
+                long cookStepId = Long.parseLong(cookStep.get("cookStepId"));
                 CookingStep cookingStep = cookStepRepository.findById(cookStepId)
                         .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COOK_STEP));
-                cookingStep.update(cookStep.get("cook_steps"));
+                cookingStep.update(cookStep.get("cookSteps"));
             });
         }
     }

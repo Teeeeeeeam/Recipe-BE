@@ -37,7 +37,7 @@ public class RecipeUpdateRequest {
     private String cookTime;
 
     @NotEmptyMapValue(message = "변경할 레시피의 조리순서를 입력해주세요")
-    @Schema(example = "[{\"cook_step_id\":\"185128\", \"cook_steps\":\"양파를 볶는다.\"}]")
+    @Schema(example = "[{\"cookStepId\":\"185128\", \"cookSteps\":\"양파를 볶는다.\"}]")
     private List<Map<String,String>> cookSteps;
 
     @Schema(example = "[\"라드를이용해 볶는다.\"]")
