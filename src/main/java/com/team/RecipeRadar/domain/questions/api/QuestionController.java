@@ -87,7 +87,7 @@ public class QuestionController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",questionDto));
     }
 
-    @Operation(summary = "문의사항 전체 조회",description = "문의사항의 대해서 상세 조회된다.\n question-type={ACCOUNT_INQUIRY[계정 문의],GENERAL_INQUIRY[일반 문의]} ,question_status={PENDING[대기중],COMPLETED[완료]} ",tags = "어드민 - 문의사항 컨트롤러")
+    @Operation(summary = "문의사항 전체 조회",description = "문의사항의 대해서 상세 조회된다.\n questionType={ACCOUNT_INQUIRY[계정 문의],GENERAL_INQUIRY[일반 문의]} ,questionStatus={PENDING[대기중],COMPLETED[완료]} ",tags = "어드민 - 문의사항 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
