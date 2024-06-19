@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.admin.application.recipe;
+package com.team.RecipeRadar.domain.recipe.application.admin;
 
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;

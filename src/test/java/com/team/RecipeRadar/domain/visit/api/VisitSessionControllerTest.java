@@ -1,12 +1,11 @@
 package com.team.RecipeRadar.domain.visit.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
+import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.domain.visit.domain.VisitSession;
-import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
+import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
+import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
 import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;

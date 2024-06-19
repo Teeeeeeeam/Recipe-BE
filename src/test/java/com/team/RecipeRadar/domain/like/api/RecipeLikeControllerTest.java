@@ -1,16 +1,15 @@
-package com.team.RecipeRadar.domain.like_bookmark.api;
+package com.team.RecipeRadar.domain.like.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.like_bookmark.api.like.RecipeLikeController;
-import com.team.RecipeRadar.domain.like_bookmark.application.like.RecipeLikeServiceImpl;
-import com.team.RecipeRadar.domain.like_bookmark.dto.like.RecipeLikeRequest;
-import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
+import com.team.RecipeRadar.domain.like.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
-import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.CustomOauth2Service;
+import com.team.RecipeRadar.global.utils.CookieUtils;
+import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
+import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
+import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.member.api;
+package com.team.RecipeRadar.domain.account.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;

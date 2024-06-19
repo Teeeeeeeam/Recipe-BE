@@ -1,10 +1,8 @@
 package com.team.RecipeRadar.domain.blackList.api;
 
 import com.team.RecipeRadar.domain.balckLIst.application.AdminBlackMemberService;
-import com.team.RecipeRadar.domain.balckLIst.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.balckLIst.api.BlackListController;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
@@ -21,22 +19,15 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @WebMvcTest(BlackListController.class)
-class BlackListMemberControllerTest {
+class BlackListControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean ApplicationEventPublisher eventPublisher;
@@ -48,14 +39,6 @@ class BlackListMemberControllerTest {
     @MockBean JwtProvider jwtProvider;
     @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean CustomOauth2Service customOauth2Service;
-
-
-
-
-
-
-
-
     @Test
     @DisplayName("블랙리스트 이메일 임시 차단테스트")
     @CustomMockAdmin

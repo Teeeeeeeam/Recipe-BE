@@ -1,14 +1,11 @@
-package com.team.RecipeRadar.domain.notice.api;
+package com.team.RecipeRadar.domain.notice.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.notice.api.user.NoticeController;
 import com.team.RecipeRadar.domain.notice.application.user.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
-import com.team.RecipeRadar.domain.notice.dto.request.AdminAddRequest;
-import com.team.RecipeRadar.domain.notice.dto.request.AdminUpdateRequest;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoNoticeResponse;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
@@ -21,18 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,71 +45,6 @@ class NoticeControllerTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private final String originalName = "test.png";
-
-
-    @Test
-    @DisplayName("공지사항 작성")
-    @CustomMockAdmin
-    void noticeAdd() throws Exception {
-        AdminAddRequest adminAddRequest = new AdminAddRequest();
-        adminAddRequest.setNoticeTitle("제목");
-        adminAddRequest.setNoticeContent("내용");
-
-        MockMultipartFile file = getMockMultipartFile();
-        doNothing().when(noticeService).save(eq(adminAddRequest),anyLong(), any(MockMultipartFile.class));
-
-        MockMultipartFile request = new MockMultipartFile("adminAddRequest", null, "application/json", objectMapper.writeValueAsString(adminAddRequest).getBytes(StandardCharsets.UTF_8));
-
-
-        mockMvc.perform(multipart("/api/admin/notices")
-                .file(request)
-                .file(file)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("작성 성공"));
-    }
-
-    @Test
-    @DisplayName("공지사항 삭제")
-    @CustomMockAdmin
-    void deleteNotice() throws Exception {
-
-        doNothing().when(noticeService).delete(anyList());
-
-        mockMvc.perform(delete("/api/admin/notices")
-                .param("noticeIds","1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("공지사항 삭제 성공"));
-    }
-
-    @Test
-    @DisplayName("공지사항 업데이트")
-    @CustomMockAdmin
-    void updateNotice() throws Exception{
-
-        AdminUpdateRequest adminUpdateRequest = new AdminUpdateRequest();
-        adminUpdateRequest.setNoticeTitle("제목");
-        adminUpdateRequest.setNoticeContent("내용");
-
-        MockMultipartFile file = getMockMultipartFile();
-        doNothing().when(noticeService).update(anyLong(),eq(adminUpdateRequest), any(MockMultipartFile.class));
-        MockMultipartFile updateRequest = new MockMultipartFile("adminUpdateRequest", null, "application/json", objectMapper.writeValueAsString(adminUpdateRequest).getBytes(StandardCharsets.UTF_8));
-
-        mockMvc.perform(multipart("/api/admin/notices/1")
-                        .file(updateRequest)
-                        .file(file)
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        })
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("공지사항 수정 성공"));
-
-    }
-
     @Test
     @DisplayName("메인 공지사항")
     void mainNotice() throws Exception {
@@ -157,11 +85,6 @@ class NoticeControllerTest {
                 .andExpect(jsonPath("$.data.member.nickname").value("닉네임"))
                 .andDo(print());
     }
-
-    private MockMultipartFile getMockMultipartFile() {
-        return new MockMultipartFile("사진", originalName, "image/jpeg", "Test".getBytes());
-    }
-
     public static List<NoticeDto> createMockNoticeDtoList() {
         List<NoticeDto> mockList = new ArrayList<>();
         Member member = Member.builder().id(1l).nickName("닉네임").loginId("로그인아이디").build();

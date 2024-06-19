@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.visit.dao;
 
 import com.team.RecipeRadar.domain.visit.domain.VisitSession;
-import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
+import com.team.RecipeRadar.global.config.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

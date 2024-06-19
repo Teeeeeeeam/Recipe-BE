@@ -1,9 +1,12 @@
-package com.team.RecipeRadar.global.jwt.controller;
+package com.team.RecipeRadar.global.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.auth.api.AuthController;
+import com.team.RecipeRadar.global.security.oauth2.application.UserDisConnectService;
+import com.team.RecipeRadar.global.security.oauth2.application.impl.KakaoUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.application.impl.NaverUserDisConnectServiceImpl;
+import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.auth.application.AuthService;
@@ -29,13 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
 
-    @MockBean
-    AuthService jwtAuthService;
+    @MockBean AuthService jwtAuthService;
     @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
     @MockBean CookieUtils cookieUtils;
+    @MockBean JwtProvider jwtProvider;
+    @MockBean KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
+    @MockBean NaverUserDisConnectServiceImpl naverUserDisConnectService;
+    @MockBean CustomOauth2Handler customOauth2Handler;
+    @MockBean Oauth2UrlProvider oauth2UrlProvider;
+    @MockBean CustomOauth2Service customOauth2Service;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired

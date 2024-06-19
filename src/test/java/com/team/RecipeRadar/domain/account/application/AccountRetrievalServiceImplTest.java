@@ -1,7 +1,8 @@
-package com.team.RecipeRadar.domain.member.application;
+package com.team.RecipeRadar.domain.account.application;
 
 import com.team.RecipeRadar.domain.account.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.account.application.AccountRetrievalServiceImpl;
+import com.team.RecipeRadar.domain.member.application.user.MemberService;
 import com.team.RecipeRadar.domain.member.application.user.MemberServiceTest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.account.domain.AccountRetrieval;
@@ -33,8 +34,7 @@ class AccountRetrievalServiceImplTest {
 
     @Mock MemberRepository memberRepository;
     @Mock AccountRetrievalEmailServiceImpl emailService;
-    @Mock
-    MemberServiceTest memberService;
+    @Mock MemberService memberService;
     @Mock PasswordEncoder passwordEncoder;
     @Mock AccountRetrievalRepository accountRetrievalRepository;
 

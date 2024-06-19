@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.admin.application.post;
+package com.team.RecipeRadar.domain.post.application.admin;
 
 import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;

@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.post.api;
+package com.team.RecipeRadar.domain.post.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
@@ -9,6 +9,9 @@ import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.*;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
@@ -201,12 +204,12 @@ class PostControllerTest {
     @DisplayName("게시글 조회시 데이터 없을 때 예외 테스트")
     @CustomMockUser
     void details_posts_empty() throws Exception {
-        given(postService.postDetail(anyLong())).willThrow(new BadRequestException("게시글이 존재하지 않습니다."));
+        given(postService.postDetail(anyLong())).willThrow(new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
 
         mockMvc.perform(get("/api/user/posts/1"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("게시글을 찾을 수 없습니다."));
     }
 
     @Test
@@ -300,7 +303,7 @@ class PostControllerTest {
     @DisplayName("게시글 비밀번호 유효성 검사 불일치")
     @CustomMockUser
     void validPost_invalidPassword_throwsBadRequestException() throws Exception {
-        doThrow(new BadRequestException("비밀번호가 일치하지 않습니다."))
+        doThrow(new InvalidIdException("비밀번호가 일치하지 않습니다."))
                 .when(postService).validPostPassword(anyLong(), any());
 
         ValidPostRequest validPostRequest = new ValidPostRequest();

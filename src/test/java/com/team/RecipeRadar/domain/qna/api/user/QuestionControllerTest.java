@@ -1,8 +1,7 @@
-package com.team.RecipeRadar.domain.qna.api;
+package com.team.RecipeRadar.domain.qna.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.qna.api.user.QuestionController;
 import com.team.RecipeRadar.domain.qna.application.user.QnAServiceImpl;
 import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
 import com.team.RecipeRadar.domain.qna.dto.reqeust.QuestionRequest;
@@ -30,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@WebMvcTest(QuestionController.class)
+@WebMvcTest(QnAController.class)
 class QuestionControllerTest {
 
     @MockBean
@@ -85,22 +84,5 @@ class QuestionControllerTest {
                 .andExpect(jsonPath("$.message").value("문의 사항 등록"));
     }
 
-    @Test
-    @DisplayName("어드민의 상세조회 성공")
-    @CustomMockAdmin
-    void details_Question_Success() throws Exception {
-        Long questionId = 1L;
-
-        QuestionDto questionDto = new QuestionDto();
-        questionDto.setQuestionContent("컨튼트");
-        questionDto.setAnswerEmail("test@example.com");
-        
-        when(questionService.detailAdminQuestion(eq(questionId), anyLong())).thenReturn(questionDto);
-
-        mockMvc.perform(get("/api/admin/question/{id}", questionId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").doesNotExist());
-    }
 }
 

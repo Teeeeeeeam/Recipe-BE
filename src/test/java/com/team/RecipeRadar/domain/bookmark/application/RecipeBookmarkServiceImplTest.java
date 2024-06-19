@@ -1,11 +1,13 @@
-package com.team.RecipeRadar.domain.recipe.application;
+package com.team.RecipeRadar.domain.bookmark.application;
 
 import com.team.RecipeRadar.domain.bookmark.application.RecipeBookmarkServiceImpl;
+import com.team.RecipeRadar.domain.bookmark.dto.response.UserInfoBookmarkResponse;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.bookmark.dao.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -90,6 +96,29 @@ class RecipeBookmarkServiceImplTest {
 
         Boolean checkBookmark = recipeBookmarkService.checkBookmark(member_id, recipe_id);
         assertThat(checkBookmark).isTrue();
+    }
+
+    @Test
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 조회 테스트")
+    void bookmark_page(){
+
+        Long memberId = 1l;
+        Member member = Member.builder().id(memberId).nickName("닉네임").build();
+
+        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
+
+        Pageable pageRequest = PageRequest.of(0, 10);
+
+        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+        boolean hasNext =false;
+
+        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(list, pageRequest, hasNext);
+
+        when(recipeBookmarkRepository.userInfoBookmarks(eq(memberId),isNull(),eq(pageRequest))).thenReturn(recipeDtoSlice);
+
+        UserInfoBookmarkResponse userInfoBookmarkResponse = recipeBookmarkService.userInfoBookmark(memberId, null, pageRequest);
+        assertThat(userInfoBookmarkResponse.getBookmarkList()).hasSize(3);
+        assertThat(userInfoBookmarkResponse.getNextPage()).isFalse();
     }
 
 

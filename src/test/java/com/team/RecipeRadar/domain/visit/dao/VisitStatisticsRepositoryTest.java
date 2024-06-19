@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.visit.dao;
 
 import com.team.RecipeRadar.domain.visit.domain.VisitStatistics;
-import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
+import com.team.RecipeRadar.global.config.QueryDslConfig;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;

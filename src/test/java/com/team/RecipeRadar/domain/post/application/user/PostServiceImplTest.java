@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.post.application;
+package com.team.RecipeRadar.domain.post.application.user;
 
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.like.dao.like.PostLikeRepository;

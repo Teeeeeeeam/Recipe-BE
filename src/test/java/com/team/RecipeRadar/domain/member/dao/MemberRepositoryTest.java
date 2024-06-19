@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.member.dao;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
+import com.team.RecipeRadar.global.config.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.*;
 class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
-
     @Test
     @DisplayName("아이디 찾기 테스트")
     void findById(){

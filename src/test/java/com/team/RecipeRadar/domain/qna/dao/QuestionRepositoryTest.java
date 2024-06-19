@@ -1,10 +1,11 @@
-package com.team.RecipeRadar.domain.questions.dao;
+package com.team.RecipeRadar.domain.qna.dao;
 
-import com.team.RecipeRadar.domain.questions.domain.Question;
-import com.team.RecipeRadar.domain.questions.dto.QuestionDto;
+import com.team.RecipeRadar.domain.qna.dao.question.QuestionRepository;
+import com.team.RecipeRadar.domain.qna.domain.Question;
+import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
-import com.team.RecipeRadar.global.config.querydsl.QueryDslConfig;
+import com.team.RecipeRadar.global.config.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class QuestionRepositoryTest {
 
-    @Autowired QuestionRepository questionRepository;
+    @Autowired
+    QuestionRepository questionRepository;
     @Autowired ImgRepository imgRepository;
 
     @Value("${S3.URL}")

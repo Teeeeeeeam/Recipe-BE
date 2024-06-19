@@ -1,6 +1,8 @@
-package com.team.RecipeRadar.domain.recipe.dao.recipe;
+package com.team.RecipeRadar.domain.recipe.dao;
 
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
+import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
@@ -36,9 +38,11 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("test")
 class RecipeRepositoryTest {
 
-    @Autowired RecipeRepository recipeRepository;
+    @Autowired
+    RecipeRepository recipeRepository;
     @Autowired IngredientRepository ingredientRepository;
-    @Autowired CookStepRepository cookStepRepository;
+    @Autowired
+    CookStepRepository cookStepRepository;
     @Autowired ImgRepository imgRepository;
 
 

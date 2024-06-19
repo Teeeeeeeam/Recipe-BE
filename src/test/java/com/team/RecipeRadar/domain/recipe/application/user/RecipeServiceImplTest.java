@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.recipe.application;
+package com.team.RecipeRadar.domain.recipe.application.user;
 
 import com.team.RecipeRadar.domain.recipe.application.user.RecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;

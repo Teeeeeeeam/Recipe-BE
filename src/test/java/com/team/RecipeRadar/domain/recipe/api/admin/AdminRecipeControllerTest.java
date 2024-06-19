@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.admin.api;
+package com.team.RecipeRadar.domain.recipe.api.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;

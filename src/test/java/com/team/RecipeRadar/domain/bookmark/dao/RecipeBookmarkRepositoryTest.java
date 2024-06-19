@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.recipe.dao.bookmark;
+package com.team.RecipeRadar.domain.bookmark.dao;
 
 import com.team.RecipeRadar.domain.bookmark.dao.RecipeBookmarkRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;

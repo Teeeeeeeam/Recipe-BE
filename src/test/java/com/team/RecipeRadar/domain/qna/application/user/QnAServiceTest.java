@@ -1,16 +1,14 @@
-package com.team.RecipeRadar.domain.qna.application;
+package com.team.RecipeRadar.domain.qna.application.user;
 
+import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
-import com.team.RecipeRadar.domain.qna.application.user.QnAServiceImpl;
+import com.team.RecipeRadar.domain.qna.dao.answer.AnswerRepository;
 import com.team.RecipeRadar.domain.qna.dao.question.QuestionRepository;
 import com.team.RecipeRadar.domain.qna.domain.Question;
-import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
 import com.team.RecipeRadar.domain.qna.dto.reqeust.QuestionRequest;
-import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,22 +23,24 @@ import java.util.Optional;
 import static com.team.RecipeRadar.domain.qna.domain.AnswerType.*;
 import static com.team.RecipeRadar.domain.qna.domain.QuestionStatus.*;
 import static com.team.RecipeRadar.domain.qna.domain.QuestionType.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class QuestionServiceTest {
+class QnAServiceTest {
 
     @Mock QuestionRepository questionRepository;
     @Mock S3UploadService s3UploadService;
-    @Mock ImgRepository imgRepository;
     @Mock MemberRepository memberRepository;
     @Mock NotificationService notificationService;
+    @Mock AnswerRepository answerRepository;
+    @Mock ImgRepository imgRepository;
 
-    @InjectMocks
-    QnAServiceImpl questionService;
+
+
+
+    @InjectMocks QnAServiceImpl questionService;
 
     @Test
     @DisplayName("계정 정지 상태에서 문의사항 등록")
@@ -106,36 +106,4 @@ class QuestionServiceTest {
         // then
         verify(questionRepository, times(1)).save(any(Question.class));
     }
-
-    @Test
-    @DisplayName("관리자만 문의사항 상세보기 접근 가능")
-    void detailAdmin_Question() {
-        Long questionId = 1L;
-        String loginId = "admin";
-        Member adminMember = Member.builder().id(1l).loginId(loginId).roles("ROLE_ADMIN").build();
-
-        QuestionDto questionDto = new QuestionDto();
-
-        when(memberRepository.findById(1l)).thenReturn(Optional.of(adminMember));
-        when(questionRepository.details(questionId)).thenReturn(questionDto);
-
-        QuestionDto result = questionService.detailAdminQuestion(questionId,1l);
-
-        assertThat(result).isEqualTo(questionDto);
-    }
-
-    @Test
-    @DisplayName("관리자만 문의사항 상세보기 접근 가능 - 예외 발생")
-    void detailAdmin_Question_throwsException() {
-        Long questionId = 1L;
-        String loginId = "user";
-        Member userMember = Member.builder().id(1l).loginId(loginId).roles("ROLE_USER").build();
-
-        when(memberRepository.findById(1l)).thenReturn(Optional.of(userMember));
-
-        assertThatThrownBy(() -> questionService.detailAdminQuestion(questionId, 1l))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("관리자만 접근 가능 가능합니다.");
-    }
-
 }
