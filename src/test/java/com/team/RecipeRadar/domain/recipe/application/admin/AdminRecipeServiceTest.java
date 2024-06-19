@@ -90,12 +90,12 @@ class AdminRecipeServiceTest {
     @Test
     @DisplayName("레시피 수정 성공하는 테스트")
     void updateRecipe_successful() {
-        long recipeId = 1L;
+        Long recipeId = 1L;
         String title = "변경된 Recipe";
         List<Map<String, String>> cookSteps = new ArrayList<>();
         Map<String, String> cookStep1 = new HashMap<>();
-        cookStep1.put("cook_step_id", "1");
-        cookStep1.put("cook_steps", "조리 순서 1");
+        cookStep1.put("cookStepId", "1");
+        cookStep1.put("cookSteps", "조리 순서 1");
         cookSteps.add(cookStep1);
         List<String> ingredients = Arrays.asList("재료 1", "재료 2");
         String originalFileName = "after.jpg";
