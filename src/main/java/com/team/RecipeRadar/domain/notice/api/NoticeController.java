@@ -139,6 +139,20 @@ public class NoticeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoDetailsResponse));
     }
 
+    @Operation(summary = "공지사항 검색", description = "공지사항에 제목을 통해 공지사항을 검색")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"notice\":[{\"id\":1,\"noticeTitle\":\"첫 번째 공지사항\",\"createdAt\":\"2024-05-28T17:08:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":2,\"noticeTitle\":\"두 번째 공지사항\",\"createdAt\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}},{\"id\":3,\"noticeTitle\":\"세 번째 공지사항\",\"createdAt\":\"2024-05-28T13:00:00\",\"member\":{\"nickname\":\"관리자\"}}]}}\n")))
+    })
+    @GetMapping("/search")
+    public ResponseEntity<?> searchNoticeTitle(@RequestParam(value = "title",required = false) String title,
+                                               @RequestParam(value = "lastId",required = false) Long lastId,
+                                               @Parameter(example = "{\"size\":10}")Pageable pageable){
+        InfoNoticeResponse infoNoticeResponse = noticeService.searchNoticeWithTitle(title, lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",infoNoticeResponse));
+    }
+
     private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> result = new LinkedHashMap<>();

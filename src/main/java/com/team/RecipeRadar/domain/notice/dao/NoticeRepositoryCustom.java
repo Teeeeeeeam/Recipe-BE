@@ -17,4 +17,6 @@ public interface NoticeRepositoryCustom {
     NoticeDto detailsPage(Long noticeId);
 
     void deleteMemberId(Long memberId);
+
+    Slice<NoticeDto> searchNotice(String title, Long lastId,Pageable pageable);
 }

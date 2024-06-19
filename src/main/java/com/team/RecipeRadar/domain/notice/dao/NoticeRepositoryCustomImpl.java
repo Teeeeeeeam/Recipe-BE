@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
@@ -47,9 +48,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
     public Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable){
         BooleanBuilder builder = new BooleanBuilder();
 
-        if(noticeId!=null){
-            builder.and(notice.id.lt(noticeId));
-        }
+        lastId(noticeId, builder);
 
         List<Tuple> list = jpaQueryFactory.select(notice, notice.member.nickName)
                 .from(notice)
@@ -89,6 +88,32 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 )).execute();
     }
 
+    @Override
+    public Slice<NoticeDto> searchNotice(String title, Long lastId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(title != null){
+            builder.and(notice.noticeTitle.like("%"+title+"%"));
+        }
+        lastId(lastId, builder);
+
+        List<Notice> notices = jpaQueryFactory.select(notice)
+               .from(notice)
+                .where(builder)
+                .orderBy(notice.id.desc())
+                .limit(pageable.getPageSize() + 1).fetch();
+
+        List<NoticeDto> noticeDtoList = notices.stream().map(notice -> NoticeDto.of(notice, notice.getMember().getNickName())).collect(Collectors.toList());
+        boolean nextPage = isNext(pageable, noticeDtoList);
+
+        return new SliceImpl(noticeDtoList,pageable,nextPage);
+    }
+
+    private static void lastId(Long lastId, BooleanBuilder builder) {
+        if(lastId !=null){
+            builder.and(notice.id.lt(lastId));
+        }
+    }
+
     private  String getImageUrl(Tuple tuple) {
         String img = tuple.get(uploadFile.storeFileName);
         if(img!=null && !img.startsWith("http")){
@@ -97,7 +122,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         return img;
     }
 
-    private static boolean isNext(Pageable pageable, List<NoticeDto> noticeDtoList) {
+    private static<T> boolean isNext(Pageable pageable, List<T> noticeDtoList) {
         boolean isHasNext = false;
 
         if(noticeDtoList.size()> pageable.getPageSize()){

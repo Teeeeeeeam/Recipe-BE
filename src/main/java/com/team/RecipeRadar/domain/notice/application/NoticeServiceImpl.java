@@ -97,6 +97,13 @@ public class NoticeServiceImpl implements NoticeService {
         return InfoDetailsResponse.of(noticeDto);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public InfoNoticeResponse searchNoticeWithTitle(String title, Long lastId, Pageable pageable) {
+        Slice<NoticeDto> slice = noticeRepository.searchNotice(title, lastId, pageable);
+        return new InfoNoticeResponse(slice.hasNext(),slice.getContent());
+    }
+
 
     /**
      * 이미지를 삭제 하는 메서드

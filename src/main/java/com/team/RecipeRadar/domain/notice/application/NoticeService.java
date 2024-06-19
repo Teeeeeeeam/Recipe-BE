@@ -21,4 +21,6 @@ public interface NoticeService {
     InfoNoticeResponse noticeInfo(Long noticeId, Pageable pageable);
 
     InfoDetailsResponse detailNotice(Long noticeId);
+
+    InfoNoticeResponse searchNoticeWithTitle(String title, Long lastId, Pageable pageable);
 }
