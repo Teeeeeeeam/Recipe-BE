@@ -4,12 +4,14 @@ import com.team.RecipeRadar.domain.member.dao.AccountRetrievalRepository;
 import com.team.RecipeRadar.domain.member.domain.AccountRetrieval;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CookieUtils {
@@ -18,16 +20,17 @@ public class CookieUtils {
 
     public ResponseCookie createCookie(String cookieName, String value, int expiredTime){
 
-        String userEncodeToken = new String(Base64.getEncoder().encode(value.getBytes()));
+        String cookieValue = value;
 
-        ResponseCookie responseCookie = ResponseCookie.from(cookieName, userEncodeToken)
+        cookieValue = encodeCookieValueIfNeeded(cookieName, value, cookieValue);
+
+        return ResponseCookie.from(cookieName, cookieValue)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(expiredTime)
                 .build();
-        return responseCookie;
     }
 
     public void validCookie(String cookieValue,String loginId){
@@ -47,5 +50,12 @@ public class CookieUtils {
                 .httpOnly(true)
                 .sameSite("None")
                 .maxAge(0).path("/").build();
+    }
+
+    private static String encodeCookieValueIfNeeded(String cookieName, String value, String cookieValue) {
+        if(!cookieName.equals("RefreshToken")) {
+            cookieValue = new String(Base64.getEncoder().encode(value.getBytes()));
+        }
+        return cookieValue;
     }
 }
