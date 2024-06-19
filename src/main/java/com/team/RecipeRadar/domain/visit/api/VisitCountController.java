@@ -1,11 +1,11 @@
 package com.team.RecipeRadar.domain.visit.api;
 
-import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
+import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

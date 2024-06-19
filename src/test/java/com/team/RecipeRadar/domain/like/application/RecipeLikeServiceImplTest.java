@@ -1,9 +1,10 @@
-package com.team.RecipeRadar.domain.like.application;
+package com.team.RecipeRadar.domain.like_bookmark.application;
 
-import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
-import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
+import com.team.RecipeRadar.domain.like_bookmark.application.like.RecipeLikeServiceImpl;
+import com.team.RecipeRadar.domain.like_bookmark.dao.like.RecipeLikeRepository;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;

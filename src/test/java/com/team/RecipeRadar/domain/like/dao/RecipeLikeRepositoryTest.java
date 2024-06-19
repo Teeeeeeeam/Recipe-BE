@@ -1,7 +1,8 @@
-package com.team.RecipeRadar.domain.like.dao;
+package com.team.RecipeRadar.domain.like_bookmark.dao;
 
-import com.team.RecipeRadar.domain.like.domain.RecipeLike;
-import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
+import com.team.RecipeRadar.domain.like_bookmark.dao.like.RecipeLikeRepository;
+import com.team.RecipeRadar.domain.like_bookmark.domain.like.RecipeLike;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.notice.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
+import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import javax.persistence.*;
 @ToString(exclude = "member")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Notice extends BaseTimeEntity {
+public class Notice extends BaseTimeUtils {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

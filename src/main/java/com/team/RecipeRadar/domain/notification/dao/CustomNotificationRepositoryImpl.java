@@ -9,7 +9,7 @@ import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.domain.QNotification;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
-import com.team.RecipeRadar.domain.questions.domain.QuestionType;
+import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,7 @@ import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.notification;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
+import static com.team.RecipeRadar.domain.qna.domain.QQuestion.*;
 
 @Repository
 @Slf4j

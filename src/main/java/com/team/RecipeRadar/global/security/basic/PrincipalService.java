@@ -2,8 +2,8 @@ package com.team.RecipeRadar.global.security.basic;
 
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
-import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.recipe.domain.RecipeBookmark;
+import com.team.RecipeRadar.domain.bookmark.domain.RecipeBookmark;
 import lombok.*;
 
 import javax.persistence.*;

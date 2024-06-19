@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.comment.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
+import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -14,7 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString(exclude = {"member", "post"})
 @NoArgsConstructor
-public class Comment extends BaseTimeEntity {
+public class Comment extends BaseTimeUtils {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

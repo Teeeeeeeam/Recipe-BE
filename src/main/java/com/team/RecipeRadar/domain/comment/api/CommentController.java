@@ -6,7 +6,7 @@ import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;

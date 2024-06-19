@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.global.security.oauth2.provider;
-
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,7 @@ public class Oauth2UrlProvider{
             String state = new BigInteger(130, secureRandom).toString();
             url ="https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id="+naverClientId+"&state="+state+"&redirect_uri="+naverRedirectUrl;
             log.info("url={}",url);
-        } else throw new BadRequestException("오류");
+        } else throw new IllegalStateException("오류");
 
         return url;
     }

@@ -2,16 +2,13 @@ package com.team.RecipeRadar.domain.comment.application;
 
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
-import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
-import com.team.RecipeRadar.global.exception.ex.NoSuchErrorType;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

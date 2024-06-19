@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.post.domain;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.questions.domain.BaseTimeEntity;
+import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "member")
-public class Post extends BaseTimeEntity {
+public class Post extends BaseTimeUtils {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")

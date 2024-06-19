@@ -2,7 +2,8 @@ package com.team.RecipeRadar.global.exception.advice;
 
 
 import com.team.RecipeRadar.global.exception.ex.*;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -39,24 +40,6 @@ public class ApiControllerAdvice {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler(CommentException.class)
-    public ResponseEntity<ErrorResponse> commentError(CommentException e){
-        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> BadRequest(BadRequestException e){
-        ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> Forbidden(ForbiddenException e){
-        ErrorResponse response = new ErrorResponse<>(false, e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> UnSupport(UnsupportedMediaTypeStatusException e){

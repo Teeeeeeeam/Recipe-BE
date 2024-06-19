@@ -1,13 +1,15 @@
 package com.team.RecipeRadar.domain.like.application;
 
-import com.team.RecipeRadar.domain.like.dao.RecipeLikeRepository;
+import com.team.RecipeRadar.domain.like.dao.like.RecipeLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
-import com.team.RecipeRadar.domain.like.dto.*;
+import com.team.RecipeRadar.domain.like.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,8 +18,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.team.RecipeRadar.global.exception.ex.NoSuchErrorType.NO_SUCH_MEMBER;
-import static com.team.RecipeRadar.global.exception.ex.NoSuchErrorType.NO_SUCH_RECIPE;
+import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.NO_SUCH_MEMBER;
+import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.NO_SUCH_RECIPE;
 
 @Transactional
 @RequiredArgsConstructor
@@ -69,7 +71,7 @@ public class RecipeLikeServiceImpl<T extends RecipeLikeRequest> implements LikeS
      * @return 사용자의 좋아요 정보를 포함하는 UserInfoLikeResponse 객체
      */
     @Override
-    public UserInfoLikeResponse getUserLikesByPage(Long memberId,Long recipeLike_lastId, Pageable pageable) {
+    public UserInfoLikeResponse getUserLikesByPage(Long memberId, Long recipeLike_lastId, Pageable pageable) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NO_SUCH_MEMBER));
 

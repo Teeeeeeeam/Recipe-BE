@@ -1,11 +1,10 @@
 package com.team.RecipeRadar.domain.like.api;
 
-import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.application.LikeService;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
-import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.ForbiddenException;
+import com.team.RecipeRadar.domain.like.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.global.utils.CookieUtils;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,17 +1,17 @@
 package com.team.RecipeRadar.domain.like.application;
 
-import com.team.RecipeRadar.domain.like.dao.PostLikeRepository;
+import com.team.RecipeRadar.domain.like.dao.like.PostLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
-import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
-import com.team.RecipeRadar.domain.like.dto.PostLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.like.PostLikeRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.global.exception.ex.NoSuchDataException;
-import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.NoSuchElementException;
 
-import static com.team.RecipeRadar.global.exception.ex.NoSuchErrorType.*;
+import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.*;
 
 @Transactional
 @RequiredArgsConstructor

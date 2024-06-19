@@ -1,10 +1,11 @@
-package com.team.RecipeRadar.domain.like.api;
+package com.team.RecipeRadar.domain.like_bookmark.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
-import com.team.RecipeRadar.domain.like.dto.RecipeLikeRequest;
-import com.team.RecipeRadar.domain.like.dto.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
+import com.team.RecipeRadar.domain.like_bookmark.api.like.RecipeLikeController;
+import com.team.RecipeRadar.domain.like_bookmark.application.like.RecipeLikeServiceImpl;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like_bookmark.dto.like.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;

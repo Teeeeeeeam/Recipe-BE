@@ -4,7 +4,7 @@ import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.notification.dto.MainNotificationResponse;
 import com.team.RecipeRadar.domain.notification.dto.ResponseUserInfoNotification;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,10 +26,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.List;
 
 
-@RestController
+
 @Tag(name = "공용 - 알림 컨트롤러" ,description = "실시간 알림 컨트롤러")
-@RequestMapping("/api/user")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/user")
 public class NotificationController {
 
     private final NotificationService notificationService;

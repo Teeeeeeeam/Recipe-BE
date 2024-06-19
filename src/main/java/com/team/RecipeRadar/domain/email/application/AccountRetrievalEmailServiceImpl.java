@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.email.application;
 
 import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
 import com.team.RecipeRadar.domain.email.domain.EmailVerification;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;

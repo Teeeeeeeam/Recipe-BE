@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.Image.domain;
 
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.questions.domain.Question;
+import com.team.RecipeRadar.domain.qna.domain.Question;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import lombok.*;
 
