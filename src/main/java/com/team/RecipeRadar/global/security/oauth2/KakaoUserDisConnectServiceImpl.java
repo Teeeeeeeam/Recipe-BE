@@ -4,8 +4,6 @@ package com.team.RecipeRadar.global.security.oauth2;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.application.MemberService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +52,7 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
                 String accessToken = jsonNode.get("access_token").asText();
                 return accessToken;
             } else {
-                log.error("Failed to get access token. Response: " + responseEntity.getBody());
+                log.error("엑세스 토큰 가져오기 실패: Response: " + responseEntity.getBody());
                 return null;
             }
         } catch (Exception e) {
@@ -87,7 +85,6 @@ public class KakaoUserDisConnectServiceImpl implements UserDisConnectService{
             );
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
                 return true;
             } else {
                 return false;

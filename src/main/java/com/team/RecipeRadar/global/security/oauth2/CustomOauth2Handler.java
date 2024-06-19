@@ -14,8 +14,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,7 +34,6 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
     //소셜 로그인 성공시 해당로직을 타게되며 accessToken 과 RefreshToken을 발급해준다.
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
-        log.info("onAuthenticationSuccess실행");
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
         String loginId = principal.getMember().getLoginId();
 
@@ -50,7 +47,6 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
                 .build().toString();
 
         ResponseCookie responseCookie = cookieUtils.createCookie("RefreshToken", refreshToken, 30 * 24 * 60 * 60);
-
 
         if (jwtToken != null) {
             HttpHeaders headers = new HttpHeaders();

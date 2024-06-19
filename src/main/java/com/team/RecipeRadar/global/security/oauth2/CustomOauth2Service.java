@@ -14,7 +14,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -32,7 +31,6 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
 
         String requestId = userRequest.getClientRegistration().getRegistrationId();  // 요청한 oath2 사이트 회사명
 
-        log.info("reee={}",requestId);
         Oauth2UserInfo oauth2UserInfo =null;
         Member member=null;
 
@@ -44,7 +42,6 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
             member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
         } else if (requestId.equals("naver")) {
             oauth2UserInfo = new NaverUserInfo(attributes);
-            log.info("aaa={}",oauth2UserInfo.getId());
             member = save(oauth2UserInfo.getId(), oauth2UserInfo.getName(), oauth2UserInfo.getEmail(), requestId);
         }
 
@@ -56,22 +53,19 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
      * 만약 로그인한 정보가 없다면 자동으로 회원가입 진행
      * @return member 객체 반환
      */
-    private Member save(String id, String name, String email,String requestId) {
-        Member member = memberRepository.findByLoginId(id);
+    private Member save(String loginId, String name, String email,String requestId) {
+        Member member = memberRepository.findByLoginId(loginId);
         if (member==null){
             Member user = Member.builder()
-                    .loginId(id)
+                    .loginId(loginId)
                     .username(name)
                     .email(email)
                     .login_type(requestId)
-                    .createAt(LocalDate.now())
                     .nickName(name)
                     .verified(true).roles("ROLE_USER").build();
-            Member save = memberRepository.save(user);
-            return save;
+            return memberRepository.save(user);
         }else {
-            member.setEmail(email);
-            memberRepository.save(member);
+            member.updateEmail(email);
         }
         return member;
     }

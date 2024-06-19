@@ -10,7 +10,6 @@ public class GoogleUserInfo implements Oauth2UserInfo{
         this.attribute = attribute;
     }
 
-
     @Override
     public String getId() {
         return (String) attribute.get("sub");

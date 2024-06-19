@@ -4,9 +4,6 @@ package com.team.RecipeRadar.global.security.oauth2;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.application.MemberService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +28,6 @@ public class NaverUserDisConnectServiceImpl implements UserDisConnectService{
 
     private final ObjectMapper objectMapper;
     private final Oauth2UrlProvider oauth2UrlProvider;
-//    private final MemberRepository memberRepository;
     private final MemberService memberService;
 
     /*
