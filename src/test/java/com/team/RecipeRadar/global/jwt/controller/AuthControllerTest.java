@@ -3,6 +3,7 @@ package com.team.RecipeRadar.global.jwt.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.jwt.Service.JwtAuthService;
 import com.team.RecipeRadar.global.jwt.dto.MemberInfoResponse;
@@ -32,7 +33,7 @@ class AuthControllerTest {
     @MockBean JwtProvider jwtProvider;
     @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean CustomOauth2Service customOauth2Service;
-
+    @MockBean CookieUtils cookieUtils;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -66,16 +67,16 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("엑세스 토큰 유저 정보 조회시 500 예외 발생")
+    @DisplayName("엑세스 토큰 유저 정보 조회시 401 예외 발생")
     void AccessToken_getInfo_ServerEx() throws Exception {
         String fakeToken = "fakeToken";
-        given(jwtAuthService.accessTokenMemberInfo(eq(fakeToken))).willThrow(new JwtTokenException("서버 오류발생"));
+        given(jwtAuthService.accessTokenMemberInfo(eq(fakeToken))).willThrow(new JwtTokenException("토큰이 존재하지 않습니다."));
 
         mockMvc.perform(post("/api/userinfo")
                         .header("Authorization","Bearer"+fakeToken)
                 )
                 .andDo(print())
-                .andExpect(status().is(500))
-                .andExpect(jsonPath("$.message").value("500 INTERNAL_SERVER_ERROR \"서버 오류발생\""));
+                .andExpect(status().is(401))
+                .andExpect(jsonPath("$.message").value("토큰이 존재하지 않습니다."));
     }
 }
