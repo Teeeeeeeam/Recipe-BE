@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityManager;
@@ -49,7 +48,6 @@ class NoticeRepositoryTest {
     void mainNotice(){
         List<NoticeDto> noticeDtosList = noticeRepository.mainNotice();
         assertThat(noticeDtosList).hasSize(5);
-        List<Notice> all = noticeRepository.findAll();
     }
 
     @Test
@@ -59,13 +57,11 @@ class NoticeRepositoryTest {
         Slice<NoticeDto> noticeDtos = noticeRepository.adminNotice(null, request);
         assertThat(noticeDtos.hasNext()).isTrue();
         assertThat(noticeDtos.getContent()).hasSize(4);
-        List<Notice> all = noticeRepository.findAll();
     }
 
     @Test
     @DisplayName("공지사항 상세 내용")
     void details_notice(){
-        List<Notice> all = noticeRepository.findAll();
         NoticeDto noticeDto = noticeRepository.detailsPage(1l);
         assertThat(noticeDto.getNoticeTitle()).isEqualTo("0번째 제목");
     }
@@ -74,5 +70,13 @@ class NoticeRepositoryTest {
     @DisplayName("공지사항 사용자 Id로 삭제")
     void deleteWithMemberId(){
         noticeRepository.deleteMemberId(1l);
+    }
+    
+    @Test
+    @DisplayName("제목으로 조회 테스트")
+    void searchTitle(){
+        PageRequest request = PageRequest.of(0, 10);
+        Slice<NoticeDto> noticeDtos = noticeRepository.searchNotice("4", null, request);
+        assertThat(noticeDtos.getContent()).hasSize(1);
     }
 }
