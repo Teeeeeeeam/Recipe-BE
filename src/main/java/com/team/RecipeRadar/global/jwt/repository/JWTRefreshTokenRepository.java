@@ -9,10 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JWTRefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-
-
-    @Query("SELECT rt from RefreshToken rt where rt.refreshToken=:refreshToken")
-    RefreshToken findByRefreshToken(@Param("refreshToken")String refreshToken);
+    Boolean existsByRefreshTokenAndMemberLoginId(String refreshToken ,String loginId);
 
     @Modifying
     @Query("delete from RefreshToken rt where rt.member.id=:member_id")

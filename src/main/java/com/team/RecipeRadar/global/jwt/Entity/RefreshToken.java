@@ -20,11 +20,18 @@ public class RefreshToken {
     private Long id;
 
     @Column(length = 500)
-    String refreshToken;
+    private String refreshToken;
 
     @OneToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
     private LocalDateTime tokenTIme;
+
+    public void update(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+    public static RefreshToken createRefreshToken(Member member,String refreshToken,LocalDateTime expired){
+        return  RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expired).build();
+    }
 }

@@ -1,6 +1,7 @@
 package com.team.RecipeRadar.global.security.oauth2;
 
 
+import com.team.RecipeRadar.domain.userInfo.utils.CookieUtils;
 import com.team.RecipeRadar.global.jwt.utils.JwtProvider;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,15 @@ import java.io.IOException;
 public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
+    private final CookieUtils cookieUtils;
+
 
     @Value("${host.path}")
     private String successUrl;
 
     //소셜 로그인 성공시 해당로직을 타게되며 accessToken 과 RefreshToken을 발급해준다.
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
         log.info("onAuthenticationSuccess실행");
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
         String loginId = principal.getMember().getLoginId();
@@ -46,13 +49,7 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
                 .queryParam("access-token", jwtToken)
                 .build().toString();
 
-        ResponseCookie responseCookie = ResponseCookie.from("RefreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(30 * 24 * 60 * 60)
-                .build();
+        ResponseCookie responseCookie = cookieUtils.createCookie("RefreshToken", refreshToken, 30 * 24 * 60 * 60);
 
 
         if (jwtToken != null) {

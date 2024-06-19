@@ -3,7 +3,6 @@ package com.team.RecipeRadar.global.jwt.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.team.RecipeRadar.global.jwt.Entity.RefreshToken;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
@@ -12,7 +11,6 @@ import com.team.RecipeRadar.global.jwt.repository.JWTRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -33,135 +31,102 @@ public class JwtProvider {
     private final MemberRepository memberRepository;
     private final JWTRefreshTokenRepository jwtRefreshTokenRepository;
 
+    private final String CLAM_ID ="id";
+    private final String LOGIN_ID ="loginId";
+    private final String NICKNAME ="nickName";
+    private final String LOGIN_TYPE ="loginType";
 
     @Value("${security.token}")
     private String secret;
 
     /**
-     * 엑세스 토큰을 만드는 메서드
-     *
-     * @param loginId
-     * @return 새로운 엑세시 토큰을 만들어 String 타입으로 반환
+     * 엑세스 토큰을 생성 메서드
      */
-
     public String generateAccessToken(String loginId) {
-
-        Member member = memberRepository.findByLoginId(loginId);
+        Member member = getMember(loginId);
 
         LocalDateTime now = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_TINE);
-        Date date = Timestamp.valueOf(now);
-        String token = JWT.create()
-                .withSubject("Token")
-                .withExpiresAt(date)
-                .withClaim("id", member.getId())
-                .withClaim("loginId", member.getLoginId())
-                .withClaim("nickName",member.getNickName())
-                .withClaim("loginType",member.getLogin_type())
-                .sign(Algorithm.HMAC512(secret));
-        return token;
+        return creatToken("Token",  Timestamp.valueOf(now), member);
     }
 
     /**
      * 리프레쉬 토큰을 생성해주는 메서드
-     * @param loginId
-     * @return
      */
     public String generateRefreshToken(String loginId) {
-        Member member = memberRepository.findByLoginId(loginId);
-        RefreshToken refreshToken_member = jwtRefreshTokenRepository.findByMemberId(member.getId());
+        Member member = getMember(loginId);
+        RefreshToken refreshTokenMember = jwtRefreshTokenRepository.findByMemberId(member.getId());
 
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_TINE);
-        Date expirationDate = java.sql.Timestamp.valueOf(expirationDateTime);
+        Date expired =  Timestamp.valueOf(expirationDateTime);
 
         String refreshToken ="";
 
-        if (refreshToken_member==null) {
-            String new_refreshToken = JWT.create()
-                    .withSubject("RefreshToken")
-                    .withExpiresAt(expirationDate)
-                    .withClaim("id", member.getId())
-                    .withClaim("loginId", member.getLoginId())
-                    .withClaim("nickName",member.getNickName())
-                    .withClaim("loginType",member.getLogin_type())
-                    .sign(Algorithm.HMAC512(secret));
-            refreshToken = new_refreshToken;
-            RefreshToken build = RefreshToken.builder().member(member).refreshToken(refreshToken).tokenTIme(expirationDateTime).build();
-            jwtRefreshTokenRepository.save(build);
+        if (refreshTokenMember==null) {
+            refreshToken = creatToken("RefreshToken", expired, member);
+            jwtRefreshTokenRepository.save(RefreshToken.createRefreshToken(member,refreshToken,expirationDateTime));
         }else {
-            refreshToken = refreshToken_member.getRefreshToken();
-            refreshToken_member.setRefreshToken(refreshToken);
-            jwtRefreshTokenRepository.save(refreshToken_member);
+            refreshTokenMember.update(refreshTokenMember.getRefreshToken());    // 로그인을 두번 요청되었을때를 대비해 업데이트 작성
         }
 
         return refreshToken;
     }
 
     /**
-     * JWT 토큰의 만료를 검증하는 메소드
-     *
-     * @param token
-     * @return 만료된 토큰 이면 ture 만려되지 않았다면 false
+     * JWT 토큰의 만료 시간을 검증하는 메소드
      */
     public Boolean TokenExpiration(String token) {
-
-        DecodedJWT decodedJWT = JWT.decode(token);
-        Date expiresAt = decodedJWT.getExpiresAt();
-        if (expiresAt != null && expiresAt.before(new Date())) {
-            return true;
-        } else
-            return false;
+        Date expired = JWT.decode(token).getExpiresAt();
+        return expired != null && expired.before(new Date());
     }
 
     /**
      * 토큰을 검증하는 메서드
-     * @param token
-     * @return
      */
-
     public String validateAccessToken(String token){
-
         try {
-            String loginId = JWT.require(Algorithm.HMAC512(secret)).build()
-                    .verify(token)
-                    .getClaim("loginId")
-                    .asString();
-
-            return loginId;
+            return verifyToken(token);
         } catch (SignatureVerificationException e) {
             log.error("존재하지 않은 토큰 사용");
             throw new JwtTokenException("토큰이 존재하지 않습니다.");
         }
-
     }
 
+    /**
+     * 리프레쉬 토큰을 검증하는 메서드
+     * 만료되지않았거나 토큰이 DB에 존재할때 TRUE
+     */
     public String validateRefreshToken(String refreshToken){
-        try{
-            DecodedJWT decodedJWT = JWT.decode(refreshToken);
+        String loginId = verifyToken(refreshToken);
 
-            String loginId = decodedJWT.getClaim("loginId").asString();
+        Boolean existsByRefreshToken = jwtRefreshTokenRepository.existsByRefreshTokenAndMemberLoginId(refreshToken, loginId);
+        Boolean isTokenTIme = TokenExpiration(refreshToken);
 
-            RefreshToken rerefreshToken = jwtRefreshTokenRepository.findByRefreshToken(refreshToken);
-            if (refreshToken == null) throw new JwtTokenException("토큰이 존재하지 않습니다.");
-
-            Boolean isTokenTIme = TokenExpiration(refreshToken);
-
-            if (loginId.equals(rerefreshToken.getMember().getLoginId())&&!isTokenTIme){
-                String token = generateAccessToken(rerefreshToken.getMember().getLoginId());
-                return token;
-            }else
-                return null;
-
-        }catch (Exception e){
-            e.printStackTrace();
-          throw new JwtTokenException("잘못된 토큰 형식입니다.");
-        }
+        if (!existsByRefreshToken && !isTokenTIme) throw new JwtTokenException("사용할수 없는 토큰 입니다.");
+        return generateAccessToken(loginId);
     }
 
+    /* 토큰의 loginId 값을 조회 */
+    private String verifyToken(String tokenName) {
+        return JWT.require(Algorithm.HMAC512(secret)).build()
+                .verify(tokenName)
+                .getClaim(LOGIN_ID)
+                .asString();
+    }
 
-    private Member getMember(Authentication authentication) {
-        String name = authentication.getName();
+    /* 토큰 생성 */
+    private String creatToken(String tokenName, Date expirationDate, Member member) {
+        return  JWT.create()
+                .withSubject(tokenName)
+                .withExpiresAt(expirationDate)
+                .withClaim(CLAM_ID, member.getId())
+                .withClaim(LOGIN_ID, member.getLoginId())
+                .withClaim(NICKNAME, member.getNickName())
+                .withClaim(LOGIN_TYPE, member.getLogin_type())
+                .sign(Algorithm.HMAC512(secret));
+    }
 
-        Member member = memberRepository.findByLoginId(name);
-        return member;
+    /* 사용자 정보 조회 */
+    private Member getMember(String loginId) {
+        return memberRepository.findByLoginId(loginId);
     }
 }
