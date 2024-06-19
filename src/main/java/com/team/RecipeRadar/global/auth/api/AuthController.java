@@ -57,8 +57,6 @@ public class AuthController {
     private final UserDisConnectService naverDisConnectService;
     private final Oauth2UrlProvider urlProvider;
 
-
-
     @Tag(name = "공용 - 로그인 컨트롤러", description = "로그인 및 토큰 관리")
     @Operation(summary = "엑세스토큰 재발급", description = "엑세스 토큰이 만료되면 리프레시 토큰을 사용하여 새로운 엑세스 토큰을 발급합니다.")
     @ApiResponses(value = {
@@ -78,7 +76,7 @@ public class AuthController {
         return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",jwtProvider.validateRefreshToken(refreshToken)));
     }
 
-    @Operation(summary = "로그인", description = "사용자가 아이디와 비밀번호를 입력하여 로그인하는 API. 로그인이 성공하면 JWT 토큰과 쿠키의 RefreshToken이 발급됩니다.")
+    @Operation(summary = "로그인", description = "사용자가 아이디와 비밀번호를 입력하여 로그인하는 API. 로그인이 성공하면 JWT 토큰과 쿠키의 RefreshToken이 발급됩니다.",tags = "공용 - 로그인 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
