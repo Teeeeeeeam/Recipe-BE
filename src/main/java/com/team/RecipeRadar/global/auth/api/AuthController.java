@@ -1,8 +1,6 @@
 package com.team.RecipeRadar.global.auth.api;
 
 import com.team.RecipeRadar.global.auth.application.AuthService;
-import com.team.RecipeRadar.global.auth.dto.request.LoginRequest;
-import com.team.RecipeRadar.global.auth.dto.request.LogoutRequest;
 import com.team.RecipeRadar.global.auth.dto.request.UserValidRequest;
 import com.team.RecipeRadar.global.auth.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.global.security.oauth2.application.UserDisConnectService;
@@ -27,14 +25,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
