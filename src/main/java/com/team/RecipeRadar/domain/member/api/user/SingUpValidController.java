@@ -28,7 +28,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "공용 - 회원가입 컨트롤러",description = "회원가입 및 검증 처리")
-@RequestMapping("/api/join")
+@RequestMapping("/api")
 @Slf4j
 public class SingUpValidController {
 
@@ -68,7 +68,7 @@ public class SingUpValidController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"사용할수 없는 아이디입니다.\"}")))
     })
-    @PostMapping("/register/validation")
+    @PostMapping("/join/register/validation")
     public ResponseEntity<ControllerApiResponse> LoginIdValid(@RequestBody LoginIdValidRequest loginIdValidRequest){
         sinUpService.LoginIdValid(loginIdValidRequest.getLoginId());;
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"사용 가능"));
@@ -83,7 +83,7 @@ public class SingUpValidController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 사용 불가능\"}")))
     })
-    @PostMapping("/email/validation")
+    @PostMapping("/join/email/validation")
     public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidRequest emailValidRequest){
 
         sinUpService.emailValidCon(emailValidRequest.getEmail());
@@ -99,7 +99,7 @@ public class SingUpValidController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"사용 불가능한 닉네임 입니다.\"}")))
     })
-    @PostMapping("/nickname/validation")
+    @PostMapping("/join/nickname/validation")
     public ResponseEntity<?> nickName(@RequestBody NicknameValidRequest nicknameValidRequest){
         sinUpService.nickNameValid(nicknameValidRequest.getNickname());
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"닉네임 사용 가능"));
