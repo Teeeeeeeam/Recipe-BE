@@ -75,30 +75,6 @@ public class AuthController {
         }
         return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",jwtProvider.validateRefreshToken(refreshToken)));
     }
-
-    @Operation(summary = "로그인", description = "사용자가 아이디와 비밀번호를 입력하여 로그인하는 API. 로그인이 성공하면 JWT 토큰과 쿠키의 RefreshToken이 발급됩니다.",tags = "공용 - 로그인 컨트롤러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\" :\"로그인성공\", \"data\": {\"accessToken\":\"[AccessToken]\"}}"))),
-            @ApiResponse(responseCode = "400" ,description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"password\":\"비밀번호를 입력해주세요\",\"loginId\":\"아이디를 입력해주세요\"}}"))),
-            @ApiResponse(responseCode = "401" ,description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"아이디 및 비밀번호가 일치하지 않습니다.\"}")))
-    })
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult){
-        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
-        Map<String, String> login = jwtAuthService.login(loginRequest.getLoginId(),loginRequest.getPassword());
-        String refreshToken = login.get("refreshToken");
-        ResponseCookie refreshTokenCookie = cookieUtils.createCookie("RefreshToken", refreshToken, 30 * 24 * 60 * 60);
-
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,refreshTokenCookie.toString()).body(new ControllerApiResponse<>(true,"로그인 성공",Map.of("accessToken",login.get("accessToken"))));
-    }
     @Operation(summary = "엑세스 토큰 정보 조회", description = "로그인시 획득한 AccessToken에 대한 사용자 정보를 조회한다.",tags = "공용 - 로그인 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
@@ -121,27 +97,6 @@ public class AuthController {
         MemberInfoResponse info = jwtAuthService.accessTokenMemberInfo(token);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",info));
     }
-
-    @Operation(summary = "로그아웃", description = "해당 사용자의 ID를 보내 로그아웃.(RefreshToken과 AccessToken 모두 삭제)",tags = "공용 - 로그인 컨트롤러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"로그아웃 성공\"}"))),
-            @ApiResponse(responseCode = "401" ,description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"해당 회원은 이미 로그아웃 했습니다.\"}")))
-    })
-    @PostMapping("/logout")
-    public ResponseEntity<?> Logout(@RequestBody LogoutRequest logoutRequest) {
-
-            jwtAuthService.logout(logoutRequest.getMemberId());
-            SecurityContextHolder.clearContext();
-
-            ResponseCookie deleteCookie = cookieUtils.deleteCookie("RefreshToken");
-
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"로그아웃 성공"));
-    }
-
 
     @Operation(summary = "사용자 페이지 쿠키 발급",
             description = "사용자 페이지에서 기능을 사용하기 위해 해당 API에서 비밀번호를 통해 사용자를 인증합니다. 인증에 성공하면 20분 동안 유효한 쿠키를 발급하여 사용자 페이지에서 사용할 수 있습니다. 만약 쿠키가 발급되지 않은 상태에서 사용자 페이지를 URL로 직접 접근하면 403 Forbidden 에러가 발생합니다." +

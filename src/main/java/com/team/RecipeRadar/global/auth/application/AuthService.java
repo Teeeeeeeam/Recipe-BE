@@ -6,10 +6,6 @@ import java.util.Map;
 
 public interface AuthService {
 
-    void logout(Long id);
-
-    Map<String, String> login(String loginId,String password);
-
     MemberInfoResponse accessTokenMemberInfo(String accessToken);
 
     String userToken(Long loginId, String password);
