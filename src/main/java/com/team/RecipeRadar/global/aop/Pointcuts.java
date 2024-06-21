@@ -10,4 +10,8 @@ public class Pointcuts {
     void exMessage(){}
     @Pointcut("execution(*  *..*Controller.*(..))")
     void checkTime(){}
+
+    @Pointcut("execution(*  *..*Controller.*(..))")
+    void ResultSet(){}
+
 }
