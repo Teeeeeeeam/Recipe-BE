@@ -2,6 +2,7 @@ package com.team.RecipeRadar.global.security.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +30,9 @@ public class SecurityExceptionHandlerFilter extends OncePerRequestFilter {
             setErrorResponse(response, e.getMessage(), HttpStatus.UNAUTHORIZED);
         }catch (AccessDeniedException e){
             setErrorResponse(response,e.getMessage(),HttpStatus.UNAUTHORIZED);
-        }catch (BadCredentialsException e){
+        }catch (UnauthorizedException e){
+            setErrorResponse(response,e.getMessage(),HttpStatus.FORBIDDEN);
+        } catch (BadCredentialsException e){
             setErrorResponse(response,e.getMessage(),HttpStatus.UNAUTHORIZED);
         }
     }

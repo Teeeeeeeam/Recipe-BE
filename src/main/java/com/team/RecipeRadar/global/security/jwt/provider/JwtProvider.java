@@ -3,8 +3,8 @@ package com.team.RecipeRadar.global.security.jwt.provider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.auth.domain.RefreshToken;
-import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -42,8 +43,16 @@ public class JwtProvider {
     /**
      * 엑세스 토큰을 생성 메서드
      */
-    public String generateAccessToken(String loginId) {
-        Member member = getMember(loginId);
+
+    public Map<String, String> generateToken (MemberDto memberDto){
+
+        String accessToken = generateAccessToken(memberDto);
+        String refreshToken = generateRefreshToken(memberDto);
+
+        return Map.of("accessToken",accessToken,"refreshToken",refreshToken);
+    }
+
+    public String generateAccessToken(MemberDto member) {
 
         LocalDateTime now = LocalDateTime.now().plusMinutes(ACCESS_TOKEN_TINE);
         return creatToken("Token",  Timestamp.valueOf(now), member);
@@ -52,8 +61,7 @@ public class JwtProvider {
     /**
      * 리프레쉬 토큰을 생성해주는 메서드
      */
-    public String generateRefreshToken(String loginId) {
-        Member member = getMember(loginId);
+    public String generateRefreshToken(MemberDto member) {
         RefreshToken refreshTokenMember = jwtRefreshTokenRepository.findByMemberId(member.getId());
 
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMonths(REFRESH_TOKEN_TINE);
@@ -63,9 +71,11 @@ public class JwtProvider {
 
         if (refreshTokenMember==null) {
             refreshToken = creatToken("RefreshToken", expired, member);
-            jwtRefreshTokenRepository.save(RefreshToken.createRefreshToken(member,refreshToken,expirationDateTime));
-        }else {
+            jwtRefreshTokenRepository.save(RefreshToken.createRefreshToken(MemberDto.toEntity(member),refreshToken,expirationDateTime));
+        }
+        else {
             refreshTokenMember.update(refreshTokenMember.getRefreshToken());    // 로그인을 두번 요청되었을때를 대비해 업데이트 작성
+            refreshToken= refreshTokenMember.getRefreshToken();
         }
 
         return refreshToken;
@@ -98,15 +108,15 @@ public class JwtProvider {
     public String validateRefreshToken(String refreshToken){
         String loginId = verifyToken(refreshToken);
 
-        Boolean existsByRefreshToken = jwtRefreshTokenRepository.existsByRefreshTokenAndMemberLoginId(refreshToken, loginId);
+        MemberDto memberDto = jwtRefreshTokenRepository.existsByRefreshTokenAndMember(refreshToken, loginId);
         Boolean isTokenTIme = TokenExpiration(refreshToken);
 
-        if (!existsByRefreshToken && !isTokenTIme) throw new JwtTokenException("사용할수 없는 토큰 입니다.");
-        return generateAccessToken(loginId);
+        if (isTokenTIme || memberDto==null) throw new JwtTokenException("사용할수 없는 토큰 입니다.");
+        return generateAccessToken(memberDto);
     }
 
     /* 토큰의 loginId 값을 조회 */
-    private String verifyToken(String tokenName) {
+    public String verifyToken(String tokenName) {
         return JWT.require(Algorithm.HMAC512(secret)).build()
                 .verify(tokenName)
                 .getClaim(LOGIN_ID)
@@ -114,19 +124,15 @@ public class JwtProvider {
     }
 
     /* 토큰 생성 */
-    private String creatToken(String tokenName, Date expirationDate, Member member) {
+    private String creatToken(String tokenName, Date expirationDate, MemberDto member) {
         return  JWT.create()
                 .withSubject(tokenName)
                 .withExpiresAt(expirationDate)
                 .withClaim(CLAM_ID, member.getId())
                 .withClaim(LOGIN_ID, member.getLoginId())
-                .withClaim(NICKNAME, member.getNickName())
+                .withClaim(NICKNAME, member.getNickname())
                 .withClaim(LOGIN_TYPE, member.getLogin_type())
                 .sign(Algorithm.HMAC512(secret));
     }
 
-    /* 사용자 정보 조회 */
-    private Member getMember(String loginId) {
-        return memberRepository.findByLoginId(loginId);
-    }
 }

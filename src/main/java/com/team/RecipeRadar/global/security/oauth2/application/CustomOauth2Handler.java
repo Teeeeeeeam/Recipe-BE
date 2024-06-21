@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 
 @Service
@@ -26,28 +27,30 @@ public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtProvider jwtProvider;
     private final CookieUtils cookieUtils;
 
+    private final String ACCESS_TOKEN = "accessToken";
+    private final String REFRESH_TOKEN = "refreshToken";
 
     @Value("${host.path}")
     private String successUrl;
 
+
     //소셜 로그인 성공시 해당로직을 타게되며 accessToken 과 RefreshToken을 발급해준다.
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
+
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        String loginId = principal.getMember().getLoginId();
+        Map<String, String> toekenMap = jwtProvider.generateToken(principal.getMemberDto(principal.getMember()));
 
-        String jwtToken = jwtProvider.generateAccessToken(loginId);
-        String refreshToken = jwtProvider.generateRefreshToken(loginId);
-
+        String accessToken = toekenMap.get(ACCESS_TOKEN);
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(successUrl);
 
         String redirectURI = builder
-                .queryParam("access-token", jwtToken)
+                .queryParam("access-token", accessToken)
                 .build().toString();
 
-        ResponseCookie responseCookie = cookieUtils.createCookie("RefreshToken", refreshToken, 30 * 24 * 60 * 60);
+        ResponseCookie responseCookie = cookieUtils.createCookie("RefreshToken", toekenMap.get(REFRESH_TOKEN), 30 * 24 * 60 * 60);
 
-        if (jwtToken != null) {
+        if (accessToken != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
             response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());

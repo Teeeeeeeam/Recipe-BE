@@ -2,12 +2,17 @@ package com.team.RecipeRadar.global.security.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
+import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import lombok.RequiredArgsConstructor;
+import com.team.RecipeRadar.global.utils.CookieUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -17,71 +22,56 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
-@RequiredArgsConstructor
+
 @Slf4j
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final CookieUtils cookieUtils;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String URL ="/api/login";
+    public JwtLoginFilter(AuthenticationManager authenticationManager, JwtProvider jwtProvider, CookieUtils cookieUtils) {
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
+        this.cookieUtils = cookieUtils;
+        setFilterProcessesUrl(URL);
+    }
 
-    /**
-     * 로그인을 처리하는 Custom 메소드(Jwt 토큰을 사용해 로그인 처리를하기때문에 LoginFrom 을 사용하지않아 커스텀)
-     * @param request 요청
-     * @param response 응답
-     * redirect as part of a multi-stage authentication process (such as OpenID).
-     * @return authenticate 객체를 반환
-     * @throws AuthenticationException
-     */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        log.info("로그인 시도중");
-        
-            ObjectMapper objectMapper = new ObjectMapper();
-        Member member = null;
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
-            member = objectMapper.readValue(request.getInputStream(), Member.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            Member member = objectMapper.readValue(request.getInputStream(), Member.class);
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(member.getLoginId(), member.getPassword());
+            return authenticationManager.authenticate(authToken);
+        } catch (Exception e) {
+            throw new JwtTokenException("로그인 실패");
         }
-
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(member.getLoginId(), member.getPassword());
-            Authentication authenticate = authenticationManager.authenticate(token);
-            
-            return authenticate;
-
     }
 
-    /**
-     * 로그인성공시 실행되며, 응답값에 jwt 토큰을 만들어 전달달한다. (200OK).
-     * @param request 요청
-     * @param response 응답
-     * @param chain 필터체인
-     * @param authResult the object returned from the <tt>attemptAuthentication</tt>
-     * method.
-     */
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult){
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         PrincipalDetails principal = (PrincipalDetails) authResult.getPrincipal();
-        String loginId = principal.getMember().getLoginId();
+        Map<String, String> tokenMap = jwtProvider.generateToken(principal.getMemberDto(principal.getMember()));
 
-        String token = jwtProvider.generateAccessToken(loginId);
-        String refreshToken = jwtProvider.generateRefreshToken(loginId);
+        String accessToken = tokenMap.get("accessToken");
+        String refreshToken = tokenMap.get("refreshToken");
 
-        response.addHeader("Authorization","Bearer "+ token);
-        response.addHeader("RefreshToken","Bearer "+ refreshToken);
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        ResponseCookie refreshTokenCookie = cookieUtils.createCookie("RefreshToken", refreshToken, 30 * 24 * 60 * 60);
+        response.setHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        ControllerApiResponse<String> apiResponse = new ControllerApiResponse<>(true, "로그인 성공", accessToken);
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 
-
-    /**
-     * 로그인 실패시 BadCredentialsException 을 날린다.
-     * @param request
-     * @param response
-     * @param failed
-     */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed){
-        log.error("로그인 실패", failed);
-        throw new BadCredentialsException("로그인 실패");
+        throw new JwtTokenException("로그인 실패");
     }
 }

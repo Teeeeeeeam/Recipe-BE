@@ -25,6 +25,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
+            log.info("설마 여기로오니?");
             filterChain.doFilter(request,response);
         }catch (JwtTokenException e){
             setErrorResponse(response, e.getMessage(),HttpStatus.UNAUTHORIZED);
