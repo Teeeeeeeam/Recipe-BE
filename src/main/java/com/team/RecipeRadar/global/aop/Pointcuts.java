@@ -8,5 +8,6 @@ public class Pointcuts {
 
     @Pointcut("execution(* com.team.RecipeRadar.*..*(..))")
     void exMessage(){}
-
+    @Pointcut("execution(*  *..*Controller.*(..))")
+    void checkTime(){}
 }
