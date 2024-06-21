@@ -34,7 +34,8 @@ public class SinUpServiceImpl implements SinUpService{
 
     @Override
     public void joinMember(MemberDto memberDto) {
-        Member entity = MemberDto.toEntity(memberDto,passwordEncoder);
+        memberDto.setPassword(passwordEncoder.encode(memberDto.getPassword()));
+        Member entity = MemberDto.toEntity(memberDto);
         memberRepository.save(entity);
     }
 

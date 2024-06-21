@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -50,11 +49,11 @@ public class MemberDto {
     @JsonIgnore
     private Integer code;
 
-    public static Member toEntity(MemberDto memberDto, PasswordEncoder passwordEncoder) {
+    public static Member toEntity(MemberDto memberDto) {
         return Member.builder()
                 .id(memberDto.getId())
                 .loginId(memberDto.loginId)
-                .password(passwordEncoder.encode(memberDto.getPassword()))
+                .password(memberDto.getPassword())
                 .email(memberDto.email)
                 .createAt(LocalDate.now())
                 .nickName(memberDto.nickname)
