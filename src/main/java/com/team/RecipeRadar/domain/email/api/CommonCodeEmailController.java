@@ -61,11 +61,11 @@ public class CommonCodeEmailController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[인증번호가 일치하지 않습니다. or 숫자만 입력해주세요.]\"}")))
     })
     @PostMapping("/verify")
-    public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
+    public ResponseEntity<?> check(@Valid  EmailVerificationRequest emailVerificationRequest, BindingResult bindingResult){
         ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
         if (result != null) return result;
 
-        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(signUpEmailVerificationRequest.getEmail(), signUpEmailVerificationRequest.getCode());
+        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
         if(!stringBooleanMap.get("isVerifyCode")) throw new IllegalStateException("인증번호가 일치하지 않습니다.");
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",stringBooleanMap));

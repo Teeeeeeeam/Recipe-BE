@@ -5,7 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 
-@Schema(name = "이메일 검증 Request")
+@Schema(name = "이메일 인증 번호 검증  Request")
 @Data
 public class EmailVerificationRequest {
 
