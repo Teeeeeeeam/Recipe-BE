@@ -1,22 +1,19 @@
 package com.team.RecipeRadar.domain.notice.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notice.application.user.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoNoticeResponse;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
-import com.team.mock.CustomMockAdmin;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,20 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+@Import(TestConfig.class)
 @WebMvcTest(NoticeController.class)
 class NoticeControllerTest {
 
 
     @MockBean NoticeService noticeService;
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
     @Autowired MockMvc mockMvc;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private final String originalName = "test.png";
     @Test
     @DisplayName("메인 공지사항")
     void mainNotice() throws Exception {

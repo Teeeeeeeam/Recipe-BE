@@ -2,25 +2,23 @@ package com.team.RecipeRadar.domain.member.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.application.user.MemberService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.response.UserInfoResponse;
 import com.team.RecipeRadar.domain.member.dto.rqeust.UserDeleteIdRequest;
 import com.team.RecipeRadar.domain.member.dto.rqeust.UserInfoEmailRequest;
 import com.team.RecipeRadar.domain.member.dto.rqeust.UserInfoUpdateNickNameRequest;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Import(TestConfig.class)
 @WebMvcTest(MemberController.class)
 public class MemberControllerTest {
 
@@ -47,11 +46,6 @@ public class MemberControllerTest {
     @MockBean ApplicationEvent applicationEvent;
     @MockBean CookieUtils cookieUtils;
     @MockBean MemberService memberService;
-
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -89,12 +83,12 @@ public class MemberControllerTest {
         // Given
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         when(memberService.getMembers(anyLong()))
-                .thenThrow(new AccessDeniedException("Access Denied"));
+                .thenThrow(new IllegalArgumentException("Access Denied"));
 
         // When, Then
         mockMvc.perform(get("/api/user/info/")
                         .cookie(cookie))
-                .andExpect(status().is(401))
+                .andExpect(status().is(403))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Access Denied"));
     }
@@ -133,14 +127,14 @@ public class MemberControllerTest {
         Cookie cookie = new Cookie("login-id", "fakeCookie");
         request.setNickName(nickName);
 
-        doThrow(new AccessDeniedException("접근 불가한 페이지")).when(memberService).updateNickName(eq(nickName), anyLong());
+        doThrow(new IllegalArgumentException("접근 불가한 페이지")).when(memberService).updateNickName(eq(nickName), anyLong());
 
         mockMvc.perform(put("/api/user/info/update/nickname")
                         .content(objectMapper.writeValueAsString(request))
                         .cookie(cookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().is(401))
+                .andExpect(status().is(403))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("접근 불가한 페이지"));
     }

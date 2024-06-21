@@ -6,6 +6,7 @@ import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,7 +65,7 @@ class QuestionRepositoryTest {
     @Test
     @DisplayName("문의 사항 예외")
     void details_questionNotFound() {
-        assertThrows(NoSuchElementException.class, () -> questionRepository.details(999L));
+        assertThrows(NoSuchDataException.class, () -> questionRepository.details(999L));
     }
 
 }

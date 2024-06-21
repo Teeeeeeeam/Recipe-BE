@@ -3,12 +3,8 @@ package com.team.RecipeRadar.domain.member.api.admin;
 import com.team.RecipeRadar.domain.balckLIst.dto.MemberInfoResponse;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
 import com.team.RecipeRadar.domain.member.application.admin.AdminMemberService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -34,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+@Import(TestConfig.class)
 @WebMvcTest(AdminMemberController.class)
 class AdminMemberControllerTest {
 
@@ -42,12 +40,6 @@ class AdminMemberControllerTest {
     @MockBean ResignEmailHandler resignEmailHandler;
     @MockBean ApplicationEvent applicationEvent;
     @MockBean AdminMemberService adminMemberService;
-
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
-
 
     @Test
     @DisplayName("사용자 수 전제 조회")

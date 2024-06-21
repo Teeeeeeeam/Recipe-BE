@@ -5,24 +5,19 @@ import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.like.PostLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.mock.CustomMockUser;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
@@ -37,19 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@ExtendWith(SpringExtension.class)
+@Import(TestConfig.class)
 @WebMvcTest(PostLikeController.class)
-@Slf4j
 class PostLikeControllerTest {
 
-    @MockBean private PostLikeServiceImpl postLikeService;
-    @Autowired private MockMvc mockMvc;
-
+    @MockBean PostLikeServiceImpl postLikeService;
+    @Autowired MockMvc mockMvc;
     @MockBean CookieUtils cookieUtils;
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

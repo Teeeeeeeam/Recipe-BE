@@ -5,25 +5,20 @@ import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.mock.CustomMockUser;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -37,20 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@Import(TestConfig.class)
 @WebMvcTest(CommentController.class)
-@Slf4j
 class CommentControllerTest {
 
 
-    @MockBean private CommentServiceImpl commentService;
-    @Autowired private MockMvc mockMvc;
-
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
-
+    @MockBean CommentServiceImpl commentService;
+    @Autowired MockMvc mockMvc;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test

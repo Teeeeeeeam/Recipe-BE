@@ -1,9 +1,8 @@
 package com.team.RecipeRadar.global.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.security.oauth2.application.UserDisConnectService;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.KakaoUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.NaverUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
@@ -11,15 +10,13 @@ import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.JwtTokenException;
 import com.team.RecipeRadar.global.auth.application.AuthService;
 import com.team.RecipeRadar.global.auth.dto.response.MemberInfoResponse;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -29,20 +26,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
+@Import(TestConfig.class)
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
 
     @MockBean AuthService jwtAuthService;
-    @MockBean MemberRepository memberRepository;
     @MockBean CookieUtils cookieUtils;
-    @MockBean JwtProvider jwtProvider;
     @MockBean KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
     @MockBean NaverUserDisConnectServiceImpl naverUserDisConnectService;
-    @MockBean CustomOauth2Handler customOauth2Handler;
     @MockBean Oauth2UrlProvider oauth2UrlProvider;
-    @MockBean CustomOauth2Service customOauth2Service;
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     @Autowired
     MockMvc mockMvc;
 

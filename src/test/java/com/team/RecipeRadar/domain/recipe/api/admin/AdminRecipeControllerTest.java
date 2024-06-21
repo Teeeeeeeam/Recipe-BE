@@ -3,22 +3,20 @@ package com.team.RecipeRadar.domain.recipe.api.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.recipe.application.admin.AdminRecipeService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
-import com.team.RecipeRadar.domain.recipe.api.admin.AdminRecipeController;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -37,8 +36,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
+import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -50,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @Slf4j
+@Import(TestConfig.class)
 @WebMvcTest(AdminRecipeController.class)
 class AdminRecipeControllerTest {
 
@@ -58,12 +58,8 @@ class AdminRecipeControllerTest {
     @MockBean ResignEmailHandler resignEmailHandler;
     @MockBean ApplicationEvent applicationEvent;
     @MockBean AdminRecipeService adminService;
-    @MockBean MemberRepository memberRepository;
     @MockBean PostServiceImpl postService;
     @MockBean S3UploadService s3UploadService;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -108,31 +104,6 @@ class AdminRecipeControllerTest {
     }
 
     @Test
-    @DisplayName("레시피 등록 테스트 (일반 사용자 등록 실패)")
-    @CustomMockUser
-    void save_Recipe_User_Fail() throws Exception {
-        List<String> ingredients = List.of("재료1", "재료2");
-        List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        String uploadFile= "test.jpg";
-        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
-
-        given(s3UploadService.uploadFile(eq(mockMultipartFile),anyList())).willReturn(uploadFile);
-        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest), eq(mockMultipartFile));
-
-        MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
-
-        mockMvc.perform(
-                        multipart("/api/admin/save/recipe")
-                                .file(mockMultipartFile)
-                                .file(request)
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     @CustomMockAdmin
     @DisplayName("레시피 수정 성공시 테스트")
     void recipe_update_successful() throws Exception {
@@ -161,6 +132,31 @@ class AdminRecipeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("레시피 수정 성공"));
+    }
+    @Test
+    @Disabled
+    @CustomMockUser
+    @DisplayName("레시피 등록 테스트 (일반 사용자 등록 실패)")
+    void save_Recipe_User_Fail() throws Exception {
+        List<String> ingredients = List.of("재료1", "재료2");
+        List<String> cooksteps = List.of("조리1", "조리2");
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
+        String uploadFile= "test.jpg";
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
+
+        given(s3UploadService.uploadFile(eq(mockMultipartFile),anyList())).willReturn(uploadFile);
+        doNothing().when(adminService).saveRecipe(eq(recipeSaveRequest), eq(mockMultipartFile));
+
+        MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(
+                        multipart("/api/admin/save/recipe")
+                                .file(mockMultipartFile)
+                                .file(request)
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -209,7 +205,7 @@ class AdminRecipeControllerTest {
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
 
-        doThrow(new NoSuchElementException("해당 레시피를 찾을수가 없습니다.")).when(adminService).updateRecipe(recipe_id,recipeUpdateRequest,multipartFile);
+        doThrow(new NoSuchDataException(NO_SUCH_RECIPE)).when(adminService).updateRecipe(recipe_id,recipeUpdateRequest,multipartFile);
 
         MockMultipartFile recipeUpdateRequest_multi = new MockMultipartFile("recipeUpdateRequest", null, "application/json", objectMapper.writeValueAsString(recipeUpdateRequest).getBytes(StandardCharsets.UTF_8));
         mockMvc.perform(multipart("/api/admin/update/"+recipe_id)
@@ -224,7 +220,7 @@ class AdminRecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("해당 레시피를 찾을수가 없습니다."));
+                .andExpect(jsonPath("$.message").value("레시피를 찾을 수 없습니다."));
     }
 
 

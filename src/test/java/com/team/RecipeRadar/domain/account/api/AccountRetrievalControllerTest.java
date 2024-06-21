@@ -2,29 +2,22 @@ package com.team.RecipeRadar.domain.account.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
-import com.team.RecipeRadar.domain.account.api.AccountRetrievalController;
 import com.team.RecipeRadar.domain.account.application.AccountRetrievalService;
-import com.team.RecipeRadar.domain.member.application.user.MemberServiceTest;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.FindPasswordRequest;
 import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
@@ -36,24 +29,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(TestConfig.class)
 @WebMvcTest(AccountRetrievalController.class)
-@ExtendWith(SpringExtension.class)
-@Slf4j
 class AccountRetrievalControllerTest {
 
-    @MockBean private AccountRetrievalService accountRetrievalService;
-    @Autowired private MockMvc mockMvc;
+    @MockBean AccountRetrievalService accountRetrievalService;
+    @Autowired MockMvc mockMvc;
     @MockBean BlackListRepository blackListRepository;
     @MockBean CookieUtils cookieUtils;
-
     @MockBean AccountRetrievalEmailServiceImpl mailService;
-    @MockBean MemberRepository memberRepository;
-    @MockBean
-    MemberServiceTest memberService;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test

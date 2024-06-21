@@ -1,11 +1,8 @@
 package com.team.RecipeRadar.domain.visit.api;
 
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.domain.visit.domain.VisitSession;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
 import com.team.RecipeRadar.domain.visit.dao.VisitSessionRepository;
 import com.team.RecipeRadar.domain.visit.dto.DayDto;
@@ -18,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -31,11 +29,11 @@ import java.util.List;
 import static java.time.LocalDate.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(TestConfig.class)
 @WebMvcTest(VisitCountController.class)
 class VisitSessionControllerTest {
 
@@ -44,11 +42,6 @@ class VisitSessionControllerTest {
     @MockBean CookieUtils cookieUtils;
 
     @Autowired private MockMvc mockMvc;
-
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
 
     @Test
     @DisplayName("처음 방문할시에 쿠키 발급후 db에 저장")

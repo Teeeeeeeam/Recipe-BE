@@ -1,9 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.recipe.application.user.RecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.dto.*;
@@ -13,16 +10,13 @@ import com.team.RecipeRadar.domain.recipe.dto.response.MainPageRecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeNormalPageResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
-import com.team.mock.CustomMockUser;
-import lombok.extern.slf4j.Slf4j;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -38,21 +32,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Slf4j
+@Import(TestConfig.class)
 @WebMvcTest(RecipeController.class)
 class RecipeControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired MockMvc mockMvc;
     @MockBean RecipeServiceImpl recipeService;
     @MockBean ImgServiceImpl imgService;
     @MockBean S3UploadService s3UploadService;
-
-
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -196,8 +183,6 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipe.[0].likeCount").value(16))
                 .andExpect(jsonPath("$.data.recipe.[1].likeCount").value(13))
                 .andExpect(jsonPath("$.data.recipe.[2].likeCount").value(3));
-
-
     }
 
 }

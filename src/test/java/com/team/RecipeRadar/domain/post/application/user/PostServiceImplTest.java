@@ -4,7 +4,6 @@ import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.like.dao.like.PostLikeRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -188,7 +186,7 @@ class PostServiceImplTest {
         userUpdateRequest.setPostPassword(password);
 
         assertThatThrownBy(() -> postService.update(postId, anotherMemberId, userUpdateRequest, multipartFile))
-                .isInstanceOf(UnauthorizedException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("작성자만 이용 가능합니다.");
     }
 
@@ -266,7 +264,7 @@ class PostServiceImplTest {
         validPostRequest.setPostId(postId);
         when(passwordEncoder.matches(anyString(),anyString())).thenReturn(false);
 
-        assertThatThrownBy(() ->  postService.validPostPassword(1l, validPostRequest)).isInstanceOf(AccessDeniedException.class).hasMessage("비밀번호가 일치하지 않습니다.");
+        assertThatThrownBy(() ->  postService.validPostPassword(1l, validPostRequest)).isInstanceOf(IllegalStateException.class).hasMessage("비밀번호가 일치하지 않습니다.");
     }
 
     @Test
@@ -287,13 +285,9 @@ class PostServiceImplTest {
 
         when(memberRepository.findById(2L)).thenReturn(Optional.of(member)); // 다른 사용자가 호출한 것으로 가정
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
-        log.info("meme={}",member.getLoginId());
-        log.info("post={}",post.getId());
-
-        log.info("asdasd={}",passwordEncoder.matches(request.getPassword(),post.getPostPassword()));
 
         assertThatThrownBy(() -> postService.validPostPassword(2L, request))
-                .isInstanceOf(AccessDeniedException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
     }
 

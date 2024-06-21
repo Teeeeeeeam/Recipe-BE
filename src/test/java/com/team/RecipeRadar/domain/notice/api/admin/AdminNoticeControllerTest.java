@@ -1,19 +1,17 @@
 package com.team.RecipeRadar.domain.notice.api.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.notice.application.admin.AdminNoticeService;
 import com.team.RecipeRadar.domain.notice.dto.request.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.request.AdminUpdateRequest;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,16 +24,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+@Import(TestConfig.class)
 @WebMvcTest(AdminNoticeController.class)
 class AdminNoticeControllerTest {
 
 
     @MockBean AdminNoticeService adminNoticeService;
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
     @Autowired MockMvc mockMvc;
 
     private ObjectMapper objectMapper = new ObjectMapper();

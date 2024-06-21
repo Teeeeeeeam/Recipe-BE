@@ -2,27 +2,23 @@ package com.team.RecipeRadar.domain.post.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
-import com.team.RecipeRadar.domain.post.api.user.PostController;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
 import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.user.*;
+import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
-import com.team.RecipeRadar.global.utils.CookieUtils;
-import com.team.RecipeRadar.global.exception.ex.BadRequestException;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
-import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -43,18 +39,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Import(TestConfig.class)
 @WebMvcTest(PostController.class)
 class PostControllerTest {
 
-    @MockBean private PostServiceImpl postService;
-    @Autowired private MockMvc mockMvc;
-
-    @MockBean CookieUtils cookieUtils;
-    @MockBean MemberRepository memberRepository;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean CustomOauth2Handler customOauth2Handler;
-    @MockBean CustomOauth2Service customOauth2Service;
-
+    @MockBean PostServiceImpl postService;
+    @Autowired MockMvc mockMvc;
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -98,12 +88,12 @@ class PostControllerTest {
         String loginId= "test";
         Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        given(postService.userPostPage(anyLong(),isNull(),any(Pageable.class))).willThrow(new AccessDeniedException("접근 할수 없는 페이지 입니다."));
+        given(postService.userPostPage(anyLong(),isNull(),any(Pageable.class))).willThrow(new IllegalArgumentException("접근 할수 없는 페이지 입니다."));
 
         mockMvc.perform(get("/api/user/info/posts",loginId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(cookie))
                 .andDo(print())
-                .andExpect(status().is(401))
+                .andExpect(status().is(403))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("접근 할수 없는 페이지 입니다."));
     }
@@ -289,12 +279,12 @@ class PostControllerTest {
     @CustomMockUser
     void delete_posts_member() throws Exception {
         Long postId = 1l;
-        doThrow(new AccessDeniedException("작성자만 삭제할수 있습니다."))
+        doThrow(new IllegalArgumentException("작성자만 삭제할수 있습니다."))
                 .when(postService).delete(anyLong(), anyLong());
 
         mockMvc.perform(delete("/api/user/posts/"+postId))
                 .andDo(print())
-                .andExpect(status().is(401))
+                .andExpect(status().is(403))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("작성자만 삭제할수 있습니다."));
     }
