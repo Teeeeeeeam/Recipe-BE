@@ -10,13 +10,13 @@ import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
 import com.team.RecipeRadar.domain.qna.dao.question.QuestionRepository;
 import com.team.RecipeRadar.domain.member.dto.response.UserInfoResponse;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -140,7 +140,7 @@ public class MemberServiceImpl implements MemberService {
 
     private static void validateNormalUser(Member member) {
         if (!member.getLogin_type().equals("normal"))
-            throw new AccessDeniedException("일반 사용자만 가능합니다.");
+            throw new UnauthorizedException("일반 사용자만 가능합니다.");
     }
     private void deleteMemberId(Member member) {
         noticeRepository.deleteMemberId(member.getId());

@@ -7,6 +7,8 @@ import com.team.RecipeRadar.domain.qna.domain.Question;
 import com.team.RecipeRadar.domain.qna.domain.QuestionStatus;
 import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +44,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
                 .leftJoin(uploadFile).on(uploadFile.question.id.eq(question.id))
                 .where(question.id.eq(questionId)).fetch();
 
-        return questonList.stream().map(tuple -> QuestionDto.of(tuple.get(question),getImageUrl(tuple))).findFirst().orElseThrow(() -> new NoSuchElementException("문의사항을 찾을수 없습니다."));
+        return questonList.stream().map(tuple -> QuestionDto.of(tuple.get(question),getImageUrl(tuple))).findFirst().orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_QUESTION));
     }
 
     @Override

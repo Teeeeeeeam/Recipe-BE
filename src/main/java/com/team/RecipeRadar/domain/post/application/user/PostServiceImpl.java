@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -134,7 +133,7 @@ public class PostServiceImpl implements PostService {
     /* 게시글의 비밀 번호를 검증하는 메서드 */
     private void validatePassword(ValidPostRequest validPostRequest, Post post) {
         if(!passwordEncoder.matches(validPostRequest.getPassword(), post.getPostPassword()))
-            throw new AccessDeniedException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
     }
 
     /* 사용자 정보 조회 메서드*/
@@ -150,7 +149,7 @@ public class PostServiceImpl implements PostService {
     /* 작성자 및 관리자인지 검증 메서드*/
     private static void validatePostOwner(Member member, Post post) {
         if(!post.getMember().getLoginId().equals(member.getLoginId()) && !member.getRoles().equals("ROLE_ADMIN"))
-            throw new UnauthorizedException("작성자만 이용 가능합니다.");
+            throw new IllegalArgumentException("작성자만 이용 가능합니다.");
     }
 
     /* 삭제 메서드 */
