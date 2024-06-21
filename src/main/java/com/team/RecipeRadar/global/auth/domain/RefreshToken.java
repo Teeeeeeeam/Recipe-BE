@@ -1,10 +1,7 @@
 package com.team.RecipeRadar.global.auth.domain;
 
 import com.team.RecipeRadar.domain.member.domain.Member;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "member")
 public class RefreshToken {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
