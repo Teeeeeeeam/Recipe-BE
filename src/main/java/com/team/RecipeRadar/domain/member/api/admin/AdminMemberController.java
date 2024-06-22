@@ -50,7 +50,7 @@ public class AdminMemberController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"memberInfoes\":[{\"id\":1,\"username\":\"일반\",\"nickname\":\"일반사용자\",\"loginId\":\"user1234\",\"email\":\"user@user.com\"},{\"id\":2,\"username\":\"관리자\",\"nickname\":\"어드민\",\"loginId\":\"admin1234\",\"email\":\"admin@admin.com\"}],\"nextPage\":false}}"))),
     })
     @GetMapping("/members/info")
-    public ResponseEntity<ControllerApiResponse> getMemberInfos(@PathVariable(value = "lastId",required = false) Long lastMemberId ,
+    public ResponseEntity<ControllerApiResponse> getMemberInfos(@RequestParam(value = "lastId",required = false) Long lastMemberId ,
                                                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
         MemberInfoResponse memberInfoResponse = adminMemberService.memberInfos(lastMemberId,pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",memberInfoResponse));
