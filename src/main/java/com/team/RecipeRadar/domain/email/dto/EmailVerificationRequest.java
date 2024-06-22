@@ -13,9 +13,8 @@ public class EmailVerificationRequest {
     @Schema(description = "이메일",example = "test@naver.com")
     private String email;
 
-    @NotNull
-    @Min(value = 100000, message = "인증번호는 최소 6자리여야 합니다.")
-    @Max(value = 999999, message = "인증번호는 최대 6자리여야 합니다.")
+    @Min(value = 100000,message = "최소 6자리 이상입니다.")
+    @Max(value = 999999,message = "최대 6자리 이하입니다.")
     @Schema(description = "이메일 인증번호",example = "123456")
-    private Integer code;
+    private int code;
 }

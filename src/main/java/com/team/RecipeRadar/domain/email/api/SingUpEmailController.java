@@ -49,31 +49,17 @@ public class SingUpEmailController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 검증 성공\"}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"인증 번호 검증\" ,\"data\" : {\"isVerified\": \"true\", \"isExpired\" :true}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[오류 내용]\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/email-confirmation/verify")
     public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
 
-        ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(signUpEmailVerificationRequest.getEmail(), signUpEmailVerificationRequest.getCode());
-        if(!stringBooleanMap.get("isVerifyCode")) throw new IllegalStateException("인증번호가 일치하지 않습니다.");
 
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 검증 성공"));
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"인증 번호 검증",stringBooleanMap));
     }
 
-    private static ResponseEntity<ErrorResponse<List<String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<String> result = new LinkedList<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.add( error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
-    }
 }

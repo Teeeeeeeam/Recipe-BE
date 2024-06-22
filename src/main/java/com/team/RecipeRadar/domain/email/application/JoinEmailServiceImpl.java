@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -60,15 +59,12 @@ public class JoinEmailServiceImpl implements MailService{
      * 인증번호가 유효한지 검증하는 역활을 합니다.
      */
     public Map<String, Boolean> verifyCode(String email, int code) {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        boolean isVerifyCode = false; // 기본값은 false.
-
         EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
-        if (emailVerification != null && isCodeValid(emailVerification)) {
-            isVerifyCode = true;
-        }
-        result.put("isVerifyCode", isVerifyCode);
-        return result;
+
+        boolean isVerified = emailVerification != null;
+        boolean isExpired = emailVerification != null && isCodeValid(emailVerification);
+
+        return Map.of("isVerified",isVerified, "isExpired",isExpired);
     }
 
 

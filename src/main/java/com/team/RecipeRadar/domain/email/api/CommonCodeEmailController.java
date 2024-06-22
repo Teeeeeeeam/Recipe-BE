@@ -17,18 +17,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 @Tag(name = "공통 - 이메일 전송 컨트롤러",description = "이메일 인증 번호 전송 및 검증")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/code/email-confirmation")
+@RequestMapping("/api/code/email-confirmation")
 public class CommonCodeEmailController {
 
     @Qualifier("AccountEmail")
@@ -55,30 +52,15 @@ public class CommonCodeEmailController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"성공\" ,\"data\" : {\"isVerifyCode\": \"true\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"인증 번호 검증\" ,\"data\" : {\"isVerified\": \"true\", \"isExpired\" :true}}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"[인증번호가 일치하지 않습니다. or 숫자만 입력해주세요.]\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/verify")
-    public ResponseEntity<?> check(@Valid  EmailVerificationRequest emailVerificationRequest, BindingResult bindingResult){
-        ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
+    public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest, BindingResult bindingResult){
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
-        if(!stringBooleanMap.get("isVerifyCode")) throw new IllegalStateException("인증번호가 일치하지 않습니다.");
 
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"성공",stringBooleanMap));
-    }
-
-    private static ResponseEntity<ErrorResponse<List<String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<String> result = new LinkedList<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.add( error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"인증 번호 검증",stringBooleanMap));
     }
 }

@@ -13,8 +13,6 @@ public interface SinUpService {
 
     Map<String, Boolean> emailValid(String email);
 
-    void emailValidCon(String email);
-
     void nickNameValid(String nickName);
 
     Map<String,String> ValidationErrorMessage(MemberDto memberDto);

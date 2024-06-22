@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.member.dto.rqeust.JoinRequest;
 import com.team.RecipeRadar.domain.member.dto.rqeust.EmailValidRequest;
 import com.team.RecipeRadar.domain.member.dto.rqeust.LoginIdValidRequest;
 import com.team.RecipeRadar.domain.member.dto.rqeust.NicknameValidRequest;
+import com.team.RecipeRadar.global.annotations.ExcludeResultSet;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,7 @@ public class SingUpValidController {
 
     private final SinUpService sinUpService;
 
+    @ExcludeResultSet
     @Operation(summary = "회원가입", description = "사용자가 회원가입합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -78,16 +80,15 @@ public class SingUpValidController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 사용 가능\"}"))),
-            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 사용 가능\",\"data\" :{ \"duplicateEmail\":true, \"useEmail\":true,\"blackListEmail\":false}}"))),
+            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"이메일 사용 불가능\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/join/email/validation")
-    public ResponseEntity<ControllerApiResponse> emailValid(@RequestBody EmailValidRequest emailValidRequest){
-
-        sinUpService.emailValidCon(emailValidRequest.getEmail());
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 사용 가능"));
+    public ResponseEntity<ControllerApiResponse> emailValid(@Valid @RequestBody EmailValidRequest emailValidRequest,BindingResult result){
+        Map<String, Boolean> stringBooleanMap = sinUpService.emailValid(emailValidRequest.getEmail());
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"이메일 사용 가능",stringBooleanMap));
     }
 
     @Operation(summary = "닉네임 검증",description = "닉네임이 대소문자, 한글, 숫자로 이뤄진 4글자 이상이어야 하며 중복 여부도 검증가능. (true = 사용 가능, false = 사용 불가능)")

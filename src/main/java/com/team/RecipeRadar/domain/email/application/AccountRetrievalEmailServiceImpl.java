@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -69,17 +68,12 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
      */
     @Override
     public Map<String, Boolean> verifyCode(String email, int code) {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-
         EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email, code);
 
-        if (emailVerification != null && isCodeValid(emailVerification)) {
-            result.put("isVerifyCode",true);
-            return result;
-        } else {
-            throw new IllegalStateException("인증번호가 일치하지 않습니다.");
-        }
+        boolean isVerified = emailVerification != null;
+        boolean isExpired = emailVerification != null && isCodeValid(emailVerification);
 
+        return Map.of("isVerified",isVerified, "isExpired",isExpired);
     }
 
     /**

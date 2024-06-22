@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -31,6 +30,18 @@ public class SinUpServiceImpl implements SinUpService{
 
     @Qualifier("JoinEmail")
     private final MailService mailService;
+
+    private static final String DUPLICATE_EMAIL = "duplicateEmail";
+    private static final String EMAIL = "email";
+    private static final String USE_LOGIN_ID = "useLoginId";
+    private static final String PASSWORD_RE = "passwordRe";
+    private static final String LOGIN_ID = "loginId";
+    private static final String CODE = "code";
+    private static final String DUPLICATE_PASSWORD = "duplicate_password";
+    private static final String IS_LOGIN_VALID = "isLoginValid";
+    private static final String USE_EMAIL = "useEmail";
+    private static final String BLACKLIST_EMAIL = "blackListEmail";
+    private static final String NORMAL_LOGIN_TYPE = "normal";
 
     @Override
     public void joinMember(MemberDto memberDto) {
@@ -56,34 +67,20 @@ public class SinUpServiceImpl implements SinUpService{
             }
         }
         mailService.deleteCode(memberDto.getEmail(), memberDto.getCode());
-
         return true;
     }
-
 
     /**
      * 회원가입시 아이디 중복검사 및 아이디 조건체크(대소문자 구문)
      * @param loginId 회원가입시 정보
      * @return  아이디가 이미 사용 중이거나 조건이 불충분하면 false를 반환하고, 모두 만족시 true를 반환합니다
      */
-    public Map<String, Boolean> LoginIdValid(String loginId) {
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        boolean loginIdDuplicated = isLoginIdDuplicated(loginId);
-        Member member = memberRepository.findByCaseSensitiveLoginId(loginId);
-        if (member==null && !loginIdDuplicated) {
-            result.put("useLoginId", true);
-        }else
-            throw new InvalidIdException("사용할수 없는 아이디입니다.");
-        return result;
-    }
-
     @Override
-    public void emailValidCon(String email) {
-        boolean duplicateEmail = isDuplicateEmail(email);
-
-        boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
-        if(!duplicateEmail || !valid)
-            throw new InvalidIdException("이메일 사용 불가능");
+    public Map<String, Boolean> LoginIdValid(String loginId) {
+        if (isLoginIdDuplicated(loginId) || memberRepository.findByCaseSensitiveLoginId(loginId) != null) {
+            throw new InvalidIdException("사용할 수 없는 아이디입니다.");
+        }
+        return Map.of(USE_LOGIN_ID, true);
     }
 
     /**
@@ -93,10 +90,10 @@ public class SinUpServiceImpl implements SinUpService{
      */
     @Override
     public void nickNameValid(String nickname) {
-        Boolean existsByNickName = memberRepository.existsByNickName(nickname);
-
-        boolean valid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,12}$").matcher(nickname).matches();
-        if(!valid || existsByNickName) throw  new InvalidIdException("사용 불가능한 닉네임 입니다.");
+        boolean isNicknameValid = Pattern.compile("^[a-zA-Z0-9가-힣]{4,12}$").matcher(nickname).matches();
+        if (!isNicknameValid || memberRepository.existsByNickName(nickname)) {
+            throw new InvalidIdException("사용 불가능한 닉네임입니다.");
+        }
     }
 
     /**
@@ -106,23 +103,27 @@ public class SinUpServiceImpl implements SinUpService{
     @Override
     public Map<String,String> ValidationErrorMessage(MemberDto memberDto) {
         Map<String, Boolean> validationResult = validateSignUp(memberDto);
+        Map<String, String> errorMessages = new HashMap<>();
 
-        Map<String,String> result = new HashMap<>();
-
-        for (Map.Entry<String, Boolean> entry : validationResult.entrySet()){
-            if(!entry.getValue()){
-                String key = entry.getKey();
-                if(key.equals("duplicate_password"))
-                    result.put("passwordRe","비밀 번호가 일치하지 않습니다.");
-                else if(key.equals("isLoginValid")){
-                    result.put("loginId","중복된 아이디 입니다.");
-                }else if(key.equals("duplicateEmail")){
-                    result.put("email","종복된 이메일 입니다.");
-                } else
-                    result.put("code","인증 번호가 일치하지 않습니다.");
+        validationResult.forEach((key, value) -> {
+            if (!value) {
+                switch (key) {
+                    case DUPLICATE_PASSWORD:
+                        errorMessages.put(PASSWORD_RE, "비밀번호가 일치하지 않습니다.");
+                        break;
+                    case IS_LOGIN_VALID:
+                        errorMessages.put(LOGIN_ID, "중복된 아이디입니다.");
+                        break;
+                    case DUPLICATE_EMAIL:
+                        errorMessages.put(EMAIL, "중복된 이메일입니다.");
+                        break;
+                    default:
+                        errorMessages.put(CODE, "인증 번호가 일치하지 않습니다.");
+                }
             }
-        }
-        return result;
+        });
+
+        return errorMessages;
     }
 
     /**
@@ -133,9 +134,9 @@ public class SinUpServiceImpl implements SinUpService{
      */
     private Map<String, Boolean> validateSignUp(MemberDto memberDto) {
         Map<String, Boolean> validationResult = new LinkedHashMap<>();
-        validationResult.put("isLoginValid",!isLoginIdDuplicated(memberDto.getLoginId()));
+        validationResult.put(IS_LOGIN_VALID,!isLoginIdDuplicated(memberDto.getLoginId()));
         validationResult.putAll(duplicatePassword(memberDto.getPassword(), memberDto.getPasswordRe()));
-        validationResult.put("duplicateEmail",!isDuplicateEmail(memberDto.getEmail()));
+        validationResult.put(DUPLICATE_EMAIL,!isDuplicateEmail(memberDto.getEmail()));
         validationResult.putAll(emailValid(memberDto.getEmail()));
         validationResult.putAll(verifyCode(memberDto.getEmail(), memberDto.getCode()));
 
@@ -148,8 +149,7 @@ public class SinUpServiceImpl implements SinUpService{
      * @return 인증 성공시 true, 실패시 false
      */
     private Map<String, Boolean> verifyCode(String email, int code){
-        Map<String, Boolean> stringBooleanMap = mailService.verifyCode(email,code);
-        return stringBooleanMap;
+        return mailService.verifyCode(email,code);
     }
 
 
@@ -160,23 +160,17 @@ public class SinUpServiceImpl implements SinUpService{
      */
     @Override
     public Map<String, Boolean> emailValid(String email) {
-
         Map<String, Boolean> result = new LinkedHashMap<>();
 
-        boolean blackList = blackListRepository.existsByEmail(email);
+        boolean isBlackListed = blackListRepository.existsByEmail(email);
+        boolean isValidFormat =  Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
+        boolean isDuplicateEmail = isValidFormat && !isBlackListed && !isDuplicateEmail(email);
+        boolean canUseEmail = isValidFormat && !isBlackListed;
 
-        boolean valid = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.(com|net)$").matcher(email).matches();
-        boolean duplicateEmail = true;
-        boolean useEmail = true;
+        result.put(DUPLICATE_EMAIL, isDuplicateEmail);
+        result.put(USE_EMAIL, canUseEmail);
+        result.put(BLACKLIST_EMAIL, !isBlackListed);
 
-        if (valid && !blackList) {
-            // 이메일이 데이터베이스에 존재하는지 확인
-            duplicateEmail = isDuplicateEmail(email);
-        }else
-            useEmail = false;
-
-        result.put("duplicateEmail",duplicateEmail);
-        result.put("useEmail",useEmail);
         return result;
     }
 
@@ -192,7 +186,7 @@ public class SinUpServiceImpl implements SinUpService{
     public Map<String, Boolean> duplicatePassword(String password,String passwordRe) {
         Map<String, Boolean> result = new LinkedHashMap<>();
 
-        result.put("duplicate_password", password.equals(passwordRe));
+        result.put(DUPLICATE_PASSWORD, password.equals(passwordRe));
         return result;
     }
     /**
@@ -200,13 +194,8 @@ public class SinUpServiceImpl implements SinUpService{
      * 일반 사용자의 이메일의 대해서만 검사한다.
      */
     private boolean isDuplicateEmail(String email) {
-        List<Member> member = memberRepository.findByEmail(email);
-        for (Member m : member) {
-            if (m.getLogin_type().equals("normal")) {
-                return  false;
-            }
-        }
-        return true;
+        return memberRepository.findByEmail(email).stream()
+                .anyMatch(member ->NORMAL_LOGIN_TYPE.equals(member.getLogin_type()));
     }
 
     /**
