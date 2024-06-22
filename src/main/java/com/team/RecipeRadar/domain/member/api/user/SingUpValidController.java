@@ -43,7 +43,7 @@ public class SingUpValidController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"회원가입 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
     })
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody JoinRequest joinRequest , BindingResult result){

@@ -22,12 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.LinkedList;
-import java.util.List;
 
 @Tag(name = "어드민 - 문의사항 컨트롤러",description = "문의사항 관리 및 답변")
 @RestController
@@ -77,30 +74,14 @@ public class AdminQnAController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"답변 작성 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[오류 내용]\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/questions/{questionId}/answers")
     public ResponseEntity<?> answer(@PathVariable Long questionId,
                                     @Valid @RequestBody QuestionAnswerRequest questionAnswerRequest, BindingResult bindingResult,
                                     @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails){
-
-        ResponseEntity<ErrorResponse<List<String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
         adminQnAService.questionAnswer(questionId, questionAnswerRequest, principalDetails.getNickName());
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true, "답변 작성 성공"));
     }
-
-    private static ResponseEntity<ErrorResponse<List<String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<String> result = new LinkedList<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.add( error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
-    }
-
 }

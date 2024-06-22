@@ -25,16 +25,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -137,17 +133,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl+disconnected)).build();
     }
-
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> result = new LinkedHashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.put(error.getField(), error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
-    }
-
-
 }

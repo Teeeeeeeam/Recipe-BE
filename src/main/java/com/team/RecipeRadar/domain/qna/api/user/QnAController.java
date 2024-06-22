@@ -23,9 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -42,10 +44,14 @@ public class QnAController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"비로그인 문의 사항 등록\"}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"비로그인 문의 사항 등록\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples =  @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
     })
     @PostMapping(value = "/question",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> accountQuestion(@RequestPart QuestionRequest questionRequest, @RequestPart(required = false) MultipartFile file){
+    public ResponseEntity<?> accountQuestion(@Valid @RequestPart QuestionRequest questionRequest, BindingResult bindingResult,
+                                             @RequestPart(required = false) MultipartFile file){
         qnAService.accountQuestion(questionRequest,file);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"비로그인 문의 사항 등록"));
     }
@@ -56,12 +62,12 @@ public class QnAController {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"문의 사항 등록\"}"))),
-            @ApiResponse(responseCode = "400",description = "BAD REQUEST",
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"문의사항이 존재하지 않습니다.\"}")))
+                            examples =  @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
     })
     @PostMapping(value = "/user/question",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> generalQuestion(@RequestPart QuestionRequest questionRequest,
+    public ResponseEntity<?> generalQuestion(@Valid @RequestPart QuestionRequest questionRequest, BindingResult result,
                                              @RequestPart(required = false) MultipartFile file,
                                              @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         qnAService.generalQuestion(questionRequest,principalDetails.getMemberId(),file);

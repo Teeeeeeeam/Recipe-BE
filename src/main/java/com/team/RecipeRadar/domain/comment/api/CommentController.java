@@ -24,13 +24,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "사용자 - 댓글 컨트롤러",description = "사용자 댓글 관리")
@@ -46,14 +42,11 @@ public class CommentController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"회원정보나 게시글을 찾을수 없습니다.\"}]"))),
+                    examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}, {\"success\":false,\"message\":\"회원정보나 게시글을 찾을수 없습니다.\"}]"))),
     })
     @PostMapping("/api/user/comments")
     public ResponseEntity<?> comment_add(@Valid @RequestBody UserAddCommentRequest userAddCommentRequest, BindingResult bindingResult,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
-            if (bindingResult.hasErrors())
-                return getErrorResponseResponse(bindingResult);
-
         MemberDto memberDto = getMemberDto(principalDetails);
 
         commentService.save(userAddCommentRequest.getPostId(),userAddCommentRequest.getCommentContent(),memberDto.getId());
@@ -102,7 +95,7 @@ public class CommentController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 수정 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"수정할 댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"[오류내용]\"}]"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
@@ -110,21 +103,10 @@ public class CommentController {
     @PutMapping("/api/user/comments")
     public ResponseEntity<?> comment_update(@Valid @RequestBody UserUpdateCommentRequest userUpdateCommentRequest, BindingResult bindingResult,
                                             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
-        if (bindingResult.hasErrors())
-            return getErrorResponseResponse(bindingResult);
-
         MemberDto memberDto = getMemberDto(principalDetails);
         commentService.update(userUpdateCommentRequest.getCommentId(), userUpdateCommentRequest.getCommentContent(), memberDto.getId());
 
         return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공"));
-    }
-
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponse(BindingResult bindingResult) {
-        Map<String, String> result = new LinkedHashMap<>();
-        for (FieldError error : bindingResult.getFieldErrors()) {
-            result.put(error.getField(),error.getDefaultMessage());
-        }
-        return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
     }
 
     private static MemberDto getMemberDto(PrincipalDetails principalDetails) {

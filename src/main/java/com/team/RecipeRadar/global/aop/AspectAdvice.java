@@ -14,7 +14,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Aspect
@@ -58,17 +60,16 @@ public class AspectAdvice {
         Object[] args = joinPoint.getArgs();
         log.error("An error occurred during request processing. (BingResultSet)");
 
-
         for (Object arg :args){
             if(arg instanceof BindingResult){
                 BindingResult bindingResult =  (BindingResult)arg;
-                List<String> errors = new ArrayList<>();
+                Map<String,String> erorMap = new LinkedHashMap<>();
                if(bindingResult.hasErrors()){
-                   for (FieldError error : bindingResult.getFieldErrors()){
-                       errors.add(error.getDefaultMessage());
-                   }
+                   bindingResult.getFieldErrors().forEach(
+                           fieldError -> erorMap.put(fieldError.getField(),fieldError.getDefaultMessage())
+                   );
+                   return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", erorMap));
                }
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "모든 값을 입력해주세요", errors));
             }
         }
         return joinPoint.proceed();

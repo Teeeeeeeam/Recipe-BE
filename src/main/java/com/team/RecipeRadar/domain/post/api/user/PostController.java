@@ -22,13 +22,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Tag(name = "사용자 - 게시글 컨트롤러", description = "사용자 게시글과 관련된 API")
 @RestController
@@ -46,15 +43,12 @@ public class PostController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"모든 값을 입력해 주세요\", \"data\": {\"postCookingTime\": \"요리 시간을 선택하세요\"}}"))),
+                    examples =  @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
     })
     @PostMapping(value = "/user/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostRequest, BindingResult bindingResult,
                                      @RequestPart MultipartFile file,
                                      @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
         postService.save(userAddPostRequest,principalDetails.getMemberId(),file);
         return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
     }
@@ -116,15 +110,12 @@ public class PostController {
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"게시글을 찾을수 없습니다.\"}"))),
             @ApiResponse(responseCode = "403", description = "FORBIDDEN",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"작성자만 이용 가능합니다.\"}")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping(value = "/user/update/posts/{postId}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updatePost(@Valid @RequestPart UserUpdateRequest userUpdateRequest, BindingResult bindingResult,
                                          @RequestPart(required = false) MultipartFile file, @PathVariable("postId") Long postId,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
-        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
         postService.update(postId,principalDetails.getMemberId(),userUpdateRequest,file);
 
         return ResponseEntity.ok(new ControllerApiResponse(true,"요리글 수정 성공"));
@@ -169,17 +160,5 @@ public class PostController {
         cookieUtils.validCookie(cookieLoginId,principalDetails.getName());
         UserInfoPostResponse userInfoPostResponse = postService.userPostPage(principalDetails.getMemberId(),lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userInfoPostResponse));
-    }
-
-    /* BindingResult 의 예외 Valid 여러곳의 사용되어서 메소드로 추출 */
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> result = new LinkedHashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.put(error.getField(), error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
     }
 }

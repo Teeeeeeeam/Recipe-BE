@@ -19,14 +19,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Tag(name = "어드민 - 공지사항 컨트롤러",description = "공지사항 관리")
@@ -44,15 +41,12 @@ public class AdminNoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples =  @ExampleObject(value = "{\"success\": false, \"message\": \"관련 오류 내용\"}"))),
+                            examples =  @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
     })
     @PostMapping(value = "/notices", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> noticeAdd(@Valid @RequestPart AdminAddRequest adminAddRequest, BindingResult bindingResult,
                                        @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
                                        @RequestPart(required = false) MultipartFile file) {
-        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
-
         adminNoticeService.save(adminAddRequest,principalDetails.getMemberId(),file);
         return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
     }
@@ -65,7 +59,7 @@ public class AdminNoticeController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": {\"noticeTitle\": \"[수정한 공지사항 제목]\", \"memberId\": \"[사용자 ID]\", \"noitceId\": \"[공지사항 ID]\", \"update_At\": \"[수정 시간]\"}}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"관련 오류 내용\"}"))),
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": false, \"message\" : \"관리자만 수정할수 있습니다.\"}")))
@@ -73,22 +67,9 @@ public class AdminNoticeController {
     @PutMapping(value = "/notices/{noticeId}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public  ResponseEntity<?> updateNotice(@Valid @RequestPart AdminUpdateRequest adminUpdateRequest, BindingResult bindingResult,
                                            @RequestPart(required = false) MultipartFile file, @PathVariable("noticeId") Long noticeId){
-        ResponseEntity<ErrorResponse<Map<String, String>>> result = getErrorResponseResponseEntity(bindingResult);
-        if (result != null) return result;
         adminNoticeService.update(noticeId,adminUpdateRequest,file);
 
         return ResponseEntity.ok(new ControllerApiResponse(true,"공지사항 수정 성공"));
-    }
-
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> result = new LinkedHashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                result.put(error.getField(), error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
-        }
-        return null;
     }
 
     @Operation(summary = "공지사항 삭제",description = "관리자만 문의사항 삭제가능 단일, 일괄 삭제가능")

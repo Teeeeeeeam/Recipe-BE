@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.recipe.api.admin;
 
-import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.recipe.application.admin.AdminRecipeService;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +31,6 @@ import java.util.*;
 public class AdminRecipeController {
 
     private final AdminRecipeService adminService;
-    private final S3UploadService s3UploadService;
 
     @Operation(summary = "레시피수 조회", description = "작성된 레시피의 수를 조회하는 API",tags = "어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
@@ -88,15 +85,11 @@ public class AdminRecipeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"레시피 등록 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"[\\\"대표사진을 등록해주세요\\\" OR \\\"이미지 파일만 등록 해주세요\\\" OR \\\"70MB 이하로 등록해주세요\\\"]\"},{\"success\":false,\"message\":\"실패\",\"data\":[\"필드 오류내용\"]}]")))
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"[\"대표사진을 등록해주세요\" OR \"이미지 파일만 등록 해주세요\" OR \"70MB 이하로 등록해주세요\"]\"},{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}]")))
     })
     @PostMapping(value = "/save/recipes", consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> recipe_save(@Valid @RequestPart RecipeSaveRequest recipeSaveRequest, BindingResult bindingResult,
                                          @RequestPart MultipartFile file){
-
-        if (bindingResult.hasErrors())
-            return getErrorResponse(bindingResult);
-
         adminService.saveRecipe(recipeSaveRequest,file);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 등록 성공"));
     }
@@ -109,24 +102,14 @@ public class AdminRecipeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"레시피 수정 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\": false, \"message\": \"모든 값을 입력해주세요\", \"data\": {\"errors\": [\"변경할 레시피의 제목를 입력해주세요\"]}}, {\"success\": false, \"message\": \"해당 레시피를 찾을수 없습니다.\"}]"))),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}, {\"success\": false, \"message\": \"해당 레시피를 찾을수 없습니다.\"}]"))),
     })
     @PutMapping(value = "/update/{recipeId}",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRecipe(@Schema(example = "400648")@PathVariable(name = "recipeId")Long recipeId ,
                                           @Valid @RequestPart RecipeUpdateRequest recipeUpdateRequest, BindingResult bindingResult,
                                           @RequestPart(required = false) MultipartFile file){
-        if (bindingResult.hasErrors())
-            return getErrorResponse(bindingResult);
         adminService.updateRecipe(recipeId,recipeUpdateRequest,file);
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"레시피 수정 성공"));
-    }
-
-    private static ResponseEntity<ErrorResponse<List<String>>> getErrorResponse(BindingResult bindingResult) {
-        List<String> errors = new ArrayList<>();
-        for (FieldError error : bindingResult.getFieldErrors()){
-            errors.add(error.getDefaultMessage());
-        }
-        return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "모든 값을 입력해주세요", errors));
     }
 }

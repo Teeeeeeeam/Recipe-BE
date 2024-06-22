@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -47,12 +46,10 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":[{\"login_type\":\"normal\",\"login_info\":\"[로그인 아이디]\"},  {\"login_type\": \"naver\", \"login_info\": \"[소셜 로그인 아이디]\"}]}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]")))
+                            examples = @ExampleObject(value = "[\"{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}\" , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]")))
     })
     @PostMapping("/api/search/login-id")
     public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdRequest findLoginIdRequest, BindingResult bindingResult){
-        if (bindingResult.hasErrors())
-            return getErrorResponseResponseEntity(bindingResult);
 
         List<Map<String, String>> accountRetrievalServiceLoginId = accountRetrievalService.findLoginId(findLoginIdRequest.getUsername(), findLoginIdRequest.getEmail(),findLoginIdRequest.getCode());
 
@@ -67,12 +64,10 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
+                            examples = @ExampleObject(value = "[\"{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}\" , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
     })
     @PostMapping("/api/search/password")
     public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){
-        if (bindingResult.hasErrors())
-            return getErrorResponseResponseEntity(bindingResult);
 
         String token = accountRetrievalService.findPwd(findPasswordRequest.getUsername(), findPasswordRequest.getLoginId(), findPasswordRequest.getEmail(), findPasswordRequest.getCode());
 
@@ -89,12 +84,10 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"비밀번호 변경 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"[필드명]\":\"[필드 오류 내용]\"}} , {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]")))
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}, {\"success\":false,\"message\":\"[비밀번호가 일치하지 않습니다. OR  비밀번호가 안전하지 않습니다.]\"}]")))
     })
     @PutMapping("/api/password/update")
     public ResponseEntity<?>updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, BindingResult bindingResult, HttpServletRequest request){
-        if (bindingResult.hasErrors())
-            return getErrorResponseResponseEntity(bindingResult);
 
         Cookie[] cookies = request.getCookies();
         String accountId = "";
@@ -113,13 +106,5 @@ public class AccountRetrievalController {
 
         ResponseCookie deleteCookie = cookieUtils.deleteCookie(cookieId);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
-    }
-
-    private static ResponseEntity<ErrorResponse<Map<String, String>>> getErrorResponseResponseEntity(BindingResult bindingResult) {
-        Map<String, String> result = new LinkedHashMap<>();
-        for (FieldError error : bindingResult.getFieldErrors()) {
-            result.put(error.getField(),error.getDefaultMessage());
-        }
-        return ResponseEntity.badRequest().body(new ErrorResponse<>(false, "실패", result));
     }
 }
