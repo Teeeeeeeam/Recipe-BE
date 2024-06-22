@@ -1,13 +1,11 @@
 package com.team.RecipeRadar.domain.account.application;
 
 import com.team.RecipeRadar.domain.account.dao.AccountRetrievalRepository;
-import com.team.RecipeRadar.domain.account.application.AccountRetrievalServiceImpl;
 import com.team.RecipeRadar.domain.member.application.user.MemberService;
-import com.team.RecipeRadar.domain.member.application.user.MemberServiceTest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.account.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import lombok.extern.slf4j.Slf4j;
