@@ -2,6 +2,8 @@ package com.team.RecipeRadar.domain.qna.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.qna.application.user.QnAServiceImpl;
+import com.team.RecipeRadar.domain.qna.domain.AnswerType;
+import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import com.team.RecipeRadar.domain.qna.dto.reqeust.QuestionRequest;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.mock.CustomMockUser;
@@ -35,6 +37,11 @@ class QuestionControllerTest {
     @DisplayName("사용자 계정 관련 질문 등록 성공")
     void accountQuestion_Success() throws Exception {
         QuestionRequest questionRequest = new QuestionRequest();
+        questionRequest.setQuestionType(QuestionType.GENERAL_INQUIRY);
+        questionRequest.setTitle("Sample Question Title");
+        questionRequest.setQuestionContent("This is a sample question content.");
+        questionRequest.setAnswer(AnswerType.EMAIL);
+        questionRequest.setAnswerEmail("sample@example.com");
         MockMultipartFile file = new MockMultipartFile("file", "test.jpg", MediaType.TEXT_PLAIN_VALUE, "fileContent".getBytes());
         MockMultipartFile userAddRequestMultipartFile = new MockMultipartFile("questionRequest", null, "application/json", objectMapper.writeValueAsString(questionRequest).getBytes(StandardCharsets.UTF_8));
 
@@ -54,6 +61,11 @@ class QuestionControllerTest {
     @DisplayName("로그인한 사용자들의 일반 문의 등록 성공")
     void generalQuestion_Success() throws Exception {
         QuestionRequest questionRequest = new QuestionRequest();
+        questionRequest.setQuestionType(QuestionType.GENERAL_INQUIRY);
+        questionRequest.setTitle("Sample Question Title");
+        questionRequest.setQuestionContent("This is a sample question content.");
+        questionRequest.setAnswer(AnswerType.EMAIL);
+        questionRequest.setAnswerEmail("sample@example.com");
         MockMultipartFile file = new MockMultipartFile("file", "test.jpg", MediaType.TEXT_PLAIN_VALUE, "fileContent".getBytes());
         MockMultipartFile userAddRequestMultipartFile = new MockMultipartFile("questionRequest", null, "application/json", objectMapper.writeValueAsString(questionRequest).getBytes(StandardCharsets.UTF_8));
 
