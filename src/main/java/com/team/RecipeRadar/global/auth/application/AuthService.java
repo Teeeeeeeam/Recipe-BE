@@ -2,8 +2,6 @@ package com.team.RecipeRadar.global.auth.application;
 
 import com.team.RecipeRadar.global.auth.dto.response.MemberInfoResponse;
 
-import java.util.Map;
-
 public interface AuthService {
 
     MemberInfoResponse accessTokenMemberInfo(String accessToken);

@@ -1,9 +1,9 @@
 package com.team.RecipeRadar.domain.account.api;
 
 import com.team.RecipeRadar.domain.account.application.AccountRetrievalService;
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.FindLoginIdRequest;
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.FindPasswordRequest;
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.account.dto.request.FindLoginIdRequest;
+import com.team.RecipeRadar.domain.account.dto.request.FindPasswordRequest;
+import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

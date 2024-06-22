@@ -23,7 +23,7 @@ public class RefreshTokenRepositoryCustomImpl implements RefreshTokenRepositoryC
     public MemberDto existsByRefreshTokenAndMember(String token, String loginId) {
 
         List<Member> members = jpaQueryFactory
-                .select(refreshToken1.member)  // refreshToken1.member를 select 절에 포함
+                .select(refreshToken1.member)
                 .from(refreshToken1)
                 .leftJoin(refreshToken1).on(refreshToken1.member.id.eq(member.id)).fetchJoin()
                 .where(refreshToken1.member.loginId.eq(loginId)

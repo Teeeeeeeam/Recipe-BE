@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.account.dto.AccountRetrieval;
+package com.team.RecipeRadar.domain.account.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

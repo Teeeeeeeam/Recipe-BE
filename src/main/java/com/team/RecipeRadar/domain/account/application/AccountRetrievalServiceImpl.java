@@ -5,7 +5,7 @@ import com.team.RecipeRadar.domain.member.application.user.MemberService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.account.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;

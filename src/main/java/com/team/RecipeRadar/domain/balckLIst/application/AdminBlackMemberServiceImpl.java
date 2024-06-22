@@ -4,8 +4,6 @@ import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
 import com.team.RecipeRadar.domain.balckLIst.dto.BlackListResponse;
-import com.team.RecipeRadar.domain.member.application.user.MemberService;
-import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminBlackMemberServiceImpl implements AdminBlackMemberService {
 
-    private final MemberRepository memberRepository;
-    private final MemberService memberService;
     private final BlackListRepository blackListRepository;
-
-
-
-
 
     /**
      * 블랙리스트 저장된 모든 정보를 조회하는 메서드

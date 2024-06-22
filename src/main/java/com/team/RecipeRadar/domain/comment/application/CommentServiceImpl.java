@@ -54,7 +54,6 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 댓글의 Id와 사용자의 Id를 사용해서 댓글을 삭제한다.
-     * 댓글의 작성자가 아닐경우 삭제시에는 ->CommentException 예외를 날린다.
      */
     public void deleteComment(Long commentId, Long memberId) {
         Member member = getMember(memberId);

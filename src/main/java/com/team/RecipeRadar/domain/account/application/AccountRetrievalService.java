@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.account.application;
 
-import com.team.RecipeRadar.domain.account.dto.AccountRetrieval.UpdatePasswordRequest;
+import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 
 import java.util.List;
 import java.util.Map;

@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 
@@ -18,11 +17,10 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 public class ApiControllerAdvice {
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> ServerError (ServerErrorException ex){
-        ErrorResponse errorResponse = new ErrorResponse(false, ex.getMessage());
+    public ResponseEntity<ErrorResponse> ServerError (Exception e){
+        ErrorResponse errorResponse = new ErrorResponse(false, "서버 오류 발생");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-
     @ExceptionHandler(JwtTokenException.class)
     public ResponseEntity<ErrorResponse> TokenError(JwtTokenException e){
         ErrorResponse errorResponse = new ErrorResponse(false, e.getMessage());

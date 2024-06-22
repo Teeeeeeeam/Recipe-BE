@@ -22,11 +22,6 @@ public class BlackList {
 
     private boolean black_check;
 
-    public BlackList(String email, boolean black_check) {
-        this.email = email;
-        this.black_check = black_check;
-    }
-
     public static BlackList toEntity(String email){
         return BlackList.builder()
                 .black_check(true)

@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
-import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +33,6 @@ public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeSer
     private final PostLikeRepository postLikeRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final JwtProvider jwtProvider;
     private final NotificationService notificationService;
 
     /**
