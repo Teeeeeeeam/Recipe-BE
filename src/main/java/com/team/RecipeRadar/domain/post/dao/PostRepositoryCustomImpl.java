@@ -8,7 +8,7 @@ import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
+import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;

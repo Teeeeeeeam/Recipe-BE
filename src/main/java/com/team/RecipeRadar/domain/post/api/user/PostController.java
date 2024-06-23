@@ -1,8 +1,11 @@
 package com.team.RecipeRadar.domain.post.api.user;
 
 import com.team.RecipeRadar.domain.post.application.user.PostService;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
-import com.team.RecipeRadar.domain.post.dto.user.*;
+import com.team.RecipeRadar.domain.post.dto.request.UserAddRequest;
+import com.team.RecipeRadar.domain.post.dto.request.ValidPostRequest;
+import com.team.RecipeRadar.domain.post.dto.response.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.request.UserUpdateRequest;
+import com.team.RecipeRadar.domain.post.dto.response.*;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

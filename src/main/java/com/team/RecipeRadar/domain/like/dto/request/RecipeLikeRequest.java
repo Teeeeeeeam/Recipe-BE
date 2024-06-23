@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.like.dto.like;
+package com.team.RecipeRadar.domain.like.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "게시글 좋아요 Request")
-public class PostLikeRequest {
+@Schema(name = "레시피 좋아요 Request")
+public class RecipeLikeRequest {
 
-    private Long postId;
-
+    private Long recipeId;
 }

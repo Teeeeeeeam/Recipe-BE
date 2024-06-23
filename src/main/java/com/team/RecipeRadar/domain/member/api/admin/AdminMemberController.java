@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.member.api.admin;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.domain.member.application.admin.AdminMemberService;
 import com.team.RecipeRadar.domain.email.event.MailEvent;
 import com.team.RecipeRadar.global.payload.ErrorResponse;

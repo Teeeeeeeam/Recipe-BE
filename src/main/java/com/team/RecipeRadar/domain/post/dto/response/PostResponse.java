@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.post.dto.user;
+package com.team.RecipeRadar.domain.post.dto.response;
 
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import io.swagger.v3.oas.annotations.media.Schema;

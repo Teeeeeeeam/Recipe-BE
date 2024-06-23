@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.like.dto.like;
+package com.team.RecipeRadar.domain.like.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.like.domain.PostLike;

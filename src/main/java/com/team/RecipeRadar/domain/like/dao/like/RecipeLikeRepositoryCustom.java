@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.like.dao.like;
 
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

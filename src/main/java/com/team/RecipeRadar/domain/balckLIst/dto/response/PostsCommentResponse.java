@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.balckLIst.dto;
+package com.team.RecipeRadar.domain.balckLIst.dto.response;
 
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import lombok.AllArgsConstructor;

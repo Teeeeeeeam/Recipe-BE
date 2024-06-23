@@ -7,14 +7,16 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.user.*;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostResponse;
+import com.team.RecipeRadar.domain.post.dto.request.UserAddRequest;
+import com.team.RecipeRadar.domain.post.dto.request.UserUpdateRequest;
+import com.team.RecipeRadar.domain.post.dto.request.ValidPostRequest;
+import com.team.RecipeRadar.domain.post.dto.response.*;
+import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
+import com.team.RecipeRadar.domain.post.dto.response.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.global.exception.ex.*;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +51,7 @@ public class PostServiceImpl implements PostService {
      * 게시글 저장을 저장하는 메서드
      */
     @Override
-    public void save(UserAddRequest userAddRequest, Long memberId ,MultipartFile file) {
+    public void save(UserAddRequest userAddRequest, Long memberId , MultipartFile file) {
         Member member = getMember(memberId);
         Recipe recipe = recipeRepository.findById(userAddRequest.getRecipeId()).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
 
@@ -94,7 +96,7 @@ public class PostServiceImpl implements PostService {
      * 게시글을 업데이트 하기 위한 메서드
      */
     @Override
-    public void update(Long postId,Long memberId,UserUpdateRequest userUpdateRequest,MultipartFile file) {
+    public void update(Long postId, Long memberId, UserUpdateRequest userUpdateRequest, MultipartFile file) {
 
         Member member = getMember(memberId);
         Post post = getPost(postId);

@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.balckLIst.application;
 import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.BlackListResponse;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
-package com.team.RecipeRadar.domain.notification.dto;
+package com.team.RecipeRadar.domain.notification.dto.response;
 
+import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
 import lombok.Data;
 
 import java.util.List;

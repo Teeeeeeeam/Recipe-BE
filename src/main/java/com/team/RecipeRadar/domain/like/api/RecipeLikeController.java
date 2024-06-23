@@ -1,8 +1,8 @@
 package com.team.RecipeRadar.domain.like.api;
 
-import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.application.LikeService;
-import com.team.RecipeRadar.domain.like.dto.like.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.request.RecipeLikeRequest;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;

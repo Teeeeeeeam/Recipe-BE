@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.notification.dto;
+package com.team.RecipeRadar.domain.notification.dto.response;
 
 import com.team.RecipeRadar.domain.notification.domain.Notification;
 import lombok.Builder;
@@ -9,20 +9,20 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResponseNotification {
+public class NotificationResponse {
 
     private Long id;
     private String content;
     private String url;
 
     @Builder
-    public ResponseNotification(Notification notification) {
+    public NotificationResponse(Notification notification) {
         this.id = notification.getId();
         this.content = notification.getContent();
         this.url = notification.getUrl();
     }
 
-    public static ResponseNotification from(Notification notification) {
-        return new ResponseNotification(notification);
+    public static NotificationResponse from(Notification notification) {
+        return new NotificationResponse(notification);
     }
 }

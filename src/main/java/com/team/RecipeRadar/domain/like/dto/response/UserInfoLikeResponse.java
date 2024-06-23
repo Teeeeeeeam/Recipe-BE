@@ -1,5 +1,6 @@
-package com.team.RecipeRadar.domain.like.dto.like;
+package com.team.RecipeRadar.domain.like.dto.response;
 
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import lombok.*;
 
 import java.util.List;

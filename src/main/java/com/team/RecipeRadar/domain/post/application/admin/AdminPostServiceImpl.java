@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.post.application.admin;
 
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
-import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
@@ -9,7 +9,7 @@ import com.team.RecipeRadar.domain.like.dao.like.PostLikeRepository;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
+import com.team.RecipeRadar.domain.post.dto.response.PostResponse;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.like.dao.like;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;

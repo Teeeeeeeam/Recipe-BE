@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.post.dto.user;
+package com.team.RecipeRadar.domain.post.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

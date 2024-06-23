@@ -1,8 +1,8 @@
 package com.team.RecipeRadar.domain.post.api.admin;
 
 import com.team.RecipeRadar.domain.post.application.admin.AdminPostService;
-import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
-import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
+import com.team.RecipeRadar.domain.post.dto.response.PostResponse;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.email.dto;
+package com.team.RecipeRadar.domain.email.dto.reqeust;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

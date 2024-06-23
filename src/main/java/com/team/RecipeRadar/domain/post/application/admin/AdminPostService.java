@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.post.application.admin;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
-import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
+import com.team.RecipeRadar.domain.post.dto.response.PostResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

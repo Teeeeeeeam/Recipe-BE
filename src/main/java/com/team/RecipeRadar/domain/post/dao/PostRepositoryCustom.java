@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.post.dao;
 
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
+import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

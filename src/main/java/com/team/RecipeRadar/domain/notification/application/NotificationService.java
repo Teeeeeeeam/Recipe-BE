@@ -6,10 +6,10 @@ import com.team.RecipeRadar.domain.notification.dao.EmitterRepository;
 import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
 import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
-import com.team.RecipeRadar.domain.notification.dto.MainNotificationResponse;
+import com.team.RecipeRadar.domain.notification.dto.response.MainNotificationResponse;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
-import com.team.RecipeRadar.domain.notification.dto.ResponseNotification;
-import com.team.RecipeRadar.domain.notification.dto.ResponseUserInfoNotification;
+import com.team.RecipeRadar.domain.notification.dto.response.NotificationResponse;
+import com.team.RecipeRadar.domain.notification.dto.response.UserInfoNotificationResponse;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.qna.domain.Question;
 import com.team.RecipeRadar.domain.qna.domain.QuestionType;
@@ -73,14 +73,14 @@ public class NotificationService {
         sseEmitters.forEach(
                 (key, emitter) -> {
                     emitterRepository.saveEventCache(key, notification);
-                    sendToClient(emitter, key, new ControllerApiResponse<>(true,"새로운 알림", ResponseNotification.from(notification)));
+                    sendToClient(emitter, key, new ControllerApiResponse<>(true,"새로운 알림", NotificationResponse.from(notification)));
                 }
         );
     }
 
-    public ResponseUserInfoNotification userInfoNotification(Long memberId, Long lastId, Pageable pageable){
+    public UserInfoNotificationResponse userInfoNotification(Long memberId, Long lastId, Pageable pageable){
         Slice<NotificationDto> notificationPage = notificationRepository.notificationPage(memberId, pageable, lastId);
-        return new ResponseUserInfoNotification(notificationPage.hasNext(),notificationPage.getContent());
+        return new UserInfoNotificationResponse(notificationPage.hasNext(),notificationPage.getContent());
     }
 
     public MainNotificationResponse mainNotification(Long memberId){

@@ -4,7 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.domain.QMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

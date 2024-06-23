@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.email.api;
 
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.email.application.MailService;
-import com.team.RecipeRadar.domain.email.dto.EmailVerificationRequest;
+import com.team.RecipeRadar.domain.email.dto.reqeust.EmailVerificationRequest;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

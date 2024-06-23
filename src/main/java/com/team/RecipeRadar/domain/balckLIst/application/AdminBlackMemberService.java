@@ -1,9 +1,7 @@
 package com.team.RecipeRadar.domain.balckLIst.application;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.BlackListResponse;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface AdminBlackMemberService{
 

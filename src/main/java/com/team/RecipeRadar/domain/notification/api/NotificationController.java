@@ -2,8 +2,8 @@ package com.team.RecipeRadar.domain.notification.api;
 
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
-import com.team.RecipeRadar.domain.notification.dto.MainNotificationResponse;
-import com.team.RecipeRadar.domain.notification.dto.ResponseUserInfoNotification;
+import com.team.RecipeRadar.domain.notification.dto.response.MainNotificationResponse;
+import com.team.RecipeRadar.domain.notification.dto.response.UserInfoNotificationResponse;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
@@ -55,7 +55,7 @@ public class NotificationController {
                                               @RequestParam(value = "lastId",required = false) Long lasId,
                                               @Parameter(example = "{\"size\":10}")Pageable pageable){
         MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
-        ResponseUserInfoNotification responseUserInfoNotification = notificationService.userInfoNotification(memberDto.getId(), lasId, pageable);
+        UserInfoNotificationResponse responseUserInfoNotification = notificationService.userInfoNotification(memberDto.getId(), lasId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",responseUserInfoNotification));
     }
 
