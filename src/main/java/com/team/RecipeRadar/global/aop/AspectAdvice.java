@@ -55,10 +55,10 @@ public class AspectAdvice {
     @Around("com.team.RecipeRadar.global.aop.Pointcuts.ResultSet() && !@annotation(com.team.RecipeRadar.global.annotations.ExcludeResultSet)")
     public Object resultSet(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        log.error("An error occurred during request processing. (BingResultSet)");
 
         for (Object arg :args){
             if(arg instanceof BindingResult){
+                log.error("An error occurred during request processing. (BingResultSet)");
                 BindingResult bindingResult =  (BindingResult)arg;
                 Map<String,String> erorMap = new LinkedHashMap<>();
                if(bindingResult.hasErrors()){
