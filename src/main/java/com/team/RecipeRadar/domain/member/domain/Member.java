@@ -38,7 +38,6 @@ public class Member {
 
     private String email;
 
-    @JsonIgnore
     private String roles;
 
     private LocalDate createAt;
