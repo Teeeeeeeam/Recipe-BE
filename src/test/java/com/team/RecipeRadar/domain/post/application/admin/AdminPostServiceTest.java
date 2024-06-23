@@ -1,10 +1,9 @@
 package com.team.RecipeRadar.domain.post.application.admin;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.post.application.admin.AdminPostServiceImpl;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;

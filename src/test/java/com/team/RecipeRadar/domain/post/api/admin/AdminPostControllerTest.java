@@ -2,12 +2,12 @@ package com.team.RecipeRadar.domain.post.api.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.post.application.admin.AdminPostService;
-import com.team.RecipeRadar.domain.balckLIst.dto.PostsCommentResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.user.PostResponse;
+import com.team.RecipeRadar.domain.post.dto.response.PostResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;

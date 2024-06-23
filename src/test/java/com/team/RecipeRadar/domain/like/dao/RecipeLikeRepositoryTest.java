@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.like.dao;
 
 import com.team.RecipeRadar.domain.like.dao.like.RecipeLikeRepository;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;

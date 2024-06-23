@@ -2,9 +2,9 @@ package com.team.RecipeRadar.domain.like.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
-import com.team.RecipeRadar.domain.like.dto.like.PostLikeRequest;
-import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.request.PostLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;

@@ -2,9 +2,9 @@ package com.team.RecipeRadar.domain.comment.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentRequest;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
-import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserAddCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserUpdateCommentRequest;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.conig.TestConfig;

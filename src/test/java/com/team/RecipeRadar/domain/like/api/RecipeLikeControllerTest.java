@@ -2,9 +2,9 @@ package com.team.RecipeRadar.domain.like.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
-import com.team.RecipeRadar.domain.like.dto.like.RecipeLikeRequest;
-import com.team.RecipeRadar.domain.like.dto.like.UserInfoLikeResponse;
-import com.team.RecipeRadar.domain.like.dto.like.UserLikeDto;
+import com.team.RecipeRadar.domain.like.dto.request.RecipeLikeRequest;
+import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
+import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;

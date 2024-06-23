@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.comment.application;
 
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.member.application.admin;
 
 import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
-import com.team.RecipeRadar.domain.balckLIst.dto.MemberInfoResponse;
+import com.team.RecipeRadar.domain.balckLIst.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.domain.member.application.user.MemberServiceTest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
