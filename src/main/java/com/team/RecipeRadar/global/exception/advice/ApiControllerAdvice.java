@@ -19,6 +19,7 @@ public class ApiControllerAdvice {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> ServerError (Exception e){
         ErrorResponse errorResponse = new ErrorResponse(false, "서버 오류 발생");
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
     @ExceptionHandler(JwtTokenException.class)
