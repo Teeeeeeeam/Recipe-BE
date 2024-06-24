@@ -96,7 +96,7 @@ public class PostLikeController {
          })
     @GetMapping("/info/posts/likes")
     public ResponseEntity<?> getUserLike(@RequestParam(value = "lastId",required = false)Long postLike_lastId,
-                                         @Parameter(hidden = true) @CookieValue(name = "login-id") String cookieLoginId,
+                                         @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
 
