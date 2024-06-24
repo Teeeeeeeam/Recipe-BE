@@ -36,7 +36,7 @@ public class RecipeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
     })
     @GetMapping("/recipe")
-    public ResponseEntity<?> findRecipe(@RequestParam("ingredients") List<String> ingredients,
+    public ResponseEntity<?> findRecipe(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
                                         @RequestParam(value = "lastId",required = false)Long lastRecipeId,
                                         @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients,lastRecipeId, pageable);

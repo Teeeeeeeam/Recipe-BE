@@ -42,8 +42,10 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         
         //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
         BooleanBuilder builder = new BooleanBuilder();
-        for (String ingredientList : ingredients) {
-            builder.or(ingredient.ingredients.like("%"+ingredientList+"%"));
+        if (ingredients != null && !ingredients.isEmpty()) {
+            for (String ingredientList : ingredients) {
+                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
+            }
         }
         // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
         if (lastRecipeId!=null){
