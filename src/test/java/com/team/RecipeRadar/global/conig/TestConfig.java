@@ -4,6 +4,7 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
 import com.team.RecipeRadar.global.security.exception.CustomAccessDeniedHandler;
 import com.team.RecipeRadar.global.security.exception.JwtAuthenticationEntryPoint;
+import com.team.RecipeRadar.global.security.jwt.filter.SecurityExceptionHandlerFilter;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
@@ -11,8 +12,10 @@ import com.team.RecipeRadar.global.utils.CookieUtils;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 @TestConfiguration
+@Import({JwtAuthenticationEntryPoint.class,CustomAccessDeniedHandler.class})
 public class TestConfig {
 
     @Bean
@@ -45,13 +48,18 @@ public class TestConfig {
         return Mockito.mock(RefreshTokenRepository.class);
     }
 
-    @Bean
-    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-        return Mockito.mock(JwtAuthenticationEntryPoint.class);
-    }
+//    @Bean
+//    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
+//        return Mockito.mock(JwtAuthenticationEntryPoint.class);
+//    }
+//
+//    @Bean
+//    public CustomAccessDeniedHandler customAccessDeniedHandler() {
+//        return Mockito.mock(CustomAccessDeniedHandler.class);
+//    }
 
     @Bean
-    public CustomAccessDeniedHandler customAccessDeniedHandler() {
-        return Mockito.mock(CustomAccessDeniedHandler.class);
+    public SecurityExceptionHandlerFilter securityExceptionHandlerFilter() {
+        return new SecurityExceptionHandlerFilter();
     }
 }
