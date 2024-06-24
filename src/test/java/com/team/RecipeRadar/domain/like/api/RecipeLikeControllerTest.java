@@ -6,9 +6,9 @@ import com.team.RecipeRadar.domain.like.dto.request.RecipeLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
+import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -143,22 +144,14 @@ class RecipeLikeControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("사용자페이지- 좋아요한 레시피의 대한 페이징 실패시")
     @CustomMockUser
     public void getUserLike_page_fail() throws Exception {
-        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        List<UserLikeDto> userLikeDtos = new ArrayList<>();
-        userLikeDtos.add(new UserLikeDto(1L, 1l,"내용", "제목"));
-        userLikeDtos.add(new UserLikeDto(2L, 1l,"내용1", "제목1"));
+        doThrow(new UnauthorizedException("올바르지 않은 접근입니다.")).when(cookieUtils).validCookie(isNull(), anyString());
 
-        doNothing().when(cookieUtils).validCookie(anyString(),anyString());
-
-        mockMvc.perform(get("/api/user/info/recipe/likes")
-                        .cookie(cookie))
+        mockMvc.perform(get("/api/user/info/recipe/likes"))
                 .andExpect(status().isForbidden())
-                .andDo(print())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("올바르지 않은 접근입니다."));
     }

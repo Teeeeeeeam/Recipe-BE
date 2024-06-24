@@ -9,7 +9,6 @@ import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.mock.CustomMockUser;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
 import java.util.*;
@@ -137,17 +137,13 @@ class PostLikeControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("사용자페이지- 좋아요한 게시글의 대한 페이징 실패시")
     @CustomMockUser
     public void getUserLike_page_fail() throws Exception {
-        Cookie cookie = new Cookie("login-id", null);
 
-        // validCookie 메서드가 UnauthorizedException을 던지도록 설정
-        doThrow(new UnauthorizedException("올바르지 않은 접근입니다.")).when(cookieUtils).validCookie(eq(null), anyString());
+        doThrow(new UnauthorizedException("올바르지 않은 접근입니다.")).when(cookieUtils).validCookie(isNull(), anyString());
 
-        // GET /api/user/info/posts/likes 요청을 수행하고 예상되는 결과 검증
-        mockMvc.perform(get("/api/user/info/posts/likes").cookie(cookie))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/info/posts/likes"))
                 .andExpect(status().isForbidden()) // 403 Forbidden 상태코드 확인
                 .andExpect(jsonPath("$.success").value(false)) // success 필드가 false인지 확인
                 .andExpect(jsonPath("$.message").value("올바르지 않은 접근입니다.")); // message 필드 확인
