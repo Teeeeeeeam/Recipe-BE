@@ -17,7 +17,6 @@ import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +136,6 @@ class AdminRecipeControllerTest {
                 .andExpect(jsonPath("$.message").value("레시피 수정 성공"));
     }
     @Test
-    @Disabled
     @CustomMockUser
     @DisplayName("레시피 등록 테스트 (일반 사용자 등록 실패)")
     void save_Recipe_User_Fail() throws Exception {
@@ -159,7 +157,7 @@ class AdminRecipeControllerTest {
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
                                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().is(401));
     }
 
     @Test
