@@ -8,6 +8,8 @@ import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
+import com.team.RecipeRadar.global.aop.AspectAdvice;
+import com.team.RecipeRadar.global.aop.Pointcuts;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
@@ -15,11 +17,12 @@ import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
@@ -48,9 +51,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Slf4j
-@Import(TestConfig.class)
+@Import({TestConfig.class, Pointcuts.class,AspectAdvice.class})
 @WebMvcTest(AdminRecipeController.class)
+@ImportAutoConfiguration(AopAutoConfiguration.class)
 class AdminRecipeControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -160,7 +163,6 @@ class AdminRecipeControllerTest {
     }
 
     @Test
-    @Disabled
     @CustomMockAdmin
     @DisplayName("레시피 수정시 Valid 발생 테스트")
     void recipe_update_fail_valid() throws Exception {
@@ -169,7 +171,7 @@ class AdminRecipeControllerTest {
         List<String> newCook = List.of("새로운 값~~");
         List<Long> delete = List.of(1l);
 
-        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("", "", "인원수",
+        RecipeUpdateRequest recipeUpdateRequest = new RecipeUpdateRequest("","", "",
                 List.of("", "재료2"), "조리시간", List.of(Map.of("cook_step_id", "1", "cook_steps", "1번째 조리순서"), Map.of("cook_step_id", "", "cook_steps", "2번째 조리순서")),newCook,delete);
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", originFileName, "image/jpeg", "controller test".getBytes());
@@ -188,9 +190,8 @@ class AdminRecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("모든 값을 입력해주세요"))
-                .andExpect(jsonPath("$.data.[0]").isString())
-                .andExpect(jsonPath("$.data.[1]").isString());
+                .andExpect(jsonPath("$.message").value("실패"))
+                .andExpect(jsonPath("$.data.size()").value(4));
     }
 
     @Test

@@ -10,15 +10,18 @@ import com.team.RecipeRadar.domain.post.dto.request.ValidPostRequest;
 import com.team.RecipeRadar.domain.post.dto.response.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.request.UserUpdateRequest;
 import com.team.RecipeRadar.domain.post.dto.response.*;
+import com.team.RecipeRadar.global.aop.AspectAdvice;
+import com.team.RecipeRadar.global.aop.Pointcuts;
 import com.team.RecipeRadar.global.conig.TestConfig;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.mock.CustomMockUser;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -41,8 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import({TestConfig.class, Pointcuts.class, AspectAdvice.class})
 @WebMvcTest(PostController.class)
+@ImportAutoConfiguration(AopAutoConfiguration.class)
 class PostControllerTest {
 
     @MockBean PostServiceImpl postService;
@@ -130,7 +134,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("사용자 게시글 등록 API @Valid 테스트")
     @CustomMockUser
     void save_postAPI_Valid() throws Exception {
@@ -238,7 +241,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("게시글 수정 @Valid 테스트")
     @CustomMockUser
     void update_posts_valid() throws Exception {
