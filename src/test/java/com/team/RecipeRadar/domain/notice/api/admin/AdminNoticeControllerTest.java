@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.notice.application.admin.AdminNoticeService;
 import com.team.RecipeRadar.domain.notice.dto.request.AdminAddRequest;
 import com.team.RecipeRadar.domain.notice.dto.request.AdminUpdateRequest;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(AdminNoticeController.class)
 class AdminNoticeControllerTest {
 

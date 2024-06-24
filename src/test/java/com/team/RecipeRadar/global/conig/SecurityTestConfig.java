@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Import;
 
 @TestConfiguration
 @Import({JwtAuthenticationEntryPoint.class,CustomAccessDeniedHandler.class})
-public class TestConfig {
+public class SecurityTestConfig {
 
     @Bean
     public MemberRepository memberRepository() {
@@ -46,20 +46,5 @@ public class TestConfig {
     @Bean
     public RefreshTokenRepository refreshTokenRepository() {
         return Mockito.mock(RefreshTokenRepository.class);
-    }
-
-//    @Bean
-//    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-//        return Mockito.mock(JwtAuthenticationEntryPoint.class);
-//    }
-//
-//    @Bean
-//    public CustomAccessDeniedHandler customAccessDeniedHandler() {
-//        return Mockito.mock(CustomAccessDeniedHandler.class);
-//    }
-
-    @Bean
-    public SecurityExceptionHandlerFilter securityExceptionHandlerFilter() {
-        return new SecurityExceptionHandlerFilter();
     }
 }

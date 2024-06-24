@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.visit.api;
 
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.domain.visit.domain.VisitSession;
 import com.team.RecipeRadar.domain.visit.application.VisitService;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(VisitCountController.class)
 class VisitSessionControllerTest {
 

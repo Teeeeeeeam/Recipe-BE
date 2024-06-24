@@ -7,14 +7,13 @@ import com.team.RecipeRadar.domain.bookmark.dto.response.UserInfoBookmarkRespons
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,14 +38,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(BookmarkController.class)
 class BookmarkControllerTest {
 
     @MockBean RecipeBookmarkService recipeBookmarkService;
     @MockBean CookieUtils cookieUtils;
     @Autowired MockMvc mockMvc;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -190,7 +187,6 @@ class BookmarkControllerTest {
 
 
     @Test
-    @Disabled
     @DisplayName("비로그인 사용자 즐겨찾기 상태")
     void UnLoginIsBookmark() throws Exception {
         Long recipeId = 1L;
@@ -199,6 +195,6 @@ class BookmarkControllerTest {
 
         mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
-                .andExpect(status().is(302));
+                .andExpect(status().is(403));
     }
 }

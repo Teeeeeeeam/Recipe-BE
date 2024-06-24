@@ -7,7 +7,7 @@ import com.team.RecipeRadar.domain.notice.application.user.NoticeService;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoDetailsResponse;
 import com.team.RecipeRadar.domain.notice.dto.response.InfoNoticeResponse;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(NoticeController.class)
 class NoticeControllerTest {
 

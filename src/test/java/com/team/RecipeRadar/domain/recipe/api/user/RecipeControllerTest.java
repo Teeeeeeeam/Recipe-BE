@@ -10,7 +10,7 @@ import com.team.RecipeRadar.domain.recipe.dto.response.MainPageRecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeDetailsResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeNormalPageResponse;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(RecipeController.class)
 class RecipeControllerTest {
 

@@ -12,7 +12,7 @@ import com.team.RecipeRadar.domain.post.dto.request.UserUpdateRequest;
 import com.team.RecipeRadar.domain.post.dto.response.*;
 import com.team.RecipeRadar.global.aop.AspectAdvice;
 import com.team.RecipeRadar.global.aop.Pointcuts;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({TestConfig.class, Pointcuts.class, AspectAdvice.class})
+@Import({SecurityTestConfig.class, Pointcuts.class, AspectAdvice.class})
 @WebMvcTest(PostController.class)
 @ImportAutoConfiguration(AopAutoConfiguration.class)
 class PostControllerTest {

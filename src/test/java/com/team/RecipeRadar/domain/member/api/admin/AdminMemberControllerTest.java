@@ -4,7 +4,7 @@ import com.team.RecipeRadar.domain.balckLIst.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
 import com.team.RecipeRadar.domain.member.application.admin.AdminMemberService;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(AdminMemberController.class)
 class AdminMemberControllerTest {
 

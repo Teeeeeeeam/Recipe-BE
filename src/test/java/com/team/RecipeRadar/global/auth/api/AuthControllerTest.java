@@ -1,8 +1,7 @@
 package com.team.RecipeRadar.global.auth.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.KakaoUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.NaverUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
@@ -26,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
 

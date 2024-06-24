@@ -2,7 +2,7 @@ package com.team.RecipeRadar.domain.qna.api.admin;
 
 import com.team.RecipeRadar.domain.qna.application.admin.AdminQnAServiceImpl;
 import com.team.RecipeRadar.domain.qna.dto.QuestionDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.mock.CustomMockAdmin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(AdminQnAController.class)
 class AdminQnAControllerTest {
 

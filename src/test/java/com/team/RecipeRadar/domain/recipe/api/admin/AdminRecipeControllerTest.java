@@ -10,7 +10,7 @@ import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
 import com.team.RecipeRadar.global.aop.AspectAdvice;
 import com.team.RecipeRadar.global.aop.Pointcuts;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.exception.ex.img.ImageErrorType;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Import({TestConfig.class, Pointcuts.class,AspectAdvice.class})
+@Import({SecurityTestConfig.class, Pointcuts.class,AspectAdvice.class})
 @WebMvcTest(AdminRecipeController.class)
 @ImportAutoConfiguration(AopAutoConfiguration.class)
 class AdminRecipeControllerTest {

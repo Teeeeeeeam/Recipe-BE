@@ -5,7 +5,7 @@ import com.team.RecipeRadar.domain.like.application.PostLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.request.PostLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import com.team.mock.CustomMockUser;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(PostLikeController.class)
 class PostLikeControllerTest {
 

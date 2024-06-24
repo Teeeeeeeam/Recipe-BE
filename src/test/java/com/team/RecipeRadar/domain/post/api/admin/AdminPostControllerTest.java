@@ -8,7 +8,7 @@ import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.response.PostResponse;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;
 import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @ExtendWith(SpringExtension.class)
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(AdminPostController.class)
 class AdminPostControllerTest {
 

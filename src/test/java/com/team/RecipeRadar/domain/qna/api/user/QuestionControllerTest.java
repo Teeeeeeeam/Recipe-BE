@@ -5,7 +5,7 @@ import com.team.RecipeRadar.domain.qna.application.user.QnAServiceImpl;
 import com.team.RecipeRadar.domain.qna.domain.AnswerType;
 import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import com.team.RecipeRadar.domain.qna.dto.reqeust.QuestionRequest;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(QnAController.class)
 class QuestionControllerTest {
 

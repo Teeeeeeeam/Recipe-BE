@@ -5,7 +5,7 @@ import com.team.RecipeRadar.domain.like.application.RecipeLikeServiceImpl;
 import com.team.RecipeRadar.domain.like.dto.request.RecipeLikeRequest;
 import com.team.RecipeRadar.domain.like.dto.response.UserInfoLikeResponse;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
-import com.team.RecipeRadar.global.conig.TestConfig;
+import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.Disabled;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestConfig.class)
+@Import(SecurityTestConfig.class)
 @WebMvcTest(RecipeLikeController.class)
 class RecipeLikeControllerTest {
 
