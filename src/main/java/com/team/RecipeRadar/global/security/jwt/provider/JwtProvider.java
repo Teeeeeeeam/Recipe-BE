@@ -29,7 +29,6 @@ public class JwtProvider {
     @Value("${token.refresh}")
     private int REFRESH_TOKEN_TINE;
 
-    private final MemberRepository memberRepository;
     private final RefreshTokenRepository jwtRefreshTokenRepository;
 
     private final String CLAM_ID ="id";
