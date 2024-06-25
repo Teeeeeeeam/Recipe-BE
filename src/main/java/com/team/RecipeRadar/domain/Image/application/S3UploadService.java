@@ -127,7 +127,7 @@ public class S3UploadService{
 
     private String createStoreFile(String originalFilename) {
         int lastIndexOf = originalFilename.lastIndexOf(".");                    // 마지막 종류
-        String extension = originalFilename.substring(lastIndexOf + 1);     //확장자 종류
+        String extension = originalFilename.substring(lastIndexOf + 1).toLowerCase();     //확장자 종류
 
         Set<String> allowedExtensions = Set.of("jpeg", "jpg", "png");
         if (!allowedExtensions.contains(extension)) {
