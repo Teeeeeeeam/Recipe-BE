@@ -214,7 +214,6 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         List<Tuple> list = queryFactory.select(recipe, uploadFile.storeFileName)
                 .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .join(QRecipeBookmark.recipeBookmark)
                 .where(builder,uploadFile.post.id.isNull())
                 .limit(pageable.getPageSize() + 1)
                 .orderBy(orderSort)
