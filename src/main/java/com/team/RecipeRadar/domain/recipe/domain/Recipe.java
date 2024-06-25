@@ -64,11 +64,14 @@ public class Recipe extends BaseTimeUtils {
         this.people=people;
         this.cookingTime=cookingTime;
     }
-    public static Recipe createRecipe(String title,String cookingTime, String cookingLevel, String people){
+    public static Recipe createRecipe(String title,String cookingTime, String cookingLevel, String people,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes){
         return  Recipe.builder()
                 .title(title)
                 .cookingTime(cookingTime)
                 .cookingLevel(cookingLevel)
+                .cookingIngredients(cookIngredients)
+                .cookMethods(cookMethods)
+                .types(dishTypes)
                 .likeCount(0)
                 .people(people).build();
     }

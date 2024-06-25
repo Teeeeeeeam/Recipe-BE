@@ -3,6 +3,9 @@ package com.team.RecipeRadar.domain.recipe.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -38,6 +41,11 @@ public class RecipeDto {
 
     private LocalDate createdAt;
 
+    private CookIngredients cookIngredients;
+
+    private CookMethods cookMethods;
+
+    private DishTypes dishTypes;
 
     public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount,LocalDateTime createdAt) {
         this.id = id;
@@ -48,6 +56,19 @@ public class RecipeDto {
         this.cookingTime = cookingTime;
         this.likeCount = likeCount;
         this.createdAt =createdAt.toLocalDate();
+    }
+
+    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, List<CookStepDto> cookStep, String ingredient, LocalDate localDate) {
+        this.id = id;
+        this.imageUrl=imageUrl;
+        this.title=title;
+        this.cookingLevel= cookingLevel;
+        this.people = people;
+        this.cookingTime = cookingTime;
+        this.likeCount= likeCount;
+        this.cookSteps =cookStep;
+        this.ingredient = ingredient;
+        this.createdAt = localDate;
     }
 
     public RecipeDto toDto(){

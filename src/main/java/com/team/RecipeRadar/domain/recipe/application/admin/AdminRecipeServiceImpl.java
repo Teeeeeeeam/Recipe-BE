@@ -51,7 +51,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      */
     @Override
     public void saveRecipe(RecipeSaveRequest recipeSaveRequest, MultipartFile file) {
-        Recipe recipe = recipeRepository.save(Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(), recipeSaveRequest.getPeople()));
+        Recipe recipe = recipeRepository.save(Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(), recipeSaveRequest.getPeople(),recipeSaveRequest.getCookIngredients(),recipeSaveRequest.getCookMethods(),recipeSaveRequest.getDishTypes()));
         saveIngredient(recipeSaveRequest, recipe);
         s3UploadService.uploadFile(file,List.of(recipe));
         saveCookingSteps(recipeSaveRequest.getCookSteps(), recipe);

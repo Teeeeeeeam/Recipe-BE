@@ -1,11 +1,15 @@
 package com.team.RecipeRadar.domain.recipe.dto.request;
 
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -38,15 +42,28 @@ public class RecipeSaveRequest {
     @NotEmpty(message = "레시피의 조리 순서를 작성해주세요")
     private List<String> cookSteps;
 
-    private RecipeSaveRequest(String title, String cookLevel, String people, List<String> ingredients, List<String> cookSteps) {
+    @NotNull(message = "주재료 카테고리를 선택해주세요")
+    private CookIngredients cookIngredients;
+
+    @NotNull(message = "대표 조리 카테고리를 선택해주세요")
+    private CookMethods cookMethods;
+
+    @NotNull(message = "레시피 타입 카테고리를 선택해주세요")
+    private DishTypes dishTypes;
+
+    private RecipeSaveRequest(String title, String cookLevel, String people, List<String> ingredients, List<String> cookSteps,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes) {
         this.title = title;
         this.cookLevel = cookLevel;
         this.people = people;
         this.ingredients = ingredients;
         this.cookSteps = cookSteps;
+        this.cookIngredients=  cookIngredients;
+        this.cookMethods = cookMethods;
+        this.dishTypes = dishTypes;
     }
 
     public static RecipeSaveRequest of(RecipeSaveRequest recipeSaveRequest){
-        return new RecipeSaveRequest(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookLevel(),recipeSaveRequest.getPeople(),recipeSaveRequest.getIngredients(),recipeSaveRequest.getCookSteps());
+        return new RecipeSaveRequest(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookLevel(),recipeSaveRequest.getPeople(),recipeSaveRequest.getIngredients(),recipeSaveRequest.getCookSteps(),recipeSaveRequest.getCookIngredients(),
+                recipeSaveRequest.getCookMethods(),recipeSaveRequest.getDishTypes());
     }
 }
