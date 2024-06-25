@@ -2,9 +2,17 @@ package com.team.RecipeRadar.domain.recipe.dao.recipe;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.team.RecipeRadar.domain.bookmark.domain.QRecipeBookmark;
+import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
+import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -182,6 +191,40 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount),tuple.get(recipe.createdAt))).collect(Collectors.toList());
     }
 
+    @Override
+    public Slice<RecipeDto> searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if(ingredients!=null){
+            builder.and(recipe.cookingIngredients.eq(ingredients));
+        }
+        if(cookMethods !=null){
+            builder.and(recipe.cookMethods.eq(cookMethods));
+        }
+        if (dishTypes != null) {
+            builder.and(recipe.types.eq(dishTypes));
+        }
+        if (order.equals(OrderType.LIKE) && likeCount != null) {
+            builder.and(recipe.likeCount.lt(likeCount));
+        } else if (!order.equals(OrderType.LIKE) && lastId != null) {
+            builder.and(recipe.id.lt(lastId));
+        }
+
+        OrderSpecifier<?>[] orderSort = getOrder(order, recipe);
+
+        List<Tuple> list = queryFactory.select(recipe, uploadFile.storeFileName)
+                .from(recipe)
+                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
+                .join(QRecipeBookmark.recipeBookmark)
+                .where(builder,uploadFile.post.id.isNull())
+                .limit(pageable.getPageSize() + 1)
+                .orderBy(orderSort)
+                .fetch();
+
+        List<RecipeDto> recipeDtos = list.stream().map(tuple -> RecipeDto.categoryOf(tuple.get(recipe), getImageUrl(tuple))).collect(Collectors.toList());
+
+        boolean hasNext = isHasNext(pageable, recipeDtos);
+        return new SliceImpl<>(recipeDtos,pageable,hasNext);
+    }
 
 
     private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
@@ -217,5 +260,21 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
             hasNext = true;
         }
         return hasNext;
+    }
+
+    /* 동적 정렬 메서드*/
+    private OrderSpecifier[] getOrder(OrderType order, QRecipe recipe) {
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+
+        switch (order) {
+            case LIKE:
+                orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, recipe.likeCount));
+                break;
+            case DATE:
+                orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, recipe.id));
+                break;
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
     }
 }

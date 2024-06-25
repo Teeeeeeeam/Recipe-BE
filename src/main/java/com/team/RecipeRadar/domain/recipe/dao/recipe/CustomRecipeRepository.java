@@ -1,5 +1,9 @@
 package com.team.RecipeRadar.domain.recipe.dao.recipe;
 
+import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +23,5 @@ public interface CustomRecipeRepository {
 
     List<RecipeDto> mainPageRecipe();
 
+    Slice<RecipeDto> searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order,Integer count, Long lastId, Pageable pageable);
 }

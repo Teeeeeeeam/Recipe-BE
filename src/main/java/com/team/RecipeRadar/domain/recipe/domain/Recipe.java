@@ -1,5 +1,8 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -15,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
-        @Index(columnList = "likeCount"),
+        @Index(columnList = "like_count"),
         @Index(columnList = "recipe_title")
 })
 @Schema(hidden = true, name = "레시피")
@@ -35,7 +38,17 @@ public class Recipe extends BaseTimeUtils {
 
     private String cookingTime;     // 요리시간
 
+    @Column(name = "like_count")
     private Integer likeCount;      // 좋아요 수
+
+    @Enumerated(EnumType.STRING)
+    private CookMethods cookMethods; // 요리 방법
+
+    @Enumerated(EnumType.STRING)
+    private CookIngredients cookingIngredients; // 요리재료 별명
+
+    @Enumerated(EnumType.STRING)
+    private DishTypes types; // 요리 종류 별명
 
 
     @OneToMany(mappedBy = "recipe",cascade = CascadeType.ALL)

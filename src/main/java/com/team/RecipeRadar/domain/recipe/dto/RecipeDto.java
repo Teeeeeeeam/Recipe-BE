@@ -62,4 +62,8 @@ public class RecipeDto {
         return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
         ,cookStep,ingredient,recipe.getCreatedAt().toLocalDate());
     }
+
+    public static RecipeDto categoryOf(Recipe recipe, String imageUrl){
+        return RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).likeCount(recipe.getLikeCount()).imageUrl(imageUrl).build();
+    }
 }
