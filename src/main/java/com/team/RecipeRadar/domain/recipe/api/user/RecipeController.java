@@ -83,12 +83,18 @@ public class RecipeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",mainPageRecipeResponse));
     }
 
+    @Operation(summary = "레시피 카테고리 검색",description = "레시피의 카테고리를 통해서 해당 레시피를 검색")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"recipes\":[{\"id\":\"7014622\",\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2023/11/29/40bdfa564314d9024353b55d84ed79241.jpg\",\"title\":\"양갈비\",\"likeCount\":0}]}}")))
+    })
     @GetMapping("/category/recipe")
     public ResponseEntity admin(@RequestParam(value = "cat1",required = false) CookIngredients ingredients,
                                 @RequestParam(value = "cat2",required = false) CookMethods cookMethods,
                                 @RequestParam(value = "cat3",required = false) DishTypes dishTypes,
                                 @RequestParam(value = "lastLikeCount", required = false)  Integer likeCount,
-                                @RequestParam(value = "order") OrderType order,
+                                @RequestParam(value = "order",required = false) OrderType order,
                                 @RequestParam(value = "lastId",required = false) Long lastId,
                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeCategoryResponse recipeCategoryResponse = recipeService.searchCategory(ingredients, cookMethods, dishTypes, order, likeCount, lastId, pageable);
