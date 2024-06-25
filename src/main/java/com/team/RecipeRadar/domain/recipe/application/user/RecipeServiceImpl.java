@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -74,7 +75,9 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     @Transactional(readOnly = true)
     public RecipeCategoryResponse searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
+        if(ingredients==null || cookMethods==null || dishTypes==null || order == null)throw new InvalidIdException("카테고리를 선택해주세요");
         Slice<RecipeDto> recipeDtoSlice = recipeRepository.searchCategory(ingredients, cookMethods, dishTypes, order, likeCount, lastId, pageable);
+        
         return new RecipeCategoryResponse(recipeDtoSlice.hasNext(),recipeDtoSlice.getContent());
     }
 
