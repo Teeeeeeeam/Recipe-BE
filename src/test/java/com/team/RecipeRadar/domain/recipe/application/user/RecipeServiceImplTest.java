@@ -1,12 +1,11 @@
 package com.team.RecipeRadar.domain.recipe.application.user;
 
-import com.team.RecipeRadar.domain.recipe.application.user.RecipeServiceImpl;
+import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.dto.*;
-import com.team.RecipeRadar.domain.recipe.dto.response.MainPageRecipeResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeNormalPageResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.response.*;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.BEEF;
+import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.MEAT;
+import static com.team.RecipeRadar.domain.recipe.domain.type.CookMethods.BOILING;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -135,4 +137,30 @@ class RecipeServiceImplTest {
         assertThat(mainPageRecipeResponse.getRecipe().get(2).getLikeCount()).isEqualTo(3);
     }
 
+    @Test
+    @DisplayName("카테고리 예외 테스트")
+    void category_exTest() {
+        when(recipeRepository.searchCategory(null, CookMethods.SASHIMI, null, null, 1, null, Pageable.ofSize(10)))
+                .thenThrow(new InvalidIdException("카테고리를 선택해주세요"));
+
+        assertThatThrownBy(() -> recipeService.searchCategory(null, CookMethods.SASHIMI, null, null, 1, null, Pageable.ofSize(10)))
+                .isInstanceOf(InvalidIdException.class)
+                .hasMessage("카테고리를 선택해주세요");
+    }
+
+    
+    @Test
+    @DisplayName("카테고리 페지징 테스트")
+    void page_category(){
+        List<RecipeDto> recipeDtoList = List.of(
+                RecipeDto.builder().id(1l).title("제목1").cookingTime("시간1").cookingLevel("1").cookMethods(BOILING).cookIngredients(MEAT).build(),
+                RecipeDto.builder().id(2l).title("제목1").cookingTime("시간1").cookingLevel("1").cookMethods(BOILING).cookIngredients(BEEF).build());
+
+        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList, Pageable.ofSize(10), false);
+        when(recipeRepository.searchCategory(null,BOILING,null, OrderType.DATE,null,null,Pageable.ofSize(10))).thenReturn(recipeDtoSlice);
+
+        RecipeCategoryResponse recipeCategoryResponse = recipeService.searchCategory(null, BOILING, null, OrderType.DATE, null, null, Pageable.ofSize(10));
+
+        assertThat(recipeCategoryResponse.getRecipes()).hasSize(2);
+    }
 }

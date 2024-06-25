@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.recipe.application.admin.AdminRecipeService;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
@@ -85,7 +88,7 @@ class AdminRecipeControllerTest {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
         String uploadFile= "test.jpg";
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps, CookIngredients.BEEF, CookMethods.SASHIMI, DishTypes.BREAD);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
 
         given(s3UploadService.uploadFile(eq(mockMultipartFile),anyList())).willReturn(uploadFile);
@@ -141,7 +144,7 @@ class AdminRecipeControllerTest {
     void save_Recipe_User_Fail() throws Exception {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps,CookIngredients.BEEF, CookMethods.SASHIMI, DishTypes.BREAD);
         String uploadFile= "test.jpg";
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test data".getBytes());
 
@@ -261,7 +264,7 @@ class AdminRecipeControllerTest {
     void save_Recipe_With_Invalid_FileName() throws Exception {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps,CookIngredients.BEEF, CookMethods.SASHIMI, DishTypes.BREAD);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.AAA", "image/jpeg", "test data".getBytes());
 
         doThrow(new ImageException(ImageErrorType.INVALID_IMAGE_FORMAT)).when(adminService).saveRecipe(any(),any());
@@ -286,7 +289,7 @@ class AdminRecipeControllerTest {
     void save_Empty_File() throws Exception {
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps,CookIngredients.BEEF, CookMethods.SASHIMI, DishTypes.BREAD);
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", null, "image/jpeg", "test data".getBytes());
 
         MockMultipartFile request = new MockMultipartFile("recipeSaveRequest", null, "application/json", objectMapper.writeValueAsString(recipeSaveRequest).getBytes(StandardCharsets.UTF_8));

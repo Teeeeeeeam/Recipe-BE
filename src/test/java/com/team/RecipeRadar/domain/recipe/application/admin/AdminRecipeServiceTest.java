@@ -3,13 +3,15 @@ package com.team.RecipeRadar.domain.recipe.application.admin;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
-import com.team.RecipeRadar.domain.recipe.application.admin.AdminRecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
@@ -69,8 +71,8 @@ class AdminRecipeServiceTest {
     void saveRecipe(){
         List<String> ingredients = List.of("재료1", "재료2");
         List<String> cooksteps = List.of("조리1", "조리2");
-        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps);
-        Recipe entity = Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(),recipeSaveRequest.getPeople());
+        RecipeSaveRequest recipeSaveRequest = new RecipeSaveRequest("title", "초급", "인원수", ingredients, "시간", cooksteps, CookIngredients.BEEF, CookMethods.SASHIMI, DishTypes.BREAD);
+        Recipe entity = Recipe.createRecipe(recipeSaveRequest.getTitle(),recipeSaveRequest.getCookTime(),recipeSaveRequest.getCookLevel(),recipeSaveRequest.getPeople(),recipeSaveRequest.getCookIngredients(),recipeSaveRequest.getCookMethods(),recipeSaveRequest.getDishTypes());
         Ingredient ingredient = Ingredient.builder().id(1L).ingredients("재료").recipe(entity).build();
         List<CookingStep> cookingSteps = cooksteps.stream()
                 .map(s -> CookingStep.builder().steps(s).recipe(entity).build())

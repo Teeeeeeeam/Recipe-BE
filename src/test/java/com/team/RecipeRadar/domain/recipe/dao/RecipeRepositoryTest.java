@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.dao;
 
+import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.dao.ingredient.IngredientRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.CookStepRepository;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
@@ -28,6 +29,9 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.*;
+import static com.team.RecipeRadar.domain.recipe.domain.type.CookMethods.*;
+import static com.team.RecipeRadar.domain.recipe.domain.type.DishTypes.*;
 import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
@@ -38,11 +42,9 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("test")
 class RecipeRepositoryTest {
 
-    @Autowired
-    RecipeRepository recipeRepository;
+    @Autowired RecipeRepository recipeRepository;
     @Autowired IngredientRepository ingredientRepository;
-    @Autowired
-    CookStepRepository cookStepRepository;
+    @Autowired CookStepRepository cookStepRepository;
     @Autowired ImgRepository imgRepository;
 
 
@@ -127,9 +129,9 @@ class RecipeRepositoryTest {
         assertThat(dto.getTitle()).isEqualTo(save.getTitle());
         assertThat(ing).isEqualTo(ingredient1.getIngredients());
         assertThat(cookSteps.get(0).getCookSteps()).isEqualTo(save1.getSteps());
-        
+
     }
-    
+
     @Test
     @DisplayName("레시피 검색의 일반 페이징 방식 테스트")
     void search_ing_normal_page(){
@@ -185,8 +187,8 @@ class RecipeRepositoryTest {
         Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, "",pageable1);
         assertThat(NorecipeDtoPage.getContent()).hasSize(0);
     }
-    
-    
+
+
     @Test
     @DisplayName("메인페이지의 레시피 좋아요가 많은순 출력")
     void main_Page_like_desc(){
@@ -212,7 +214,7 @@ class RecipeRepositoryTest {
         assertThat(recipeDtoList.get(1).getLikeCount()).isEqualTo(6);
         assertThat(recipeDtoList.get(2).getLikeCount()).isEqualTo(2);
     }
-    
+
     @Test
     @DisplayName("레시피 업데이트 테스트")
     void recipe_update(){
@@ -303,5 +305,47 @@ class RecipeRepositoryTest {
         // 모든 레시피 데이터 검색
         assertThat(recipe_FirstPage_2.getContent()).hasSize(5);
 
+    }
+
+    @Test
+    @DisplayName("카테고리 테스트")
+    void categoryTest() {
+        Recipe build1 = Recipe.builder().title("제목1").cookingTime("시간1").cookingLevel("1").cookMethods(BOILING).cookingIngredients(MEAT).build();
+        Recipe build2 = Recipe.builder().title("제목2").cookingTime("시간2").cookingIngredients(BEEF).build();
+        Recipe build3 = Recipe.builder().title("제목3").cookingTime("시간3").cookingIngredients(BEEF).build();
+        Recipe build4 = Recipe.builder().title("제목4").cookingTime("시간4").cookingIngredients(FLOUR).build();
+        Recipe build5 = Recipe.builder().title("제목5").cookingTime("시간5").types(BREAD).build();
+
+        UploadFile uploadFile1 = UploadFile.builder().recipe(recipeRepository.save(build1)).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile2 = UploadFile.builder().recipe(recipeRepository.save(build2)).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile3 = UploadFile.builder().recipe(recipeRepository.save(build3)).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile4 = UploadFile.builder().recipe(recipeRepository.save(build4)).storeFileName("test").originFileName("test").build();
+        UploadFile uploadFile5 = UploadFile.builder().recipe(recipeRepository.save(build5)).storeFileName("test").originFileName("test").build();
+        imgRepository.save(uploadFile1);
+        imgRepository.save(uploadFile2);
+        imgRepository.save(uploadFile3);
+        imgRepository.save(uploadFile4);
+        imgRepository.save(uploadFile5);
+
+        Ingredient ingredient1 = Ingredient.builder().recipe(build1).ingredients("밥").build();
+        Ingredient ingredient2 = Ingredient.builder().recipe(build2).ingredients("밥|고기").build();
+        Ingredient ingredient3 = Ingredient.builder().recipe(build3).ingredients("밥|김치").build();
+        Ingredient ingredient4 = Ingredient.builder().recipe(build4).ingredients("밥|돼지고기|밑반찬").build();
+        Ingredient ingredient5 = Ingredient.builder().recipe(build5).ingredients("밥|물김치|닭고기").build();
+
+        ingredientRepository.save(ingredient1);
+        ingredientRepository.save(ingredient2);
+        ingredientRepository.save(ingredient3);
+        ingredientRepository.save(ingredient4);
+        ingredientRepository.save(ingredient5);
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Slice<RecipeDto> recipeDtos = recipeRepository.searchCategory(
+                BEEF, null, null, OrderType.DATE, null, null, pageRequest);
+
+        assertThat(recipeDtos).isNotNull();
+        assertThat(recipeDtos.getContent()).isNotEmpty();
+        assertThat(recipeDtos.getContent()).hasSize(2);
     }
 }
