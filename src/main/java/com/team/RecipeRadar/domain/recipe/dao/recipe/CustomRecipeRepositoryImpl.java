@@ -125,14 +125,12 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
             builder.and(ingredientsBuilder);
         }
 
-        // 결과 페칭 쿼리
         List<Tuple> result = queryFactory.select(
-                recipe.title,recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime,recipe.cookingLevel, recipe.people, recipe.createdAt)
-                .from(ingredient)
-                .join(ingredient.recipe, recipe)
+                        recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people, recipe.createdAt)
+                .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(builder, uploadFile.post.isNull())
-                .orderBy(recipe.id.asc()) // 정렬 조건 추가
+                .orderBy(recipe.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
