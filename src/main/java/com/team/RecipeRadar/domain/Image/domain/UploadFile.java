@@ -10,10 +10,17 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "post_id"),
+        @Index(columnList = "recipe_id"),
+        @Index(columnList = "notice_id"),
+        @Index(columnList = "question_id"),
+        @Index(columnList = "store_file_name"),
+})
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @ToString(exclude = "post")
 public class UploadFile {
 
@@ -25,7 +32,7 @@ public class UploadFile {
     @Column(length = 400)
     private String originFileName;      // 실제 파일명
 
-    @Column(length = 400)
+    @Column(length = 400,name = "store_file_name")
     private String storeFileName;       // DB에 저장될 파일명
 
     @ManyToOne(fetch = FetchType.LAZY)

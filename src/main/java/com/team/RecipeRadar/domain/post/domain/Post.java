@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "post_title"),
+        @Index(columnList = "member_id"),
+})
 @Data
 @Builder
 @AllArgsConstructor

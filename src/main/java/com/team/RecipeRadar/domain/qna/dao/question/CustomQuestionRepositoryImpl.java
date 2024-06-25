@@ -18,7 +18,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.qna.domain.QQuestion.*;

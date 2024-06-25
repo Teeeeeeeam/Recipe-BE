@@ -9,11 +9,15 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Builder
+@Table(indexes = {
+        @Index(columnList = "post_id"),
+        @Index(columnList = "member_id")
+})
 @Getter
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"member", "post"})
-@NoArgsConstructor
 public class Comment extends BaseTimeUtils {
 
     @Id

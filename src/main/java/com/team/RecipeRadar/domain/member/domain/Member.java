@@ -1,7 +1,5 @@
 package com.team.RecipeRadar.domain.member.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
@@ -16,12 +14,16 @@ import java.util.Arrays;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "nick_name"),
+        @Index(columnList = "email"),
+        @Index(columnList = "login_id"),
+})
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "posts")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Member {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +32,12 @@ public class Member {
 
     private String username;
 
+    @Column(name = "nick_name")
     private String nickName;
 
     private String password;
 
+    @Column(name = "login_id")
     private String loginId;
 
     private String email;

@@ -9,11 +9,13 @@ import javax.persistence.*;
 
 
 @Entity
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-@Table(indexes = @Index(columnList = "ingredients"))
+@Table(indexes = {
+        @Index(columnList = "ingredients")
+})
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ingredient {
 
     @Id

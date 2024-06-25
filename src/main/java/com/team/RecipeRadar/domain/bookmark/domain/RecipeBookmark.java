@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "member_id"),
+        @Index(columnList = "recipe_id")
+})
 @Getter
 @Builder
 @NoArgsConstructor

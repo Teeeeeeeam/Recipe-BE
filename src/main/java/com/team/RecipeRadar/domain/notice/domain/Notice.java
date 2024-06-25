@@ -7,6 +7,9 @@ import lombok.*;
 
 import javax.persistence.*;
 @Entity
+@Table(indexes = {
+        @Index(columnList = "notice_title")
+})
 @Getter
 @Setter
 @Builder

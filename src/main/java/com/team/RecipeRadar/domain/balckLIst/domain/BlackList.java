@@ -8,10 +8,13 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "email")
+})
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Data
 public class BlackList {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)

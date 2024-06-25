@@ -8,9 +8,14 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor
+@Table(indexes = {
+        @Index(columnList = "notification_type"),
+        @Index(columnList = "member_id"),
+        @Index(columnList = "url"),
+})
 @Getter
-@ToString(exclude = "receiver") // receiver 필드를 toString()에서 제외
+@NoArgsConstructor
+@ToString(exclude = "receiver")
 public class Notification {
 
     @Id
@@ -26,6 +31,7 @@ public class Notification {
     private String toName;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "notification_type")
     private NotificationType notificationType;
 
     @OnDelete(action = OnDeleteAction.CASCADE)

@@ -4,7 +4,6 @@ import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.global.utils.BaseTimeUtils;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,16 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 @Table(indexes = {
         @Index(columnList = "like_count"),
-        @Index(columnList = "recipe_title")
+        @Index(columnList = "recipe_title"),
 })
-@Schema(hidden = true, name = "레시피")
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
 public class Recipe extends BaseTimeUtils {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

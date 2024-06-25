@@ -5,6 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "question_id")
+})
 @Data
 @Builder
 @NoArgsConstructor

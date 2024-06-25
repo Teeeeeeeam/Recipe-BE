@@ -10,10 +10,9 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "재료")
 public class CookingStep {
 
 

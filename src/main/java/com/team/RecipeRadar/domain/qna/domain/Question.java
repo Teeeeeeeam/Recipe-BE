@@ -10,10 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "status"),
+        @Index(columnList = "member_id"),
+        @Index(columnList = "question_type"),
+
+})
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = "member")
 public class Question extends BaseTimeUtils {
 
@@ -23,6 +29,7 @@ public class Question extends BaseTimeUtils {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "question_type")
     private QuestionType questionType;          //문의 유형
 
     private String title;  // 질문 제목

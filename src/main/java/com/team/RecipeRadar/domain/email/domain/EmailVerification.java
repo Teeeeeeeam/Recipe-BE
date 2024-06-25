@@ -12,12 +12,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-@AllArgsConstructor
 @Entity
 @Table(name = "email_verifications")
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class EmailVerification{
 
     @Id
