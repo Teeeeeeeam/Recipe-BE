@@ -28,8 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,8 +138,8 @@ class AdminRecipeServiceTest {
 
         String title = "레시피1";
         List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1l, "url", title, "level1", "1", "10minute", 0,List.of(),"밥", LocalDate.now()));
-        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 0, LocalDateTime.now()));
+        recipeDtoList.add(RecipeDto.builder().id(1l).title(title).build());
+        recipeDtoList.add(RecipeDto.builder().id(2l).title("레시피2").build());
 
         Pageable pageRequest = PageRequest.of(0, 2);
 
