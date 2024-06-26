@@ -7,6 +7,9 @@ import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
@@ -230,7 +233,7 @@ class RecipeRepositoryTest {
         CookingStep cookingStep_save2 = cookStepRepository.save(cookingStep2);
 
         Recipe save_Recipe = recipeRepository.findById(recipe_save.getId()).get();
-        recipe_save.updateRecipe("변경된 제목","변경된 레벨","변경된 인원수","변경된 시간");
+        recipe_save.updateRecipe("변경된 제목","변경된 레벨","변경된 인원수","변경된 시간", CHICKEN, BOILING, SIDE_DISH);
 
         ingredient_save.setIngredients("변경한재료!");
 

@@ -110,7 +110,7 @@ class AdminRecipeServiceTest {
         UploadFile testUploadFile = new UploadFile("before.jpg", "저장돤 파일명");
 
         List<Long> delete = List.of(1L);
-        adminService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps, List.of("새로운 데이터"), delete), file);
+        adminService.updateRecipe(recipeId, new RecipeUpdateRequest(title, "레벨", "인원수", ingredients, "시간", cookSteps, List.of("새로운 데이터"), delete,CookIngredients.BEEF,CookMethods.SASHIMI,DishTypes.BREAD), file);
 
         assertThat(testRecipe.getTitle()).isEqualTo(title);
         assertThat(testCookStep.getSteps()).isEqualTo("조리 순서 1");
