@@ -176,7 +176,7 @@ class RecipeRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(List.of(), "제목1",pageable);
+        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(List.of(), "제목1","",pageable);
 
         assertThat(recipeDtoPage.getTotalPages()).isEqualTo(1);
         assertThat(recipeDtoPage.getContent().get(0).getTitle()).isEqualTo(save1.getTitle());
@@ -184,7 +184,7 @@ class RecipeRepositoryTest {
 
         Pageable pageable1 = PageRequest.of(3, 2);
 
-        Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, "",pageable1);
+        Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, "","",pageable1);
         assertThat(NorecipeDtoPage.getContent()).hasSize(0);
     }
 

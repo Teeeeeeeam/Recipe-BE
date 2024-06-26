@@ -102,7 +102,7 @@ class RecipeServiceImplTest {
 
         PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
 
-        when(recipeRepository.getNormalPage(eq(ingLists),anyString(),eq(pageRequest))).thenReturn(dtoPage);
+        when(recipeRepository.getNormalPage(eq(ingLists),anyString(),anyString(),eq(pageRequest))).thenReturn(dtoPage);
 
         List<RecipeDto> dummyRecipes = Arrays.asList(
                 RecipeDto.builder().id(1l).title("제목").build(),
@@ -115,7 +115,7 @@ class RecipeServiceImplTest {
         RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
 
 
-        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingLists, "title", pageRequest);
+        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingLists, "title", "all",pageRequest);
        log.info("asdasd={}",recipeNormalPageResponse);
     }
 

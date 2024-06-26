@@ -127,7 +127,7 @@ class RecipeControllerTest {
         RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
 
 
-        given(recipeService.searchRecipeByIngredientsNormal(isNull(),eq("레시피1"),any(Pageable.class)))
+        given(recipeService.searchRecipeByIngredientsNormal(isNull(),eq("레시피1"),isNull(),any(Pageable.class)))
                 .willReturn(dummyResponse);
 
         mockMvc.perform(get("/api/recipe/normal?title=레시피1")
@@ -154,7 +154,7 @@ class RecipeControllerTest {
         RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
 
 
-        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),any(Pageable.class))).willReturn(dummyResponse);
+        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),isNull(),any(Pageable.class))).willReturn(dummyResponse);
 
         mockMvc.perform(get("/api/recipe/normal?ingredients=밥")
                         .contentType(MediaType.APPLICATION_JSON))
