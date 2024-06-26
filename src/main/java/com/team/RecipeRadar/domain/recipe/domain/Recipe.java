@@ -56,11 +56,14 @@ public class Recipe extends BaseTimeUtils {
         this.likeCount = count;
     }
 
-    public void updateRecipe(String title, String cookingLevel, String people, String cookingTime){
+    public void updateRecipe(String title, String cookingLevel, String people, String cookingTime,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes){
         this.title=title;
         this.cookingLevel=cookingLevel;
         this.people=people;
         this.cookingTime=cookingTime;
+        this.cookingIngredients = cookIngredients;
+        this.cookMethods = cookMethods;
+        this.types = dishTypes;
     }
     public static Recipe createRecipe(String title,String cookingTime, String cookingLevel, String people,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes){
         return  Recipe.builder()

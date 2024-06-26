@@ -1,5 +1,8 @@
 package com.team.RecipeRadar.domain.recipe.dto.request;
 
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.global.annotations.NotEmptyMapValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -7,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -46,17 +50,13 @@ public class RecipeUpdateRequest {
     @Schema(example = "[\"185135\"]",description = "삭제할 조리순서가 있을때만 사용")
     private List<Long> deleteCookStepsId;
 
-    private RecipeUpdateRequest(String title, String cookLevel, String people, List<String>  ingredients, List<Map<String,String>> cookeSteps,List<String> newCookSteps) {
-        this.title = title;
-        this.cookLevel = cookLevel;
-        this.people = people;
-        this.ingredients = ingredients;
-        this.cookSteps = cookeSteps;
-        this.newCookSteps = newCookSteps;
+    @NotNull(message = "카테고리를 선택해주세요")
+    private CookIngredients cookIngredients;
 
-    }
+    @NotNull(message = "카테고리를 선택해주세요")
+    private CookMethods cookMethods;
 
-    public static RecipeUpdateRequest of(RecipeUpdateRequest recipeUpdateRequest){
-        return new RecipeUpdateRequest(recipeUpdateRequest.getTitle(),recipeUpdateRequest.getCookLevel(),recipeUpdateRequest.getPeople(),recipeUpdateRequest.getIngredients(),recipeUpdateRequest.getCookSteps(),recipeUpdateRequest.getNewCookSteps());
-    }
+    @NotNull(message = "카테고리를 선택해주세요")
+    private DishTypes dishTypes;
+
 }
