@@ -65,7 +65,7 @@ public class RecipeController {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":{\"id\":128671,\"imageUrl\":\"링크.jpg\"," +
-                                    "\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0},\"ingredients\":[\"어묵 2개\",\"재료 데이터\"]," +
+                                    "\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0,\"createdAt\":\"2024-06-25\",\"cookIngredients\":\"PROCESSED_FOOD\",\"cookMethods\":\"DEEP_FRYING\",\"dishTypes\":\"DESSERT\"},\"ingredients\":[\"어묵 2개\",\"재료 데이터\"]," +
                                     "\"cookSteps\":[{\"cookStepId\":\"193\",\"cookSteps\":\"당근과 양파는 깨끗히 씻으신 후에 채썰어 준비한 후 후라이팬에 기름을 두르고 팬을 달군 후 당근| 양파를 살짝 볶아주세요.\"}]}}")))
     })
     @GetMapping("/recipe/{recipeId}")
