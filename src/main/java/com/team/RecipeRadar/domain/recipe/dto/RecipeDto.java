@@ -57,8 +57,7 @@ public class RecipeDto {
         this.likeCount = likeCount;
         this.createdAt =createdAt.toLocalDate();
     }
-
-    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, List<CookStepDto> cookStep, String ingredient, LocalDate localDate) {
+    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, LocalDateTime localDateTime, CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes) {
         this.id = id;
         this.imageUrl=imageUrl;
         this.title=title;
@@ -66,13 +65,14 @@ public class RecipeDto {
         this.people = people;
         this.cookingTime = cookingTime;
         this.likeCount= likeCount;
-        this.cookSteps =cookStep;
-        this.ingredient = ingredient;
-        this.createdAt = localDate;
+        this.createdAt =localDateTime.toLocalDate();
+        this.cookIngredients = cookIngredients;
+        this.cookMethods = cookMethods;
+        this.dishTypes = dishTypes;
     }
 
     public RecipeDto toDto(){
-        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount, createdAt.atStartOfDay());
+        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount, createdAt.atStartOfDay(),cookIngredients,cookMethods,dishTypes);
     }
 
     public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, LocalDateTime createdAt){
@@ -81,7 +81,7 @@ public class RecipeDto {
 
     public static RecipeDto of(Recipe recipe,String imageUrl,List<CookStepDto> cookStep,String ingredient){
         return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
-        ,cookStep,ingredient,recipe.getCreatedAt().toLocalDate());
+        ,cookStep,ingredient,recipe.getCreatedAt().toLocalDate(),recipe.getCookingIngredients(),recipe.getCookMethods(),recipe.getTypes());
     }
 
     public static RecipeDto categoryOf(Recipe recipe, String imageUrl){

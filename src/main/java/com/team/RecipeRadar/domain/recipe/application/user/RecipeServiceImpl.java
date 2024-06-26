@@ -58,7 +58,6 @@ public class RecipeServiceImpl implements RecipeService{
     @Transactional(readOnly = true)
     public RecipeDetailsResponse getRecipeDetails(Long recipeId) {
         RecipeDto recipeDetails = recipeRepository.getRecipeDetails(recipeId);
-
         List<Map<String, String>> cookList = convertCookStepsToMap(recipeDetails.getCookSteps());
         List<String> ingredients = convertIngredientStringToList(recipeDetails.getIngredient());
 
