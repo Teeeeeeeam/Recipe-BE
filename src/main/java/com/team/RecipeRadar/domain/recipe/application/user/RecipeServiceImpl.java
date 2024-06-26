@@ -44,8 +44,8 @@ public class RecipeServiceImpl implements RecipeService{
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients, String title, Pageable pageable) {
-        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(ingredients, title, pageable);
+    public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients, String title, String all, Pageable pageable) {
+        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(ingredients, title,all, pageable);
         return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages(),recipeDtoPage.getTotalElements());
     }
 

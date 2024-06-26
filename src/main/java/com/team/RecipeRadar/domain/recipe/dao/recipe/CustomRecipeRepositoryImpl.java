@@ -5,7 +5,6 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.bookmark.domain.QRecipeBookmark;
 import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
 import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
@@ -102,21 +101,19 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     }
     /**
      * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
-     * @param ingredients   재료들
-     * @param pageable      페이지정보
-     * @return              pageImpl을 반환
      */
     @Override
-    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, Pageable pageable) {
+    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, String all, Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
 
-        // 제목이 있을 경우 제목 조건 추가
+        if(all !=null){
+            builder.and(recipe.title.like("%" + all + "%").or(QIngredient.ingredient.ingredients.like("%" + all + "%")));
+        }
         if (title != null) {
             builder.and(recipe.title.like("%" + title + "%"));
         }
 
-        // 재료 목록이 있을 경우 재료 조건 추가
         if (ingredients != null && !ingredients.isEmpty()) {
             BooleanBuilder ingredientsBuilder = new BooleanBuilder();
             for (String ingredient : ingredients) {
@@ -128,6 +125,7 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         List<Tuple> result = queryFactory.select(
                         recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people, recipe.createdAt)
                 .from(recipe)
+                .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(builder, uploadFile.post.isNull())
                 .orderBy(recipe.id.asc())
