@@ -167,6 +167,20 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .where(post.recipe.id.in(recipeId)).execute();
     }
 
+    @Override
+    public List<PostDto> getTopRecipesByLikes(Long recipeId) {
+        List<Tuple> list = jpaQueryFactory
+                .select(post,uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .where(post.recipe.id.in(recipeId))
+                .orderBy(post.postLikeCount.desc())
+                .limit(4)
+                .fetch();
+
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+    }
+
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
     }

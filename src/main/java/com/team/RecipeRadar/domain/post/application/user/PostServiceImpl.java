@@ -26,9 +26,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Transactional
@@ -130,6 +130,13 @@ public class PostServiceImpl implements PostService {
         Post post = getPost(validPostRequest.getPostId());
         validatePassword(validPostRequest, post);
         validatePostOwner(member,post);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RecipeLikeTopPostResponse getTop4RecipesByLikes(Long recipeId) {
+        List<PostDto> topRecipesByLikes = postRepository.getTopRecipesByLikes(recipeId);
+        return new RecipeLikeTopPostResponse(topRecipesByLikes);
     }
 
     /* 게시글의 비밀 번호를 검증하는 메서드 */

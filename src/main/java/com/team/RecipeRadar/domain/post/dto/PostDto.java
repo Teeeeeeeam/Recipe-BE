@@ -66,6 +66,12 @@ public class PostDto {
     public static PostDto of(Long id, String loginId,String postTitle,String img,String nickName,String recipeTitle,Long recipeId,LocalDateTime create_at){
         return new PostDto(id,loginId,postTitle,img,nickName,recipeTitle,recipeId,create_at);
     }
+
+    public static PostDto of(Post post,String img){
+        MemberDto member = MemberDto.builder().nickname(post.getMember().getNickName()).build();
+        return PostDto.builder().postTitle(post.getPostTitle()).postLikeCount(post.getPostLikeCount()).createdAt(post.getCreatedAt().toLocalDate())
+                .postImageUrl(img).member(member).build();
+    }
     public static PostDto of(Post post, String imgUrl, Recipe recipe,List<CommentDto> comments){
         return PostDto.builder()
                 .id(post.getId())

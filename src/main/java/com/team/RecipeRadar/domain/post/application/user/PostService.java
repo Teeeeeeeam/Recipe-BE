@@ -24,4 +24,5 @@ public interface PostService {
 
     void validPostPassword(Long memberId, ValidPostRequest validPostRequest);
 
+    RecipeLikeTopPostResponse getTop4RecipesByLikes(Long recipeId);
 }
