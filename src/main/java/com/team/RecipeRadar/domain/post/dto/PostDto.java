@@ -69,7 +69,7 @@ public class PostDto {
 
     public static PostDto of(Post post,String img){
         MemberDto member = MemberDto.builder().nickname(post.getMember().getNickName()).build();
-        return PostDto.builder().postTitle(post.getPostTitle()).postLikeCount(post.getPostLikeCount()).createdAt(post.getCreatedAt().toLocalDate())
+        return PostDto.builder().id(post.getId()).postTitle(post.getPostTitle()).postLikeCount(post.getPostLikeCount()).createdAt(post.getCreatedAt().toLocalDate())
                 .postImageUrl(img).member(member).build();
     }
     public static PostDto of(Post post, String imgUrl, Recipe recipe,List<CommentDto> comments){

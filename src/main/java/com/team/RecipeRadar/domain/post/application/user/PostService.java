@@ -27,4 +27,6 @@ public interface PostService {
     PostLikeTopResponse getTop4RecipesByLikes(Long recipeId);
 
     PostLikeTopResponse getTopMainsByLikes();
+
+    PostResponse postByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable);
 }

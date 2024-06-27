@@ -2,11 +2,15 @@ package com.team.RecipeRadar.domain.post.dao;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.post.domain.QPost;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -191,6 +196,41 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .limit(3)
                 .fetch();
         return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+    }
+
+    @Override
+    public Slice<PostDto> getPostsByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if(lastCount!=null){
+            if(lastCount==0){
+                builder.and(post.postLikeCount.eq(0).and(post.id.lt(lastId)));
+            }else
+                builder.and(post.postLikeCount.lt(lastCount));
+        }
+
+        OrderSpecifier<Integer> orderByLikeCount = new CaseBuilder()
+                .when(post.postLikeCount.gt(0)).then(post.postLikeCount)
+                .otherwise(Expressions.constant(0))
+                .desc();
+
+        OrderSpecifier<Long> orderByPostId = new CaseBuilder()
+                .when(post.postLikeCount.eq(0)).then(post.id)
+                .otherwise(Expressions.constant(Long.MAX_VALUE))
+                .desc();
+
+        List<Tuple> list = jpaQueryFactory.select(post, uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .where(builder,post.recipe.id.eq(recipeId))
+                .orderBy(orderByLikeCount,orderByPostId)
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+        boolean nextSize = isHasNextSize(pageable, postDtoList);
+
+        return new SliceImpl<>(postDtoList,pageable,nextSize);
     }
 
     private String getImg(Tuple tuple) {

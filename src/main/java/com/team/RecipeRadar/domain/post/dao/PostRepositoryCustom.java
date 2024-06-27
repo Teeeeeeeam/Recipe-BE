@@ -22,4 +22,6 @@ public interface PostRepositoryCustom {
     List<PostDto> getTopRecipesByLikes(Long recipeId);
 
     List<PostDto> getTopMainByLikes();
+
+    Slice<PostDto> getPostsByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable);
 }

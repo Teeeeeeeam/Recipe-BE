@@ -145,6 +145,14 @@ public class PostServiceImpl implements PostService {
         return new PostLikeTopResponse(postRepository.getTopMainByLikes());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PostResponse postByRecipeId(Long recipeId,Integer lastCount,Long lastId, Pageable pageable) {
+        Slice<PostDto> postDtoSlice = postRepository.getPostsByRecipeId(recipeId,lastCount,lastId, pageable);
+        return new PostResponse(postDtoSlice.hasNext(),postDtoSlice.getContent());
+    }
+
+
     /* 게시글의 비밀 번호를 검증하는 메서드 */
     private void validatePassword(ValidPostRequest validPostRequest, Post post) {
         if(!passwordEncoder.matches(validPostRequest.getPassword(), post.getPostPassword()))

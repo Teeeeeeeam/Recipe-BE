@@ -169,7 +169,7 @@ public class PostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\": 5,\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
     })
     @GetMapping("/top/posts")
     public ResponseEntity<?> recipeTopPosts(@RequestParam("recipeId")Long recipeId){
@@ -181,7 +181,7 @@ public class PostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\": 5,\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
     })
     @GetMapping("/posts/main")
     public ResponseEntity<?> mainTopPosts(){
@@ -189,4 +189,18 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
 
+    @Operation(summary = "레시피 게시글의 좋아요순 조회(페이징)",description = "현재 레시피의 작성된 게시글을 좋아요 순으로 조회(무한페이징), 마지막 게시글의 좋아요가 0일경우 lastId 사용")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"id\": 5,\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
+    })
+    @GetMapping("/posts/{recipeId}")
+    public ResponseEntity<?> getRecipe(@PathVariable("recipeId") Long recipeId,
+                                       @RequestParam(value = "lastCount",required = false)Integer lastCount,
+                                       @RequestParam(value = "lastId",required = false)Long lastId,
+                                       @Parameter(example = "{\"size\":10}") Pageable pageable){
+        PostResponse postResponse = postService.postByRecipeId(recipeId, lastCount, lastId,pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postResponse));
+    }
 }
