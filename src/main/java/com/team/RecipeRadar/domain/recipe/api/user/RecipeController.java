@@ -88,13 +88,13 @@ public class RecipeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"recipes\":[{\"id\":\"7014622\",\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2023/11/29/40bdfa564314d9024353b55d84ed79241.jpg\",\"title\":\"양갈비\",\"likeCount\":0}]}}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"recipes\":[{\"id\":\"7014622\",\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2023/11/29/40bdfa564314d9024353b55d84ed79241.jpg\",\"title\":\"양갈비\", \"cookingLevel\": \"아무나\",\"people\": \"2인분\",\"likeCount\":0}]}}")))
     })
     @GetMapping("/category/recipe")
     public ResponseEntity admin(@RequestParam(value = "cat1",required = false) CookIngredients ingredients,
                                 @RequestParam(value = "cat2",required = false) CookMethods cookMethods,
                                 @RequestParam(value = "cat3",required = false) DishTypes dishTypes,
-                                @RequestParam(value = "lastLikeCount", required = false)  Integer likeCount,
+                                @RequestParam(value = "LikeCount", required = false)  Integer likeCount,
                                 @RequestParam(value = "order",required = false) OrderType order,
                                 @RequestParam(value = "lastId",required = false) Long lastId,
                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
