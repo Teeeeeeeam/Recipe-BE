@@ -134,15 +134,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeLikeTopPostResponse getTop4RecipesByLikes(Long recipeId) {
+    public PostLikeTopResponse getTop4RecipesByLikes(Long recipeId) {
         List<PostDto> topRecipesByLikes = postRepository.getTopRecipesByLikes(recipeId);
-        return new RecipeLikeTopPostResponse(topRecipesByLikes);
+        return new PostLikeTopResponse(topRecipesByLikes);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeLikeTopPostResponse getTopMainsByLikes() {
-        return new RecipeLikeTopPostResponse(postRepository.getTopMainByLikes());
+    public PostLikeTopResponse getTopMainsByLikes() {
+        return new PostLikeTopResponse(postRepository.getTopMainByLikes());
     }
 
     /* 게시글의 비밀 번호를 검증하는 메서드 */

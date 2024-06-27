@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RecipeLikeTopPostResponse {
+public class PostLikeTopResponse {
 
     private List<PostDto> post;
 }

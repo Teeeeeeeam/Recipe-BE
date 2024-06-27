@@ -173,7 +173,7 @@ public class PostController {
     })
     @GetMapping("/top/posts")
     public ResponseEntity<?> recipeTopPosts(@RequestParam("recipeId")Long recipeId){
-        RecipeLikeTopPostResponse top4RecipesByLikes = postService.getTop4RecipesByLikes(recipeId);
+        PostLikeTopResponse top4RecipesByLikes = postService.getTop4RecipesByLikes(recipeId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
 
@@ -185,7 +185,7 @@ public class PostController {
     })
     @GetMapping("/posts/main")
     public ResponseEntity<?> mainTopPosts(){
-        RecipeLikeTopPostResponse top4RecipesByLikes = postService.getTopMainsByLikes();
+        PostLikeTopResponse top4RecipesByLikes = postService.getTopMainsByLikes();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
 
