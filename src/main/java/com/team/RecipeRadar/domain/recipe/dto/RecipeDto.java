@@ -85,6 +85,7 @@ public class RecipeDto {
     }
 
     public static RecipeDto categoryOf(Recipe recipe, String imageUrl){
-        return RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).likeCount(recipe.getLikeCount()).imageUrl(imageUrl).build();
+        return RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).people(recipe.getPeople()).cookingLevel(recipe.getCookingLevel()).
+                likeCount(recipe.getLikeCount()).imageUrl(imageUrl).build();
     }
 }
