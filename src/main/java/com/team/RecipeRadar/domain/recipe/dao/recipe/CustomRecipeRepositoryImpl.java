@@ -4,6 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.team.RecipeRadar.domain.post.domain.QPost.post;
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
@@ -196,8 +199,12 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
             builder.and(recipe.types.eq(dishTypes));
         }
         if (order.equals(OrderType.LIKE) && likeCount != null) {
-            builder.and(recipe.likeCount.lt(likeCount));
-        } else if (!order.equals(OrderType.LIKE) && lastId != null) {
+            if (likeCount != 0)
+                builder.and(recipe.likeCount.lt(likeCount));
+            else
+                builder.and(recipe.likeCount.eq(0).and(recipe.id.lt(lastId)));
+        }
+        else if (!order.equals(OrderType.LIKE) && lastId != null) {
             builder.and(recipe.id.lt(lastId));
         }
 
@@ -259,7 +266,17 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
 
         switch (order) {
             case LIKE:
-                orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, recipe.likeCount));
+                OrderSpecifier<Integer> orderByLikeCount = new CaseBuilder()
+                        .when(recipe.likeCount.gt(0)).then(recipe.likeCount)
+                                .otherwise(Expressions.constant(0))
+                                        .desc();
+
+                OrderSpecifier<Long> orderByRecipeId = new CaseBuilder()
+                        .when(recipe.likeCount.eq(0)).then(recipe.id)
+                        .otherwise(Expressions.constant(Long.MAX_VALUE))
+                        .desc();
+                orderSpecifiers.add(orderByLikeCount);
+                orderSpecifiers.add(orderByRecipeId);
                 break;
             case DATE:
                 orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, recipe.id));
