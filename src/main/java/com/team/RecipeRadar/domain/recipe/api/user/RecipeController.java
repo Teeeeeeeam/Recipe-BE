@@ -53,10 +53,9 @@ public class RecipeController {
     })
     @GetMapping("/recipe/normal")
     public ResponseEntity<?> findRecipeV1(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
-                                          @RequestParam(value = "title", required = false) String title ,
-                                          @RequestParam(value = "all", required = false) String all ,
+                                          @RequestParam(value = "title", required = false) String title,
                                           @Parameter(example = "{\"page\":2,\"size\":10}") Pageable pageable){
-        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingredients, title,all, pageable);
+        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingredients, title, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeNormalPageResponse));
     }
 

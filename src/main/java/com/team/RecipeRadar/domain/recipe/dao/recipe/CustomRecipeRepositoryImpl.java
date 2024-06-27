@@ -103,13 +103,9 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
      * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
      */
     @Override
-    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, String all, Pageable pageable) {
+    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
-
-        if(all !=null){
-            builder.and(recipe.title.like("%" + all + "%").or(QIngredient.ingredient.ingredients.like("%" + all + "%")));
-        }
         if (title != null) {
             builder.and(recipe.title.like("%" + title + "%"));
         }
