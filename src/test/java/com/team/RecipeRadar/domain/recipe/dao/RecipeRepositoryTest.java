@@ -7,9 +7,6 @@ import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
-import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
-import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
@@ -345,7 +342,7 @@ class RecipeRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         Slice<RecipeDto> recipeDtos = recipeRepository.searchCategory(
-                BEEF, null, null, OrderType.DATE, null, null, pageRequest);
+                List.of(BEEF), null, null, OrderType.DATE, null, null, pageRequest);
 
         assertThat(recipeDtos).isNotNull();
         assertThat(recipeDtos.getContent()).isNotEmpty();
