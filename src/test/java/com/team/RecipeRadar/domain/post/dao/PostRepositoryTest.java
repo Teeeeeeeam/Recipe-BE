@@ -119,4 +119,15 @@ class PostRepositoryTest {
         assertThat(topRecipesByLikes.get(3).getPostTitle()).isEqualTo("tit3");
     }
 
+    @Test
+    @DisplayName("메인 페이지의 게시글 전체 게시글 3개 조회")
+    void getMainTopByLikes(){
+
+        List<PostDto> topMainByLikes = postRepository.getTopMainByLikes();
+
+        assertThat(topMainByLikes.get(0).getPostTitle()).isEqualTo("tit1");
+        assertThat(topMainByLikes.get(1).getPostTitle()).isEqualTo("tit2");
+        assertThat(topMainByLikes.get(2).getPostTitle()).isEqualTo("searchPost");
+    }
+
 }
