@@ -78,7 +78,7 @@ public class RecipeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipe\":[\"8개의 레시피 데이터\"]}}")))
     })
-    @GetMapping("/main/recipe")
+    @GetMapping("/recipe/main")
     public ResponseEntity<?> mainRecipe(){
         MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",mainPageRecipeResponse));
@@ -90,7 +90,7 @@ public class RecipeController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"recipes\":[{\"id\":\"7014622\",\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2023/11/29/40bdfa564314d9024353b55d84ed79241.jpg\",\"title\":\"양갈비\", \"cookingLevel\": \"아무나\",\"people\": \"2인분\",\"likeCount\":0}]}}")))
     })
-    @GetMapping("/category/recipe")
+    @GetMapping("/recipe/category")
     public ResponseEntity admin(@RequestParam(value = "cat1",required = false) List<CookIngredients> ingredients,
                                 @RequestParam(value = "cat2",required = false) List<CookMethods> cookMethods,
                                 @RequestParam(value = "cat3",required = false) List<DishTypes> dishTypes,

@@ -8,10 +8,10 @@ import java.util.List;
 @Data
 public class MainPageRecipeResponse {
 
-    private List<RecipeDto> recipe;
+    private List<RecipeDto> recipes;
 
     private MainPageRecipeResponse(List<RecipeDto> list) {
-        this.recipe = list;
+        this.recipes = list;
     }
 
     public static MainPageRecipeResponse of(List<RecipeDto> list){
