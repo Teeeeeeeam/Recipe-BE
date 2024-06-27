@@ -94,7 +94,7 @@ public class RecipeController {
     public ResponseEntity admin(@RequestParam(value = "cat1",required = false) CookIngredients ingredients,
                                 @RequestParam(value = "cat2",required = false) CookMethods cookMethods,
                                 @RequestParam(value = "cat3",required = false) DishTypes dishTypes,
-                                @RequestParam(value = "LikeCount", required = false)  Integer likeCount,
+                                @RequestParam(value = "lastCount", required = false)  Integer likeCount,
                                 @RequestParam(value = "order",required = false) OrderType order,
                                 @RequestParam(value = "lastId",required = false) Long lastId,
                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
