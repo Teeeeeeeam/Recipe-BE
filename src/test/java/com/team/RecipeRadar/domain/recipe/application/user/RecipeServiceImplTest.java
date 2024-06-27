@@ -131,10 +131,10 @@ class RecipeServiceImplTest {
 
         MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
 
-        assertThat(mainPageRecipeResponse.getRecipe()).hasSize(3);
-        assertThat(mainPageRecipeResponse.getRecipe().get(0).getLikeCount()).isEqualTo(16);
-        assertThat(mainPageRecipeResponse.getRecipe().get(1).getLikeCount()).isEqualTo(13);
-        assertThat(mainPageRecipeResponse.getRecipe().get(2).getLikeCount()).isEqualTo(3);
+        assertThat(mainPageRecipeResponse.getRecipes()).hasSize(3);
+        assertThat(mainPageRecipeResponse.getRecipes().get(0).getLikeCount()).isEqualTo(16);
+        assertThat(mainPageRecipeResponse.getRecipes().get(1).getLikeCount()).isEqualTo(13);
+        assertThat(mainPageRecipeResponse.getRecipes().get(2).getLikeCount()).isEqualTo(3);
     }
 
     @Test

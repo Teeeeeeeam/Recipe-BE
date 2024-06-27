@@ -175,14 +175,14 @@ class RecipeControllerTest {
 
         given(recipeService.mainPageRecipe()).willReturn(of);
 
-        mockMvc.perform(get("/api/main/recipe")
+        mockMvc.perform(get("/api/recipe/main")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.recipe.size()").value(3))
-                .andExpect(jsonPath("$.data.recipe.[0].likeCount").value(16))
-                .andExpect(jsonPath("$.data.recipe.[1].likeCount").value(13))
-                .andExpect(jsonPath("$.data.recipe.[2].likeCount").value(3));
+                .andExpect(jsonPath("$.data.recipes.size()").value(3))
+                .andExpect(jsonPath("$.data.recipes.[0].likeCount").value(16))
+                .andExpect(jsonPath("$.data.recipes.[1].likeCount").value(13))
+                .andExpect(jsonPath("$.data.recipes.[2].likeCount").value(3));
     }
 
 }
