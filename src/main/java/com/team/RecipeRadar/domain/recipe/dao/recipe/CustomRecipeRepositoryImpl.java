@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.team.RecipeRadar.domain.post.domain.QPost.post;
 import static com.team.RecipeRadar.domain.recipe.domain.QCookingStep.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
@@ -187,24 +186,39 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     }
 
     @Override
-    public Slice<RecipeDto> searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
+    public Slice<RecipeDto> searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
-        if(ingredients!=null){
-            builder.and(recipe.cookingIngredients.eq(ingredients));
+        BooleanBuilder ingredientConditions = new BooleanBuilder();
+        BooleanBuilder methodConditions = new BooleanBuilder();
+        BooleanBuilder typeConditions = new BooleanBuilder();
+        BooleanBuilder likeConditions = new BooleanBuilder();
+
+        if (ingredients != null && !ingredients.isEmpty()) {
+            ingredients.forEach(cookIngredient ->
+                    ingredientConditions.or(recipe.cookingIngredients.eq(cookIngredient)));
+            builder.and(ingredientConditions);
         }
-        if(cookMethods !=null){
-            builder.and(recipe.cookMethods.eq(cookMethods));
+
+        if (cookMethods != null && !cookMethods.isEmpty()) {
+            cookMethods.forEach(cookMethod ->
+                    methodConditions.or(recipe.cookMethods.eq(cookMethod)));
+            builder.and(methodConditions);
         }
-        if (dishTypes != null) {
-            builder.and(recipe.types.eq(dishTypes));
+
+        if (dishTypes != null && !dishTypes.isEmpty()) {
+            dishTypes.forEach(dishType ->
+                    typeConditions.or(recipe.types.eq(dishType)));
+            builder.and(typeConditions);
         }
+
         if (order.equals(OrderType.LIKE) && likeCount != null) {
-            if (likeCount != 0)
-                builder.and(recipe.likeCount.lt(likeCount));
-            else
-                builder.and(recipe.likeCount.eq(0).and(recipe.id.lt(lastId)));
-        }
-        else if (!order.equals(OrderType.LIKE) && lastId != null) {
+            if (likeCount != 0) {
+                likeConditions.or(recipe.likeCount.lt(likeCount));
+            } else {
+                likeConditions.or(recipe.likeCount.eq(0).and(recipe.id.lt(lastId)));
+            }
+            builder.and(likeConditions);
+        } else if (!order.equals(OrderType.LIKE) && lastId != null) {
             builder.and(recipe.id.lt(lastId));
         }
 

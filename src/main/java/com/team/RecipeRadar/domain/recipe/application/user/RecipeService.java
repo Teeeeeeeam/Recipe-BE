@@ -20,6 +20,6 @@ public interface RecipeService {
 
     MainPageRecipeResponse mainPageRecipe();
 
-    RecipeCategoryResponse searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable);
+    RecipeCategoryResponse searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable);
 
 }

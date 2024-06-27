@@ -20,11 +20,9 @@ public enum CookIngredients {
     MUSHROOMS("버섯류");
 
     private final String korean;
-
     CookIngredients(String korean) {
         this.korean = korean;
     }
-
     public String getKorean() {
         return korean;
     }

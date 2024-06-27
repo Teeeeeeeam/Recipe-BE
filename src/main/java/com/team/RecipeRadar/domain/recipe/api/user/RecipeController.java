@@ -4,7 +4,6 @@ import com.team.RecipeRadar.domain.recipe.application.user.RecipeService;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,13 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@Slf4j
 @Tag(name = "사용자 - 레시피 컨트롤러", description = "레시피 검색 및 관리")
 @RestController
 @RequiredArgsConstructor
@@ -91,11 +91,11 @@ public class RecipeController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"recipes\":[{\"id\":\"7014622\",\"imageUrl\":\"https://recipe1.ezmember.co.kr/cache/recipe/2023/11/29/40bdfa564314d9024353b55d84ed79241.jpg\",\"title\":\"양갈비\", \"cookingLevel\": \"아무나\",\"people\": \"2인분\",\"likeCount\":0}]}}")))
     })
     @GetMapping("/category/recipe")
-    public ResponseEntity admin(@RequestParam(value = "cat1",required = false) CookIngredients ingredients,
-                                @RequestParam(value = "cat2",required = false) CookMethods cookMethods,
-                                @RequestParam(value = "cat3",required = false) DishTypes dishTypes,
-                                @RequestParam(value = "lastCount", required = false)  Integer likeCount,
-                                @RequestParam(value = "order",required = false) OrderType order,
+    public ResponseEntity admin(@RequestParam(value = "cat1",required = false) List<CookIngredients> ingredients,
+                                @RequestParam(value = "cat2",required = false) List<CookMethods> cookMethods,
+                                @RequestParam(value = "cat3",required = false) List<DishTypes> dishTypes,
+                                @RequestParam(value = "lastCount",required = false)  Integer likeCount,
+                                @RequestParam(value = "order",defaultValue = "DATE") OrderType order,
                                 @RequestParam(value = "lastId",required = false) Long lastId,
                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeCategoryResponse recipeCategoryResponse = recipeService.searchCategory(ingredients, cookMethods, dishTypes, order, likeCount, lastId, pageable);

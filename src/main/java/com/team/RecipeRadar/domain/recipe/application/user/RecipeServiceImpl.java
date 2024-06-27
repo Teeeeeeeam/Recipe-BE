@@ -73,8 +73,7 @@ public class RecipeServiceImpl implements RecipeService{
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeCategoryResponse searchCategory(CookIngredients ingredients, CookMethods cookMethods, DishTypes dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
-        if(ingredients==null && cookMethods==null && dishTypes==null && order == null)throw new InvalidIdException("카테고리를 선택해주세요");
+    public RecipeCategoryResponse searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
         Slice<RecipeDto> recipeDtoSlice = recipeRepository.searchCategory(ingredients, cookMethods, dishTypes, order, likeCount, lastId, pageable);
         
         return new RecipeCategoryResponse(recipeDtoSlice.hasNext(),recipeDtoSlice.getContent());
