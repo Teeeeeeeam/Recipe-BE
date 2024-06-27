@@ -139,6 +139,12 @@ public class PostServiceImpl implements PostService {
         return new RecipeLikeTopPostResponse(topRecipesByLikes);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public RecipeLikeTopPostResponse getTopMainsByLikes() {
+        return new RecipeLikeTopPostResponse(postRepository.getTopMainByLikes());
+    }
+
     /* 게시글의 비밀 번호를 검증하는 메서드 */
     private void validatePassword(ValidPostRequest validPostRequest, Post post) {
         if(!passwordEncoder.matches(validPostRequest.getPassword(), post.getPostPassword()))

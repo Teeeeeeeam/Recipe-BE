@@ -176,4 +176,17 @@ public class PostController {
         RecipeLikeTopPostResponse top4RecipesByLikes = postService.getTop4RecipesByLikes(recipeId);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
+
+    @Operation(summary = "메인페이지 게시글 좋아요순 조회",description = "현재 사이트에서 작성된 게시글중 좋아요가 제일 많은 게시글 3개를 조회한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"post\":[{\"postTitle\":\"게시글 제목\",\"createdAt\":\"2024-06-25\",\"postLikeCount\":0,\"postImageUrl\":\"https://recipe-reader-kr/ex_image.png\",\"member\":{\"nickname\":\"일반사용자\"}}]}}")))
+    })
+    @GetMapping("/posts/main")
+    public ResponseEntity<?> mainTopPosts(){
+        RecipeLikeTopPostResponse top4RecipesByLikes = postService.getTopMainsByLikes();
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
+    }
+
 }

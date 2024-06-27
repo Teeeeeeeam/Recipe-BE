@@ -181,6 +181,18 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
     }
 
+    @Override
+    public List<PostDto> getTopMainByLikes() {
+        List<Tuple> list = jpaQueryFactory
+                .select(post, uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .orderBy(post.postLikeCount.desc())
+                .limit(3)
+                .fetch();
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+    }
+
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
     }

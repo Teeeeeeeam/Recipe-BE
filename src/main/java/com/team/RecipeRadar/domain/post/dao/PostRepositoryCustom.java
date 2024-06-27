@@ -20,4 +20,6 @@ public interface PostRepositoryCustom {
     void deletePostByRecipeId(Long recipeId);
 
     List<PostDto> getTopRecipesByLikes(Long recipeId);
+
+    List<PostDto> getTopMainByLikes();
 }
