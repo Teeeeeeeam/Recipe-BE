@@ -108,4 +108,15 @@ class PostRepositoryTest {
         assertThat(search_loginId_and_title_postTitle.getContent()).hasSize(1);
     }
 
+    @Test
+    @DisplayName("레시피 페이지에서 좋아요순 4개 출력")
+    void getRecipeTopByLikes(){
+        List<PostDto> topRecipesByLikes = postRepository.getTopRecipesByLikes(saveRecipe.getId());
+
+        assertThat(topRecipesByLikes.get(0).getPostTitle()).isEqualTo("tit1");
+        assertThat(topRecipesByLikes.get(1).getPostTitle()).isEqualTo("tit2");
+        assertThat(topRecipesByLikes.get(2).getPostTitle()).isEqualTo("searchPost");
+        assertThat(topRecipesByLikes.get(3).getPostTitle()).isEqualTo("tit3");
+    }
+
 }
