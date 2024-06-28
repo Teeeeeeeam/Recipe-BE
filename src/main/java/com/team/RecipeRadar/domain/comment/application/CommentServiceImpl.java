@@ -46,12 +46,6 @@ public class CommentServiceImpl implements CommentService {
 
         notificationService.sendCommentNotification(post,savedComment.getMember().getNickName());       //알림 전송
     }
-
-    @Override
-    public Comment findById(long id) {
-        return commentRepository.findById(id).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_COMMENT));
-    }
-
     /**
      * 댓글의 Id와 사용자의 Id를 사용해서 댓글을 삭제한다.
      */

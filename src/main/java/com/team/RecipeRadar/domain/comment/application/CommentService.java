@@ -11,5 +11,5 @@ public interface CommentService {
     void deleteComment(Long commentId, Long memberId);
     Page<CommentDto> commentPage(Long id, Pageable pageable);
     void update(Long commentId,String newComment ,Long memberId);
-    Comment findById(long id);
+
 }
