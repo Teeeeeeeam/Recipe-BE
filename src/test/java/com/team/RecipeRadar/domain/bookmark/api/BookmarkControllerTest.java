@@ -13,7 +13,7 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.mock.CustomMockUser;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Slf4j
 @Import(SecurityTestConfig.class)
 @WebMvcTest(BookmarkController.class)
 class BookmarkControllerTest {
@@ -47,14 +46,22 @@ class BookmarkControllerTest {
     @Autowired MockMvc mockMvc;
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    private Member member;
+    private Recipe recipe;
+    private Long memberId = 1L;
+    private Long recipeId = 1L;
+
+    @BeforeEach
+    void setUp() {
+        member = Member.builder().id(1L).loginId("Test").username("loginId").username("username").build();
+        recipe = Recipe.builder().id(2L).likeCount(1).title("title").build();
+    }
+
     @Test
     @CustomMockUser
-    @DisplayName("즐겨찾기를 성공하는 테스트")
+    @DisplayName("즐겨찾기 추가 성공 테스트")
     void bookmark_success_test() throws Exception {
-        Member member = Member.builder().id(1l).loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().id(2l).likeCount(1).title("title").build();
-
-        given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(false);
+        given(recipeBookmarkService.saveBookmark(member.getId(), recipe.getId())).willReturn(false);
 
         BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
@@ -68,13 +75,10 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("즐겨찾기를 헤제하는 테스트")
     @CustomMockUser
+    @DisplayName("즐겨찾기 해제 성공 테스트")
     void unBookmark_success_test() throws Exception {
-        Member member = Member.builder().id(1l).loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().id(2l).likeCount(1).title("title").build();
-
-        given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willReturn(true);
+        given(recipeBookmarkService.saveBookmark(member.getId(), recipe.getId())).willReturn(true);
 
         BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
@@ -89,12 +93,10 @@ class BookmarkControllerTest {
 
     @Test
     @CustomMockUser
-    @DisplayName("사용자가 즐겨찾기를 진행하려했으나 db에 정보가 없을때 예외")
-    void BadRequest_Bookmark_test()throws Exception{
-        Member member = Member.builder().id(1l).loginId("Test").username("loginId").username("username").build();
-        Recipe recipe = Recipe.builder().id(3l).likeCount(1).title("title").build();
-
-        given(recipeBookmarkService.saveBookmark(member.getId(),recipe.getId())).willThrow(new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
+    @DisplayName("레시피를 찾을 수 없는 경우 BadRequest 예외 발생 테스트")
+    void BadRequest_Bookmark_test() throws Exception {
+        given(recipeBookmarkService.saveBookmark(member.getId(), recipe.getId()))
+                .willThrow(new NoSuchDataException(NoSuchErrorType.NO_SUCH_RECIPE));
 
         BookMarkRequest bookMarkRequest = new BookMarkRequest(recipe.getId());
 
@@ -109,13 +111,17 @@ class BookmarkControllerTest {
 
     @Test
     @CustomMockUser
-    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징")
+    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징 조회 테스트")
     void bookmark_page() throws Exception {
-        Long memberId =  1l;
-        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+        List<RecipeDto> list = List.of(
+                RecipeDto.builder().id(1L).title("레시피1").build(),
+                RecipeDto.builder().id(2L).title("레시피2").build(),
+                RecipeDto.builder().id(3L).title("레시피3").build()
+        );
 
         UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
-        given(recipeBookmarkService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
+        given(recipeBookmarkService.userInfoBookmark(eq(memberId), isNull(), any(Pageable.class)))
+                .willReturn(userInfoBookmarkResponse);
 
         Cookie cookie = new Cookie("login-id", "cookie");
         mockMvc.perform(get("/api/user/info/bookmark")
@@ -128,10 +134,10 @@ class BookmarkControllerTest {
 
     @Test
     @CustomMockUser
-    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징(쿠키가 없을때 접근)")
+    @DisplayName("사용자 쿠키가 없는 상태에서 접근할 경우 Forbidden 예외 발생 테스트")
     void bookmark_page_NONECOOKIE() throws Exception {
-
-        doThrow(new UnauthorizedException("잘못된 접근 이거나 일반 사용자만 가능합니다.")).when(cookieUtils).validCookie(isNull(),anyString());
+        doThrow(new UnauthorizedException("잘못된 접근 이거나 일반 사용자만 가능합니다."))
+                .when(cookieUtils).validCookie(isNull(), anyString());
 
         mockMvc.perform(get("/api/user/info/bookmark"))
                 .andExpect(status().isForbidden())
@@ -139,16 +145,20 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @CustomMockUser(id = 2l)
-    @DisplayName("사용자가 즐겨찾기한 레시피 제목 페이징(사용자가아닌 다른 사용자가 접근시)")
-    void aasdasd() throws Exception {
-        Long memberId =  1l;
-        List<RecipeDto> list = List.of(RecipeDto.builder().id(1l).title("레시피1").build(),RecipeDto.builder().id(2l).title("레시피2").build(),RecipeDto.builder().id(3l).title("레시피3").build());
+    @CustomMockUser(id = 2L)
+    @DisplayName("다른 사용자가 접근할 경우 데이터가 반환되지 않는 테스트")
+    void other_user_access() throws Exception {
+        List<RecipeDto> list = List.of(
+                RecipeDto.builder().id(1L).title("레시피1").build(),
+                RecipeDto.builder().id(2L).title("레시피2").build(),
+                RecipeDto.builder().id(3L).title("레시피3").build()
+        );
 
         UserInfoBookmarkResponse userInfoBookmarkResponse = new UserInfoBookmarkResponse(false, list);
-        given(recipeBookmarkService.userInfoBookmark(eq(memberId),isNull(),any(Pageable.class))).willReturn(userInfoBookmarkResponse);
-        Cookie cookie = new Cookie("login-id", "cookie");
+        given(recipeBookmarkService.userInfoBookmark(eq(memberId), isNull(), any(Pageable.class)))
+                .willReturn(userInfoBookmarkResponse);
 
+        Cookie cookie = new Cookie("login-id", "cookie");
         mockMvc.perform(get("/api/user/info/bookmark")
                         .cookie(cookie))
                 .andDo(print())
@@ -158,11 +168,8 @@ class BookmarkControllerTest {
 
     @Test
     @CustomMockUser
-    @DisplayName("로그인한 사용자 즐겨찾기 상태")
+    @DisplayName("로그인한 사용자가 즐겨찾기한 상태를 조회하는 테스트")
     void loginIsBookmark() throws Exception {
-        Long recipeId = 1L;
-        Long memberId = 1L;
-
         given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
 
         mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
@@ -171,13 +178,10 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @CustomMockUser(id = 2l)
-    @DisplayName("로그인한 사용자(즐겨찾기 되어있지않은 사용자) 즐겨찾기 상태")
+    @CustomMockUser(id = 2L)
+    @DisplayName("로그인한 사용자가 즐겨찾기하지 않은 상태를 조회하는 테스트")
     void diff_loginIsBookmark() throws Exception {
-        Long recipeId = 1L;
-        Long memberId = 1L;
-
-        given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
+        given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(false);
 
         mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
@@ -185,16 +189,13 @@ class BookmarkControllerTest {
                 .andExpect(jsonPath("$.success").value(false));
     }
 
-
     @Test
-    @DisplayName("비로그인 사용자 즐겨찾기 상태")
+    @DisplayName("비로그인 사용자가 즐겨찾기 상태를 조회하는 테스트")
     void UnLoginIsBookmark() throws Exception {
-        Long recipeId = 1L;
-
-        given(recipeBookmarkService.checkBookmark(isNull() ,eq(recipeId))).willReturn(false);
+        given(recipeBookmarkService.checkBookmark(isNull(), eq(recipeId))).willReturn(false);
 
         mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
-                .andExpect(status().is(403));
+                .andExpect(status().isForbidden());
     }
 }

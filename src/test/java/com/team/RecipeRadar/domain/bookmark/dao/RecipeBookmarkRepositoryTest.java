@@ -23,10 +23,10 @@ class RecipeBookmarkRepositoryTest {
     @Autowired RecipeRepository recipeRepository;
     @Autowired RecipeBookmarkRepository recipeBookmarkRepository;
 
-    Member member;
-    Recipe recipe;
-    Member saveMember;
-    Recipe saveRecipe;
+    private Member member;
+    private Recipe recipe;
+    private Member saveMember;
+    private Recipe saveRecipe;
 
     @BeforeEach
     void setUp() {
