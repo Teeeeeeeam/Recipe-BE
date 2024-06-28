@@ -3,7 +3,6 @@ package com.team.RecipeRadar.domain.email.application;
 import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
 import com.team.RecipeRadar.domain.email.domain.EmailVerification;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -21,7 +20,6 @@ import java.util.Random;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 @Qualifier("AccountEmail")
 public class AccountRetrievalEmailServiceImpl implements MailService{
 
@@ -37,7 +35,7 @@ public class AccountRetrievalEmailServiceImpl implements MailService{
      * 이멤일을 전송하면 인증번호를 반환 합니다.
      */
     @Override
-    public String sensMailMessage(String email) {
+    public String sendMailMessage(String email) {
         code=createCode();
 
         // 인증번호 말료시간

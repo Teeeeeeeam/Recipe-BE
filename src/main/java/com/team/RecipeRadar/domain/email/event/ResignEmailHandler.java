@@ -23,13 +23,13 @@ public class ResignEmailHandler{
     @EventListener
     public void sendEmail(MailEvent event) {
         String eventEmail = event.getEmail();
-        mailService.sensMailMessage(eventEmail);
+        mailService.sendMailMessage(eventEmail);
     }
 
     @EventListener
     public void sendEmail(QuestionMailEvent event) {
         String eventEmail = event.getEmail();
-        questionEmailService.sensMailMessage(eventEmail);
+        questionEmailService.sendMailMessage(eventEmail);
     }
 
     @EventListener

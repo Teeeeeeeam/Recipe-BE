@@ -3,7 +3,6 @@ package com.team.RecipeRadar.domain.email.application;
 import com.team.RecipeRadar.domain.email.dao.EmailVerificationRepository;
 import com.team.RecipeRadar.domain.email.domain.EmailVerification;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,7 +18,6 @@ import java.util.Random;
 @Transactional
 @RequiredArgsConstructor
 @Qualifier("JoinEmail")
-@Slf4j
 public class JoinEmailServiceImpl implements MailService{
 
     private final JavaMailSender mailSender;
@@ -32,7 +30,7 @@ public class JoinEmailServiceImpl implements MailService{
      * 이메일을 전송하기위한 메서드
      * 이멤일을 전송하면 인증번호를 반환 합니다.
      */
-    public String sensMailMessage(String email){
+    public String sendMailMessage(String email){
         code=createCode();
 
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);

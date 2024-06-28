@@ -37,13 +37,16 @@ public class CommonCodeEmailController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"메일 전송 성공\"}")))
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\": \"메일 전송 성공\"}"))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": false, \"message\": \"사용할수 없는 이메일입니다.\"}")))
     })
     @PostMapping("/send")
-    public ResponseEntity<?> mailConfirm(@Parameter(description ="이메일") @RequestParam("email") String email){
+    public ResponseEntity<?> sendVerificationCode(@Parameter(description ="이메일") @RequestParam("email") String email){
         boolean existsByEmail = blackListRepository.existsByEmail(email);
         if(!existsByEmail) {
-            mailService.sensMailMessage(email);
+            mailService.sendMailMessage(email);
             return ResponseEntity.ok(new ControllerApiResponse<>(true, "메일 전송 성공"));
         }else return ResponseEntity.badRequest().body(new ErrorResponse<>(false,"사용할수 없는 이메일입니다."));
     }
@@ -58,7 +61,7 @@ public class CommonCodeEmailController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/verify")
-    public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest, BindingResult bindingResult){
+    public ResponseEntity<?> verifyCode(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest, BindingResult bindingResult){
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"인증 번호 검증",stringBooleanMap));

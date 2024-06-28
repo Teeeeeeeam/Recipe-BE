@@ -37,8 +37,8 @@ public class SingUpEmailController {
                             examples = @ExampleObject(value = "{\"success\": true, \"message\": \"메일 전송 성공\"}")))
     })
     @PostMapping("/email-confirmation")
-    public ResponseEntity<?> mailConfirm(@Parameter(description = "이메일 주소") @RequestParam("email") String email){
-            mailService.sensMailMessage(email);
+    public ResponseEntity<?> sendVerificationCode(@Parameter(description = "이메일 주소") @RequestParam("email") String email){
+            mailService.sendMailMessage(email);
             return ResponseEntity.ok(new ControllerApiResponse(true,"메일 전송 성공"));
     }
 
@@ -52,7 +52,7 @@ public class SingUpEmailController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}")))
     })
     @PostMapping("/email-confirmation/verify")
-    public ResponseEntity<?> check(@Valid @RequestBody EmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
+    public ResponseEntity<?> verifyCode(@Valid @RequestBody EmailVerificationRequest signUpEmailVerificationRequest, BindingResult bindingResult){
 
         Map<String, Boolean> stringBooleanMap = mailService.verifyCode(signUpEmailVerificationRequest.getEmail(), signUpEmailVerificationRequest.getCode());
 

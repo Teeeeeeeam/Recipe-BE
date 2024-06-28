@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 @Qualifier("ResignEmail")
 public class ResignEmailServiceImpl implements MailService{
 
@@ -21,7 +21,7 @@ public class ResignEmailServiceImpl implements MailService{
     private String emailFrom;
 
     @Override
-    public String sensMailMessage(String email) {
+    public String sendMailMessage(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
 
         sendEmailVerification(email, message);

@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.email.application;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,7 +13,6 @@ import java.time.LocalDate;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 @Qualifier("NoneQuestionEmail")
 public class NonUserInquiryResponseEmailSender implements MailService {
 
