@@ -82,7 +82,7 @@ public class AdminPostServiceImpl implements AdminPostService{
 
             imgRepository.deleteUploadFileByPostIdAndRecipeId(post.getId(), post.getRecipe().getId());
             commentRepository.deleteByPostId(post.getId());
-            postLikeRepository.deletePostID(postId);
+            postLikeRepository.deleteByPostId(postId);
             postRepository.deleteById(post.getId());
         });
     }
