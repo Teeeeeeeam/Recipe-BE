@@ -206,7 +206,7 @@ class PostServiceImplTest {
         postService.delete(memberId, postId);
 
         verify(commentRepository, times(1)).deleteByPostId(anyLong());
-        verify(postLikeRepository, times(1)).deletePostID(anyLong());
+        verify(postLikeRepository, times(1)).deleteByPostId(anyLong());
         verify(postRepository, times(1)).deleteMemberId(anyLong(), anyLong());
     }
 
