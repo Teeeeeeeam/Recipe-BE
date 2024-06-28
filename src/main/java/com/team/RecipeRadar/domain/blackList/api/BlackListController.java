@@ -1,7 +1,7 @@
-package com.team.RecipeRadar.domain.balckLIst.api;
+package com.team.RecipeRadar.domain.blackList.api;
 
-import com.team.RecipeRadar.domain.balckLIst.application.AdminBlackMemberService;
-import com.team.RecipeRadar.domain.balckLIst.dto.response.BlackListResponse;
+import com.team.RecipeRadar.domain.blackList.application.AdminBlackMemberService;
+import com.team.RecipeRadar.domain.blackList.dto.response.BlackListResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

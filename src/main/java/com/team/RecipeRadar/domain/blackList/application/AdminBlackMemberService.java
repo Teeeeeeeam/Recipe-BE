@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.balckLIst.application;
+package com.team.RecipeRadar.domain.blackList.application;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.response.BlackListResponse;
+import com.team.RecipeRadar.domain.blackList.dto.response.BlackListResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminBlackMemberService{

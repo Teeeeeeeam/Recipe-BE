@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.member.application.admin;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.response.MemberInfoResponse;
+import com.team.RecipeRadar.domain.blackList.dto.response.MemberInfoResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

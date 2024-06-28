@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.balckLIst.dto.response;
+package com.team.RecipeRadar.domain.blackList.dto.response;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
+import com.team.RecipeRadar.domain.blackList.dto.BlackListDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

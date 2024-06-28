@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.balckLIst.dao;
+package com.team.RecipeRadar.domain.blackList.dao;
 
-import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
+import com.team.RecipeRadar.domain.blackList.domain.BlackList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

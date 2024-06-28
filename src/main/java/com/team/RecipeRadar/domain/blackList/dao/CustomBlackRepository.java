@@ -1,6 +1,6 @@
-package com.team.RecipeRadar.domain.balckLIst.dao;
+package com.team.RecipeRadar.domain.blackList.dao;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
+import com.team.RecipeRadar.domain.blackList.dto.BlackListDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

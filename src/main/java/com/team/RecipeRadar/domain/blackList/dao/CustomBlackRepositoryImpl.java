@@ -1,9 +1,9 @@
-package com.team.RecipeRadar.domain.balckLIst.dao;
+package com.team.RecipeRadar.domain.blackList.dao;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
+import com.team.RecipeRadar.domain.blackList.domain.BlackList;
+import com.team.RecipeRadar.domain.blackList.dto.BlackListDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 ;
-import static com.team.RecipeRadar.domain.balckLIst.domain.QBlackList.blackList;
+import static com.team.RecipeRadar.domain.blackList.domain.QBlackList.blackList;
 
 @Slf4j
 @Repository

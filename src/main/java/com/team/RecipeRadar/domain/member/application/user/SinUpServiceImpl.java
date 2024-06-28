@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.member.application.user;
 
-import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
+import com.team.RecipeRadar.domain.blackList.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;

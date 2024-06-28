@@ -135,7 +135,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      */
     private void deleteRecipeRelatedData(Long recipeId) {
         imageService.delete_Recipe(recipeId);
-        commentRepository.delete_post(recipeId);
+        commentRepository.deleteCommentsByRecipeId(recipeId);
         postLikeRepository.deleteRecipeId(recipeId);
         postRepository.deletePostByRecipeId(recipeId);
         recipeLikeRepository.deleteRecipeId(recipeId);

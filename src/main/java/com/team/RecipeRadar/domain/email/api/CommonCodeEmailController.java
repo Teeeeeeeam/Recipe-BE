@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.email.api;
 
-import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
+import com.team.RecipeRadar.domain.blackList.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.domain.email.dto.reqeust.EmailVerificationRequest;
 import com.team.RecipeRadar.global.payload.ErrorResponse;

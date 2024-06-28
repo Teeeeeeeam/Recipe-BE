@@ -1,9 +1,9 @@
-package com.team.RecipeRadar.domain.balckLIst.application;
+package com.team.RecipeRadar.domain.blackList.application;
 
-import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
-import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
-import com.team.RecipeRadar.domain.balckLIst.dto.BlackListDto;
-import com.team.RecipeRadar.domain.balckLIst.dto.response.BlackListResponse;
+import com.team.RecipeRadar.domain.blackList.domain.BlackList;
+import com.team.RecipeRadar.domain.blackList.dao.BlackListRepository;
+import com.team.RecipeRadar.domain.blackList.dto.BlackListDto;
+import com.team.RecipeRadar.domain.blackList.dto.response.BlackListResponse;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;

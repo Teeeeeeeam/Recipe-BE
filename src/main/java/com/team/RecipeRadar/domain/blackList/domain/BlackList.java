@@ -1,4 +1,4 @@
-package com.team.RecipeRadar.domain.balckLIst.domain;
+package com.team.RecipeRadar.domain.blackList.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

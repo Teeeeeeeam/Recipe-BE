@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.post.application.admin;
 
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
-import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
@@ -41,7 +41,7 @@ public class AdminPostServiceImpl implements AdminPostService{
      */
     @Override
     public PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable) {
-        Slice<CommentDto> postComment = commentRepository.getPostComment(postId, lastId, pageable);
+        Slice<CommentDto> postComment = commentRepository.getCommentsByPostId(postId, lastId, pageable);
 
         return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
     }
@@ -81,7 +81,7 @@ public class AdminPostServiceImpl implements AdminPostService{
                     .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
 
             imgRepository.deletePostImg(post.getId(), post.getRecipe().getId());
-            commentRepository.deletePostID(post.getId());
+            commentRepository.deleteByPostId(post.getId());
             postLikeRepository.deletePostID(postId);
             postRepository.deleteById(post.getId());
         });
