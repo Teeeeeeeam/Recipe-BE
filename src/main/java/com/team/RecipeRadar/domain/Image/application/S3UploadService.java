@@ -102,7 +102,7 @@ public class S3UploadService{
             } else if (entity instanceof Notice) {
                 uploadFile = imgRepository.findByNoticeId(((Notice) entity).getId());
             }else if(entity instanceof Recipe){
-                uploadFile = imgRepository.findrecipeIdpostNull(((Recipe) entity).getId()).get();
+                uploadFile = imgRepository.findUploadFileByRecipeIdAndPostNull(((Recipe) entity).getId()).get();
             }else if(entity instanceof Question)
                 uploadFile = imgRepository.findByQuestionId(((Question) entity).getId());
         }

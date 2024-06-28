@@ -18,7 +18,7 @@ public class CustomImgRepositoryImpl implements CustomImgRepository{
      * 레시피 이미지 삭제
      */
     @Override
-    public void delete_recipe_img(Long recipeId) {
+    public void deleteImagesByRecipeId(Long recipeId) {
         jpaQueryFactory
                 .delete(uploadFile)
                 .where(uploadFile.recipe.id.in(recipeId)).execute();
@@ -28,7 +28,7 @@ public class CustomImgRepositoryImpl implements CustomImgRepository{
      * 레시피 아이디가 같은 저장된 파일명 추출
      */
     @Override
-    public List<String> findAllStoredName(Long recipeId) {
+    public List<String> findAllStoredNamesByRecipeId(Long recipeId) {
         return jpaQueryFactory.select(uploadFile.storeFileName)
                 .from(uploadFile)
                 .where(uploadFile.recipe.id.eq(recipeId)).fetch();

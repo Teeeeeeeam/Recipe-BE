@@ -77,7 +77,7 @@ public class AdminNoticeServiceImpl implements AdminNoticeService {
         UploadFile uploadFile = imgRepository.findByNoticeId(notice.getId());
         if (existsFile(uploadFile)) {
             deleteS3Image(uploadFile);
-            imgRepository.deleteNoticeId(notice.getId());
+            imgRepository.deleteByNoticeId(notice.getId());
         }
     }
 

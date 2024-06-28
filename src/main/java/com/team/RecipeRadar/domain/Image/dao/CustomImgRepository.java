@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface CustomImgRepository {
 
-    void delete_recipe_img(Long recipeId);
+    void deleteImagesByRecipeId(Long recipeId);
 
-    List<String> findAllStoredName(Long recipeId);
+    List<String> findAllStoredNamesByRecipeId(Long recipeId);
 
 }

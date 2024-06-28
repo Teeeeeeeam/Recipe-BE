@@ -22,7 +22,7 @@ public class ImgServiceImpl implements ImageService {
      * 레시피 이미지를 저장하는 메서드
      */
     @Override
-    public void saveRecipeImg(Recipe recipe, UploadFile uploadFile) {
+    public void saveRecipeImage(Recipe recipe, UploadFile uploadFile) {
         uploadFile.setRecipe(recipe);
         imgRepository.save(uploadFile);
     }
@@ -31,9 +31,9 @@ public class ImgServiceImpl implements ImageService {
      * 레시피 이미지를 삭제하는 메서드
      */
     @Override
-    public void delete_Recipe(Long recipeId) {
-        List<String> allStoredName = imgRepository.findAllStoredName(recipeId);
+    public void deleteRecipe(Long recipeId) {
+        List<String> allStoredName = imgRepository.findAllStoredNamesByRecipeId(recipeId);
         allStoredName.stream().forEach(s -> s3UploadService.deleteFile(s));
-        imgRepository.delete_recipe_img(recipeId);
+        imgRepository.deleteImagesByRecipeId(recipeId);
     }
 }

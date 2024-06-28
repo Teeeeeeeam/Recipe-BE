@@ -80,7 +80,7 @@ public class AdminPostServiceImpl implements AdminPostService{
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST));
 
-            imgRepository.deletePostImg(post.getId(), post.getRecipe().getId());
+            imgRepository.deleteUploadFileByPostIdAndRecipeId(post.getId(), post.getRecipe().getId());
             commentRepository.deleteByPostId(post.getId());
             postLikeRepository.deletePostID(postId);
             postRepository.deleteById(post.getId());

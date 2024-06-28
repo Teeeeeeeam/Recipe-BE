@@ -134,7 +134,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      * 특정 ID의 레시피와 관련된 데이터를 삭제하는 메서드.
      */
     private void deleteRecipeRelatedData(Long recipeId) {
-        imageService.delete_Recipe(recipeId);
+        imageService.deleteRecipe(recipeId);
         commentRepository.deleteCommentsByRecipeId(recipeId);
         postLikeRepository.deleteRecipeId(recipeId);
         postRepository.deletePostByRecipeId(recipeId);
