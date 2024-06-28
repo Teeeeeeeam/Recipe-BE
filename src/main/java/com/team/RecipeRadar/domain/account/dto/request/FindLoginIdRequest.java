@@ -19,14 +19,14 @@ public class FindLoginIdRequest {
     @Schema(description = "가입할때 입력한 사용자 실명",example = "홍길동")
     @NotBlank(message = "이름을 입력해주세요")
     @Pattern(regexp = "^[가-힣]+.{1,}$",message = "이름을 정확이 입력해주세요")
-    String username;
+    private String username;
 
     @NotBlank(message = "이메일을 입력해주세요")
     @Schema(description = "회원가입시 입력한 이메일 주소", example = "test@naver.com")
-    String email;
+    private String email;
 
     @NotNull
     @Min(value = 100000, message = "인증번호는 최소 6자리여야 합니다.")
     @Schema(description = "이메일 인증번호",example = "123456")
-    Integer code;
+    private Integer code;
 }
