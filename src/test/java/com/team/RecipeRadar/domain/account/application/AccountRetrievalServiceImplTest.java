@@ -8,7 +8,6 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class AccountRetrievalServiceImplTest {
 
     @Mock MemberRepository memberRepository;
@@ -38,7 +36,6 @@ class AccountRetrievalServiceImplTest {
 
     @InjectMocks
     AccountRetrievalServiceImpl accountRetrievalService;
-
 
     @Test
     @DisplayName("아이디 찾기시에 일반,소셜 로그인 존재시")
@@ -83,7 +80,6 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
         int fakeCode = 12;
-        int realCode = 1234;
 
         // 잘못된 코드로 verifyCode를 호출하는 대신, 올바른 코드를 사용하여 호출해야 합니다.
         when(emailService.verifyCode(email, fakeCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
