@@ -23,11 +23,10 @@ import java.util.NoSuchElementException;
 
 import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.*;
 
+@Service
 @Transactional
 @RequiredArgsConstructor
 @Qualifier("PostLikeServiceImpl")
-@Service
-@Slf4j
 public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeService<T> {
 
     private final PostLikeRepository postLikeRepository;
@@ -52,15 +51,12 @@ public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeSer
         } else {
             addLike(post, member);
         }
-
         return alreadyLiked;
     }
 
     @Override
     public Boolean checkLike(Long memberId,Long postId) {
-        Boolean alreadyLiked = postLikeRepository.existsByMemberIdAndPostId(memberId,postId);
-
-        return alreadyLiked;
+        return postLikeRepository.existsByMemberIdAndPostId(memberId,postId);
     }
 
     /**

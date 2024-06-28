@@ -7,7 +7,6 @@ import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import com.team.RecipeRadar.domain.member.domain.QMember;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 ;
@@ -18,7 +17,6 @@ import static com.team.RecipeRadar.domain.like.domain.QPostLike.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class PostLikeRepositoryImpl implements PostLikeRepositoryCustom{

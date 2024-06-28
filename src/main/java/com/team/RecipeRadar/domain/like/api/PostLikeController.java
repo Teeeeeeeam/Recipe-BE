@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
@@ -76,7 +74,6 @@ public class PostLikeController {
         Boolean checkLike = postLikeService.checkLike(principalDetails.getMemberId(), postId);
 
         return ResponseEntity.ok(new ControllerApiResponse(checkLike,"좋아요 상태"));
-
     }
 
     @Operation(summary = "게시글 좋아요 내역(페이징)",description = "사용자가 좋아요한 게시글의 무한 페이징입니다.",tags = "사용자 - 마이페이지 컨트롤러")
@@ -105,7 +102,6 @@ public class PostLikeController {
         UserInfoLikeResponse userLikesByPage = postLikeService.getUserLikesByPage(principalDetails.getMemberId(), postLike_lastId, pageable);
 
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userLikesByPage));
-
     }
 
 

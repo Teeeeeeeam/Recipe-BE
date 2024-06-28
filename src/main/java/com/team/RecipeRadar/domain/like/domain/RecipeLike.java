@@ -32,7 +32,6 @@ public class RecipeLike {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-
     public static RecipeLike createRecipeLike(Member member, Recipe recipe){
         return RecipeLike.builder().member(member).recipe(recipe).build();
     }

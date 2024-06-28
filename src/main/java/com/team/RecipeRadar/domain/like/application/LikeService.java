@@ -7,6 +7,5 @@ public interface LikeService<T> {
 
     Boolean addLike(T postLikeDto,Long memberId);
     Boolean checkLike(Long memberId,Long postId);
-
     UserInfoLikeResponse getUserLikesByPage(Long memberId, Long Like_lastId,Pageable pageable);
 }

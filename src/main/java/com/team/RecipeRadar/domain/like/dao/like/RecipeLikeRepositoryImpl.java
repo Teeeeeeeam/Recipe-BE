@@ -5,7 +5,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.like.dto.UserLikeDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -18,7 +17,6 @@ import static com.team.RecipeRadar.domain.like.domain.QRecipeLike.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class RecipeLikeRepositoryImpl implements RecipeLikeRepositoryCustom{
@@ -44,7 +42,7 @@ public class RecipeLikeRepositoryImpl implements RecipeLikeRepositoryCustom{
 
 
         List<UserLikeDto> content = likeList.stream()
-                .map(UserLikeDto::Recipe_of) // 이 부분을 수정
+                .map(UserLikeDto::Recipe_of)
                 .collect(Collectors.toList());
 
         boolean hasNext =false;

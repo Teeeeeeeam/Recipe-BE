@@ -12,7 +12,6 @@ public interface PostLikeRepository extends JpaRepository<PostLike,Long>, PostLi
 
     Boolean existsByMemberIdAndPostId(Long memberId, Long postId);
     void deleteByMemberIdAndPostId(Long memberId, Long postId);
-
     @Modifying
     @Query("DELETE from PostLike p where p.post.id =:postId")
     void deletePostID(@Param("postId")Long postId);

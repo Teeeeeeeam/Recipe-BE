@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +25,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 @RequestMapping("/api/user")
 public class RecipeLikeController {
 
     @Qualifier("RecipeLikeServiceImpl")
     private final LikeService recipeLikeService;
     private final CookieUtils cookieUtils;
-
 
     @Tag(name = "사용자 - 좋아요/즐겨찾기 컨트롤러", description = "좋아요/즐겨찾기 확인 및 처리")
     @Operation(summary = "레시피 - 좋아요",
@@ -71,10 +68,9 @@ public class RecipeLikeController {
     })
     @GetMapping("/recipe/{recipeId}/like/check")
     public ResponseEntity<?> likeCheck(@Parameter(description = "레시피Id") @PathVariable(required = false) Long recipeId,
-                                       @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+                                       @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Boolean checkLike = recipeLikeService.checkLike(principalDetails.getMemberId(), recipeId);
-        return ResponseEntity.ok(new ControllerApiResponse(checkLike,"좋아요 상태"));
-
+        return ResponseEntity.ok(new ControllerApiResponse(checkLike, "좋아요 상태"));
     }
 
     @Operation(summary = "레시피 좋아요 내역(페이징)",description = "사용자가 좋아요한 레시피에 대한 무한 페이징을 제공합니다.",tags = "사용자 - 마이페이지 컨트롤러")
@@ -97,7 +93,6 @@ public class RecipeLikeController {
                                          @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
-
        cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
 
        UserInfoLikeResponse userLikesByPage = recipeLikeService.getUserLikesByPage(principalDetails.getMemberId(), recipeLike_lastId, pageable);

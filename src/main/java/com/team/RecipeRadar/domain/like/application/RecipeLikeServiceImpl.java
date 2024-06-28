@@ -21,11 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.NO_SUCH_MEMBER;
 import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.NO_SUCH_RECIPE;
 
+@Service
 @Transactional
 @RequiredArgsConstructor
 @Qualifier("RecipeLikeServiceImpl")
-@Service
-@Slf4j
 public class RecipeLikeServiceImpl<T extends RecipeLikeRequest> implements LikeService<T> {
 
     private final MemberRepository memberRepository;
