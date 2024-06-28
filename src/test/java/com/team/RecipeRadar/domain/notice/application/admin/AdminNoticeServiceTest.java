@@ -80,7 +80,7 @@ class AdminNoticeServiceTest {
         adminNoticeService.delete(anyList());
 
         verify(noticeRepository, times(2)).delete(any(Notice.class));
-        verify(imgRepository, times(2)).deleteNoticeId(anyLong());
+        verify(imgRepository, times(2)).deleteByNoticeId(anyLong());
     }
 
 

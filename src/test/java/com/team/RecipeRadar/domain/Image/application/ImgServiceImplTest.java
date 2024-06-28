@@ -1,6 +1,5 @@
 package com.team.RecipeRadar.domain.Image.application;
 
-import com.team.RecipeRadar.domain.Image.application.ImgServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
@@ -35,7 +34,7 @@ class ImgServiceImplTest {
 
         when(imgRepository.save(uploadFile)).thenReturn(uploadFile);
 
-        imgService.saveRecipeImg(recipe,uploadFile);
+        imgService.saveRecipeImage(recipe,uploadFile);
 
         verify(imgRepository,times(1)).save(uploadFile);        // imgRepository를 한번 호출하는지
         assertThat(uploadFile.getRecipe()).isEqualTo(recipe);                         // 저장된 파일의 레시피가 같은지
