@@ -13,7 +13,6 @@ import com.team.RecipeRadar.domain.qna.domain.Question;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.global.exception.ex.img.ImageException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,6 @@ import java.util.UUID;
 
 import static com.team.RecipeRadar.global.exception.ex.img.ImageErrorType.*;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -50,13 +48,16 @@ public class S3UploadService{
             throw new ImageException(MISSING_PRIMARY_IMAGE);
         }
 
+        // 원본 파일명과 저장될 파일명 생성
         String originalFilename = file.getOriginalFilename();
         String storeFile = createStoreFile(originalFilename);
 
+        // 객체 메타데이터 설정
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
 
+        // 연결된 엔티티가 있으면 저장
         List<Object> entitiesToSave = new ArrayList<>();
         if(!entities.isEmpty()) {
             entities.forEach(entity -> {
@@ -67,6 +68,7 @@ public class S3UploadService{
             imgRepository.save(UploadFile.createUploadFile(entitiesToSave, file.getOriginalFilename(), storeFile));
         }
 
+        // 파일을 S3에 업로드
         try{
             InputStream inputStream = file.getInputStream();
             amazonS3.putObject(new PutObjectRequest(bucket,storeFile,inputStream,objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
@@ -96,6 +98,7 @@ public class S3UploadService{
     public <T>void updateFile(MultipartFile file,List<T> entities){
         UploadFile uploadFile = null;
 
+        // 각 엔티티 타입에 따라 업로드된 파일 조회
         for(T entity : entities){
             if (entity instanceof Post) {
                 uploadFile = imgRepository.findByPostId(((Post) entity).getId());
@@ -107,24 +110,29 @@ public class S3UploadService{
                 uploadFile = imgRepository.findByQuestionId(((Question) entity).getId());
         }
 
+        // 이미지 업로드 또는 업데이트 수행
         saveOrUpdateUploadFile(file, List.of(), uploadFile);
     }
 
+    /* 이미지를 저장하거나 업데이트하는 메서드 */
     private <T> void saveOrUpdateUploadFile(MultipartFile file, T entity, UploadFile uploadFile) {
         if (file != null && !file.isEmpty()) {
             String storedFileName = uploadFile(file,List.of());
             if (uploadFile != null) {
+                // 파일명이 다를 경우 기존 파일 삭제 후 업데이트
                 if (!uploadFile.getOriginFileName().equals(file.getOriginalFilename())) {
                     deleteFile(uploadFile.getStoreFileName());
                     uploadFile.update(storedFileName, file.getOriginalFilename());
                 }
-            } else {        // 공지사항 및 질문만 최초 등록시 이미지값이 필수가 아니라 등록기능 작성
+            } else {
+                // 공지사항 및 질문만 최초 등록시 이미지값이 필수가 아니라 등록기능 작성
                 imgRepository.save(UploadFile.createUploadFile(List.of(entity), file.getOriginalFilename(), storedFileName));
                 uploadFile(file,List.of());
             }
         }
     }
 
+    /* 저장될 파일명 생성 */
     private String createStoreFile(String originalFilename) {
         int lastIndexOf = originalFilename.lastIndexOf(".");                    // 마지막 종류
         String extension = originalFilename.substring(lastIndexOf + 1).toLowerCase();     //확장자 종류
