@@ -61,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
 
         validateCommentOwner(member, comment);
         notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());        //삭제 알림 전송
-        commentRepository.deleteMemberId(member.getId(),comment.getId());           //삭제
+        commentRepository.deleteByMemberIdAndCommentId(member.getId(),comment.getId());           //삭제
     }
 
     /**
@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
      */
     @Transactional(readOnly = true)
     public Page<CommentDto> commentPage(Long postId,Pageable pageable){
-        Page<Comment> comments = commentRepository.findAllByPost_Id(postId, pageable);
+        Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
 
         return comments.isEmpty() ?
                 new PageImpl<>(Collections.emptyList(), pageable, 0) :

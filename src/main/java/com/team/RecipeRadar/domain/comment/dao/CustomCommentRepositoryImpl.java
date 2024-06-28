@@ -33,7 +33,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
      * @return
      */
     @Override
-    public Slice<CommentDto> getPostComment(Long postId, Long lastId, Pageable pageable) {
+    public Slice<CommentDto> getCommentsByPostId(Long postId, Long lastId, Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
         if(lastId!=null){
@@ -57,7 +57,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     }
 
     @Override
-    public void delete_post(Long recipeId) {
+    public void deleteCommentsByRecipeId(Long recipeId) {
         jpaQueryFactory.delete(comment)
                 .where(comment.post.id.in(
                         JPAExpressions

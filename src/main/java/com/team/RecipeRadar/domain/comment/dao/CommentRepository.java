@@ -16,10 +16,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
 
     List<Comment> findAllByPostId(Long postId);
     @Modifying
-    @Query("delete from Comment c where c.member.id=:member_id and c.id=:comment_id")
-    void deleteMemberId(@Param("member_id") Long member_id, @Param("comment_id")Long comment_id);
+    @Query("delete from Comment c where c.member.id=:memberId and c.id=:commentId")
+    void deleteByMemberIdAndCommentId(@Param("memberId") Long member_id, @Param("commentId")Long comment_id);
     @Modifying
     @Query("delete from Comment c where c.post.id=:postId")
-    void deletePostID(@Param("postId")Long postId);
-    Page<Comment> findAllByPost_Id(Long post_id, Pageable pageable);
+    void deleteByPostId(@Param("postId")Long postId);
+    Page<Comment> findAllByPostId(Long post_id, Pageable pageable);
 }
