@@ -9,125 +9,91 @@ import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Import(QueryDslConfig.class)
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(QueryDslConfig.class)
-@Transactional
-@Slf4j
 class RecipeLikeRepositoryTest {
 
-    @Autowired
-    RecipeLikeRepository recipeLikeRepository;
+    @Autowired RecipeLikeRepository recipeLikeRepository;
     @Autowired MemberRepository memberRepository;
     @Autowired RecipeRepository recipeRepository;
+    @Autowired EntityManager em;
+
+    private List<Member> members;
+    private List<Recipe> recipes;
+    private List<RecipeLike> recipeLikes;
+
+    @BeforeEach
+    void setUp(){
+        members = List.of(
+                Member.builder().loginId("testId1").username("testname1").build(),
+                Member.builder().loginId("testId2").username("testname2").build()
+        );
+        memberRepository.saveAll(members);
+
+        recipes =List.of(
+                Recipe.builder().title("타이틀1").cookingTime("쿠킹 시간").likeCount(1).build(),
+                Recipe.builder().title("타이틀2").cookingTime("쿠킹 시간").likeCount(2).build(),
+                Recipe.builder().title("타이틀3").cookingTime("쿠킹 시간").likeCount(5).build());
+        recipeRepository.saveAll(recipes);
+
+        recipeLikes =List.of(
+                RecipeLike.builder().recipe(recipes.get(0)).member(members.get(0)).build(),
+                RecipeLike.builder().recipe(recipes.get(1)).member(members.get(0)).build(),
+                RecipeLike.builder().recipe(recipes.get(2)).member(members.get(0)).build()
+        );
+        recipeLikeRepository.saveAll(recipeLikes);
+    }
 
     @Test
-    @DisplayName("필드값이 존재하는지 테스트")
-    @Rollback(value = false)
+    @DisplayName("해당 레시피의 좋아요가 되어있는지 체크")
     void save(){
-        Long recipe_id= 3l;
-        Member member = Member.builder().loginId("loginId").build();
-        Member member1 = Member.builder().loginId("loginId1").build();
-        Recipe recipe = Recipe.builder().id(recipe_id).likeCount(0).build();
-
-
-        Member saveMember = memberRepository.save(member);
-        Member saveMember1 = memberRepository.save(member1);
-
-        Recipe saveRecipe = recipeRepository.save(recipe);
-
-        RecipeLike build = RecipeLike.builder().member(saveMember).recipe(saveRecipe).build();
-        RecipeLike build1 = RecipeLike.builder().member(saveMember1).recipe(saveRecipe).build();
-
-        RecipeLike save = recipeLikeRepository.save(build);
-        RecipeLike save1 = recipeLikeRepository.save(build1);
-
-        assertThat(save).isNotNull();
-        assertThat(save1).isNotNull();
-
-        assertThat(save.getMember().getId()).isEqualTo(saveMember.getId());
-        assertThat(save1.getMember().getId()).isEqualTo(saveMember1.getId());
-
-        boolean exists = recipeLikeRepository.existsByMemberIdAndRecipeId(saveMember.getId(), saveRecipe.getId());
+        boolean exists = recipeLikeRepository.existsByMemberIdAndRecipeId(members.get(0).getId(), recipes.get(0).getId());
         assertThat(exists).isTrue();
 
-        boolean existsFalse = recipeLikeRepository.existsByMemberIdAndRecipeId(saveMember.getId(), 5l);
+        boolean existsFalse = recipeLikeRepository.existsByMemberIdAndRecipeId(members.get(0).getId(),5l);
         assertThat(existsFalse).isFalse();
-
     }
     
     @Test
-    @DisplayName("삭제 테스트")
-    @Rollback(value = false)
+    @DisplayName("사용자, 레시피Id 일치 시 삭제 테스트")
     void delete(){
-        Long recipe_id= 3l;
+        recipeLikeRepository.deleteByMemberIdAndRecipeId(members.get(0).getId(),recipes.get(0).getId());
+        em.flush();
 
-        Member member = Member.builder().loginId("loginId").build();
-        Member member1 = Member.builder().loginId("loginId1").build();
-        Recipe recipe = Recipe.builder().id(recipe_id).likeCount(0).build();
-
-
-        Member saveMember = memberRepository.save(member);
-        Member saveMember1 = memberRepository.save(member1);
-
-        Recipe saveRecipe = recipeRepository.save(recipe);
-
-        RecipeLike build = RecipeLike.builder().member(saveMember).recipe(saveRecipe).build();
-        RecipeLike build1 = RecipeLike.builder().member(saveMember1).recipe(saveRecipe).build();
-
-        RecipeLike save = recipeLikeRepository.save(build);
-        RecipeLike save1 = recipeLikeRepository.save(build1);
-
-
-        recipeLikeRepository.deleteByMemberIdAndRecipeId(saveMember.getId(),saveRecipe.getId());
-
-        Optional<RecipeLike> byId = recipeLikeRepository.findById(save.getId());
-        assertThat(byId).isEmpty();
-
-        Optional<RecipeLike> byId1 = recipeLikeRepository.findById(save1.getId());
-        assertThat(byId1).isNotEmpty();
-
-
+        List<RecipeLike> all = recipeLikeRepository.findAll();
+        assertThat(all).hasSize(2);
     }
 
     @Test
     @DisplayName("사용자페이지의 레시피 좋아요 정보를 무한 스크롤 조회")
     void testUserInfoLikesPaging() {
-        Member member = memberRepository.save(Member.builder().loginId("testId").build());
-        Recipe recipe = recipeRepository.save(Recipe.builder().title("타이틀1").cookingTime("쿠킹 시간").likeCount(1).build());
-        Recipe recipe1 = recipeRepository.save(Recipe.builder().title("타이틀2").cookingTime("쿠킹 시간").likeCount(1).build());
+        Slice<UserLikeDto> result = recipeLikeRepository.userInfoRecipeLikes(members.get(0).getId(), null,Pageable.ofSize(2));
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.hasNext()).isTrue();
+    }
+    @Test
+    @DisplayName("레시피 아이디가 일치하하는 엔티티 삭제")
+    void onlyRecipeId(){
+        recipeLikeRepository.deleteRecipeId(recipes.get(0).getId());
+        em.flush();
 
-        recipeLikeRepository.save(RecipeLike.builder().id(1l).member(member).recipe(recipe).build());
-        recipeLikeRepository.save(RecipeLike.builder().id(2l).member(member).recipe(recipe1).build());
-
-        Pageable request = PageRequest.of(0, 1);
-
-        // 사용자의 좋아요 정보를 첫 번째 페이지로 조회
-        Slice<UserLikeDto> result = recipeLikeRepository.userInfoRecipeLikes(member.getId(), null,request);
-        List<UserLikeDto> content = result.getContent();
-
-        assertThat(content).hasSize(1); // 페이지 크기와 일치하는지 확인
-        assertThat(result.hasNext()).isTrue(); // 다음 페이지가 있는지 확인
-
-        result = recipeLikeRepository.userInfoRecipeLikes(member.getId(),1l ,request);
-
-        assertThat(result.hasNext()).isFalse(); // 다음 페이지가 없는지 확인
+        List<RecipeLike> all = recipeLikeRepository.findAll();
+        assertThat(all).hasSize(2);
     }
 }
