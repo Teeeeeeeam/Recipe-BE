@@ -1,7 +1,6 @@
 package com.team.RecipeRadar.domain.blackList.api;
 
-import com.team.RecipeRadar.domain.balckLIst.application.AdminBlackMemberService;
-import com.team.RecipeRadar.domain.balckLIst.api.BlackListController;
+import com.team.RecipeRadar.domain.blackList.application.AdminBlackMemberService;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.domain.email.event.ResignEmailHandler;

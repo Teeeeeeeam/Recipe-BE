@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.account.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
+import com.team.RecipeRadar.domain.blackList.dao.BlackListRepository;
 import com.team.RecipeRadar.domain.account.application.AccountRetrievalService;
 import com.team.RecipeRadar.domain.account.dto.request.FindLoginIdRequest;
 import com.team.RecipeRadar.domain.account.dto.request.FindPasswordRequest;

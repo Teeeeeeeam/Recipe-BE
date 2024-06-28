@@ -1,6 +1,6 @@
 package com.team.RecipeRadar.domain.post.application.admin;
 
-import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
@@ -56,7 +56,7 @@ class AdminPostServiceTest {
         );
         SliceImpl<CommentDto> commentDtos = new SliceImpl<>(commentDtoList, pageRequest, false);
 
-        when(commentRepository.getPostComment(eq(post_id),isNull(),eq(pageRequest))).thenReturn(commentDtos);
+        when(commentRepository.getCommentsByPostId(eq(post_id),isNull(),eq(pageRequest))).thenReturn(commentDtos);
 
         PostsCommentResponse postsComments = adminService.getPostsComments(post_id, null, pageRequest);
 

@@ -1,7 +1,7 @@
 package com.team.RecipeRadar.domain.post.api.admin;
 
 import com.team.RecipeRadar.domain.post.application.admin.AdminPostService;
-import com.team.RecipeRadar.domain.balckLIst.dto.response.PostsCommentResponse;
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;

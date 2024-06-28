@@ -1,8 +1,7 @@
 package com.team.RecipeRadar.domain.blackList.application;
 
-import com.team.RecipeRadar.domain.balckLIst.application.AdminBlackMemberServiceImpl;
-import com.team.RecipeRadar.domain.balckLIst.dao.BlackListRepository;
-import com.team.RecipeRadar.domain.balckLIst.domain.BlackList;
+import com.team.RecipeRadar.domain.blackList.dao.BlackListRepository;
+import com.team.RecipeRadar.domain.blackList.domain.BlackList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
