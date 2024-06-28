@@ -47,11 +47,18 @@ public class RecipeBookmarkServiceImpl implements RecipeBookmarkService{
         return alreadyBookmark;
     }
 
+    /**
+     * 현재 즐겨찾기가 되어있는지 확인하는 메서드
+     * @return 즐겨찾기시 true, 아닐시-> false
+     */
     @Override
     public Boolean checkBookmark(Long memberId, Long recipeId) {
         return recipeBookmarkRepository.existsByMember_IdAndRecipe_Id(memberId,recipeId);
     }
 
+    /**
+     * 사용자가 즐겨찾기한 내용을 조회하는 메서드
+     */
     @Override
     @Transactional(readOnly = true)
     public UserInfoBookmarkResponse userInfoBookmark(Long memberId, Long lastId, Pageable pageable) {
@@ -61,10 +68,12 @@ public class RecipeBookmarkServiceImpl implements RecipeBookmarkService{
     }
 
 
+    /* 즐겨잧기를 해제하는 메서드 */
     private void removeBookmark(Member member, Recipe recipe) {
         recipeBookmarkRepository.deleteByMember_IdAndRecipe_Id(member.getId(), recipe.getId());
     }
 
+    /* 즐겨찾기를 추가하는 메서드 */
     private void addBookmark(Member member, Recipe recipe) {
         recipeBookmarkRepository.save(RecipeBookmark.toEntity(member, recipe));
     }
