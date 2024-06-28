@@ -72,7 +72,6 @@ class CommentControllerTest {
 
         doNothing().when(commentService).deleteComment(anyLong(),anyLong());
 
-        // when, then
         mockMvc.perform(delete("/api/user/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDeleteCommentDto)))
@@ -119,7 +118,7 @@ class CommentControllerTest {
                 .andExpect(status().isOk()) // 상태 코드 200 확인
                 .andExpect(jsonPath("$.data.content[0].id").value(1))
                 .andExpect(jsonPath("$.data.totalElements").value(10))
-                .andDo(print()); // 결과를 콘솔에 출력하여 확인
+                .andDo(print());
     }
 
     @Test

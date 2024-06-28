@@ -2,17 +2,15 @@ package com.team.RecipeRadar.domain.comment.application;
 
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +22,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class CommentServiceImplTest {
 
     @Mock MemberRepository memberRepository;
@@ -44,123 +40,82 @@ class CommentServiceImplTest {
 
     @InjectMocks CommentServiceImpl commentService;
 
-    private final Long memberId = 1l;
-    private final Long postId = 1l;
+    private Member member;
+    private Member memberFail;
+    private Post post;
+    private Comment comment;
 
+    @BeforeEach
+    void setUp() {
+        member = Member.builder().id(1L).nickName("닉네임").roles("ROLE_USER").build();
+        memberFail = Member.builder().id(2L).roles("ROLE_USER").build();
+        post = Post.builder().member(member).id(1L).postTitle("제목").build();
+        comment = Comment.builder().id(3L).commentContent("댓글").member(member).post(post).build();
+    }
 
     @Test
     @DisplayName("Comment_save 저장테스트")
-    public void testSave_ValidMemberAndArticle_ReturnsSavedComment() {
-        Member member = getMember();
-        Post post = getPost(member);
-        Comment comment = getComment(member, post);
-
-        when(memberRepository.findById(eq(memberId))).thenReturn(Optional.of(member));
-        when(postRepository.findById(eq(postId))).thenReturn(Optional.of(post));
-
+    void testSave_ValidMemberAndArticle_ReturnsSavedComment() {
+        when(memberRepository.findById(eq(member.getId()))).thenReturn(Optional.of(member));
+        when(postRepository.findById(eq(post.getId()))).thenReturn(Optional.of(post));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-        commentService.save(postId, "내용!!", memberId);
+        commentService.save(post.getId(), "내용!!", member.getId());
 
-        verify(commentRepository, times(1)).save(any(Comment.class)); // Verify save method was called exactly once
-
+        verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
     @Test
     @DisplayName("NoDataElementException 오류테스트")
-    public void testSave_InvalidMemberOrArticle_ThrowsNoSuchElementException() {
-
-        assertThatThrownBy(() -> commentService.save(1l,"변경오류",1l))
+    void testSave_InvalidMemberOrArticle_ThrowsNoSuchElementException() {
+        assertThatThrownBy(() -> commentService.save(1L, "변경오류", 1L))
                 .isInstanceOf(NoSuchDataException.class);
     }
 
     @Test
     @DisplayName("댓글 삭제 검증")
     void delete_comment_Test() {
-        Member member = getMember();
-        Post post = getPost(member);
-        Comment comment = getComment(member, post);
-
-
-        UserDeleteCommentRequest userDeleteCommentRequest = new UserDeleteCommentRequest();
-        userDeleteCommentRequest.setCommentId(1l);
-
-        // Member 리포지토리 mock 설정
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
-
-        // Comment 리포지토리 mock 설정
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        doNothing().when(notificationService).deleteCommentNotification(anyLong(), anyLong(), anyLong());
 
-        doNothing().when(notificationService).deleteCommentNotification(anyLong(),anyLong(),anyLong());
-        // 테스트 수행
-        commentService.deleteComment(1l,memberId);
+        commentService.deleteComment(1L, member.getId());
 
-        //deleteMemberId 메소드가 한번 실행이 됬는지 확인하는
-        verify(commentRepository, times(1)).deleteMemberId(member.getId(), comment.getId());
-
+        verify(commentRepository, times(1)).deleteByMemberIdAndCommentId(member.getId(), comment.getId());
     }
+
     @Test
     @DisplayName("비 작성자가 댓글을 삭제하려고 하는 경우")
     void delete_comment_by_non_author_Test() {
-        Member member = Member.builder().id(1l).roles("ROLE_USER").build(); //작성자
-        Member member_fail = Member.builder().id(2l).roles("ROLE_USER").build(); //비 작성자
-        Comment comment = Comment.builder().id(2l).commentContent("댓글 수정전").member(member).build();
-
-        when(memberRepository.findById(member_fail.getId())).thenReturn(Optional.of(member_fail));
+        when(memberRepository.findById(memberFail.getId())).thenReturn(Optional.of(memberFail));
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
 
-
-        assertThatThrownBy(() -> commentService.deleteComment(2l,2l))
+        assertThatThrownBy(() -> commentService.deleteComment(comment.getId(), memberFail.getId()))
                 .isInstanceOf(UnauthorizedException.class);
-
     }
+
     @Test
     @DisplayName("댓글 모두조회 페이징 처리 테스트")
-    void page_comment_test(){
-        //게시글 아이디
-        long postId = Long.parseLong("55");
-
-        String nickName = "testNickName";
-        PostDto articleDto = PostDto.builder().id(postId).build();
-
-        // 페이징 테스트를 위한 객체 생성
-        List<CommentDto> commentDtos = new ArrayList<>();
-
-        //더미 데이터 10개 생성
-        for (int i = 1; i <= 10; i++) {
-            CommentDto commentDto = CommentDto.builder()
-                    .id((long) i)
-                    .commentContent("테스트 댓글 내용 " + i)
-                    .nickName(nickName)
-                    .articleDto(articleDto)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            commentDtos.add(commentDto);
-        }
-
-        Pageable pageable = PageRequest.of(0, 5);
-
+    void page_comment_test() {
         List<Comment> comments = new ArrayList<>();
-
         for (int i = 1; i <= 10; i++) {
-            Comment comment = Comment.builder()
+            comments.add(Comment.builder()
                     .id((long) i)
                     .commentContent("테스트 댓글 내용 " + i)
-                    .member(Member.builder().id(1L).build())
-                    .post(Post.builder().id(postId).build())
-                    .build();
-            comments.add(comment);
+                    .member(member)
+                    .post(post)
+                    .build());
         }
 
         PageImpl<Comment> commentPage = new PageImpl<>(comments);
+        Pageable pageable = PageRequest.of(0, 5);
 
-        //Comment 객체의 데이터 반환
-        when(commentRepository.findAllByPost_Id(postId,pageable)).thenReturn(commentPage);
+        when(commentRepository.findAllByPostId(post.getId(), pageable)).thenReturn(commentPage);
 
-        //테스트 실행
-        Page<CommentDto> result = commentService.commentPage(postId, pageable);
+        Page<CommentDto> result = commentService.commentPage(post.getId(), pageable);
+
         assertThat(result.getTotalElements()).isEqualTo(10);
-        assertThat(result.getTotalPages()).isEqualTo(1);        //jpa는 0부터 1페이지 2개시 ->(0,2) 두개
+        assertThat(result.getTotalPages()).isEqualTo(1);
         for (int i = 0; i < 10; i++) {
             assertThat(result.getContent().get(i).getCommentContent()).isEqualTo("테스트 댓글 내용 " + (i + 1));
         }
@@ -169,47 +124,27 @@ class CommentServiceImplTest {
     }
 
     @Test
-    @DisplayName("댓글 작성자가 수정 톄스트")
-    void update_comment(){
-        String update_success="댓글 수정 성공!!";
-
-        Member member = Member.builder().id(1l).build();
-        Comment comment = Comment.builder().id(2l).commentContent("댓글 수정전").member(member).build();
+    @DisplayName("댓글 작성자가 수정 테스트")
+    void update_comment() {
+        String updateSuccess = "댓글 수정 성공!!";
 
         when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
 
-        commentService.update(2l,update_success,1l);
+        commentService.update(comment.getId(), updateSuccess, member.getId());
 
-        assertThat(comment.getCommentContent()).isEqualTo(update_success);
+        assertThat(comment.getCommentContent()).isEqualTo(updateSuccess);
         assertThat(comment.getCommentContent()).isNotEqualTo("댓글 수정!");
         assertThat(comment.getMember().getId()).isEqualTo(member.getId());
     }
 
     @Test
-    @DisplayName("댓글 비작성자가 수정시 오류발생 톄스트")
-    void update_comment_throws(){
-
-        Member member = Member.builder().id(1l).roles("ROLE_USER").build(); //작성자
-        Member member_fail = Member.builder().id(2l).roles("ROLE_USER").build(); //비 작성자
-        Comment comment = Comment.builder().id(2l).commentContent("댓글 수정전").member(member).build();
-
-        when(memberRepository.findById(member_fail.getId())).thenReturn(Optional.of(member_fail));
+    @DisplayName("댓글 비작성자가 수정 시 오류 발생 테스트")
+    void update_comment_throws() {
+        when(memberRepository.findById(memberFail.getId())).thenReturn(Optional.of(memberFail));
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
 
-        assertThatThrownBy(() -> commentService.update(2l,"수정!",2l)).isInstanceOf(UnauthorizedException.class);
-    }
-
-    private static Comment getComment(Member member, Post post) {
-        return Comment.builder().id(3l).commentContent("댓글").member(member).post(post).build();
-    }
-
-    private Post getPost(Member member) {
-        return Post.builder().member(member).id(postId).postTitle("제목").build();
-    }
-
-    private Member getMember() {
-        return Member.builder().id(memberId).nickName("닉네임").roles("ROLE_USER").build();
-
+        assertThatThrownBy(() -> commentService.update(comment.getId(), "수정!",memberFail.getId()))
+                .isInstanceOf(UnauthorizedException.class);
     }
 }
