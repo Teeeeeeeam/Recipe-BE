@@ -12,14 +12,12 @@ import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.NoSuchElementException;
 
 import static com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType.*;
 
@@ -36,15 +34,13 @@ public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeSer
 
     /**
      * 좋아요 api 호출시 해당 게시글의 좋아요가 있으면 DB 에서 삭제하고 좋아요가 되어있지않다면 DB에 추가하는 식으로 구현
-     * @param postLikeRequest
-     * @return
      */
     @Override
     public Boolean addLike(PostLikeRequest postLikeRequest,Long memberId) {
 
         Boolean alreadyLiked  = postLikeRepository.existsByMemberIdAndPostId(memberId, postLikeRequest.getPostId());    // 해당 테이블의 있는지검사
         Post post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(() -> new NoSuchDataException(NO_SUCH_POST));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NO_SUCH_MEMBER));
+        Member member = getMember(memberId);
 
         if (alreadyLiked) {
             removeLike(post, member);
@@ -68,24 +64,17 @@ public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeSer
      */
     public UserInfoLikeResponse getUserLikesByPage(Long memberId,Long postLike_lastId, Pageable pageable) {
 
-
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NO_SUCH_MEMBER));
-        if (member==null){
-            throw new NoSuchElementException("해당 회원을 찾을수 없습니다.");
-        }
+        Member member = getMember(memberId);
 
         Slice<UserLikeDto> userDtoSlice = postLikeRepository.userInfoLikes(member.getId(),postLike_lastId ,pageable);
 
-        boolean hasNext = userDtoSlice.hasNext();
-
-        UserInfoLikeResponse likeResponse = UserInfoLikeResponse.builder()
+        return  UserInfoLikeResponse.builder()
                 .content(userDtoSlice.getContent())
-                .nextPage(hasNext)
+                .nextPage(userDtoSlice.hasNext())
                 .build();
-        return likeResponse;
     }
 
-
+    /* 좋아요 시도 */
     private void addLike(Post post, Member member) {
         post.setPostLikeCount(post.getPostLikeCount() + 1);
         postRepository.save(post);
@@ -93,10 +82,16 @@ public class PostLikeServiceImpl<T extends PostLikeRequest,U> implements LikeSer
         notificationService.sendPostLikeNotification(post, member.getNickName());
     }
 
+    /* 좋아요 해제 */
     private void removeLike(Post post, Member member) {
         post.setPostLikeCount(post.getPostLikeCount() - 1);
         postRepository.save(post);
         notificationService.deleteLikeNotification(member.getId(), post.getMember().getId(), post.getId());
         postLikeRepository.deleteByMemberIdAndPostId(member.getId(), post.getId());
+    }
+
+    /* 사용자 정보 조회 */
+    private Member getMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NO_SUCH_MEMBER));
     }
 }
