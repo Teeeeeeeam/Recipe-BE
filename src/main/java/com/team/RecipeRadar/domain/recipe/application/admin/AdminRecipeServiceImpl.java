@@ -98,7 +98,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         updateIngredients(recipeUpdateRequest.getIngredients(), recipe);
 
         // 레시피 정보 업데이트
-        recipe.updateRecipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime(),recipeUpdateRequest.getCookIngredients(),recipeUpdateRequest.getCookMethods(),recipe.getTypes());
+        recipe.updateRecipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime(),recipeUpdateRequest.getCookIngredients(),recipeUpdateRequest.getCookMethods(),recipeUpdateRequest.getDishTypes());
 
     }
 
