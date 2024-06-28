@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,6 @@ import javax.validation.Valid;
 import java.util.*;
 
 @RestController
-@Slf4j
 @Tag(name = "공용 - 아이디 및 비밀번호 찾기 컨트롤러", description = "계정 찾기")
 @RequiredArgsConstructor
 public class AccountRetrievalController {

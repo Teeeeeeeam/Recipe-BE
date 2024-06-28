@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@Slf4j
 @RequiredArgsConstructor
 public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
@@ -36,16 +34,12 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
 
 
     /**
-     * 아이디 찾기시에 사용되는 메서드
-     * @param username  가입한 사용자 이름
-     * @param email     가입했던 이메일
-     * @param code      이메일로 전송된 인증번호
-     * @return      List로 반환
+     * 아이디 찾기시에 이메일과 전송된 이메일통해 사용자의 이름과 이메일로 가입된 사용자의 아이디 있는지 찾는 메서드
+     * Map의 로그인 타입과 사용자의 로그인 아이디를 반환
      */
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
         List<MemberDto> memberDtos = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
-
-
+        
         if (!emailCodeValid(email, code)) {
             return List.of(Map.of("인증 번호", "인증번호가 일치하지 않습니다."));
         }
@@ -61,11 +55,8 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
     }
 
     /**
-     * 비밀번호 찾는 메서드
-     * @param username  가입한 사용자이름
-     * @param loginId   가입한 로그인 아이디
-     * @param email     가입한 이메일
-     * @return
+     * 비밀번호 찾기 검증 메서드
+     * 이메일과 인증번호를 통해 검증하고 파라미터러 넘어온 값들이 일치하는 정보가 있다면 3분짜리 비밀번호 변경에사용할수 있는 토큰을 번환
      */
     @Override
     public String findPwd(String username, String loginId, String email,int code) {
@@ -84,10 +75,8 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
     }
 
     /**
-     * 비밀번호 수정 API DB-> 10분마다 스케쥴 이벤트 발생
-     * @param updatePasswordRequest MemberDto 객체(username, loginId, password, passwordRe)
-     * @param token        인증 ID ((UUID 생성된)Base64 인코딩된 문자열)
-     * @return ControllerApiResponse 객체
+     * 비밀번호를 새로 변경하는 메서드
+     * 비밀번호 찾기 검증시에 발급된 토큰 값을 통해 비밀번호를 새롭게 변경 (DB -> 10분마다 현재 시간기준으로 토큰을 삭제)
      */
     public void updatePassword(UpdatePasswordRequest updatePasswordRequest, String token){
 
@@ -108,7 +97,6 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         
         //비밀번호 성공시 인증 DB 에서 삭제
         accountRetrievalRepository.deleteByVerificationId(validId);
-
     }
 
     /**
@@ -123,7 +111,6 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
     /**
      * 비밀번호 유효성 검사를 하는 메서드
      * 강력도와 중복성의 대해서 검사를 하며 실패시 예외 발생
-     * @param updatePasswordRequest
      */
     private void validatePassword(UpdatePasswordRequest updatePasswordRequest) {
         if (!memberService.checkPasswordStrength(updatePasswordRequest.getPassword()).getOrDefault("passwordStrength", false)) {
