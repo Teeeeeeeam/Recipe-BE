@@ -17,14 +17,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AdminBlackServiceTest {
+class AdminBlackMemberServiceTest {
 
-    @Mock
-    BlackListRepository blackListRepository;
-
-    @InjectMocks
-    AdminBlackMemberServiceImpl adminService;
-
+    @Mock BlackListRepository blackListRepository;
+    @InjectMocks AdminBlackMemberServiceImpl adminService;
 
     @Test
     @DisplayName("이메일 차단 유뮤 테스트")
