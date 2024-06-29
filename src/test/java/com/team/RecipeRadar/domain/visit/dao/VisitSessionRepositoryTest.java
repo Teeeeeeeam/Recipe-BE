@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Slf4j
-class VisitRepositoryTest {
+class VisitSessionRepositoryTest {
 
     @Autowired
     VisitSessionRepository visitRepository;
