@@ -115,7 +115,7 @@ class AdminRecipeServiceTest {
         assertThat(testRecipe.getTitle()).isEqualTo(title);
         assertThat(testCookStep.getSteps()).isEqualTo("조리 순서 1");
         assertThat(testUploadFile.getOriginFileName()).isNotEqualTo(originalFileName); // 변경 전과 파일명이 같은지 확인
-        verify(ingredientRepository, times(1)).updateRecipe_ing(eq(recipeId), anyString()); // 인자 매처를 사용하도록 수정
+        verify(ingredientRepository, times(1)).updateRecipeIngredient(eq(recipeId), anyString()); // 인자 매처를 사용하도록 수정
     }
 
 

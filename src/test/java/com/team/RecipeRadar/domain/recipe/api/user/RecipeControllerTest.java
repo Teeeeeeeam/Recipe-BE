@@ -3,14 +3,14 @@ package com.team.RecipeRadar.domain.recipe.api.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.recipe.application.user.RecipeServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.Image.application.ImgServiceImpl;
 import com.team.RecipeRadar.domain.Image.application.S3UploadService;
-import com.team.RecipeRadar.domain.recipe.dto.response.MainPageRecipeResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeDetailsResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeNormalPageResponse;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
+import com.team.RecipeRadar.domain.recipe.dto.response.*;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -42,22 +42,29 @@ class RecipeControllerTest {
     @MockBean S3UploadService s3UploadService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-
+    private List<RecipeDto> recipeDtos;
+    private  List<String> ingredients;
+    @BeforeEach
+    void setUp(){
+        ingredients = Arrays.asList("밥");
+        recipeDtos = List.of(
+                RecipeDto.builder().id(1l).title("레시피1").likeCount(16).cookIngredients(CookIngredients.BEEF).createdAt(LocalDate.now()).build(),
+                RecipeDto.builder().id(2l).title("레시피2").likeCount(13).cookIngredients(CookIngredients.FLOUR).createdAt(LocalDate.now()).build(),
+                RecipeDto.builder().id(3l).title("레시피3").likeCount(3).dishTypes(DishTypes.MAIN_DISH).createdAt(LocalDate.now()).build(),
+                RecipeDto.builder().id(4l).title("레시피4").likeCount(2).createdAt(LocalDate.now()).build(),
+                RecipeDto.builder().id(5l).title("레시피5").likeCount(1).createdAt(LocalDate.now()).build()
+        );
+    }
 
     @Test
     @DisplayName("재료 검색 레시피 조회 테스트")
     void Search_Recipe() throws Exception {
 
-        List<String> ingredients = Arrays.asList("밥");
         Pageable pageRequest = PageRequest.of(0, 2);
-
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0, LocalDateTime.now()));
-        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피2", "level2", "2인분", "1시간", 0, LocalDateTime.now()));
 
         boolean paged = pageRequest.next().isPaged();
 
-        RecipeResponse recipeResponse = new RecipeResponse(recipeDtoList, paged);
+        RecipeResponse recipeResponse = new RecipeResponse(recipeDtos, paged);
 
         given(recipeService.searchRecipesByIngredients(eq(ingredients), eq(1l),any(Pageable.class)))
                 .willReturn(recipeResponse);
@@ -67,12 +74,8 @@ class RecipeControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.recipeDtoList.[0].id").value(1))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].imageUrl").value("url1"))
                 .andExpect(jsonPath("$.data.recipeDtoList.[0].title").value("레시피1"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingLevel").value("level1"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].people").value("1인분"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
-                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(2));
+                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(5));
     }
 
     @Test
@@ -111,21 +114,7 @@ class RecipeControllerTest {
     @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_제목으로만 검색")
     void Search_Recipe_Normal_Page() throws Exception {
 
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", "레시피1", "level1", "1인분", "10분", 0, LocalDateTime.now()));
-        recipeDtoList.add(new RecipeDto(2L, "url2", "레시피1", "level2", "2인분", "1시간", 0, LocalDateTime.now()));
-
-
-        List<RecipeDto> dummyRecipes = Arrays.asList(
-                RecipeDto.builder().id(1l).title("제목").build(),
-                RecipeDto.builder().id(2l).title("제목").build(),
-                RecipeDto.builder().id(3l).title("제목").build(),
-                RecipeDto.builder().id(4l).title("제목").build(),
-                RecipeDto.builder().id(5l).title("제목").build()
-        );
-
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
-
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(recipeDtos, 1, recipeDtos.size());
 
         given(recipeService.searchRecipeByIngredientsNormal(isNull(),eq("레시피1"),any(Pageable.class)))
                 .willReturn(dummyResponse);
@@ -141,18 +130,7 @@ class RecipeControllerTest {
     @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_재료으로만 검색")
     void Search_Recipe_Normal_Page_ing() throws Exception {
 
-        List<String> ingredients = Arrays.asList("밥");
-
-        List<RecipeDto> dummyRecipes = Arrays.asList(
-                RecipeDto.builder().id(1l).title("제목1").build(),
-                RecipeDto.builder().id(2l).title("제목2").build(),
-                RecipeDto.builder().id(3l).title("제목3").build(),
-                RecipeDto.builder().id(4l).title("제목4").build(),
-                RecipeDto.builder().id(5l).title("제목5").build()
-        );
-
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(dummyRecipes, 1, dummyRecipes.size());
-
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(recipeDtos, 1, recipeDtos.size());
 
         given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),any(Pageable.class))).willReturn(dummyResponse);
 
@@ -167,11 +145,7 @@ class RecipeControllerTest {
     @Test
     @DisplayName("메인 페이지에서 레시피 좋아요순으로 출력")
     void main_Page_Recipe_like_desc() throws Exception {
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1l, "url", "레시피1", "level1", "1", "10minute", 16, LocalDateTime.now()));
-        recipeDtoList.add(new RecipeDto(2l, "url", "레시피2", "level2", "2", "1hour", 13, LocalDateTime.now()));
-        recipeDtoList.add(new RecipeDto(3l, "url", "레시피3", "level2", "3", "1hour", 3, LocalDateTime.now()));
-        MainPageRecipeResponse of = MainPageRecipeResponse.of(recipeDtoList);
+        MainPageRecipeResponse of = MainPageRecipeResponse.of(recipeDtos);
 
         given(recipeService.mainPageRecipe()).willReturn(of);
 
@@ -179,10 +153,27 @@ class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.recipes.size()").value(3))
+                .andExpect(jsonPath("$.data.recipes.size()").value(5))
                 .andExpect(jsonPath("$.data.recipes.[0].likeCount").value(16))
                 .andExpect(jsonPath("$.data.recipes.[1].likeCount").value(13))
                 .andExpect(jsonPath("$.data.recipes.[2].likeCount").value(3));
+    }
+
+    @Test
+    @DisplayName("카테고리 검색")
+    void cateGorySearch() throws Exception {
+        RecipeCategoryResponse recipeCategoryResponse = new RecipeCategoryResponse(false, recipeDtos);
+        given(recipeService.searchCategory(anyList(),isNull(),anyList(),eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class))).willReturn(recipeCategoryResponse);
+
+        mockMvc.perform(get("/api/recipe/category")
+                        .param("cat1", CookIngredients.RICE.name(), CookIngredients.BEEF.name())
+                        .param("cat3",DishTypes.BREAD.name())
+                        .param("order", OrderType.DATE.name())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.nextPage").value(false))
+                .andExpect(jsonPath("$.data.recipes.size()").value(5));
+
     }
 
 }

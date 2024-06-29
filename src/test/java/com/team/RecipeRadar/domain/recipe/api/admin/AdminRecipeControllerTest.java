@@ -52,7 +52,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @Import({SecurityTestConfig.class, Pointcuts.class,AspectAdvice.class})
 @WebMvcTest(AdminRecipeController.class)
 @ImportAutoConfiguration(AopAutoConfiguration.class)
@@ -66,6 +65,9 @@ class AdminRecipeControllerTest {
     @MockBean PostServiceImpl postService;
     @MockBean S3UploadService s3UploadService;
     private ObjectMapper objectMapper = new ObjectMapper();
+
+
+
 
     @Test
     @DisplayName("레시피 수 전제 조회")
