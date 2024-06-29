@@ -34,7 +34,6 @@ public class AdminQnAController {
 
     private final AdminQnAService adminQnAService;
 
-
     @Operation(summary = "문의사항 상세조회",description = "문의사항의 대해서 상세 조회된다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",

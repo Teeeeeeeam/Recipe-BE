@@ -19,7 +19,6 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 public class QnAServiceImpl implements QnAService {
 
     private final QuestionRepository questionRepository;
@@ -72,15 +70,15 @@ public class QnAServiceImpl implements QnAService {
         saveImageIfProvided(file, savedQuestion);          // 사진이 제공된 경우 저장
     }
 
-    /* 사용자 파에지에서 사용자가 작성한 문의사항의 대해서 조회한 데이터를 response로 변환 */
+    /* 사용자 페이지에서 사용자가 작성한 문의사항의 대해서 조회한 데이터를 response로 변환 */
     @Override
     @Transactional(readOnly = true)
     public QuestionAllResponse allUserQuestion(Long lasId, Long memberId, QuestionType questionType, QuestionStatus questionStatus, Pageable pageable) {
         Slice<QuestionDto> allQuestion = questionRepository.getUserAllQuestion(lasId,memberId, questionType, questionStatus, pageable);
         return new QuestionAllResponse(allQuestion.hasNext(),allQuestion.getContent());
     }
+    
     /* 사용자가 작성한 문의사항을 삭제한다. 단일 및 일괄 삭제 가능 */
-
     @Override
     public void deleteQuestions(List<Long> ids, Long memberId) {
         List<Question> questions = questionRepository.findAllById(ids);
