@@ -96,7 +96,7 @@ class RecipeRepositoryTest {
         Slice<RecipeDto> recipe_FirstPage = recipeRepository.getRecipe(ingredients, null,Pageable.ofSize(2));
 
         List<RecipeDto> content = recipe_FirstPage.getContent();
-        assertThat(content.get(0).getId()).isEqualTo(1l);
+        assertThat(content.get(0).getId()).isEqualTo(recipes.get(0).getId());
         assertThat(recipe_FirstPage.hasNext()).isTrue();
 
         Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, recipes.get(4).getId(),Pageable.ofSize(2));
