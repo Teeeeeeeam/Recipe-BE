@@ -201,7 +201,7 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
      */
     private void updateIngredients(List<String> ingredients, Recipe recipe) {
         String ingredientString = getIngredients(ingredients);
-        ingredientRepository.updateRecipe_ing(recipe.getId(), ingredientString);
+        ingredientRepository.updateRecipeIngredient(recipe.getId(), ingredientString);
     }
 
     /**

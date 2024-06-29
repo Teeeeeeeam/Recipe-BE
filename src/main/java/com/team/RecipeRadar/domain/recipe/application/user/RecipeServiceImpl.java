@@ -7,9 +7,7 @@ import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
-import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor

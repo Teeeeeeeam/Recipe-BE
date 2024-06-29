@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public class IngredientRepositoryImpl implements IngredientRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
-    public void updateRecipe_ing(Long recipe_id,String ingredient){
+    public void updateRecipeIngredient(Long recipe_id, String ingredient){
 
         jpaQueryFactory.update(QIngredient.ingredient)
                 .set(QIngredient.ingredient.ingredients, ingredient)
