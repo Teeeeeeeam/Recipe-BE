@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.notification.domain.QNotification;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
 import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -27,7 +26,6 @@ import static com.team.RecipeRadar.domain.post.domain.QPost.*;
 import static com.team.RecipeRadar.domain.qna.domain.QQuestion.*;
 
 @Repository
-@Slf4j
 @RequiredArgsConstructor
 public class CustomNotificationRepositoryImpl implements CustomNotificationRepository{
 
@@ -122,16 +120,16 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
                 })
                 .findFirst()
                 .ifPresent(notification -> {
-                    deleteQuestionNotification(notification);
+                    deleteCommentNotification(notification);
                 });
     }
 
-    private void deleteQuestionNotification(Notification notification) {
+    private void deleteCommentNotification(Notification notification) {
         jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
     }
 
     /**
-     * 사용자 탈퇴사 관련된 알림 삭제
+     * 사용자 탈퇴사 관련된 알림 객체 삭제
      */
     @Override
     public void deleteMember(Long memberId) {

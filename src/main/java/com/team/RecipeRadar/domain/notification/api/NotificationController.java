@@ -81,7 +81,7 @@ public class NotificationController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false , \"message\" : \"해당 알림을 찾을수 없습니다.\"}")))
     })
-    @DeleteMapping("/user/notification")
+    @DeleteMapping("/notification")
     public ResponseEntity<?> deleteNotification(@RequestParam("notificationIds")List<Long> ids){
         notificationService.deleteAllNotification(ids);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"삭제 성공"));
