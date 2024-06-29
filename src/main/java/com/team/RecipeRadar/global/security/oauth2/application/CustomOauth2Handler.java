@@ -4,7 +4,6 @@ import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -21,7 +20,6 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CustomOauth2Handler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;

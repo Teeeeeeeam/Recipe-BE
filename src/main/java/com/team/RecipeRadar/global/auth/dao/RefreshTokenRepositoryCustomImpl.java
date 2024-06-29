@@ -18,7 +18,6 @@ import static com.team.RecipeRadar.global.auth.domain.QRefreshToken.*;
 public class RefreshTokenRepositoryCustomImpl implements RefreshTokenRepositoryCustom{
 
     private final JPAQueryFactory jpaQueryFactory;
-
     @Override
     public MemberDto existsByRefreshTokenAndMember(String token, String loginId) {
 

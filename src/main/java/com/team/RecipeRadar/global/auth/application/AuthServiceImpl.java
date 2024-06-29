@@ -11,16 +11,14 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.auth.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
-@RequiredArgsConstructor
 @Transactional
-@Slf4j
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final AccountRetrievalRepository accountRetrievalRepository;
