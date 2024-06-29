@@ -5,6 +5,7 @@ import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notification.domain.Notification;
+import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
@@ -105,28 +106,37 @@ class NotificationRepositoryTest {
 
     @Test
     @DisplayName("댓글 삭제시 알림 엔티티 삭제")
-    void deleteComment() {
-        Member member = Member.builder().nickName("작성자").build();
-        Member save_member = memberRepository.save(member);
+    void deleteCommentNotificationTest() {
+        // Given
+        Member fromMember = Member.builder().nickName("작성자").build();
+        fromMember = memberRepository.save(fromMember);
 
-        Member to = Member.builder().nickName("대글단자").build();
-        Member toMember = memberRepository.save(to);
+        Member toMember = Member.builder().nickName("댓글 대상자").build();
+        toMember = memberRepository.save(toMember);
 
-        Post post = Post.builder().postTitle("제목").build();
-        Post save = postRepository.save(post);
-        Comment comment = Comment.builder().id(1L).post(save).commentContent("댓글 내용").member(save_member).build();
-        commentRepository.save(comment);
+        Post post = Post.builder().postTitle("테스트 게시물").build();
+        post = postRepository.save(post);
+
+        Comment comment = Comment.builder()
+                .id(1L)
+                .commentContent("테스트 댓글")
+                .member(fromMember)
+                .post(post)
+                .build();
+        comment = commentRepository.save(comment);
 
         Notification notification = Notification.builder()
-                .notificationType(COMMENT)
+                .notificationType(NotificationType.COMMENT)
                 .toName(toMember.getNickName())
-                .url(POST_URL + 1)
-                .receiver(save_member)
+                .url(POST_URL + post.getId())
+                .receiver(fromMember)
                 .build();
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
 
-        notificationRepository.deleteComment(toMember.getId(), member.getId(), comment.getId());
+        // When
+        notificationRepository.deleteComment(toMember.getId(), fromMember.getId(), comment.getId());
 
+        // Then
         List<Notification> notifications = notificationRepository.findAll();
         assertThat(notifications).isEmpty();
     }
