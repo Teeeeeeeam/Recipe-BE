@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -17,13 +16,11 @@ import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CustomMemberRepositoryImpl implements CustomMemberRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
-
 
     @Override
     public Slice getMemberInfo(Long lastMemberId,Pageable pageable) {
@@ -65,12 +62,13 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
             builder.and(member.username.containsIgnoreCase(username));
         }
         if (lastMemberId != null) {
-            builder.and(member.id.gt(lastMemberId));
+            builder.and(member.id.lt(lastMemberId));
         }
 
         List<Member> memberList = jpaQueryFactory.select(member)
                 .from(member)
                 .where(builder)
+                .orderBy(member.id.desc())
                 .limit(pageable.getPageSize()+1)
                 .fetch();
 

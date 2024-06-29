@@ -204,5 +204,4 @@ public class SinUpServiceImpl implements SinUpService{
     private boolean isLoginIdDuplicated(String loginId) {
         return  memberRepository.existsByLoginId(loginId);
     }
-
 }

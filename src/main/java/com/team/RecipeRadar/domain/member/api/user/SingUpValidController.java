@@ -30,7 +30,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "공용 - 회원가입 컨트롤러",description = "회원가입 및 검증 처리")
 @RequestMapping("/api")
-@Slf4j
 public class SingUpValidController {
 
     private final SinUpService sinUpService;

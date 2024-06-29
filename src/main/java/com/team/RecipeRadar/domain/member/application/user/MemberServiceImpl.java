@@ -15,7 +15,6 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,7 +39,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Qualifier("AccountEmail")
     private final MailService mailService;
-
 
     /**
      * 주어진 회원 정보를 통해 비밀번호 중복여부를 체크하고, 결과를 반환합니다.
