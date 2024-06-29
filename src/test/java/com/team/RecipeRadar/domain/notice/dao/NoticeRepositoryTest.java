@@ -5,7 +5,6 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.notice.domain.Notice;
 import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -20,27 +19,25 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-
-@Slf4j
-@DataJpaTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
 @Import(QueryDslConfig.class)
+@DataJpaTest
+@ActiveProfiles("test")
 class NoticeRepositoryTest {
 
     @Autowired NoticeRepository noticeRepository;
     @Autowired MemberRepository memberRepository;
     @Autowired EntityManager entityManager;
 
-    @BeforeAll
-    @DisplayName("사전 공지사항 데이터 삽입")
-    void setData(){
-        Member member = memberRepository.save(Member.builder().id(1l).build());
-        List<Notice> notices = new ArrayList<>();
+    private Member member;
+    private List<Notice> notices;
+    @BeforeEach
+    void setUp(){
+        member = memberRepository.save(Member.builder().id(1l).build());
+        List<Notice> noticeList = new ArrayList<>();
         for(int i = 0; i < 10; i++){
-            notices.add(Notice.createNotice(i + "번째 제목", "내용", member));
+            noticeList.add(Notice.createNotice(i + "번째 제목", "내용", member));
         }
-        noticeRepository.saveAll(notices);
+        notices = noticeRepository.saveAll(noticeList);
     }
 
     @Test
@@ -61,8 +58,8 @@ class NoticeRepositoryTest {
 
     @Test
     @DisplayName("공지사항 상세 내용")
-    void details_notice(){
-        NoticeDto noticeDto = noticeRepository.detailsPage(1l);
+    void detailsNotice(){
+        NoticeDto noticeDto = noticeRepository.detailsPage(notices.get(0).getId());
         assertThat(noticeDto.getNoticeTitle()).isEqualTo("0번째 제목");
     }
 
@@ -71,7 +68,7 @@ class NoticeRepositoryTest {
     void deleteWithMemberId(){
         noticeRepository.deleteMemberId(1l);
     }
-    
+
     @Test
     @DisplayName("제목으로 조회 테스트")
     void searchTitle(){

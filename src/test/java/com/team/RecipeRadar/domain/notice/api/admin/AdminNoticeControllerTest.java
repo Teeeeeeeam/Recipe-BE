@@ -35,7 +35,6 @@ class AdminNoticeControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     private final String originalName = "test.png";
 
-
     @Test
     @DisplayName("공지사항 작성")
     @CustomMockAdmin

@@ -36,7 +36,6 @@ class NoticeControllerTest {
     @MockBean NoticeService noticeService;
     @Autowired MockMvc mockMvc;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
     @Test
     @DisplayName("메인 공지사항")
     void mainNotice() throws Exception {
