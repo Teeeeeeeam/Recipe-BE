@@ -4,7 +4,6 @@ import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
 import com.team.RecipeRadar.global.security.exception.CustomAccessDeniedHandler;
 import com.team.RecipeRadar.global.security.exception.JwtAuthenticationEntryPoint;
-import com.team.RecipeRadar.global.security.jwt.filter.SecurityExceptionHandlerFilter;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
 import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Handler;
 import com.team.RecipeRadar.global.security.oauth2.application.CustomOauth2Service;
