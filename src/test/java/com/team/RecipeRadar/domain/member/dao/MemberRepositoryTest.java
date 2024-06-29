@@ -3,7 +3,7 @@ package com.team.RecipeRadar.domain.member.dao;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,51 +13,47 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@DataJpaTest
 @Import(QueryDslConfig.class)
-@Transactional
+@DataJpaTest
 @ActiveProfiles("test")
-@Slf4j
 class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
+
+    private List<Member> member;
+
+    @BeforeEach
+    void setUp(){
+        member = List.of(
+                Member.builder().username("유저네임").nickName("닉네임").loginId("testId").email("test@eamil.com").login_type("normal").build(),
+                Member.builder().username("유저네임1").nickName("닉네임1").loginId("testId1").email("test1@eamil.com").login_type("normal").build(),
+                Member.builder().username("어드민1").nickName("어드민1").loginId("admin1").email("admin1@eamil.com").roles("ROLE_ADMIN").login_type("normal").build(),
+                Member.builder().username("어드민2").nickName("어드민2").loginId("admin2").email("admin2@eamil.com").roles("ROLE_ADMIN").login_type("normal").build(),
+                Member.builder().username("유저네임").nickName("카카오").loginId("카카오아이디").email("test@eamil.com").login_type("social").build()
+        );
+        memberRepository.saveAll(member);
+    }
     @Test
     @DisplayName("아이디 찾기 테스트")
     void findById(){
+        List<Member> findId = memberRepository.findByUsernameAndEmail("유저네임","test@eamil.com");
 
-        String email = "test@email.com";
-        Member member = Member.builder().username("유저네임").nickName("닉네임").loginId("testId").email(email).login_type("normal").build();
-        Member member1 = Member.builder().username("유저네임").nickName("닉네임11").loginId("testId11").email(email).login_type("kakao").build();
-
-        memberRepository.save(member);
-        memberRepository.save(member1);
-
-        List<Member> findId = memberRepository.findByUsernameAndEmail("유저네임",email);
-
-        assertThat(findId.size()).isEqualTo(2);
-        assertThat(findId.get(0).getEmail()).isEqualTo(email);
-        assertThat(findId.get(0).getLogin_type()).isEqualTo("normal");
-
-        assertThat(findId.get(1).getEmail()).isEqualTo(email);
-        assertThat(findId.get(1).getLogin_type()).isEqualTo("kakao");
+        assertThat(findId).hasSize(2);
+        assertThat(findId.get(1).getNickName()).isEqualTo("카카오");
     }
     
     @Test
     @DisplayName("비밀번호 찾기 테스트")
     void findByPwd(){
-        String email="test@email.com";
+        String email="test@eamil.com";
         String loginId = "testId";
-        String username = "username";
-
-        Member member = Member.builder().username(username).loginId(loginId).email(email).build();
-        memberRepository.save(member);
+        String username = "유저네임";
 
         Boolean aBoolean = memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email);
         assertThat(aBoolean).isTrue();
@@ -68,44 +64,69 @@ class MemberRepositoryTest {
     }
 
     @Test
+    @DisplayName("이메일 조회")
+    void findByEmail(){
+        List<Member> byEmail = memberRepository.findByEmail("test@eamil.com");
+        assertThat(byEmail).isNotEmpty();
+        assertThat(byEmail).hasSize(2);
+    }
+
+    @Test
     @DisplayName("가입한 회원 모두 조회_무한 페이징")
     void findAllMembers(){
-        String loginId = "loginId";
-        Member member_1 = Member.builder().username("회원1").email("email1").loginId(loginId).nickName("닉네임1").createAt(LocalDate.now()).build();
-        Member member_2 = Member.builder().username("회원2").email("email2").loginId("loginId2").nickName("닉네임2").createAt(LocalDate.now()).build();
-
-        Member save = memberRepository.save(member_1);
-        memberRepository.save(member_2);
-
-        Pageable pageRequest = PageRequest.of(0, 1);
-        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(null,pageRequest);
+        Slice<MemberDto> memberInfo = memberRepository.getMemberInfo(null,Pageable.ofSize(1));
 
         assertThat(memberInfo.getContent()).hasSize(1);
         assertThat(memberInfo.hasNext()).isTrue();
     }
+    
+    @Test
+    @DisplayName("닉네임이 존재하는 여부 테스트")
+    void existsByNickName(){
+        Boolean existsByNickName = memberRepository.existsByNickName("닉네임");
+        Boolean existsByNickName1 = memberRepository.existsByNickName("없는 닉네임");
 
+        assertThat(existsByNickName).isTrue();
+        assertThat(existsByNickName1).isFalse();
+    }
+    
+    @Test
+    @DisplayName("사용자 삭제 테스트")
+    void deleteByMemberId(){
+        List<Member> before = memberRepository.findAll();
+        memberRepository.deleteById(member.get(0).getId());
+        List<Member> after = memberRepository.findAll();
+        assertThat(before).hasSize(5);
+        assertThat(after).hasSize(4);
+    }
+
+    @Test
+    @DisplayName("사용자 수 조회")
+    void countMember(){
+        long count = memberRepository.countAllBy();
+        assertThat(count).isEqualTo(5l);
+    }
 
     @Test
     @DisplayName("가입한 회원 검색_무한 페이징")
     void searchMember(){
 
-        String meme1_loginId = "loginId";
-        String meme2_loginId = "loginId";
-        Member member_1 = Member.builder().username("회원1").email("email1").loginId(meme1_loginId).nickName("닉네임1").createAt(LocalDate.now()).build();
-        Member member_2 = Member.builder().username("회원2").email("email2").loginId(meme2_loginId).nickName("닉네임2").createAt(LocalDate.now()).build();
+        Slice<MemberDto> searchedMember = memberRepository.searchMember("loginId", null, null, null,null, Pageable.ofSize(3));
+        Slice<MemberDto> searchMember = memberRepository.searchMember(null, "닉네임", null, null,null, Pageable.ofSize(3));
+        Slice<MemberDto> searchedMember2 = memberRepository.searchMember("testId", "닉네임1", "test1@eamil.com", null, null,Pageable.ofSize(3));
 
-        memberRepository.save(member_1);
-        memberRepository.save(member_2);
-
-        Pageable request = PageRequest.of(0, 1);
-        Slice<MemberDto> findMember_1 = memberRepository.searchMember(meme1_loginId, null, null, null,null, request);
-        Slice<MemberDto> findMember_2 = memberRepository.searchMember(meme2_loginId, "닉네임2", null, null,null, request);
-        Slice<MemberDto> memberDtos = memberRepository.searchMember(meme1_loginId, "닉네임2", null, null, null,request);
-
-
-        assertThat(findMember_2.getContent().get(0).getLoginId()).isEqualTo(meme2_loginId);     // 두번쨰 회원
-        assertThat(memberDtos.hasNext()).isFalse();
-        assertThat(memberDtos.getContent()).hasSize(1);
+        assertThat(searchedMember).isEmpty();
+        assertThat(searchMember).hasSize(2);
+        assertThat(searchedMember2).hasSize(1);
+    }
+    
+    @Test
+    @DisplayName("어드민 사용자 조회")
+    void findAdminMember(){
+        List<Member> members = memberRepository.adminMember();
+        assertThat(members).hasSize(2);
+        assertThat(members.get(0).getNickName()).isEqualTo("어드민1");
+        assertThat(members.get(0).getNickName().getClass()).isEqualTo(String.class);
     }
 
 }

@@ -113,7 +113,4 @@ class AdminMemberControllerTest {
                 .andExpect(jsonPath("$.data.memberInfoes.[0].loginId").value(loginId))
                 .andExpect(jsonPath("$.data.size()").value(2));
     }
-
-
-
 }
