@@ -8,7 +8,6 @@ import com.team.RecipeRadar.domain.visit.dto.DayDto;
 import com.team.RecipeRadar.domain.visit.dto.MonthDto;
 import com.team.RecipeRadar.domain.visit.dto.WeekDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.*;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 import static com.team.RecipeRadar.domain.visit.domain.QVisitStatistics.*;
 
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CustomVisitAdminRepositoryImpl implements CustomVisitAdminRepository {
