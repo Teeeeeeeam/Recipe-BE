@@ -44,7 +44,7 @@ public class RecipeController {
                                           @RequestParam(value = "lastCount",required = false)  Integer likeCount,
                                           @RequestParam(value = "lastId",required = false) Long lastId,
                                           @RequestParam(value = "order",defaultValue = "DATE") OrderType order,
-                                          @Parameter(example = "{\"page\":2,\"size\":10}") Pageable pageable){
+                                          @Parameter(example = "{\"size\":10}") Pageable pageable){
         RecipeSearchResponse recipeNormalPageResponse = recipeService.searchRecipe(ingredients,cookIngredients,cookMethods,dishTypes, title,order,likeCount,lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeNormalPageResponse));
     }
