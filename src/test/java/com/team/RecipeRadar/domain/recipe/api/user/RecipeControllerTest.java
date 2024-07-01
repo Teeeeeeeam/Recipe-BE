@@ -111,32 +111,32 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_제목으로만 검색")
-    void Search_Recipe_Normal_Page() throws Exception {
+    @DisplayName("재료 검색시 카테고리+재료+시간순 정렬 테스트")
+    void Search_Recipe_category_ingredients_date_Page() throws Exception {
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(false, recipeDtos);
 
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(recipeDtos, 1, recipeDtos.size());
-
-        given(recipeService.searchRecipeByIngredientsNormal(isNull(),eq("레시피1"),any(Pageable.class)))
+        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),eq(List.of(CookIngredients.BEEF,CookIngredients.FLOUR)),isNull(),eq(List.of(DishTypes.MAIN_DISH)),isNull(),
+                        eq(OrderType.DATE),any(),isNull(),any(Pageable.class)))
                 .willReturn(dummyResponse);
 
-        mockMvc.perform(get("/api/recipe/normal?title=레시피1")
+        mockMvc.perform(get("/api/recipe/search?ingredients=밥&cat1=BEEF,FLOUR&cat3=MAIN_DISH&order=DATE")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.nextPage").value(false))
                 .andExpect(jsonPath("$.data.recipes.[0].id").value(1))
                 .andExpect(jsonPath("$.data.recipes.size()").value(5));
     }
     @Test
-    @DisplayName("재료 검색 레시피 조회 일반 페이지 네이션 테스트_재료으로만 검색")
-    void Search_Recipe_Normal_Page_ing() throws Exception {
+    @DisplayName("레시피 검색시 제목으로 만검색")
+    void Search_Recipe_title_Page() throws Exception {
 
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(recipeDtos, 1, recipeDtos.size());
+        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(false,recipeDtos);
 
-        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),isNull(),any(Pageable.class))).willReturn(dummyResponse);
+        given(recipeService.searchRecipeByIngredientsNormal(isNull(),isNull(),isNull(),isNull(),eq("레시피"), eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class)))
+                .willReturn(dummyResponse);
 
-        mockMvc.perform(get("/api/recipe/normal?ingredients=밥")
+        mockMvc.perform(get("/api/recipe/search?title=레시피")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.recipes.[0].id").value(1))
                 .andExpect(jsonPath("$.data.recipes.size()").value(5));

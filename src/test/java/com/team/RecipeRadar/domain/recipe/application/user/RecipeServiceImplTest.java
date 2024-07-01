@@ -6,7 +6,6 @@ import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.BEEF;
@@ -28,14 +26,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 @EnableJpaAuditing
 class RecipeServiceImplTest {
 
     @Mock RecipeRepository recipeRepository;
-    @InjectMocks
-    RecipeServiceImpl recipeService;
+    @InjectMocks RecipeServiceImpl recipeService;
 
     private List<RecipeDto> recipeDtoList;
     private List<String> ingLists;
@@ -83,20 +79,17 @@ class RecipeServiceImplTest {
     }
 
     @Test
-    @DisplayName("일반 페이지네이션 테스트")
+    @DisplayName("검색 무한 스크롤 테스트")
     void get_Search_RecipeFor_NormalPage(){
 
         Pageable pageRequest = PageRequest.of(0, 2);
 
         PageImpl<RecipeDto> dtoPage = new PageImpl<>(recipeDtoList, pageRequest, 2);
 
-        when(recipeRepository.getNormalPage(anyList(),anyString(),eq(pageRequest))).thenReturn(dtoPage);
+        when(recipeRepository.userSearchRecipe(anyList(),isNull(),isNull(),isNull(),eq("title"),eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class))).thenReturn(dtoPage);
 
-        RecipeNormalPageResponse title = recipeService.searchRecipeByIngredientsNormal(ingLists, "title", pageRequest);
+        RecipeNormalPageResponse title = recipeService.searchRecipeByIngredientsNormal(ingLists,null,null,null,"title", OrderType.DATE,null,null,Pageable.ofSize(2));
         assertThat(title.getRecipes()).hasSize(4);
-        assertThat(title.getTotalElements()).isEqualTo(2);
-        assertThat(title.getTotalPage()).isEqualTo(1);
-
     }
 
     @Test
@@ -105,9 +98,6 @@ class RecipeServiceImplTest {
         when(recipeRepository.mainPageRecipe()).thenReturn(recipeDtoList);
 
         MainPageRecipeResponse mainPageRecipeResponse = recipeService.mainPageRecipe();
-
-        log.info("asdasd-={}",mainPageRecipeResponse);
-
         assertThat(mainPageRecipeResponse.getRecipes()).hasSize(4);
         assertThat(mainPageRecipeResponse.getRecipes().get(0).getLikeCount()).isEqualTo(123);
         assertThat(mainPageRecipeResponse.getRecipes().get(1).getLikeCount()).isEqualTo(22);

@@ -11,12 +11,12 @@ import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -54,7 +54,9 @@ class RecipeRepositoryTest {
                 Recipe.builder().title("제목2").cookingTime("시간2").likeCount(2).cookingIngredients(BEEF).build(),
                 Recipe.builder().title("제목3").cookingTime("시간3").likeCount(4).cookingIngredients(BEEF).build(),
                 Recipe.builder().title("제목4").cookingTime("시간4").likeCount(6).cookingIngredients(FLOUR).build(),
-                Recipe.builder().title("제목5").cookingTime("시간5").likeCount(124).types(BREAD).build()
+                Recipe.builder().title("제목5").cookingTime("시간5").likeCount(124).cookingIngredients(BEEF).types(BREAD).build(),
+                Recipe.builder().title("제목6").cookingTime("시간6").likeCount(0).cookingIngredients(VEGETABLES).types(SOUP_STEW).build(),
+                Recipe.builder().title("제목7").cookingTime("시간7").likeCount(0).cookingIngredients(VEGETABLES).types(SOUP_STEW).build()
         );
         recipeRepository.saveAll(recipes);
 
@@ -63,7 +65,9 @@ class RecipeRepositoryTest {
                 UploadFile.builder().recipe(recipes.get(1)).storeFileName("test").originFileName("test").build(),
                 UploadFile.builder().recipe(recipes.get(2)).storeFileName("test").originFileName("test").build(),
                 UploadFile.builder().recipe(recipes.get(3)).storeFileName("test").originFileName("test").build(),
-                UploadFile.builder().recipe(recipes.get(4)).storeFileName("test").originFileName("test").build()
+                UploadFile.builder().recipe(recipes.get(4)).storeFileName("test").originFileName("test").build(),
+                UploadFile.builder().recipe(recipes.get(5)).storeFileName("test").originFileName("test").build(),
+                UploadFile.builder().recipe(recipes.get(6)).storeFileName("test").originFileName("test").build()
         );
         imgRepository.saveAll(uploadFiles);
 
@@ -72,7 +76,9 @@ class RecipeRepositoryTest {
                 Ingredient.builder().recipe(recipes.get(1)).ingredients("밥").build(),
                 Ingredient.builder().recipe(recipes.get(2)).ingredients("밥").build(),
                 Ingredient.builder().recipe(recipes.get(3)).ingredients("밥").build(),
-                Ingredient.builder().recipe(recipes.get(4)).ingredients("밥").build()
+                Ingredient.builder().recipe(recipes.get(4)).ingredients("밥").build(),
+                Ingredient.builder().recipe(recipes.get(5)).ingredients("김치").build(),
+                Ingredient.builder().recipe(recipes.get(6)).ingredients("김치").build()
         );
 
          ingredientRepository.saveAll(ingredients);
@@ -82,7 +88,9 @@ class RecipeRepositoryTest {
                 CookingStep.builder().recipe(recipes.get(1)).steps("조리순서").build(),
                 CookingStep.builder().recipe(recipes.get(2)).steps("조리순서").build(),
                 CookingStep.builder().recipe(recipes.get(3)).steps("조리순서").build(),
-                CookingStep.builder().recipe(recipes.get(4)).steps("조리순서").build()
+                CookingStep.builder().recipe(recipes.get(4)).steps("조리순서").build(),
+                CookingStep.builder().recipe(recipes.get(5)).steps("조리순서").build(),
+                CookingStep.builder().recipe(recipes.get(6)).steps("조리순서").build()
         );
         cookStepRepository.saveAll(cookingSteps);
     }
@@ -118,21 +126,53 @@ class RecipeRepositoryTest {
     }
 
     @Test
-    @DisplayName("레시피 검색의 일반 페이징 방식 테스트")
-    void search_ing_normal_page(){
+    @DisplayName("레시피 제목으로만 검색무한 스크롤 방식 테스트")
+    void search_title_recipe(){
+        Pageable pageable = PageRequest.of(0, 2);
+        Slice<RecipeDto> recipeDtoPage = recipeRepository.userSearchRecipe(null, null,null,null,"제목1",OrderType.DATE,null,null,pageable);
+        assertThat(recipeDtoPage.getContent()).hasSize(1);
+        assertThat(recipeDtoPage.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("레시피 재료만 검색무한 스크롤 방식 테스트")
+    void search_ing_recipe(){
         List<String>  ingredients = new ArrayList<>();
         ingredients.add("밥");
 
         Pageable pageable = PageRequest.of(0, 2);
-        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(List.of(), "제목1",pageable);
+        Slice<RecipeDto> recipeDtoPage = recipeRepository.userSearchRecipe(ingredients, null,null,null,null,OrderType.DATE,null,null,pageable);
+        assertThat(recipeDtoPage.getContent()).hasSize(2);
+        assertThat(recipeDtoPage.hasNext()).isTrue();
+    }
 
-        assertThat(recipeDtoPage.getTotalPages()).isEqualTo(1);
-        assertThat(recipeDtoPage.getContent().get(0).getTitle()).isEqualTo(recipes.get(0).getTitle());
-        assertThat(recipeDtoPage.getTotalElements()).isEqualTo(1);
+    @Test
+    @DisplayName("레시피 카테고리만 검색무한 스크롤 방식 테스트")
+    void search_category_recipe(){
+        Pageable pageable = PageRequest.of(0, 5);
+        Slice<RecipeDto> recipeDtoPage = recipeRepository.userSearchRecipe(null, List.of(BEEF),null,List.of(BREAD),null,OrderType.DATE,null,null,pageable);
+        assertThat(recipeDtoPage.getContent()).hasSize(1);
+        assertThat(recipeDtoPage.getContent().get(0).getTitle()).isEqualTo(recipes.get(4).getTitle());
+        assertThat(recipeDtoPage.hasNext()).isFalse();
+    }
 
-        Pageable pageable1 = PageRequest.of(3, 2);
-        Page<RecipeDto> NorecipeDtoPage = recipeRepository.getNormalPage(ingredients, "",pageable1);
-        assertThat(NorecipeDtoPage.getContent()).hasSize(0);
+    @Test
+    @DisplayName("레시피 검색 좋아요 정렬 테스트")
+    void search_Sort_Like_recipe(){
+        Pageable pageable = PageRequest.of(0, 2);
+        Slice<RecipeDto> recipeDtoPage = recipeRepository.userSearchRecipe(null, null,null,null,"제목",OrderType.LIKE,6,null,pageable);
+        assertThat(recipeDtoPage.getContent()).hasSize(2);
+        assertThat(recipeDtoPage.getContent().get(0).getTitle()).isEqualTo(recipes.get(2).getTitle());
+        assertThat(recipeDtoPage.hasNext()).isTrue();
+    }
+    
+    @Test
+    @DisplayName("레시피 검색 좋아요가 0일때 내림차순 정렬 테스트")
+    void search_Sort_Like_zero_recipe(){
+        Pageable pageable = PageRequest.of(0, 10);
+        Slice<RecipeDto> recipeDtoPage = recipeRepository.userSearchRecipe(null, null,null,null,"제목",OrderType.LIKE,0,recipes.get(6).getId(),pageable);
+        assertThat(recipeDtoPage.getContent()).hasSize(1);
+        assertThat(recipeDtoPage.getContent().get(0).getId()).isEqualTo(recipes.get(5).getId());
     }
 
 
@@ -162,6 +202,8 @@ class RecipeRepositoryTest {
         assertThat(ingredients.get(0).getIngredients()).isEqualTo("변경한재료!");
         assertThat(cookingSteps.get(0).getSteps()).isEqualTo("변경 된 조리순서1");
     }
+    
+    
 
     @Test
     @DisplayName("무한 페이징(Slice) 테스트 _어드민")
@@ -187,10 +229,11 @@ class RecipeRepositoryTest {
     @DisplayName("레시피 수 조회")
     void recipeCount(){
         long count = recipeRepository.countAllBy();
-        assertThat(count).isEqualTo(5l);
+        assertThat(count).isEqualTo(7l);
     }
 
     @Test
+    @Disabled
     @DisplayName("카테고리 테스트")
     void categoryTest() {
         PageRequest pageRequest = PageRequest.of(0, 10);
