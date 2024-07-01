@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class RecipeNormalPageResponse {
+public class RecipeSearchResponse {
 
     private boolean nextPage;
     private List<RecipeDto> recipes;

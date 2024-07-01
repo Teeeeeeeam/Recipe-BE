@@ -2,10 +2,8 @@ package com.team.RecipeRadar.domain.recipe.application.user;
 
 import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
-import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
-import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +17,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.BEEF;
-import static com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients.MEAT;
-import static com.team.RecipeRadar.domain.recipe.domain.type.CookMethods.BOILING;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -88,7 +83,7 @@ class RecipeServiceImplTest {
 
         when(recipeRepository.userSearchRecipe(anyList(),isNull(),isNull(),isNull(),eq("title"),eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class))).thenReturn(dtoPage);
 
-        RecipeNormalPageResponse title = recipeService.searchRecipeByIngredientsNormal(ingLists,null,null,null,"title", OrderType.DATE,null,null,Pageable.ofSize(2));
+        RecipeSearchResponse title = recipeService.searchRecipeByIngredientsNormal(ingLists,null,null,null,"title", OrderType.DATE,null,null,Pageable.ofSize(2));
         assertThat(title.getRecipes()).hasSize(4);
     }
 

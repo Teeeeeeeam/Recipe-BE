@@ -40,10 +40,10 @@ public class RecipeServiceImpl implements RecipeService{
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients, List<CookIngredients> cookIngredients,List<CookMethods> cookMethods,List<DishTypes> dishTypes,String title,
-                                                                    OrderType order, Integer likeCount, Long lastId,Pageable pageable) {
+    public RecipeSearchResponse searchRecipeByIngredientsNormal(List<String> ingredients, List<CookIngredients> cookIngredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, String title,
+                                                                OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
         Slice<RecipeDto> recipeDtoSlice = recipeRepository.userSearchRecipe(ingredients, cookIngredients,cookMethods,dishTypes,title,order,likeCount, lastId,pageable);
-        return new RecipeNormalPageResponse(recipeDtoSlice.hasNext(), recipeDtoSlice.getContent());
+        return new RecipeSearchResponse(recipeDtoSlice.hasNext(), recipeDtoSlice.getContent());
     }
 
     /**

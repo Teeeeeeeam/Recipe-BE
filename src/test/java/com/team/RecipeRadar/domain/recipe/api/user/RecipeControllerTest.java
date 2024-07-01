@@ -113,7 +113,7 @@ class RecipeControllerTest {
     @Test
     @DisplayName("재료 검색시 카테고리+재료+시간순 정렬 테스트")
     void Search_Recipe_category_ingredients_date_Page() throws Exception {
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(false, recipeDtos);
+        RecipeSearchResponse dummyResponse = new RecipeSearchResponse(false, recipeDtos);
 
         given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),eq(List.of(CookIngredients.BEEF,CookIngredients.FLOUR)),isNull(),eq(List.of(DishTypes.MAIN_DISH)),isNull(),
                         eq(OrderType.DATE),any(),isNull(),any(Pageable.class)))
@@ -130,7 +130,7 @@ class RecipeControllerTest {
     @DisplayName("레시피 검색시 제목으로 만검색")
     void Search_Recipe_title_Page() throws Exception {
 
-        RecipeNormalPageResponse dummyResponse = new RecipeNormalPageResponse(false,recipeDtos);
+        RecipeSearchResponse dummyResponse = new RecipeSearchResponse(false,recipeDtos);
 
         given(recipeService.searchRecipeByIngredientsNormal(isNull(),isNull(),isNull(),isNull(),eq("레시피"), eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class)))
                 .willReturn(dummyResponse);

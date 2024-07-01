@@ -59,7 +59,7 @@ public class RecipeController {
                                           @RequestParam(value = "lastId",required = false) Long lastId,
                                           @RequestParam(value = "order",defaultValue = "DATE") OrderType order,
                                           @Parameter(example = "{\"page\":2,\"size\":10}") Pageable pageable){
-        RecipeNormalPageResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingredients,cookIngredients,cookMethods,dishTypes, title,order,likeCount,lastId, pageable);
+        RecipeSearchResponse recipeNormalPageResponse = recipeService.searchRecipeByIngredientsNormal(ingredients,cookIngredients,cookMethods,dishTypes, title,order,likeCount,lastId, pageable);
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeNormalPageResponse));
     }
 
