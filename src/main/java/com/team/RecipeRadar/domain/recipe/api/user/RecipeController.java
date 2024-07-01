@@ -43,7 +43,7 @@ public class RecipeController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
     }
 
-    @Operation(summary = "레시피 검색 (기본 페이징)", description = "기본적인 페이지네이션 방식을 사용합니다. 기본적으로 레시피를 오름차순으로 정렬합니다.")
+    @Operation(summary = "레시피 검색(무한 스크롤)", description = "카테고리, 재료, 레시피명의 대해서 검색기능을 제공하며, 기본적으로 시간순 정렬을 지원합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
