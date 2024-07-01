@@ -29,20 +29,6 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
-    @Operation(summary = "레시피 검색(무한 스크롤)", description = "조회된 마지막 레시피의 ID 값을 통해 다음 페이지 여부를 판단합니다. 'lastId'는 조회된 마지막 페이지의 작성된 값을 넣지 않으면 첫 번째 데이터만 출력됩니다." )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
-    })
-    @GetMapping("/recipe")
-    public ResponseEntity<?> findRecipe(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
-                                        @RequestParam(value = "lastId",required = false)Long lastRecipeId,
-                                        @Parameter(example = "{\"size\":10}") Pageable pageable){
-        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingredients,lastRecipeId, pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
-    }
-
     @Operation(summary = "레시피 검색(무한 스크롤)", description = "카테고리, 재료, 레시피명의 대해서 검색기능을 제공하며, 기본적으로 시간순 정렬을 지원합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",

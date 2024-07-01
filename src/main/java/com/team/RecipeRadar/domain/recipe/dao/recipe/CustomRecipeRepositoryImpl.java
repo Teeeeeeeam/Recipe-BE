@@ -39,40 +39,9 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Value("${S3.URL}")
     private  String s3URL;
 
-    /**
-     * 동적(재료) 무한 스크르롤 페이징 기능
-     * @param ingredients       List<String> 재료값
-     * @param pageable          페이징
-     * @return                  Slice반환
-     */
-    @Override
-    public Slice<RecipeDto> getRecipe(List<String> ingredients,Long lastRecipeId,Pageable pageable) {
-        
-        //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
-        BooleanBuilder builder = new BooleanBuilder();
-        if (ingredients != null && !ingredients.isEmpty()) {
-            for (String ingredientList : ingredients) {
-                builder.or(ingredient.ingredients.like("%" + ingredientList + "%"));
-            }
-        }
-        // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
-        if (lastRecipeId!=null){
-            builder.and(recipe.id.gt(lastRecipeId));
-        }
-
-        List<Tuple> result = getSearchRecipe(pageable, builder);
-
-        List<RecipeDto> content = getRecipeDtoList(result);
-
-        boolean hasNext = isHasNext(pageable, content);
-
-        return new SliceImpl<>(content,pageable,hasNext);
-    }
-
     /*
     기존 재료 검색 로직이랑 비슷하나 제목 검색의 대한 조건이 추가된 어드민 전용 로직
      */
-
     @Override
     public Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredients, String title,Long lastRecipeId, Pageable pageable) {
         //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
