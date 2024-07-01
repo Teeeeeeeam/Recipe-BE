@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -93,7 +92,7 @@ class RecipeControllerTest {
     void Search_Recipe_category_ingredients_date_Page() throws Exception {
         RecipeSearchResponse dummyResponse = new RecipeSearchResponse(false, recipeDtos);
 
-        given(recipeService.searchRecipeByIngredientsNormal(eq(ingredients),eq(List.of(CookIngredients.BEEF,CookIngredients.FLOUR)),isNull(),eq(List.of(DishTypes.MAIN_DISH)),isNull(),
+        given(recipeService.searchRecipe(eq(ingredients),eq(List.of(CookIngredients.BEEF,CookIngredients.FLOUR)),isNull(),eq(List.of(DishTypes.MAIN_DISH)),isNull(),
                         eq(OrderType.DATE),any(),isNull(),any(Pageable.class)))
                 .willReturn(dummyResponse);
 
@@ -110,7 +109,7 @@ class RecipeControllerTest {
 
         RecipeSearchResponse dummyResponse = new RecipeSearchResponse(false,recipeDtos);
 
-        given(recipeService.searchRecipeByIngredientsNormal(isNull(),isNull(),isNull(),isNull(),eq("레시피"), eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class)))
+        given(recipeService.searchRecipe(isNull(),isNull(),isNull(),isNull(),eq("레시피"), eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class)))
                 .willReturn(dummyResponse);
 
         mockMvc.perform(get("/api/recipe/search?title=레시피")

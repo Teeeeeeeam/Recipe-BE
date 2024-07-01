@@ -70,7 +70,7 @@ class RecipeServiceImplTest {
 
         when(recipeRepository.userSearchRecipe(anyList(),isNull(),isNull(),isNull(),eq("title"),eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class))).thenReturn(dtoPage);
 
-        RecipeSearchResponse title = recipeService.searchRecipeByIngredientsNormal(ingLists,null,null,null,"title", OrderType.DATE,null,null,Pageable.ofSize(2));
+        RecipeSearchResponse title = recipeService.searchRecipe(ingLists,null,null,null,"title", OrderType.DATE,null,null,Pageable.ofSize(2));
         assertThat(title.getRecipes()).hasSize(4);
     }
 
