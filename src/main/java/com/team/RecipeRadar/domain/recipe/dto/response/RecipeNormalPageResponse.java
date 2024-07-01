@@ -10,7 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeNormalPageResponse {
 
+    private boolean nextPage;
     private List<RecipeDto> recipes;
-    private int totalPage;
-    private long totalElements;
 }

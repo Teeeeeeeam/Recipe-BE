@@ -41,9 +41,11 @@ public class RecipeServiceImpl implements RecipeService{
 
     @Override
     @Transactional(readOnly = true)
-    public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients, String title, Pageable pageable) {
-        Page<RecipeDto> recipeDtoPage = recipeRepository.getNormalPage(ingredients, title, pageable);
-        return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages(),recipeDtoPage.getTotalElements());
+    public RecipeNormalPageResponse searchRecipeByIngredientsNormal(List<String> ingredients, List<CookIngredients> cookIngredients,List<CookMethods> cookMethods,List<DishTypes> dishTypes,String title,
+                                                                    OrderType order, Integer likeCount, Long lastId,Pageable pageable) {
+        Slice<RecipeDto> recipeDtoSlice = recipeRepository.userSearchRecipe(ingredients, cookIngredients,cookMethods,dishTypes,title,order,likeCount, lastId,pageable);
+        return new RecipeNormalPageResponse(recipeDtoSlice.hasNext(), recipeDtoSlice.getContent());
+//        return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages(),recipeDtoPage.getTotalElements());
     }
 
     /**

@@ -105,30 +105,76 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
      * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
      */
     @Override
-    public Page<RecipeDto> getNormalPage(List<String> ingredients, String title, Pageable pageable) {
+    public Slice<RecipeDto> userSearchRecipe(List<String> ingredients,List<CookIngredients> cookIngredients,List<CookMethods> cookMethods,List<DishTypes> dishTypes, String title,
+                                             OrderType order, Integer likeCount, Long lastId,Pageable pageable) {
 
         BooleanBuilder builder = new BooleanBuilder();
+        BooleanBuilder cookIngredientBuilder = new BooleanBuilder();
+        BooleanBuilder ingredientsBuilder = new BooleanBuilder();
+        BooleanBuilder cookMethodsBuilder = new BooleanBuilder();
+        BooleanBuilder dishTypeBuilder = new BooleanBuilder();
+        BooleanBuilder likeConditions = new BooleanBuilder();
+
+        if(lastId!=null){
+            builder.and(recipe.id.lt(lastId));
+        }
+        // Title 조건 추가
         if (title != null) {
             builder.and(recipe.title.like("%" + title + "%"));
         }
 
+        // Cooking Ingredients 조건 추가
+        if (cookIngredients != null) {
+            cookIngredients.forEach(cookIngredient ->
+                    cookIngredientBuilder.or(recipe.cookingIngredients.eq(cookIngredient))
+            );
+            builder.and(cookIngredientBuilder);
+        }
+
+        // Cook Methods 조건 추가
+        if (cookMethods != null) {
+            cookMethods.forEach(cookMethod ->
+                    cookMethodsBuilder.or(recipe.cookMethods.eq(cookMethod))
+            );
+            builder.and(cookMethodsBuilder);
+        }
+
+        // Dish Types 조건 추가
+        if (dishTypes != null) {
+            dishTypes.forEach(dishType ->
+                    dishTypeBuilder.or(recipe.types.eq(dishType))
+            );
+            builder.and(dishTypeBuilder);
+        }
+
+        // Ingredients 조건 추가
         if (ingredients != null && !ingredients.isEmpty()) {
-            BooleanBuilder ingredientsBuilder = new BooleanBuilder();
-            for (String ingredient : ingredients) {
-                ingredientsBuilder.or(QIngredient.ingredient.ingredients.like("%" + ingredient + "%"));
-            }
+            ingredients.forEach(ingredient ->
+                    ingredientsBuilder.or(QIngredient.ingredient.ingredients.like("%" + ingredient + "%")));
             builder.and(ingredientsBuilder);
         }
 
+        if (order.equals(OrderType.LIKE) && likeCount != null) {
+            if (likeCount != 0) {
+                likeConditions.or(recipe.likeCount.lt(likeCount));
+            } else {
+                likeConditions.or(recipe.likeCount.eq(0).and(recipe.id.lt(lastId)));
+            }
+            builder.and(likeConditions);
+        } else if (!order.equals(OrderType.LIKE) && lastId != null) {
+            builder.and(recipe.id.lt(lastId));
+        }
+        log.info("현재 쿼리={}",builder);
+
+        OrderSpecifier[] orderSort = getOrder(order, recipe);
         List<Tuple> result = queryFactory.select(
                         recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people, recipe.createdAt)
                 .from(recipe)
                 .join(ingredient).on(ingredient.recipe.id.eq(recipe.id))
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
                 .where(builder, uploadFile.post.isNull())
-                .orderBy(recipe.id.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .orderBy(orderSort)
+                .limit(pageable.getPageSize()+1)
                 .fetch();
 
         // 총 카운트 쿼리
@@ -137,12 +183,16 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .join(ingredient.recipe, recipe)
                 .where(builder)
                 .fetchOne();
+        log.info("전체 조회된 레시피수 ={}",count);
 
         // 결과 DTO 리스트 변환
         List<RecipeDto> content = getRecipeDtoList(result);
+        boolean hasNext = isHasNext(pageable, content);
+
+//        log.info("제목={}",content);
 
         // 페이지 객체 생성
-        return new PageImpl<>(content, pageable, count);
+        return new SliceImpl<>(content, pageable,hasNext);
     }
 
     /**
