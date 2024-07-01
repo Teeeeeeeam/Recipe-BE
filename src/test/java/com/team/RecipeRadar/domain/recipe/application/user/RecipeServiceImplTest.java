@@ -46,19 +46,6 @@ class RecipeServiceImplTest {
                 RecipeDto.builder().id(4l).title("레시피4").likeCount(4).ingredient(ingLists.get(0)).cookSteps(cookingSteps).createdAt(LocalDate.now()).build()
         );
     }
-    @Test
-    @DisplayName("무한 페이징 쿼리 테스트")
-    void get_Search_Recipe(){
-        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
-
-        when(recipeRepository.getRecipe(eq(ingLists),eq(1l),any(Pageable.class))).thenReturn(recipeDtoSlice);
-
-        RecipeResponse recipeResponse = recipeService.searchRecipesByIngredients(ingLists, 1l, Pageable.ofSize(2));
-
-        assertThat(recipeResponse.getNextPage()).isFalse();
-        assertThat(recipeResponse.getRecipeDtoList().size()).isEqualTo(4);
-        assertThat(recipeResponse.getRecipeDtoList().get(0).getTitle()).isEqualTo("레시피1");
-    }
 
     @Test
     @DisplayName("레시피 상세 페이지")

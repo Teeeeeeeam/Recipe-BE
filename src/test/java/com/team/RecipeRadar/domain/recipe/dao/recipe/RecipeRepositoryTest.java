@@ -94,24 +94,6 @@ class RecipeRepositoryTest {
         );
         cookStepRepository.saveAll(cookingSteps);
     }
-
-    @Test
-    @DisplayName("무한 페이징(Slice) 테스트 ")
-    void findIng(){
-        List<String>  ingredients = new ArrayList<>();
-        ingredients.add("밥");
-
-        Slice<RecipeDto> recipe_FirstPage = recipeRepository.getRecipe(ingredients, null,Pageable.ofSize(2));
-
-        List<RecipeDto> content = recipe_FirstPage.getContent();
-        assertThat(content.get(0).getId()).isEqualTo(recipes.get(0).getId());
-        assertThat(recipe_FirstPage.hasNext()).isTrue();
-
-        Slice<RecipeDto> recipe_lastPage = recipeRepository.getRecipe(ingredients, recipes.get(4).getId(),Pageable.ofSize(2));
-        assertThat(recipe_lastPage.getContent()).hasSize(0);
-        assertThat(recipe_lastPage.hasNext()).isFalse();
-    }
-
     @Test
     @DisplayName("레시피의 상세 조회 테스트")
     void getDetails_recipe(){

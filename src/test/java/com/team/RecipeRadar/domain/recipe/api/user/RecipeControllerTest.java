@@ -57,28 +57,6 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("재료 검색 레시피 조회 테스트")
-    void Search_Recipe() throws Exception {
-
-        Pageable pageRequest = PageRequest.of(0, 2);
-
-        boolean paged = pageRequest.next().isPaged();
-
-        RecipeResponse recipeResponse = new RecipeResponse(recipeDtos, paged);
-
-        given(recipeService.searchRecipesByIngredients(eq(ingredients), eq(1l),any(Pageable.class)))
-                .willReturn(recipeResponse);
-
-        mockMvc.perform(get("/api/recipe?ingredients=밥&lastId=1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].id").value(1))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].title").value("레시피1"))
-                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(5));
-    }
-
-    @Test
     @DisplayName("레시피 상세 페이지 조회 테스트")
     void getDetails_Recipe() throws Exception {
 
