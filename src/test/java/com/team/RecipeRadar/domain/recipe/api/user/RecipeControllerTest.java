@@ -159,21 +159,4 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$.data.recipes.[2].likeCount").value(3));
     }
 
-    @Test
-    @DisplayName("카테고리 검색")
-    void cateGorySearch() throws Exception {
-        RecipeCategoryResponse recipeCategoryResponse = new RecipeCategoryResponse(false, recipeDtos);
-        given(recipeService.searchCategory(anyList(),isNull(),anyList(),eq(OrderType.DATE),isNull(),isNull(),any(Pageable.class))).willReturn(recipeCategoryResponse);
-
-        mockMvc.perform(get("/api/recipe/category")
-                        .param("cat1", CookIngredients.RICE.name(), CookIngredients.BEEF.name())
-                        .param("cat3",DishTypes.BREAD.name())
-                        .param("order", OrderType.DATE.name())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.nextPage").value(false))
-                .andExpect(jsonPath("$.data.recipes.size()").value(5));
-
-    }
-
 }

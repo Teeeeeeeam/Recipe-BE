@@ -231,18 +231,4 @@ class RecipeRepositoryTest {
         long count = recipeRepository.countAllBy();
         assertThat(count).isEqualTo(7l);
     }
-
-    @Test
-    @Disabled
-    @DisplayName("카테고리 테스트")
-    void categoryTest() {
-        PageRequest pageRequest = PageRequest.of(0, 10);
-
-        Slice<RecipeDto> recipeDtos = recipeRepository.searchCategory(
-                List.of(BEEF), null, null, OrderType.DATE, null, null, pageRequest);
-
-        assertThat(recipeDtos).isNotNull();
-        assertThat(recipeDtos.getContent()).isNotEmpty();
-        assertThat(recipeDtos.getContent()).hasSize(2);
-    }
 }

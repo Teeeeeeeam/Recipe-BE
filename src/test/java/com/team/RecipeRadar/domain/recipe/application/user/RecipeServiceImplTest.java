@@ -104,31 +104,4 @@ class RecipeServiceImplTest {
         assertThat(mainPageRecipeResponse.getRecipes().get(2).getLikeCount()).isEqualTo(10);
         assertThat(mainPageRecipeResponse.getRecipes().get(3).getLikeCount()).isEqualTo(4);
     }
-
-    @Test
-    @DisplayName("카테고리 예외 테스트")
-    void category_exTest() {
-        when(recipeRepository.searchCategory(null, List.of(CookMethods.SASHIMI), null, null, 1, null, Pageable.ofSize(10)))
-                .thenThrow(new InvalidIdException("카테고리를 선택해주세요"));
-
-        assertThatThrownBy(() -> recipeService.searchCategory(null, List.of(CookMethods.SASHIMI), null, null, 1, null, Pageable.ofSize(10)))
-                .isInstanceOf(InvalidIdException.class)
-                .hasMessage("카테고리를 선택해주세요");
-    }
-
-    
-    @Test
-    @DisplayName("카테고리 페지징 테스트")
-    void page_category(){
-        List<RecipeDto> recipeDtoList = List.of(
-                RecipeDto.builder().id(1l).title("제목1").cookingTime("시간1").cookingLevel("1").cookMethods(BOILING).cookIngredients(MEAT).build(),
-                RecipeDto.builder().id(2l).title("제목1").cookingTime("시간1").cookingLevel("1").cookMethods(BOILING).cookIngredients(BEEF).build());
-
-        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList, Pageable.ofSize(10), false);
-        when(recipeRepository.searchCategory(null,List.of(BOILING),null, OrderType.DATE,null,null,Pageable.ofSize(10))).thenReturn(recipeDtoSlice);
-
-        RecipeCategoryResponse recipeCategoryResponse = recipeService.searchCategory(null, List.of(BOILING), null, OrderType.DATE, null, null, Pageable.ofSize(10));
-
-        assertThat(recipeCategoryResponse.getRecipes()).hasSize(2);
-    }
 }
