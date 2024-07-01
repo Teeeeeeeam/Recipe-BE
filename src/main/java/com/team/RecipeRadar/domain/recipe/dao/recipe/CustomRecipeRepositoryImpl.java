@@ -17,7 +17,6 @@ import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.CookStepDto;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -31,7 +30,6 @@ import static com.team.RecipeRadar.domain.recipe.domain.QIngredient.ingredient;
 import static com.team.RecipeRadar.domain.recipe.domain.QRecipe.*;
 import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
@@ -164,7 +162,6 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
         } else if (!order.equals(OrderType.LIKE) && lastId != null) {
             builder.and(recipe.id.lt(lastId));
         }
-        log.info("현재 쿼리={}",builder);
 
         OrderSpecifier[] orderSort = getOrder(order, recipe);
         List<Tuple> result = queryFactory.select(
@@ -177,21 +174,10 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .limit(pageable.getPageSize()+1)
                 .fetch();
 
-        // 총 카운트 쿼리
-        Long count = queryFactory.select(recipe.id.count())
-                .from(ingredient)
-                .join(ingredient.recipe, recipe)
-                .where(builder)
-                .fetchOne();
-        log.info("전체 조회된 레시피수 ={}",count);
-
         // 결과 DTO 리스트 변환
         List<RecipeDto> content = getRecipeDtoList(result);
         boolean hasNext = isHasNext(pageable, content);
 
-//        log.info("제목={}",content);
-
-        // 페이지 객체 생성
         return new SliceImpl<>(content, pageable,hasNext);
     }
 
@@ -234,60 +220,6 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
                 tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount),tuple.get(recipe.createdAt))).collect(Collectors.toList());
     }
-
-    @Override
-    public Slice<RecipeDto> searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
-        BooleanBuilder builder = new BooleanBuilder();
-        BooleanBuilder ingredientConditions = new BooleanBuilder();
-        BooleanBuilder methodConditions = new BooleanBuilder();
-        BooleanBuilder typeConditions = new BooleanBuilder();
-        BooleanBuilder likeConditions = new BooleanBuilder();
-
-        if (ingredients != null && !ingredients.isEmpty()) {
-            ingredients.forEach(cookIngredient ->
-                    ingredientConditions.or(recipe.cookingIngredients.eq(cookIngredient)));
-            builder.and(ingredientConditions);
-        }
-
-        if (cookMethods != null && !cookMethods.isEmpty()) {
-            cookMethods.forEach(cookMethod ->
-                    methodConditions.or(recipe.cookMethods.eq(cookMethod)));
-            builder.and(methodConditions);
-        }
-
-        if (dishTypes != null && !dishTypes.isEmpty()) {
-            dishTypes.forEach(dishType ->
-                    typeConditions.or(recipe.types.eq(dishType)));
-            builder.and(typeConditions);
-        }
-
-        if (order.equals(OrderType.LIKE) && likeCount != null) {
-            if (likeCount != 0) {
-                likeConditions.or(recipe.likeCount.lt(likeCount));
-            } else {
-                likeConditions.or(recipe.likeCount.eq(0).and(recipe.id.lt(lastId)));
-            }
-            builder.and(likeConditions);
-        } else if (!order.equals(OrderType.LIKE) && lastId != null) {
-            builder.and(recipe.id.lt(lastId));
-        }
-
-        OrderSpecifier<?>[] orderSort = getOrder(order, recipe);
-
-        List<Tuple> list = queryFactory.select(recipe, uploadFile.storeFileName)
-                .from(recipe)
-                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder,uploadFile.post.id.isNull())
-                .limit(pageable.getPageSize() + 1)
-                .orderBy(orderSort)
-                .fetch();
-
-        List<RecipeDto> recipeDtos = list.stream().map(tuple -> RecipeDto.categoryOf(tuple.get(recipe), getImageUrl(tuple))).collect(Collectors.toList());
-
-        boolean hasNext = isHasNext(pageable, recipeDtos);
-        return new SliceImpl<>(recipeDtos,pageable,hasNext);
-    }
-
 
     private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
         List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people,recipe.createdAt)

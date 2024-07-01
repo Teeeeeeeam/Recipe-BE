@@ -8,7 +8,6 @@ import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.*;
 import com.team.RecipeRadar.domain.recipe.dto.response.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,6 @@ public class RecipeServiceImpl implements RecipeService{
                                                                     OrderType order, Integer likeCount, Long lastId,Pageable pageable) {
         Slice<RecipeDto> recipeDtoSlice = recipeRepository.userSearchRecipe(ingredients, cookIngredients,cookMethods,dishTypes,title,order,likeCount, lastId,pageable);
         return new RecipeNormalPageResponse(recipeDtoSlice.hasNext(), recipeDtoSlice.getContent());
-//        return new RecipeNormalPageResponse(recipeDtoPage.getContent(),recipeDtoPage.getTotalPages(),recipeDtoPage.getTotalElements());
     }
 
     /**
@@ -68,14 +66,6 @@ public class RecipeServiceImpl implements RecipeService{
     public MainPageRecipeResponse mainPageRecipe() {
         List<RecipeDto> recipeDtoList = recipeRepository.mainPageRecipe();
         return MainPageRecipeResponse.of(recipeDtoList);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public RecipeCategoryResponse searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order, Integer likeCount, Long lastId, Pageable pageable) {
-        Slice<RecipeDto> recipeDtoSlice = recipeRepository.searchCategory(ingredients, cookMethods, dishTypes, order, likeCount, lastId, pageable);
-        
-        return new RecipeCategoryResponse(recipeDtoSlice.hasNext(),recipeDtoSlice.getContent());
     }
 
     /* Josn 형식으로 Map으로 담아서 변경 */

@@ -18,10 +18,7 @@ public interface CustomRecipeRepository {
 
     Slice<RecipeDto> userSearchRecipe(List<String> ingredient, List<CookIngredients> cookIngredients,List<CookMethods> cookMethods,List<DishTypes> dishTypes,String title,
                                       OrderType order, Integer likeCount, Long lastId,Pageable pageable);
-
     RecipeDto getRecipeDetails(Long recipeId);
 
     List<RecipeDto> mainPageRecipe();
-
-    Slice<RecipeDto> searchCategory(List<CookIngredients> ingredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, OrderType order,Integer count, Long lastId, Pageable pageable);
 }
