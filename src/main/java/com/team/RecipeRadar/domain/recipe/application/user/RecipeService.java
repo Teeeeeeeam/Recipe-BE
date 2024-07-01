@@ -12,9 +12,8 @@ import java.util.List;
 
 public interface RecipeService {
 
-    RecipeSearchResponse searchRecipeByIngredientsNormal(List<String> ingredients, List<CookIngredients> cookIngredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, String title,
-                                                         OrderType order, Integer likeCount, Long lastId, Pageable pageable);
-
+    RecipeSearchResponse searchRecipe(List<String> ingredients, List<CookIngredients> cookIngredients, List<CookMethods> cookMethods, List<DishTypes> dishTypes, String title,
+                                      OrderType order, Integer likeCount, Long lastId, Pageable pageable);
     RecipeDetailsResponse getRecipeDetails(Long recipeId);
 
     MainPageRecipeResponse mainPageRecipe();
