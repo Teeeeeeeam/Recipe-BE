@@ -7,6 +7,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.team.RecipeRadar.domain.Image.domain.QUploadFile;
 import com.team.RecipeRadar.domain.recipe.api.user.OrderType;
 import com.team.RecipeRadar.domain.recipe.domain.QIngredient;
 import com.team.RecipeRadar.domain.recipe.domain.QRecipe;
@@ -178,16 +179,30 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Override
     public List<RecipeDto> mainPageRecipe() {
 
-        List<Tuple> list = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel, recipe.people,recipe.createdAt)
+        QRecipe recipeInner = new QRecipe("recipeInner");
+        QUploadFile uploadFileInner = new QUploadFile("uploadFileInner");
+
+        // 서브쿼리로 상위 8개 의데이터 조회
+        List<Long> topRecipeIds = queryFactory
+                .select(recipeInner.id)
+                .from(recipeInner)
+                .join(uploadFileInner).on(uploadFileInner.recipe.id.eq(recipeInner.id))
+                .where(uploadFileInner.post.id.isNull())
+                .orderBy(recipeInner.likeCount.desc())
+                .limit(8)
+                .fetch();
+
+        List<Tuple> list = queryFactory
+                .select(recipe.id, recipe.title, uploadFile.storeFileName, recipe.likeCount,
+                        recipe.cookingTime, recipe.cookingLevel, recipe.people, recipe.createdAt)
                 .from(recipe)
                 .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(uploadFile.post.id.isNull())
+                .where(uploadFile.post.id.isNull()
+                        .and(recipe.id.in(topRecipeIds)))   //서브쿼리사용
                 .orderBy(recipe.likeCount.desc())
-                .limit(8).fetch();
+                .fetch();
 
-        return list.stream().map(tuple -> RecipeDto.from(tuple.get(recipe.id),
-                getImageUrl(tuple), tuple.get(recipe.title), tuple.get(recipe.cookingLevel),
-                tuple.get(recipe.people), tuple.get(recipe.cookingTime), tuple.get(recipe.likeCount),tuple.get(recipe.createdAt))).collect(Collectors.toList());
+        return getRecipeDtoList(list);
     }
 
     private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
