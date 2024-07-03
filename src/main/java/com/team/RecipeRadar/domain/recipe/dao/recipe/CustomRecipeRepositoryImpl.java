@@ -138,11 +138,9 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .where(recipe.id.eq(recipeId).and(uploadFile.post.id.isNull())).fetch();
 
         List<CookStepDto> cookStepDtoList = details.stream().map(tuple -> CookStepDto.of(tuple.get(cookingStep))).collect(Collectors.toList());
-
-        String imgName = details.stream().map(tuple -> getImageUrl(tuple)).findFirst().get();
-        Recipe recipeEntity = details.stream().map(tuple -> tuple.get(recipe)).collect(Collectors.toList()).stream().findFirst().get();
-
-        String ingredients = details.stream().map(tuple -> tuple.get(ingredient.ingredients)).collect(Collectors.toList()).stream().findFirst().get();
+        String imgName = details.stream().map(this::getImageUrl).findFirst().orElse(null);
+        Recipe recipeEntity = details.stream().map(tuple -> tuple.get(recipe)).findFirst().orElse(null);
+        String ingredients = details.stream().map(tuple -> tuple.get(ingredient.ingredients)).findFirst().orElse(null);
 
         return RecipeDto.of(recipeEntity,imgName,cookStepDtoList,ingredients);
     }
