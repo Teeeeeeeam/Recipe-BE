@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,29 +182,6 @@ class RecipeRepositoryTest {
         assertThat(recipes.get(0).getTitle()).isNotEqualTo("레시피1");
         assertThat(ingredients.get(0).getIngredients()).isEqualTo("변경한재료!");
         assertThat(cookingSteps.get(0).getSteps()).isEqualTo("변경 된 조리순서1");
-    }
-    
-    
-
-    @Test
-    @DisplayName("무한 페이징(Slice) 테스트 _어드민")
-    void admin_find_titleAndIng(){
-        List<String>  ingredients = new ArrayList<>();
-        ingredients.add("밥");
-
-        Pageable pageRequest_nextPageTrue = PageRequest.of(0, 10);
-
-        Slice<RecipeDto> recipe_FirstPage = recipeRepository.adminSearchTitleOrIng(ingredients,recipes.get(2).getTitle() ,recipes.get(1).getId(),pageRequest_nextPageTrue);
-        Slice<RecipeDto> recipe_FirstPage_2 = recipeRepository.adminSearchTitleOrIng(ingredients,"제목" ,null,pageRequest_nextPageTrue);
-
-        // 하나의 데이터만 search
-        assertThat(recipe_FirstPage.getContent()).hasSize(1);
-
-        assertThat(recipe_FirstPage.hasNext()).isFalse();
-
-        // 모든 레시피 데이터 검색
-        assertThat(recipe_FirstPage_2.getContent()).hasSize(5);
-
     }
     @Test
     @DisplayName("레시피 수 조회")

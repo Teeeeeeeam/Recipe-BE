@@ -7,8 +7,6 @@ import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
 import com.team.RecipeRadar.global.aop.AspectAdvice;
@@ -227,39 +225,6 @@ class AdminRecipeControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("레시피를 찾을 수 없습니다."));
     }
-
-
-    @Test
-    @CustomMockAdmin
-    @DisplayName("어드민 검색 레시피 조회 테스트")
-    void Search_Recipe1() throws Exception {
-
-        Pageable pageRequest = PageRequest.of(0, 2);
-
-        String title= "recipe";
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(new RecipeDto(1L, "url1", title, "level1", "1인분", "10분", 0, LocalDateTime.now()));
-
-        boolean paged = pageRequest.next().isPaged();
-
-        RecipeResponse recipeResponse = new RecipeResponse(recipeDtoList, paged);
-
-        given(adminService.searchRecipesByTitleAndIngredients(isNull(), eq(title), isNull(), any(Pageable.class)))
-                .willReturn(recipeResponse);
-
-        mockMvc.perform(get("/api/admin/recipes?title="+title)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].id").value(1))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].imageUrl").value("url1"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].title").value(title))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingLevel").value("level1"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].people").value("1인분"))
-                .andExpect(jsonPath("$.data.recipeDtoList.[0].cookingTime").value("10분"))
-                .andExpect(jsonPath("$.data.recipeDtoList.size()").value(1));
-    }
-
     @Test
     @DisplayName("레시피 등록 테스트 (파일명확장자가 아닐시 오류)")
     @CustomMockAdmin

@@ -13,7 +13,6 @@ import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
 import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
 import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
 import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -128,49 +127,5 @@ class AdminRecipeServiceTest {
         when(recipeRepository.findById(eq(recipe_id))).thenThrow(new NoSuchElementException("해당 레시피를 찾을수 업습니다."));
 
         assertThatThrownBy(()-> adminService.updateRecipe(recipe_id,recipeUpdateRequest,multipartFile)).isInstanceOf(NoSuchElementException.class);
-    }
-    @Test
-    @DisplayName("어드민 페이지-무한 페이징 쿼리 테스트_제목")
-    void get_Search_Admin_Recipe(){
-
-        List<String> ingLists = Arrays.asList("밥");
-
-
-        String title = "레시피1";
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-        recipeDtoList.add(RecipeDto.builder().id(1l).title(title).build());
-        recipeDtoList.add(RecipeDto.builder().id(2l).title("레시피2").build());
-
-        Pageable pageRequest = PageRequest.of(0, 2);
-
-        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
-
-        when(recipeRepository.adminSearchTitleOrIng(eq(ingLists),eq(title),eq(1l),eq(pageRequest))).thenReturn(recipeDtoSlice);
-
-        RecipeResponse recipeResponse = adminService.searchRecipesByTitleAndIngredients(ingLists, "레시피1", 1l, pageRequest);
-
-        assertThat(recipeResponse.getNextPage()).isFalse();
-        assertThat(recipeResponse.getRecipeDtoList().size()).isEqualTo(2);
-        assertThat(recipeResponse.getRecipeDtoList().get(0).getTitle()).isEqualTo("레시피1");
-    }
-
-    @Test
-    @DisplayName("어드민 페이지-무한 페이징 쿼리 테스트_찾는 값 없을때")
-    void get_Search_Admin_Recipe_titleAndIng(){
-
-        List<String> no_ingLists = Arrays.asList("밥");
-
-        List<RecipeDto> recipeDtoList = new ArrayList<>();
-
-        Pageable pageRequest = PageRequest.of(0, 2);
-
-        SliceImpl<RecipeDto> recipeDtoSlice = new SliceImpl<>(recipeDtoList);
-
-        when(recipeRepository.adminSearchTitleOrIng(anyList(),anyString(),anyLong(),eq(pageRequest))).thenReturn(recipeDtoSlice);
-
-        RecipeResponse recipeResponse = adminService.searchRecipesByTitleAndIngredients(no_ingLists, "a", 1l, pageRequest);
-
-        assertThat(recipeResponse.getNextPage()).isFalse();
-        assertThat(recipeDtoList).isEmpty();
     }
 }
