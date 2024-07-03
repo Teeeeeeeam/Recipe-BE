@@ -13,15 +13,11 @@ import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Ingredient;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
-import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -101,18 +97,6 @@ public class AdminRecipeServiceImpl implements AdminRecipeService {
         recipe.updateRecipe(recipeUpdateRequest.getTitle(), recipeUpdateRequest.getCookLevel(), recipeUpdateRequest.getPeople(), recipeUpdateRequest.getCookTime(),recipeUpdateRequest.getCookIngredients(),recipeUpdateRequest.getCookMethods(),recipeUpdateRequest.getDishTypes());
 
     }
-
-    /**
-     * 제목과 재료로 레시피를 검색하여 페이징된 결과를 반환하는 메서드.
-     * 관리자 페이지에서 사용하는 검색 기능입니다.
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public RecipeResponse searchRecipesByTitleAndIngredients(List<String> ingredients, String title, Long lastRecipeId, Pageable pageable) {
-        Slice<RecipeDto> recipeSlice = recipeRepository.adminSearchTitleOrIng(ingredients, title, lastRecipeId, pageable);
-        return new RecipeResponse(recipeSlice.getContent(), recipeSlice.hasNext());
-    }
-
 
     // 아래는 private 메서드들입니다.
     /**

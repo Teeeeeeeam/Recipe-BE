@@ -12,8 +12,6 @@ import java.util.List;
 
 public interface CustomRecipeRepository {
 
-    Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredient,String title,Long lastRecipeId,Pageable pageable);
-
     Slice<RecipeDto> userSearchRecipe(List<String> ingredient, List<CookIngredients> cookIngredients,List<CookMethods> cookMethods,List<DishTypes> dishTypes,String title,
                                       OrderType order, Integer likeCount, Long lastId,Pageable pageable);
     RecipeDto getRecipeDetails(Long recipeId);

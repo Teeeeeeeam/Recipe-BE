@@ -40,35 +40,6 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
     @Value("${S3.URL}")
     private  String s3URL;
 
-    /*
-    기존 재료 검색 로직이랑 비슷하나 제목 검색의 대한 조건이 추가된 어드민 전용 로직
-     */
-    @Override
-    public Slice<RecipeDto> adminSearchTitleOrIng(List<String> ingredients, String title,Long lastRecipeId, Pageable pageable) {
-        //동적 쿼리 생성 레시피 list 에서 재료를 하나씩 or like() 문으로 처리
-        BooleanBuilder builder = new BooleanBuilder();
-
-        if (title!=null){
-            builder.and(recipe.title.like("%"+title+"%"));
-        }
-        if (ingredients!=null) {
-            for (String ingredientList : ingredients) {
-                builder.and(ingredient.ingredients.like("%" + ingredientList + "%"));
-            }
-        }
-        // 마지막 레시피 아이디 값을 동해 페이지 유뮤 판단
-        if (lastRecipeId!=null){
-            builder.and(recipe.id.gt(lastRecipeId));
-        }
-
-        List<Tuple> result = getSearchRecipe(pageable, builder);
-
-        List<RecipeDto> content = getRecipeDtoList(result);
-
-        boolean hasNext = isHasNext(pageable, content);
-
-        return new SliceImpl<>(content,pageable,hasNext);
-    }
     /**
      * 재료에 대한 일반 페이징 쿼리 (무한스크롤방식과, 일반 페이지네이션의둘중하나를 선택해하기떄문에 추후에 둘중하나는 변경가능)
      */
@@ -203,18 +174,6 @@ public class CustomRecipeRepositoryImpl implements CustomRecipeRepository{
                 .fetch();
 
         return getRecipeDtoList(list);
-    }
-
-    private List<Tuple> getSearchRecipe(Pageable pageable, BooleanBuilder builder) {
-        List<Tuple> result = queryFactory.select(recipe.title, recipe.id, uploadFile.storeFileName, recipe.likeCount, recipe.cookingTime, recipe.cookingLevel,recipe.people,recipe.createdAt)
-                .from(ingredient)
-                .join(ingredient.recipe,recipe)
-                .join(uploadFile).on(uploadFile.recipe.id.eq(recipe.id))
-                .where(builder,uploadFile.post.isNull())
-                .orderBy(recipe.id.asc())
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
-        return result;
     }
 
     private List<RecipeDto> getRecipeDtoList(List<Tuple> result) {

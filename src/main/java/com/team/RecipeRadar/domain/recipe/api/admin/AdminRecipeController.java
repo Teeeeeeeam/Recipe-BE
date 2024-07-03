@@ -1,21 +1,17 @@
 package com.team.RecipeRadar.domain.recipe.api.admin;
 
 import com.team.RecipeRadar.domain.recipe.application.admin.AdminRecipeService;
-import com.team.RecipeRadar.domain.recipe.dto.response.RecipeResponse;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeSaveRequest;
 import com.team.RecipeRadar.domain.recipe.dto.request.RecipeUpdateRequest;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -43,24 +39,6 @@ public class AdminRecipeController {
         long searchAllMembers = adminService.searchAllRecipes();
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
-
-
-    @Tag(name = "어드민 - 레시피 컨트롤러", description = "레시피 관리")
-    @Operation(summary = "어드민 레시피 검색(무한 스크롤)", description = "조회된 마지막 레시피의 ID 값을 통해 다음 페이지 여부를 판단합니다. 'lastId'는 조회된 마지막 페이지의 작성된 값을 넣지 않으면 첫 번째 데이터만 출력됩니다.",tags ="어드민 - 레시피 컨트롤러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"recipeDtoList\":[{\"id\":128671,\"imageUrl\":\"링크.jpg\",\"title\":\"어묵김말이\",\"cookingLevel\":\"초급\",\"people\":\"2인분\",\"cookingTime\":\"60분이내\",\"likeCount\":0}],\"nextPage\":true}}")))
-    })
-    @GetMapping("/recipes")
-    public ResponseEntity<?> findRecipeWithAdmin(@RequestParam(value = "ingredients",required = false) List<String> ingredients,
-                                                 @RequestParam(value = "title",required = false) String title,
-                                                 @RequestParam(value = "lastId",required = false)Long lastRecipeId,
-                                                 @Parameter(example = "{\"size\":10}") Pageable pageable){
-        RecipeResponse recipeResponse = adminService.searchRecipesByTitleAndIngredients(ingredients,title,lastRecipeId, pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",recipeResponse));
-    }
-
 
     @Operation(summary = "레시피 삭제",description = "레시피를 단일, 일괄 삭제하는 API",tags = "어드민 - 레시피 컨트롤러")
     @ApiResponses(value = {
