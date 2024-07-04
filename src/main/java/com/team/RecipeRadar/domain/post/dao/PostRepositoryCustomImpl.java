@@ -83,7 +83,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .from(post)
                 .join(uploadFile).on(post.id.eq(uploadFile.post.id))
                 .where(builder.and(uploadFile.notice.isNull().and(uploadFile.post.id.isNotNull())))
-                .orderBy(post.id.desc())
+                .orderBy(uploadFile.post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
