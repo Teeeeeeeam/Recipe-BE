@@ -17,7 +17,7 @@ import java.util.List;
 @Table(indexes = {
         @Index(columnList = "nick_name"),
         @Index(columnList = "email"),
-        @Index(columnList = "login_id"),
+        @Index(name = "idx_member_login_id",columnList = "login_id")
 })
 @Data
 @Builder
