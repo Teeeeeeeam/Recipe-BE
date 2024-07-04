@@ -8,7 +8,6 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.recipe.dao.recipe.RecipeRepository;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

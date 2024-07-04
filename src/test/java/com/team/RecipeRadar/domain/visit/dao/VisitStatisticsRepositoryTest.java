@@ -20,7 +20,7 @@ import static java.time.LocalDateTime.*;
 import static org.assertj.core.api.Assertions.*;
 
 
-@DataJpaTest
+@DataJpaTest()
 @Import(QueryDslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
