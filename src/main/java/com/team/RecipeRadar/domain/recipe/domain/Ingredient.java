@@ -1,17 +1,10 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
-
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
-
 @Entity
-@Table(indexes = {
-        @Index(columnList = "ingredients")
-})
 @Getter
 @Builder
 @NoArgsConstructor
