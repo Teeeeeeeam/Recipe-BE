@@ -51,7 +51,7 @@ public class Post extends BaseTimeUtils {
     @JoinColumn(name = "member_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Recipe recipe;
 
