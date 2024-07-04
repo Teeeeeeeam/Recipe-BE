@@ -5,25 +5,23 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
-import com.team.RecipeRadar.domain.post.domain.QPost;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,7 +31,6 @@ import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
 import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
@@ -42,6 +39,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     @Value("${S3.URL}")
     private String S3URL;
+
+    private final String FULL_TEXT_INDEX ="function('match',{0},{1})";
 
     @Override
     public Slice<UserInfoPostRequest> userInfoPost(Long memberId,Long lastId, Pageable pageable) {
@@ -137,27 +136,33 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     @Override
     public Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
-        if(loginId!=null){
-            builder.and(post.member.loginId.eq(loginId));
-        }
-        if(recipeTitle!=null){
-            builder.and(post.recipe.title.like("%"+recipeTitle+"%"));
-        }
-        if(postTitle!=null){
-            builder.and(post.postTitle.like("%"+postTitle+"%"));
-        }
+
         if(lastPostId !=null){
             builder.and(post.id.lt(lastPostId));
         }
+        if(recipeTitle!=null){
+            NumberTemplate recipe_boolean = Expressions.numberTemplate(Double.class,
+                    FULL_TEXT_INDEX , post.recipe.title, recipeTitle);
+            builder.and(recipe_boolean.gt(0));
+        }
+        if(postTitle!=null){
+            NumberTemplate post_boolean = Expressions.numberTemplate(Double.class,
+                    FULL_TEXT_INDEX , post.postTitle, postTitle);
+            builder.and(post_boolean.gt(0));
+        }
+        if (loginId != null) {
+            builder.and(post.member.loginId.eq(loginId));
+        }
 
-        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.createdAt)
+        List<Tuple> list = jpaQueryFactory
+                .select(post.id, post.member.loginId, post.postTitle, uploadFile.storeFileName,
+                        post.member.nickName, post.recipe.title, post.recipe.id, post.createdAt)
                 .from(post)
-                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
+                .join(uploadFile).on(post.id.eq(uploadFile.post.id).and(post.recipe.id.eq(uploadFile.recipe.id)))
                 .where(builder)
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
-
 
         List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
                 getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.createdAt))).collect(Collectors.toList());

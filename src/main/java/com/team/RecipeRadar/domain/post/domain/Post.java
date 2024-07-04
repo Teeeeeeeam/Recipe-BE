@@ -48,12 +48,11 @@ public class Post extends BaseTimeUtils {
     private Integer postLikeCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Schema(hidden = true)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "recipe_id")
+    @JoinColumn(name = "recipe_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Recipe recipe;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL,orphanRemoval = true)
