@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 @Import(QueryDslConfig.class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("test")
 class MemberRepositoryTest {
 
@@ -38,6 +40,8 @@ class MemberRepositoryTest {
         memberRepository.saveAll(member);
     }
     @Test
+    @Order(1)
+    @Rollback(value = false)
     @DisplayName("아이디 찾기 테스트")
     void findById(){
         List<Member> findId = memberRepository.findByUsernameAndEmail("유저네임","test@eamil.com");
@@ -106,11 +110,12 @@ class MemberRepositoryTest {
     }
 
     @Test
+    @Order(2)
     @DisplayName("가입한 회원 검색_무한 페이징")
     void searchMember(){
 
         Slice<MemberDto> searchedMember = memberRepository.searchMember("loginId", null, null, null,null, Pageable.ofSize(3));
-        Slice<MemberDto> searchMember = memberRepository.searchMember(null, "닉네", null, null,null, Pageable.ofSize(3));
+        Slice<MemberDto> searchMember = memberRepository.searchMember("admin", null, null, null,null, Pageable.ofSize(3));
 
         assertThat(searchedMember).isEmpty();
         assertThat(searchMember).hasSize(2);
@@ -123,6 +128,14 @@ class MemberRepositoryTest {
         assertThat(members).hasSize(2);
         assertThat(members.get(0).getNickName()).isEqualTo("어드민1");
         assertThat(members.get(0).getNickName().getClass()).isEqualTo(String.class);
+    }
+    
+    @Test
+    @Order(3)
+    @Rollback(value = false)
+    @DisplayName("삭제")
+    void delete(){
+        memberRepository.deleteAll();
     }
 
 }
