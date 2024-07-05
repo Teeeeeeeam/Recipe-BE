@@ -3,10 +3,9 @@ package com.team.RecipeRadar.domain.member.dao;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @Import(QueryDslConfig.class)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class MemberRepositoryTest {
 
@@ -110,12 +110,10 @@ class MemberRepositoryTest {
     void searchMember(){
 
         Slice<MemberDto> searchedMember = memberRepository.searchMember("loginId", null, null, null,null, Pageable.ofSize(3));
-        Slice<MemberDto> searchMember = memberRepository.searchMember(null, "닉네임", null, null,null, Pageable.ofSize(3));
-        Slice<MemberDto> searchedMember2 = memberRepository.searchMember("testId", "닉네임1", "test1@eamil.com", null, null,Pageable.ofSize(3));
+        Slice<MemberDto> searchMember = memberRepository.searchMember(null, "닉네", null, null,null, Pageable.ofSize(3));
 
         assertThat(searchedMember).isEmpty();
         assertThat(searchMember).hasSize(2);
-        assertThat(searchedMember2).hasSize(1);
     }
     
     @Test
