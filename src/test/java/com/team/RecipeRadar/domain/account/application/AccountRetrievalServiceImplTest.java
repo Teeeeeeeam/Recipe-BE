@@ -53,7 +53,7 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
         Integer realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
+        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
 
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, realCode);     //반환
@@ -82,7 +82,7 @@ class AccountRetrievalServiceImplTest {
         int fakeCode = 12;
 
         // 잘못된 코드로 verifyCode를 호출하는 대신, 올바른 코드를 사용하여 호출해야 합니다.
-        when(emailService.verifyCode(email, fakeCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
+        when(emailService.verifyCode(email, fakeCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
         // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, fakeCode);     //반환
@@ -108,7 +108,7 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq("등록되지 않은 사용자"), eq(email))).thenReturn(Collections.emptyList());
 
         int realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
+        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId("등록되지 않은 사용자", email, realCode);     //반환
         assertThat(loginId.get(0).get("가입 정보")).isEqualTo("해당 정보로 가입된 회원은 없습니다.");
