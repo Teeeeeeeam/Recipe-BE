@@ -109,14 +109,15 @@ public class NotificationService {
 
     // 댓글 등록시 보내지는 알람
     public void sendCommentNotification(Post post, String nickName) {
-        send(post.getMember(), COMMENT, nickName+"님이 댓글이 달렸습니다", POST_URL + post.getId(), nickName);
+        if(isWriter(post, nickName))
+            send(post.getMember(), COMMENT, nickName+"님이 댓글이 달렸습니다", POST_URL + post.getId(), nickName);
     }
 
-    // 레시피 좋아요시 보내지는 알람
+    // 게시글 좋아요시 보내지는 알람
     public void sendPostLikeNotification(Post post,String nickName) {
-        send(post.getMember(), POSTLIKE,  nickName+"님이 회원님의 게시글을 좋아합니다." , POST_URL + post.getId() ,nickName);
+        if(isWriter(post, nickName))
+            send(post.getMember(), POSTLIKE,  nickName+"님이 회원님의 게시글을 좋아합니다." , POST_URL + post.getId() ,nickName);
     }
-
     /**
      * 일반사용자 문의사항 등록시 보내지는 알림
      */
@@ -159,6 +160,7 @@ public class NotificationService {
     }
 
     // 클라이언트에게 이벤트 전송 메서드
+
     private void sendToClient(SseEmitter emitter, String emitterId, Object data) {
         try {
             emitter.send(SseEmitter.event().id(emitterId).data(data));
@@ -168,4 +170,8 @@ public class NotificationService {
         }
     }
 
+    /* 작성자인지 검증 */
+    private static boolean isWriter(Post post, String nickName) {
+        return !post.getMember().getNickName().equals(nickName);
+    }
 }
