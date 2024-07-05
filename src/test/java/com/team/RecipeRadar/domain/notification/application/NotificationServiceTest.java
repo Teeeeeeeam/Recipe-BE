@@ -9,7 +9,6 @@ import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.qna.domain.Question;
 import com.team.RecipeRadar.domain.qna.domain.QuestionType;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
@@ -125,7 +123,7 @@ class NotificationServiceTest {
     @DisplayName("댓글 알림")
     void sendCommentNotificationTest() {
         // Given
-        Post post = Post.builder().id(1L).member(Member.builder().id(1L).build()).build();
+        Post post = Post.builder().id(1L).member(Member.builder().id(1L).nickName("닉네임1").build()).build();
 
         // When
         notificationService.sendCommentNotification(post, "닉네임");
@@ -138,7 +136,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("좋아요시 알림 테스트")
     void sendPostLikeNotificationTest() {
-        Post post = Post.builder().id(1L).member(Member.builder().id(1L).build()).build();
+        Post post = Post.builder().id(1L).member(Member.builder().id(1L).nickName("닉네임1").build()).build();
 
         notificationService.sendPostLikeNotification(post, "닉네임");
 
