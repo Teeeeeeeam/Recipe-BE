@@ -62,7 +62,7 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[\"{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}\" , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
+                            examples = @ExampleObject(value = "[\"{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\":\"필드 오류 내용\"}}\", \"{\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}\"]"))),
     })
     @PostMapping("/api/search/password")
     public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){
