@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class BookmarkController {
 
     private final RecipeBookmarkService recipeBookmarkService;
@@ -39,7 +39,7 @@ public class BookmarkController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"오류 내용\"}")))
     })
-    @PostMapping("/recipe")
+    @PostMapping("/user/recipe")
     public ResponseEntity<?> saveRecipeBookmark(@RequestBody BookMarkRequest bookMarkRequest,
                                                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         Boolean bookmark = recipeBookmarkService.saveBookmark(principalDetails.getMemberId(), bookMarkRequest.getRecipeId());
@@ -62,7 +62,10 @@ public class BookmarkController {
     @GetMapping("/recipe/{recipeId}/bookmarks/check")
     public ResponseEntity<?> bookmarksCheck(@Parameter(description = "레시피 아이디") @PathVariable(value = "recipeId",required = false) Long recipeId,
                                             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
-        Boolean checkBookmark = recipeBookmarkService.checkBookmark(principalDetails.getMemberId(), recipeId);
+        Boolean checkBookmark;
+        if(principalDetails ==null) checkBookmark = false;
+        else
+         checkBookmark = recipeBookmarkService.checkBookmark(principalDetails.getMemberId(), recipeId);
 
         return ResponseEntity.ok(new ControllerApiResponse(checkBookmark,"즐겨 찾기 상태"));
     }
@@ -76,7 +79,7 @@ public class BookmarkController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
-    @GetMapping("/info/bookmark")
+    @GetMapping("/user/info/bookmark")
     public ResponseEntity<?> userInfoBookmark(@RequestParam(value = "lastId",required = false)Long lastId,
                                               @Parameter(hidden = true)@CookieValue(name = "login-id",required = false) String cookieLoginId,
                                               @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class RecipeLikeController {
 
     @Qualifier("RecipeLikeServiceImpl")
@@ -43,7 +43,7 @@ public class RecipeLikeController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\" : false, \"message\" : \"[회원을 찾을 수가 없습니다.] or [게시물을 찾을 수없습니다.]\"}")))
     })
-    @PostMapping("/recipe/like")
+    @PostMapping("/user/recipe/like")
     public ResponseEntity<?> addLike(@RequestBody RecipeLikeRequest recipeLikeRequest,
                                      @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         Boolean addLike = recipeLikeService.addLike(recipeLikeRequest,principalDetails.getMemberId());
@@ -69,7 +69,11 @@ public class RecipeLikeController {
     @GetMapping("/recipe/{recipeId}/like/check")
     public ResponseEntity<?> likeCheck(@Parameter(description = "레시피Id") @PathVariable(required = false) Long recipeId,
                                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Boolean checkLike = recipeLikeService.checkLike(principalDetails.getMemberId(), recipeId);
+        Boolean checkLike;
+        if (principalDetails == null) checkLike = false;
+        else
+            checkLike = recipeLikeService.checkLike(principalDetails.getMemberId(), recipeId);
+
         return ResponseEntity.ok(new ControllerApiResponse(checkLike, "좋아요 상태"));
     }
 
@@ -88,7 +92,7 @@ public class RecipeLikeController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"올바르지 않은 접근입니다.\"}")))
     })
-    @GetMapping("/info/recipe/likes")
+    @GetMapping("/user/info/recipe/likes")
     public ResponseEntity<?> getUserLike(@RequestParam(value = "lastId",required = false) Long recipeLike_lastId,
                                          @Parameter(hidden = true) @CookieValue(name = "login-id",required = false) String cookieLoginId,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
