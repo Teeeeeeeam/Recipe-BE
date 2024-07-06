@@ -88,7 +88,7 @@ class RecipeLikeControllerTest {
         Long recipeId = 123l;
         given(recipeLikeService.checkLike(eq(memberId),eq(recipeId))).willReturn(false);
 
-        mockMvc.perform(get("/api/user/recipe/{recipeId}/like/check", recipeId)
+        mockMvc.perform(get("/api/recipe/{recipeId}/like/check", recipeId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -107,7 +107,7 @@ class RecipeLikeControllerTest {
 
         given(recipeLikeService.checkLike(eq(memberId),eq(recipeId))).willReturn(true);
         // GET 요청 수행 및 테스트
-        mockMvc.perform(get("/api/user/recipe/{recipeId}/like/check/", recipeId)
+        mockMvc.perform(get("/api/recipe/{recipeId}/like/check/", recipeId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());

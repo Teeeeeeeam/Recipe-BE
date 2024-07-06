@@ -172,7 +172,7 @@ class BookmarkControllerTest {
     void loginIsBookmark() throws Exception {
         given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(true);
 
-        mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
+        mockMvc.perform(get("/api/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -183,7 +183,7 @@ class BookmarkControllerTest {
     void diff_loginIsBookmark() throws Exception {
         given(recipeBookmarkService.checkBookmark(eq(memberId), eq(recipeId))).willReturn(false);
 
-        mockMvc.perform(get("/api/user/recipe/{recipeId}/bookmarks/check", recipeId))
+        mockMvc.perform(get("/api/recipe/{recipeId}/bookmarks/check", recipeId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
