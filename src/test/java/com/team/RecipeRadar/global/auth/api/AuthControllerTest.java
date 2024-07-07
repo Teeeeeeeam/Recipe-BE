@@ -2,6 +2,7 @@ package com.team.RecipeRadar.global.auth.api;
 
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
+import com.team.RecipeRadar.global.security.oauth2.application.impl.GoogleUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.KakaoUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.application.impl.NaverUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
@@ -33,9 +34,9 @@ class AuthControllerTest {
     @MockBean CookieUtils cookieUtils;
     @MockBean KakaoUserDisConnectServiceImpl kakaoUserDisConnectService;
     @MockBean NaverUserDisConnectServiceImpl naverUserDisConnectService;
+    @MockBean GoogleUserDisConnectServiceImpl googleUserDisConnectService;
     @MockBean Oauth2UrlProvider oauth2UrlProvider;
-    @Autowired
-    MockMvc mockMvc;
+    @Autowired MockMvc mockMvc;
 
     
     @Test
