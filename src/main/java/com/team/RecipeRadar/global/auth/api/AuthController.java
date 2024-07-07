@@ -4,7 +4,9 @@ import com.team.RecipeRadar.global.auth.application.AuthService;
 import com.team.RecipeRadar.global.auth.dto.request.UserValidRequest;
 import com.team.RecipeRadar.global.auth.dto.response.MemberInfoResponse;
 import com.team.RecipeRadar.global.security.oauth2.application.UserDisConnectService;
+import com.team.RecipeRadar.global.security.oauth2.application.impl.GoogleUserDisConnectServiceImpl;
 import com.team.RecipeRadar.global.security.oauth2.provider.Oauth2UrlProvider;
+import com.team.RecipeRadar.global.security.oauth2.provider.SocialType;
 import com.team.RecipeRadar.global.utils.CookieUtils;
 import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.security.jwt.provider.JwtProvider;
@@ -47,6 +49,8 @@ public class AuthController {
     private final UserDisConnectService kakaoDisConnectService;
     @Qualifier("naver")
     private final UserDisConnectService naverDisConnectService;
+    @Qualifier("google")
+    private final GoogleUserDisConnectServiceImpl googleUserDisConnectService;
     private final Oauth2UrlProvider urlProvider;
 
     @Tag(name = "공용 - 로그인 컨트롤러", description = "로그인 및 토큰 관리")
@@ -111,8 +115,8 @@ public class AuthController {
 
     @GetMapping ("/oauth2/social/unlink")
     @Hidden
-    public void socialUnlink(@RequestParam(value = "type") String loginType, HttpServletResponse response) throws IOException {
-        String redirectUrl = urlProvider.getRedirectUrl(loginType);
+    public void socialUnlink(@RequestParam(value = "type") SocialType type, HttpServletResponse response) throws IOException {
+        String redirectUrl = urlProvider.getRedirectUrl(type);
         response.sendRedirect(redirectUrl);
     }
 
@@ -130,6 +134,15 @@ public class AuthController {
     public ResponseEntity<?> naverUnlink(@RequestParam("code")String auth2Code){
         String accessToken = naverDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = naverDisConnectService.disconnect(accessToken);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl+disconnected)).build();
+    }
+
+    @RequestMapping(value = "/oauth2/unlink/google",method = {RequestMethod.GET, RequestMethod.POST})
+    @Hidden
+    public ResponseEntity<?>  googleUnlink(@RequestParam("code")String auth2Code) {
+        String accessToken = googleUserDisConnectService.getAccessToken(auth2Code);
+        Boolean disconnected = googleUserDisConnectService.disconnect(accessToken);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl+disconnected)).build();
     }

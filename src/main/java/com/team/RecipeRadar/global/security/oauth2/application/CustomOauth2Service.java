@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -60,6 +62,7 @@ public class CustomOauth2Service extends DefaultOAuth2UserService {
                     .email(email)
                     .login_type(requestId)
                     .nickName(name)
+                    .createAt(LocalDate.now())
                     .verified(true).roles("ROLE_USER").build();
             return memberRepository.save(user);
         }else {
