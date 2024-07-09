@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.account.domain.AccountRetrieval;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.email.application.AccountRetrievalEmailServiceImpl;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,14 +82,9 @@ class AccountRetrievalServiceImplTest {
         int fakeCode = 12;
 
         // 잘못된 코드로 verifyCode를 호출하는 대신, 올바른 코드를 사용하여 호출해야 합니다.
-        when(emailService.verifyCode(eq(email), eq(fakeCode))).thenReturn(Map.of("isVerified",false, "isExpired",true));
-        // 이메일인증코드
+        when(emailService.verifyCode(eq(email), eq(fakeCode))).thenReturn(Map.of("isVerified",false, "isExpired",false));
 
-        List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, fakeCode);     //반환
-
-
-        assertThat(loginId.get(0).get("인증 번호")).isEqualTo("인증번호가 일치하지 않습니다.");
-        assertThat(loginId.size()).isEqualTo(1);
+        assertThatThrownBy(() -> accountRetrievalService.findLoginId(username,email,fakeCode)).isInstanceOf(InvalidIdException.class);
     }
 
 
@@ -108,11 +104,7 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(anyString(), eq(email))).thenReturn(List.of());
 
         int realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Map.of("isVerified",true, "isExpired",true));
-
-        List<Map<String, String>> loginId = accountRetrievalService.findLoginId("등록되지 않은 사용자", email, realCode);     //반환
-        assertThat(loginId.get(0).get("가입 정보")).isEqualTo("해당 정보로 가입된 회원은 없습니다.");
-        assertThat(loginId.size()).isEqualTo(1);
+        assertThatThrownBy(() -> accountRetrievalService.findLoginId(username,email,realCode)).isInstanceOf(NoSuchDataException.class);
     }
 
     @Test
