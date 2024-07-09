@@ -77,7 +77,7 @@ public class VisitCountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"12\"}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : 12}")))
     })
     @GetMapping("/api/admin/visit-count/today")
     public ResponseEntity<?> todayCount(){
@@ -89,7 +89,7 @@ public class VisitCountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"142\"}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : 142}")))
     })
     @GetMapping("/api/admin/visit-count/before")
     public ResponseEntity<?> before(){
@@ -101,7 +101,7 @@ public class VisitCountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : \"14902\"}")))
+                            examples = @ExampleObject(value = "{\"success\":true,\"message\" : \"성공\",\"data\" : 14902}")))
     })
     @GetMapping("/api/admin/visit-count/all")
     public ResponseEntity<?> allCount(){
