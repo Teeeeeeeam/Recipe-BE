@@ -35,7 +35,7 @@ public class AdminMemberController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"조회 성공\", \"data\":\"10\"}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"조회 성공\", \"data\":10}"))),
     })
     @GetMapping("/members/count")
     public ResponseEntity<ControllerApiResponse> getAllMembersCount(){
