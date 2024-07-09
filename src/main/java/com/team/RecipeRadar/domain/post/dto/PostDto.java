@@ -72,7 +72,7 @@ public class PostDto {
         return PostDto.builder().id(post.getId()).postTitle(post.getPostTitle()).postLikeCount(post.getPostLikeCount()).createdAt(post.getCreatedAt().toLocalDate())
                 .postImageUrl(img).member(member).build();
     }
-    public static PostDto of(Post post, String imgUrl, Recipe recipe,List<CommentDto> comments){
+    public static PostDto of(Post post, String imgUrl, Recipe recipe){
         return PostDto.builder()
                 .id(post.getId())
                 .postTitle(post.getPostTitle())
@@ -84,7 +84,6 @@ public class PostDto {
                 .postLikeCount(post.getPostLikeCount())
                 .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
                 .recipe(RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).build())
-                .comments(comments)
                 .postImageUrl(imgUrl).build();
     }
 }

@@ -111,17 +111,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
             throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST);
         }
 
-        List<CommentDto> comments = list.stream().map(
-                tuple -> {
-                    Comment comment = tuple.get(QComment.comment);
-                    if (comment != null) {
-                        return CommentDto.of(comment);
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple),tuple.get(post.recipe),comments)).findFirst().get();
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple),tuple.get(post.recipe))).findFirst().get();
     }
 
     /**
