@@ -48,7 +48,7 @@ public class NotificationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =   "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":false,\"notification\":[{\"id\":274,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/6\"},{\"id\":272,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/11\"},{\"id\":260,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/5\"}]}}")))
+                            examples = @ExampleObject(value =   "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"hasNext\":false,\"notification\":[{\"id\":274,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/list-page/user-recipes/463665\"},{\"id\":272,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/list-page/user-recipes/463666\"}]}}")))
     })
     @GetMapping("/info/notification")
     public ResponseEntity<?> notificationPage(@Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -63,7 +63,7 @@ public class NotificationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"notification\":[{\"id\":1,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/1\"},{\"id\":2,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/api/user/question/2\"}]}}")))
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"notification\":[{\"id\":1,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/list-page/user-recipes/463665\"},{\"id\":2,\"content\":\"관리자가 답변을 등록했습니다.\",\"url\":\"/list-page/user-recipes/463666\"}]}}")))
     })
     @GetMapping("/main/notification")
     public ResponseEntity<?> notificationMainPage(@Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
