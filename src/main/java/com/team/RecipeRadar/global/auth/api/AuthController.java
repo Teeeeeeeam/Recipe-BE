@@ -37,6 +37,7 @@ import java.net.URI;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "공용 - 인증 컨트롤러", description = "JWT토큰 및 쿠키 관리")
 @RequestMapping("/api")
 public class AuthController {
 
@@ -53,7 +54,7 @@ public class AuthController {
     private final GoogleUserDisConnectServiceImpl googleUserDisConnectService;
     private final Oauth2UrlProvider urlProvider;
 
-    @Tag(name = "공용 - 로그인 컨트롤러", description = "로그인 및 토큰 관리")
+
     @Operation(summary = "엑세스토큰 재발급", description = "엑세스 토큰이 만료되면 리프레시 토큰을 사용하여 새로운 엑세스 토큰을 발급합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
@@ -71,7 +72,7 @@ public class AuthController {
         }
         return ResponseEntity.ok(new ControllerApiResponse(true,"새로운 accessToken 발급",jwtProvider.validateRefreshToken(refreshToken)));
     }
-    @Operation(summary = "엑세스 토큰 정보 조회", description = "로그인시 획득한 AccessToken에 대한 사용자 정보를 조회한다.",tags = "공용 - 로그인 컨트롤러")
+    @Operation(summary = "엑세스 토큰 정보 조회", description = "로그인시 획득한 AccessToken에 대한 사용자 정보를 조회한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
