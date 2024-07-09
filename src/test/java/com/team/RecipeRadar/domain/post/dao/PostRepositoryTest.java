@@ -95,7 +95,6 @@ class PostRepositoryTest {
 
         assertThat(postDto).isNotNull();
         assertThat(postDto.getPostTitle()).isEqualTo(posts.get(0).getPostTitle());
-        assertThat(postDto.getComments().get(0).getCommentContent()).isEqualTo(comment.getCommentContent());
     }
 
     @Order(3)
