@@ -54,22 +54,6 @@ public class AdminPostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }
 
-    @Operation(summary = "게시글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ControllerApiResponse.class)),
-                            examples = @ExampleObject(value = "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":true,\"posts\":[{\"id\":23,\"postTitle\":\"Delicious Pasta\",\"createdAt\":\"2024-05-23\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}},{\"id\":24,\"postTitle\":\"Spicy Tacos\",\"createAt\":\"2024-05-23\",\"postImageUrl\":\"https://store_image.jpg\",\"member\":{\"nickname\":\"Admin\",\"loginId\":\"admin\"},\"recipe\":{\"id\":7014704,\"title\":\"아마트리치아나스파게티\"}}]}}"))),
-    })
-    @GetMapping("/posts/search")
-    public ResponseEntity<?> searchPost(@RequestParam(value = "loginId",required = false) String loginId,
-                                        @RequestParam(value = "recipeTitle",required = false) String recipeTitle,
-                                        @RequestParam(value = "postTitle",required = false) String postTitle,
-                                        @RequestParam(value = "lastId",required = false) Long lastPostId,
-                                        @Parameter(example = "{\"size\":10}") Pageable pageable){
-        PostResponse postResponse = adminService.searchPost(loginId, recipeTitle, postTitle, lastPostId, pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"검색 성공",postResponse));
-    }
-
     @Operation(summary = "게시글 댓글 삭제",description = "게시글의 댓글을 단일, 일괄 삭제하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",

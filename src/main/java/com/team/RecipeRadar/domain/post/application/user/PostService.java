@@ -29,4 +29,6 @@ public interface PostService {
     PostLikeTopResponse getTopMainsByLikes();
 
     PostResponse postByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable);
+
+    PostResponse searchPost(String loginId, String recipeTitle, String postTitle , Long lastPostId, Pageable pageable);
 }

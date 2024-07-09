@@ -46,17 +46,6 @@ public class AdminPostServiceImpl implements AdminPostService{
         return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
     }
 
-
-    /**
-     * 게시글을 조회하는 메서드
-     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환합니다.
-     */
-    @Override
-    public PostResponse searchPost(String loginId, String recipeTitle, String postTitle, Long lastPostId, Pageable pageable) {
-        Slice<PostDto> postDtoList = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
-        return new PostResponse(postDtoList.hasNext(),postDtoList.getContent());
-    }
-
     /**
      * 게시글의 댓글 삭제하는 메서드
      * 어드민 사용자는 게시글의 작성된 댓글을 삭제 가능합니다.

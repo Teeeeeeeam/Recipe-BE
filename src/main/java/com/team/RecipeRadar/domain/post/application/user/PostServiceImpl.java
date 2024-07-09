@@ -185,4 +185,13 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteMemberId(member.getId(), post.getId());
     }
 
+    /**
+     * 게시글을 조회하는 메서드
+     * dao 넘어온 PostDto의 페이징의 대한 데이터를 PostResponse의 담아서 변환합니다.
+     */
+    @Override
+    public PostResponse searchPost(String loginId, String recipeTitle, String postTitle, Long lastPostId, Pageable pageable) {
+        Slice<PostDto> postDtoList = postRepository.searchPosts(loginId, recipeTitle, postTitle, lastPostId, pageable);
+        return new PostResponse(postDtoList.hasNext(),postDtoList.getContent());
+    }
 }

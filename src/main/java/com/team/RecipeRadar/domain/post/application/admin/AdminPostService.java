@@ -12,7 +12,7 @@ public interface AdminPostService {
 
     PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable);
 
-    PostResponse searchPost(String loginId, String recipeTitle, String postTitle , Long lastPostId, Pageable pageable);
+
 
     void deleteComments(List<Long> ids);
 
