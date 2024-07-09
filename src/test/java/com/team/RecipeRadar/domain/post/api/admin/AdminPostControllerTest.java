@@ -128,32 +128,5 @@ class AdminPostControllerTest {
                 .andExpect(jsonPath("$.message").value("게시글 삭제 성공"));
     }
 
-    @Test
-    @CustomMockAdmin
-    @DisplayName("게시글 검색 API TEST")
-    void searchPostData() throws Exception {
-        String loginId = "searchId";
-        String postTitle = "제목";
-        List<PostDto> postDtos = List.of(
-                PostDto.builder().postContent("글").postTitle("제목").member(MemberDto.builder().loginId(loginId).nickname("닉네임").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목").build()).build(),
-                PostDto.builder().postContent("글1").postTitle("제목1").member(MemberDto.builder().loginId(loginId).nickname("닉네임1").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목1").build()).build()
-        );
-        PostResponse postResponse = new PostResponse(true, postDtos);
-
-        given(adminService.searchPost(eq(loginId),isNull(), eq(postTitle),isNull(), any())).willReturn(postResponse);
-
-        mockMvc.perform(get("/api/admin/posts/search")
-                        .param("loginId",loginId)
-                        .param("postTitle",postTitle))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.nextPage").value(true))
-                .andExpect(jsonPath("$.data.posts").isArray())
-                .andExpect(jsonPath("$.data.posts[0].postTitle").value("제목"))
-                .andExpect(jsonPath("$.data.posts[0].postContent").value("글"))
-                .andExpect(jsonPath("$.data.posts[1].member.loginId").value("searchId"))
-                .andExpect(jsonPath("$.data.posts[1].recipe.id").value(1))
-                .andExpect(jsonPath("$.data.posts[1].recipe.title").value("레시피제목1"));
-    }
 
 }

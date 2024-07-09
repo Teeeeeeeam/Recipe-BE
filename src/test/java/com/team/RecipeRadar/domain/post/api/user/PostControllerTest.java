@@ -2,6 +2,7 @@ package com.team.RecipeRadar.domain.post.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.application.user.PostServiceImpl;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.post.dto.request.UserAddRequest;
@@ -10,12 +11,14 @@ import com.team.RecipeRadar.domain.post.dto.request.ValidPostRequest;
 import com.team.RecipeRadar.domain.post.dto.response.UserInfoPostResponse;
 import com.team.RecipeRadar.domain.post.dto.request.UserUpdateRequest;
 import com.team.RecipeRadar.domain.post.dto.response.*;
+import com.team.RecipeRadar.domain.recipe.dto.RecipeDto;
 import com.team.RecipeRadar.global.aop.AspectAdvice;
 import com.team.RecipeRadar.global.aop.Pointcuts;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
+import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -333,6 +336,34 @@ class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("비밀번호 인증 성공"));
+    }
+
+    @Test
+    @CustomMockAdmin
+    @DisplayName("게시글 검색 API TEST")
+    void searchPostData() throws Exception {
+        String loginId = "searchId";
+        String postTitle = "제목";
+        List<PostDto> postDtos = List.of(
+                PostDto.builder().postContent("글").postTitle("제목").member(MemberDto.builder().loginId(loginId).nickname("닉네임").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목").build()).build(),
+                PostDto.builder().postContent("글1").postTitle("제목1").member(MemberDto.builder().loginId(loginId).nickname("닉네임1").build()).recipe(RecipeDto.builder().id(1L).title("레시피제목1").build()).build()
+        );
+        PostResponse postResponse = new PostResponse(true, postDtos);
+
+        given(postService.searchPost(eq(loginId),isNull(), eq(postTitle),isNull(), any())).willReturn(postResponse);
+
+        mockMvc.perform(get("/api/posts/search")
+                        .param("loginId",loginId)
+                        .param("postTitle",postTitle))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.nextPage").value(true))
+                .andExpect(jsonPath("$.data.posts").isArray())
+                .andExpect(jsonPath("$.data.posts[0].postTitle").value("제목"))
+                .andExpect(jsonPath("$.data.posts[0].postContent").value("글"))
+                .andExpect(jsonPath("$.data.posts[1].member.loginId").value("searchId"))
+                .andExpect(jsonPath("$.data.posts[1].recipe.id").value(1))
+                .andExpect(jsonPath("$.data.posts[1].recipe.title").value("레시피제목1"));
     }
 
 }
