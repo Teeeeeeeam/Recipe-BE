@@ -44,7 +44,7 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\",\"data\":[{\"login_type\":\"normal\",\"login_info\":\"[로그인 아이디]\"},  {\"login_type\": \"naver\", \"login_info\": \"[소셜 로그인 아이디]\"}]}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[\"{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}\" , {\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]")))
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\":\"필드 오류 내용\"}}, {\"success\":false,\"message\":\"사용자를 찾을 수 없습니다.\"}, {\"success\":false,\"message\":\"인증번호가 일치하지 않거나 유효시간이 지났습니다.\"}]")))
     })
     @PostMapping("/api/search/login-id")
     public ResponseEntity<?> test(@Valid @RequestBody FindLoginIdRequest findLoginIdRequest, BindingResult bindingResult){
@@ -62,7 +62,7 @@ public class AccountRetrievalController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\":\"필드 오류 내용\"}}\", \"{\"success\":false,\"message\":\"인증번호가 일치하지 않습니다.\"}]"))),
+                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\":\"필드 오류 내용\"}}, {\"success\":false,\"message\":\"인증번호가 일치하지 않거나 유효시간이 지났습니다.\"}]"))),
     })
     @PostMapping("/api/search/password")
     public ResponseEntity<?> findPwd(@Valid @RequestBody FindPasswordRequest findPasswordRequest, BindingResult bindingResult){

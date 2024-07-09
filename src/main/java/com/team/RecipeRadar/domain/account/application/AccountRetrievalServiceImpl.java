@@ -41,11 +41,11 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
         List<MemberDto> memberDtos = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
 
-        if (!emailCodeValid(email, code)) {
-            return List.of(Map.of("인증 번호", "인증번호가 일치하지 않습니다."));
-        }
         if (memberDtos.isEmpty()) {
-            return List.of(Map.of("가입 정보", "해당 정보로 가입된 회원은 없습니다."));
+            throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER);
+        }
+        if (!emailCodeValid(email, code)) {
+            throw new InvalidIdException("인증번호가 일치하지 않거나 유효시간이 지났습니다.");
         }
 
         mailService.deleteCode(email, code);
