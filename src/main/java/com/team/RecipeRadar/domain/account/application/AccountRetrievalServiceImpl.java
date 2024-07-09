@@ -8,6 +8,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.account.dto.request.UpdatePasswordRequest;
 import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.email.application.MailService;
+import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +40,10 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      */
     public List<Map<String ,String>> findLoginId(String username, String email, int code) {
         List<MemberDto> memberDtos = memberRepository.findByUsernameAndEmail(username, email).stream().map(MemberDto::from).collect(Collectors.toList());
-        
-        if (emailCodeValid(email, code)) {
+
+        if (!emailCodeValid(email, code)) {
             return List.of(Map.of("인증 번호", "인증번호가 일치하지 않습니다."));
         }
-
         if (memberDtos.isEmpty()) {
             return List.of(Map.of("가입 정보", "해당 정보로 가입된 회원은 없습니다."));
         }
@@ -64,12 +64,10 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         if (!memberExists) throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER);
         Boolean emailCodeValid = emailCodeValid(email,code);
 
-        String token = "";
-
-        if (memberExists&&emailCodeValid){
-             token  = accountRetrievalRepository.save(AccountRetrieval.createAccount(loginId,3)).getVerificationId();
-            mailService.deleteCode(email,code);
-        }
+        if (!emailCodeValid)
+            throw new InvalidIdException("인증번호가 일치하지 않거나 유효시간이 지났습니다.");
+        String token  = accountRetrievalRepository.save(AccountRetrieval.createAccount(loginId,3)).getVerificationId();
+        mailService.deleteCode(email,code);
 
         return token;
     }
@@ -127,7 +125,9 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * @return  일치시 -> true 불일치 false
      */
     public Boolean emailCodeValid(String email, int code){
-        return mailService.verifyCode(email, code).getOrDefault("isVerifyCode",false);
+        Boolean isVerified = mailService.verifyCode(email, code).get("isVerified");
+        Boolean isExpired = mailService.verifyCode(email, code).get("isExpired");
+        return isVerified && isExpired;
     }
 
 }
