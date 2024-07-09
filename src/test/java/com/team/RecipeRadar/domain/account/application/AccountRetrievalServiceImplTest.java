@@ -53,11 +53,10 @@ class AccountRetrievalServiceImplTest {
         when(memberRepository.findByUsernameAndEmail(eq(username), eq(email))).thenReturn(list);        //리스트로 반환
 
         Integer realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
+        when(emailService.verifyCode(email, realCode)).thenReturn(Map.of("isVerified",true, "isExpired",true));
 
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, realCode);     //반환
-
         assertThat(loginId.get(0).get("login_type")).isEqualTo("normal");
         assertThat(loginId.get(1).get("login_type")).isEqualTo("kakao");
         assertThat(loginId.size()).isEqualTo(2);
@@ -82,10 +81,11 @@ class AccountRetrievalServiceImplTest {
         int fakeCode = 12;
 
         // 잘못된 코드로 verifyCode를 호출하는 대신, 올바른 코드를 사용하여 호출해야 합니다.
-        when(emailService.verifyCode(email, fakeCode)).thenReturn(Collections.singletonMap("isVerifyCode", true));
+        when(emailService.verifyCode(eq(email), eq(fakeCode))).thenReturn(Map.of("isVerified",false, "isExpired",true));
         // 이메일인증코드
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId(username, email, fakeCode);     //반환
+
 
         assertThat(loginId.get(0).get("인증 번호")).isEqualTo("인증번호가 일치하지 않습니다.");
         assertThat(loginId.size()).isEqualTo(1);
@@ -105,10 +105,10 @@ class AccountRetrievalServiceImplTest {
         list.add(normal);
         list.add(social);
 
-        when(memberRepository.findByUsernameAndEmail(eq("등록되지 않은 사용자"), eq(email))).thenReturn(Collections.emptyList());
+        when(memberRepository.findByUsernameAndEmail(anyString(), eq(email))).thenReturn(List.of());
 
         int realCode = 1234;
-        when(emailService.verifyCode(email, realCode)).thenReturn(Collections.singletonMap("isVerifyCode", false));
+        when(emailService.verifyCode(email, realCode)).thenReturn(Map.of("isVerified",true, "isExpired",true));
 
         List<Map<String, String>> loginId = accountRetrievalService.findLoginId("등록되지 않은 사용자", email, realCode);     //반환
         assertThat(loginId.get(0).get("가입 정보")).isEqualTo("해당 정보로 가입된 회원은 없습니다.");
@@ -126,8 +126,9 @@ class AccountRetrievalServiceImplTest {
         // 가짜 회원이 존재함을 설정
         when(memberRepository.existsByUsernameAndLoginIdAndEmail(username, loginId, email)).thenReturn(true);
 
+
         // 이메일 서비스가 인증 코드를 확인하여 true를 반환하도록 설정
-        when(emailService.verifyCode(email, code)).thenReturn(Collections.singletonMap("isVerifyCode", true));
+        when(emailService.verifyCode(email, code)).thenReturn(Map.of("isVerified",true, "isExpired",true));
 
         AccountRetrieval accountRetrieval = AccountRetrieval.builder().verificationId("accountRetrieval").loginId(loginId).build();
 
