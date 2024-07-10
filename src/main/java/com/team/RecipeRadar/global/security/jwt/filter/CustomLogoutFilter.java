@@ -30,6 +30,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private static final String LOGOUT_URI_PATTERN = "^\\/api/logout$";
     private static final String REFRESH_TOKEN_COOKIE_NAME = "RefreshToken";
+    private static final String MY_PAGE_TOKEN_COOKIE_NAME = "login-id";
     private static final String SUCCESS_LOGOUT_MESSAGE = "로그아웃 성공";
     private static final String COOKIE_NOT_FOUND_MESSAGE = "쿠키가 존재하지 않습니다.";
     private static final String INVALID_TOKEN_MESSAGE = "토큰이 잘못되었습니다.";
@@ -81,10 +82,12 @@ public class CustomLogoutFilter extends GenericFilterBean {
         refreshTokenRepository.deleteByRefreshToken(refreshToken);
 
         ResponseCookie deleteCookie = cookieUtils.deleteCookie(REFRESH_TOKEN_COOKIE_NAME);
+        ResponseCookie myPageCookie = cookieUtils.deleteCookie(MY_PAGE_TOKEN_COOKIE_NAME);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, myPageCookie.toString());
         response.setCharacterEncoding("UTF-8");
 
         sendSuccessResponse(response);
