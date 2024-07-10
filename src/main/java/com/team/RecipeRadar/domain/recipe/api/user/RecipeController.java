@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@Tag(name = "사용자 - 레시피 컨트롤러", description = "레시피 검색 및 관리")
+@Tag(name = "공용 - 레시피 컨트롤러", description = "레시피 검색 및 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
