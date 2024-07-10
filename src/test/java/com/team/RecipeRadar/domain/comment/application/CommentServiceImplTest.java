@@ -1,9 +1,11 @@
 package com.team.RecipeRadar.domain.comment.application;
 
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.member.domain.Member;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.notification.application.NotificationService;
 import com.team.RecipeRadar.domain.post.dao.PostRepository;
 import com.team.RecipeRadar.domain.post.domain.Post;
@@ -17,10 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,4 +146,27 @@ class CommentServiceImplTest {
         assertThatThrownBy(() -> commentService.update(comment.getId(), "수정!",memberFail.getId()))
                 .isInstanceOf(UnauthorizedException.class);
     }
+
+    @Test
+    @DisplayName("게시글 관련 댓글 페이징 변환 테스트")
+    void postsContainsComment(){
+        Long post_id= 1l;
+
+        PageRequest pageRequest = PageRequest.of(0, 2);
+
+        List<CommentDto> commentDtoList = List.of(
+                CommentDto.builder().commentContent("댓글1").member(MemberDto.builder().loginId("testId").nickname("닉네임1").build()).build(),
+                CommentDto.builder().commentContent("댓글2").member(MemberDto.builder().loginId("testId1").nickname("닉네임2").build()).build()
+        );
+        SliceImpl<CommentDto> commentDtos = new SliceImpl<>(commentDtoList, pageRequest, false);
+
+        when(commentRepository.getCommentsByPostId(eq(post_id),isNull(),eq(pageRequest))).thenReturn(commentDtos);
+
+        PostsCommentResponse postsComments = commentService.getPostsComments(post_id, null, pageRequest);
+
+        assertThat(postsComments.getComment()).hasSize(2);
+        assertThat(postsComments.getComment().get(0).getCommentContent()).isEqualTo("댓글1");
+        assertThat(postsComments.getNextPage()).isFalse();
+    }
+
 }

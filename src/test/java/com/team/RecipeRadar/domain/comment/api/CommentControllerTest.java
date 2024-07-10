@@ -1,13 +1,16 @@
 package com.team.RecipeRadar.domain.comment.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.application.CommentServiceImpl;
 import com.team.RecipeRadar.domain.comment.dto.request.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.request.UserUpdateCommentRequest;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.global.conig.SecurityTestConfig;
+import com.team.mock.CustomMockAdmin;
 import com.team.mock.CustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,4 +145,24 @@ class CommentControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("어드민 게시글 관련 댓글 조회")
+    @CustomMockAdmin
+    void postsContainsComment() throws Exception {
+        Long post_id= 1l;
+        List<CommentDto> commentDtoList = List.of(
+                CommentDto.builder().commentContent("댓글1").member(MemberDto.builder().loginId("testId").username("실명1").nickname("닉네임1").build()).build(),
+                CommentDto.builder().commentContent("댓글2").member(MemberDto.builder().loginId("testId1").username("실명2").nickname("닉네임2").build()).build()
+        );
+        PostsCommentResponse postsCommentResponse = new PostsCommentResponse(false, commentDtoList);
+        given(commentService.getPostsComments(eq(post_id),isNull(),any())).willReturn(postsCommentResponse);
+
+        mockMvc.perform(get("/api/user/posts/"+post_id+"/comments"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()").value(2))
+                .andExpect(jsonPath("$.data.comment.[0].member.nickname").value("닉네임1"))
+                .andExpect(jsonPath("$.data.nextPage").value(false));
+
+    }
 }
