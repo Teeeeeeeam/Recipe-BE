@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Map;
 
-@Tag(name = "공통 - 이메일 전송 컨트롤러",description = "이메일 인증 번호 전송 및 검증")
+@Tag(name = "공용 - 이메일 전송 컨트롤러",description = "이메일 인증 번호 전송 및 검증")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/code/email-confirmation")

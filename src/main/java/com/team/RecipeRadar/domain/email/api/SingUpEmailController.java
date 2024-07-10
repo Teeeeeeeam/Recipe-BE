@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
-@Tag(name = "공통 - 이메일 전송 컨트롤러",description = "이메일 인증 번호 전송 및 검증")
+@Tag(name = "공용 - 이메일 전송 컨트롤러",description = "이메일 인증 번호 전송 및 검증")
 @RequiredArgsConstructor
 @RequestMapping("/api/join")
 public class SingUpEmailController {
