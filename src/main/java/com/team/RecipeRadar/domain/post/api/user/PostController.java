@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-@Tag(name = "사용자 - 게시글 컨트롤러", description = "사용자 게시글과 관련된 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api")
@@ -39,6 +38,7 @@ public class PostController {
     private final PostService postService;
     private final CookieUtils cookieUtils;
 
+    @Tag(name = "사용자 - 게시글 컨트롤러", description = "사용자 게시글과 관련된 API")
     @Operation(summary = "게시글 작성", description = "로그인한 사용자만 게시글 작성 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -56,6 +56,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));
     }
 
+    @Tag(name = "공용 - 게시글 컨트롤러", description = "게시글과 관련된 API")
     @Operation(summary = "전체 게시글 조회(페이징)", description = "모든 사용자가 해당 게시글의 페이지를 볼 수 있다.(무한페이징)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -69,7 +70,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postResponse));
     }
 
-    @Operation(summary = "게시글 상세 조회", description = "사용자가 게시글의 상세 정보를 조회할 수 있습니다.")
+    @Operation(summary = "게시글 상세 조회", description = "사용자가 게시글의 상세 정보를 조회할 수 있습니다.",tags = "사용자 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -84,7 +85,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회성공",postDetailResponse));
     }
 
-    @Operation(summary = "게시글 삭제",description = "작성한 사용자만이 해당 레시피를 삭제할 수 있습니다. 삭제 시 해당 게시물과 관련된 모든 데이터가 삭제됩니다.")
+    @Operation(summary = "게시글 삭제",description = "작성한 사용자만이 해당 레시피를 삭제할 수 있습니다. 삭제 시 해당 게시물과 관련된 모든 데이터가 삭제됩니다.",tags = "사용자 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -103,7 +104,7 @@ public class PostController {
             return ResponseEntity.ok(new ControllerApiResponse(true,"게시글 삭제 성공"));
     }
 
-    @Operation(summary = "게시글 수정",  description = "로그인한 사용자만 수정이 가능하며, 작성자만 수정할 수 있습니다. 비밀번호 검증을 통해 사용자를 확인한 후 해당 API에 접근할 수 있습니다.")
+    @Operation(summary = "게시글 수정",  description = "로그인한 사용자만 수정이 가능하며, 작성자만 수정할 수 있습니다. 비밀번호 검증을 통해 사용자를 확인한 후 해당 API에 접근할 수 있습니다.",tags = "사용자 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -125,7 +126,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "게시글 비밀번호 검증",description = "게시글 삭제 및 수정 시, 해당 메소드를 통해 게시글 작성 시 입력한 비밀번호를 검증합니다. 검증에 성공한 경우에만 수정 및 삭제가 가능합니다.")
+    @Operation(summary = "게시글 비밀번호 검증",description = "게시글 삭제 및 수정 시, 해당 메소드를 통해 게시글 작성 시 입력한 비밀번호를 검증합니다. 검증에 성공한 경우에만 수정 및 삭제가 가능합니다.",tags = "사용자 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -165,7 +166,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",userInfoPostResponse));
     }
 
-    @Operation(summary = "리시피 게시글 좋아요순 조회",description = "레시피의 좋아요가 많은 게시글 top 4개를 조회")
+    @Operation(summary = "리시피 게시글 좋아요순 조회",description = "레시피의 좋아요가 많은 게시글 top 4개를 조회",tags = "공용 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -177,7 +178,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
 
-    @Operation(summary = "메인페이지 게시글 좋아요순 조회",description = "현재 사이트에서 작성된 게시글중 좋아요가 제일 많은 게시글 3개를 조회한다.")
+    @Operation(summary = "메인페이지 게시글 좋아요순 조회",description = "현재 사이트에서 작성된 게시글중 좋아요가 제일 많은 게시글 3개를 조회한다.",tags = "공용 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -189,7 +190,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",top4RecipesByLikes));
     }
 
-    @Operation(summary = "레시피 게시글의 좋아요순 조회(페이징)",description = "현재 레시피의 작성된 게시글을 좋아요 순으로 조회(무한페이징), 마지막 게시글의 좋아요가 0일경우 lastId 사용")
+    @Operation(summary = "레시피 게시글의 좋아요순 조회(페이징)",description = "현재 레시피의 작성된 게시글을 좋아요 순으로 조회(무한페이징), 마지막 게시글의 좋아요가 0일경우 lastId 사용",tags = "공용 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
@@ -204,7 +205,7 @@ public class PostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postResponse));
     }
 
-    @Operation(summary = "게시글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)")
+    @Operation(summary = "게시글 검색",description = "사용자의 로그인 아이디와 게시글 제목, 스크랩한 요리에 대해 검색할 수 있는 API  단일 조건의 검색이 가능하며, 조건 데이터가 추가될 때마다 AND 조건으로 데이터를 추립니다. (무한 페이징)",tags = "공용 - 게시글 컨트롤러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ControllerApiResponse.class)),
