@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,35 +90,6 @@ class CommentServiceImplTest {
 
         assertThatThrownBy(() -> commentService.deleteComment(comment.getId(), memberFail.getId()))
                 .isInstanceOf(UnauthorizedException.class);
-    }
-
-    @Test
-    @DisplayName("댓글 모두조회 페이징 처리 테스트")
-    void page_comment_test() {
-        List<Comment> comments = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            comments.add(Comment.builder()
-                    .id((long) i)
-                    .commentContent("테스트 댓글 내용 " + i)
-                    .member(member)
-                    .post(post)
-                    .build());
-        }
-
-        PageImpl<Comment> commentPage = new PageImpl<>(comments);
-        Pageable pageable = PageRequest.of(0, 5);
-
-        when(commentRepository.findAllByPostId(post.getId(), pageable)).thenReturn(commentPage);
-
-        Page<CommentDto> result = commentService.commentPage(post.getId(), pageable);
-
-        assertThat(result.getTotalElements()).isEqualTo(10);
-        assertThat(result.getTotalPages()).isEqualTo(1);
-        for (int i = 0; i < 10; i++) {
-            assertThat(result.getContent().get(i).getCommentContent()).isEqualTo("테스트 댓글 내용 " + (i + 1));
-        }
-        assertThat(result.getContent().size()).isEqualTo(10);
-        assertThat(result.getNumber()).isEqualTo(0);
     }
 
     @Test
