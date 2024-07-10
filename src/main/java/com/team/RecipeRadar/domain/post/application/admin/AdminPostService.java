@@ -9,12 +9,6 @@ import java.util.List;
 public interface AdminPostService {
 
     long searchAllPosts();
-
-    PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable);
-
-
-
     void deleteComments(List<Long> ids);
-
     void deletePosts(List<Long> postIds);
 }

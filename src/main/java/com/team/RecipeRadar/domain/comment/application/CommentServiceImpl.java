@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.comment.application;
 
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
@@ -11,8 +12,8 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
-@RequiredArgsConstructor
-@Transactional
 @Service
-@Slf4j
+@Transactional
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -83,7 +83,18 @@ public class CommentServiceImpl implements CommentService {
         validateCommentOwner(member,comment);
         comment.update(newComment);
     }
-    
+
+    /**
+     * 게시글의 작성된 댓글을 조회하는 메서드
+     * 게시글의 작성된 모든 데이터를 무한 페이징으로 처리합니다.
+     */
+    @Override
+    public PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable) {
+        Slice<CommentDto> postComment = commentRepository.getCommentsByPostId(postId, lastId, pageable);
+
+        return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
+    }
+
     /* 사용자 정보를 조회하는 메서드 */
     private Member getMember(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_MEMBER));

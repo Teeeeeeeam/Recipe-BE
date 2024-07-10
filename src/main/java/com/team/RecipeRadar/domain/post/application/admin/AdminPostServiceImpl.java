@@ -36,17 +36,6 @@ public class AdminPostServiceImpl implements AdminPostService{
     }
 
     /**
-     * 게시글의 작성된 댓글을 조회하는 메서드
-     * 게시글의 작성된 모든 데이터를 무한 페이징으로 처리합니다.
-     */
-    @Override
-    public PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable) {
-        Slice<CommentDto> postComment = commentRepository.getCommentsByPostId(postId, lastId, pageable);
-
-        return new PostsCommentResponse(postComment.hasNext(),postComment.getContent());
-    }
-
-    /**
      * 게시글의 댓글 삭제하는 메서드
      * 어드민 사용자는 게시글의 작성된 댓글을 삭제 가능합니다.
      */

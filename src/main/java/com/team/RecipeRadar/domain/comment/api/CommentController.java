@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.comment.api;
 
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.application.CommentService;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.comment.dto.request.UserAddCommentRequest;
@@ -27,10 +28,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-@RequiredArgsConstructor
-@RestController
 @Tag(name = "사용자 - 댓글 컨트롤러",description = "사용자 댓글 관리")
-@Slf4j
+@RestController
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
@@ -107,6 +107,19 @@ public class CommentController {
         commentService.update(userUpdateCommentRequest.getCommentId(), userUpdateCommentRequest.getCommentContent(), memberDto.getId());
 
         return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공"));
+    }
+
+    @Operation(summary = "게시글의 작성된 댓글 조회", description = "게시글의 작성된 댓글을 조회하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
+    })
+    @GetMapping("/api/user/posts/{postId}/comments")
+    public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
+                                                      @Parameter(example = "{\"size\":10}") Pageable pageable){
+        PostsCommentResponse postsComments = commentService.getPostsComments(postId, lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
     }
 
     private static MemberDto getMemberDto(PrincipalDetails principalDetails) {

@@ -40,20 +40,6 @@ public class AdminPostController {
         return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",searchAllMembers));
     }
 
-
-    @Operation(summary = "게시글의 작성된 댓글 조회", description = "게시글의 작성된 댓글을 조회하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
-    })
-    @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
-                                                      @Parameter(example = "{\"size\":10}") Pageable pageable){
-        PostsCommentResponse postsComments = adminService.getPostsComments(postId, lastId, pageable);
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
-    }
-
     @Operation(summary = "게시글 댓글 삭제",description = "게시글의 댓글을 단일, 일괄 삭제하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
