@@ -73,21 +73,6 @@ public class CommentController {
         commentService.deleteComment(userDeleteCommentRequest.getCommentId(),memberDto.getId());
         return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
     }
-
-    @Operation(summary = "댓글 모두 조회",description = "해당 게시글의 모든 댓글을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-            content = @Content(schema = @Schema(implementation = CommentDto.class),
-                    examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"content\":\"댓글 리스트\"}, \"pageable\":\"페이징 내용\"}")
-            ))
-    })
-    @GetMapping("/api/comments")
-    public ResponseEntity<?> comment_Page(@Parameter(description = "게시글 Id")@RequestParam(value = "postId",required = false)Long postId,
-                                          Pageable pageable){
-            Page<CommentDto> comments = commentService.commentPage(postId, pageable);
-            return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", comments));
-    }
-
     @Operation(summary = "댓글 수정 API",description = "로그인, 작성자만 수정가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",

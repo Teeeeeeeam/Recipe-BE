@@ -12,15 +12,12 @@ import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import com.team.RecipeRadar.global.exception.ex.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
@@ -56,19 +53,6 @@ public class CommentServiceImpl implements CommentService {
         validateCommentOwner(member, comment);
         notificationService.deleteCommentNotification(member.getId(),comment.getPost().getMember().getId(),comment.getId());        //삭제 알림 전송
         commentRepository.deleteByMemberIdAndCommentId(member.getId(),comment.getId());           //삭제
-    }
-
-    /**
-     * 댓글을 조회하는 메서드
-     * 댓글이 없을시에는 빈 페이지 네이션을 반환
-     */
-    @Transactional(readOnly = true)
-    public Page<CommentDto> commentPage(Long postId,Pageable pageable){
-        Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
-
-        return comments.isEmpty() ?
-                new PageImpl<>(Collections.emptyList(), pageable, 0) :
-                comments.map(comment -> CommentDto.of(comment));
     }
 
     /**
