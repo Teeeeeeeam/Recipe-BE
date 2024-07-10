@@ -2,7 +2,6 @@ package com.team.RecipeRadar.domain.comment.api;
 
 import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.application.CommentService;
-import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.comment.dto.request.UserAddCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
 import com.team.RecipeRadar.domain.comment.dto.request.UserUpdateCommentRequest;
@@ -19,8 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 @Tag(name = "사용자 - 댓글 컨트롤러",description = "사용자 댓글 관리")
 @RestController
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -44,7 +42,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                     examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}, {\"success\":false,\"message\":\"회원정보나 게시글을 찾을수 없습니다.\"}]"))),
     })
-    @PostMapping("/api/user/comments")
+    @PostMapping("/comments")
     public ResponseEntity<?> comment_add(@Valid @RequestBody UserAddCommentRequest userAddCommentRequest, BindingResult bindingResult,
                                          @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = getMemberDto(principalDetails);
@@ -66,7 +64,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @DeleteMapping("/api/user/comments")
+    @DeleteMapping("/comments")
     public ResponseEntity<?> comment_delete(@RequestBody UserDeleteCommentRequest userDeleteCommentRequest,
                                             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = getMemberDto(principalDetails);
@@ -85,7 +83,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @PutMapping("/api/user/comments")
+    @PutMapping("/comments")
     public ResponseEntity<?> comment_update(@Valid @RequestBody UserUpdateCommentRequest userUpdateCommentRequest, BindingResult bindingResult,
                                             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         MemberDto memberDto = getMemberDto(principalDetails);
@@ -100,7 +98,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
                             examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
     })
-    @GetMapping("/api/user/posts/{postId}/comments")
+    @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
                                                       @Parameter(example = "{\"size\":10}") Pageable pageable){
         PostsCommentResponse postsComments = commentService.getPostsComments(postId, lastId, pageable);
