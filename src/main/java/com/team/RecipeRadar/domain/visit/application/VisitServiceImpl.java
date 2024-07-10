@@ -21,6 +21,7 @@ public class VisitServiceImpl implements VisitService{
     private final VisitStatisticsRepository visitStatisticsRepository;
     private final VisitSessionRepository visitSessionRepository;
 
+    @Transactional
     @Override
     public void save(String ipaddress, LocalDateTime expiredAt) {
         visitSessionRepository.save(VisitSession.toEntity(ipaddress, expiredAt));
