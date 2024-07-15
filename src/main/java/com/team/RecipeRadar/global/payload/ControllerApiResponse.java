@@ -2,7 +2,6 @@ package com.team.RecipeRadar.global.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
+@Schema(name = "응값값 Response")
 public class ControllerApiResponse<T> {
 
     @Schema(example = "true")

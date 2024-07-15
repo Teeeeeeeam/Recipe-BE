@@ -7,7 +7,6 @@ import org.springframework.data.domain.Slice;
 
 public interface CustomCommentRepository {
 
-    Slice<CommentDto> getPostComment(Long postId, Long lastId,Pageable pageable);
-
-    void deleteMember_comment(Long memberId);
+    Slice<CommentDto> getCommentsByPostId(Long postId, Long lastId, Pageable pageable);
+    void deleteCommentsByRecipeId(Long recipeId);
 }

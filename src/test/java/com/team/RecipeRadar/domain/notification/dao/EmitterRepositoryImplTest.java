@@ -95,7 +95,7 @@ class EmitterRepositoryImplTest {
         emitterRepository.save(memberId + "1", sseEmitter1);
         emitterRepository.save(memberId + "2", sseEmitter2);
 
-        emitterRepository.deleteAllEmitterStartWithId(memberId);
+        emitterRepository.deleteAllEmitterStartWithEmitterId(memberId);
 
         assertThat(emitterRepository.findAllEmitterStartWithByMemberId(memberId)).isEmpty();
     }

@@ -18,38 +18,31 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(name = "댓글 DTO")
 public class CommentDto {
     
     private Long id;
 
     @Schema(description = "댓글 내용", example = "댓글 작성!")
-    private String comment_content;
+    private String commentContent;
 
     @Schema(description = "작성자 닉네임", example = "나만의 냉장고")
     private String nickName;
+
+    private LocalDateTime createdAt;
 
     private MemberDto member;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PostDto articleDto;
 
-    private LocalDateTime create_at;        //등록일
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private LocalDateTime updated_at;       //수정일
-
-
-    public void setLocalDateTime(){
-        this.create_at = LocalDateTime.now().withSecond(0).withNano(0);
-    }
-
     public static CommentDto of(Comment comment){
         return CommentDto.builder()
                 .id(comment.getId())
-                .comment_content(comment.getCommentContent())
+                .commentContent(comment.getCommentContent())
                 .nickName(comment.getMember().getNickName())
-                .create_at(comment.getCreated_at())
-                .updated_at(comment.getUpdated_at()).build();
+                .createdAt(truncateNanos(comment))
+                .build();
     }
 
     public static CommentDto admin(Comment comment){
@@ -57,8 +50,13 @@ public class CommentDto {
         MemberDto memberDto = MemberDto.builder().loginId(member.getLoginId()).nickname(member.getNickName()).username(member.getUsername()).build();
         return CommentDto.builder()
                 .id(comment.getId())
-                .comment_content(comment.getCommentContent())
-                .create_at(comment.getCreated_at())
+                .commentContent(comment.getCommentContent())
+                .createdAt(truncateNanos(comment))
                 .member(memberDto).build();
     }
+
+    private static LocalDateTime truncateNanos(Comment comment) {
+        return comment.getCreatedAt().withNano(0);
+    }
+
 }

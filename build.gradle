@@ -32,12 +32,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator' // 엑츄에이터
+	implementation 'io.micrometer:micrometer-registry-prometheus' // 프로메테우스
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'		//aop 적용
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation group: 'com.auth0', name: 'java-jwt', version: '3.10.2'
 	compileOnly 'org.projectlombok:lombok'

@@ -1,15 +1,14 @@
 package com.team.RecipeRadar.domain.comment.api;
 
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import com.team.RecipeRadar.domain.comment.application.CommentService;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
-import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserUpdateCommentDto;
-import com.team.RecipeRadar.global.exception.ErrorResponse;
-import com.team.RecipeRadar.global.exception.ex.CommentException;
+import com.team.RecipeRadar.domain.comment.dto.request.UserAddCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserDeleteCommentRequest;
+import com.team.RecipeRadar.domain.comment.dto.request.UserUpdateCommentRequest;
+import com.team.RecipeRadar.domain.member.dto.MemberDto;
+import com.team.RecipeRadar.global.payload.ErrorResponse;
 import com.team.RecipeRadar.global.payload.ControllerApiResponse;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import com.team.RecipeRadar.global.security.basic.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,22 +18,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.validation.Valid;
-import java.util.NoSuchElementException;
-
-@RequiredArgsConstructor
-@RestController
 @Tag(name = "사용자 - 댓글 컨트롤러",description = "사용자 댓글 관리")
-@Slf4j
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
@@ -43,28 +37,19 @@ public class CommentController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 작성 성공\", \"data\" : {\"commentContent\": \"[작성한 댓글]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"created_at\": \"LocalDateTime\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 작성 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"회원정보나 게시글을 찾을수 없습니다.\"}]"))),
+                    examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}, {\"success\":false,\"message\":\"회원정보나 게시글을 찾을수 없습니다.\"}]"))),
     })
-    @PostMapping("/api/user/comments")
-    public ResponseEntity<?> comment_add(@Valid @RequestBody UserAddCommentDto userAddCommentDto, BindingResult bindingResult){
-        try {
-            if (bindingResult.hasErrors()){
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false, bindingResult.getFieldError().getDefaultMessage()));
-            }
-            Comment save = commentService.save(userAddCommentDto);
+    @PostMapping("/comments")
+    public ResponseEntity<?> comment_add(@Valid @RequestBody UserAddCommentRequest userAddCommentRequest, BindingResult bindingResult,
+                                         @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        MemberDto memberDto = getMemberDto(principalDetails);
 
-            UserAddCommentDto addResponse = new UserAddCommentDto(save.getCommentContent(), save.getMember().getId(),save.getPost().getId(),save.getCreated_at());
-            
-            return ResponseEntity.ok(new ControllerApiResponse(true,"성공",addResponse));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버오류");
-        }
+        commentService.save(userAddCommentRequest.getPostId(),userAddCommentRequest.getCommentContent(),memberDto.getId());
+
+            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 작성 성공"));
     }
 
     @Operation(summary = "댓글 삭제",description = "로그인한 사용자만 댓글을 삭제할 수 있습니다.")
@@ -73,69 +58,55 @@ public class CommentController {
             content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
             examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"댓글 삭제 성공\"}"))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"해당 댓글을 찾을 수 없습니다.\"}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @DeleteMapping("/api/user/comments")
-    public ResponseEntity<?> comment_delete(@RequestBody UserDeleteCommentDto userDeleteCommentDto){
-        try{
-           commentService.delete_comment(userDeleteCommentDto);//반환타입 void
-            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());         //예외처리-> 여기서 처리안하고  @ExceptionHandler로 예외처리함
-        }
+    @DeleteMapping("/comments")
+    public ResponseEntity<?> comment_delete(@RequestBody UserDeleteCommentRequest userDeleteCommentRequest,
+                                            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        MemberDto memberDto = getMemberDto(principalDetails);
+        commentService.deleteComment(userDeleteCommentRequest.getCommentId(),memberDto.getId());
+        return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 삭제 성공"));
     }
-
-    @Operation(summary = "댓글 모두 조회",description = "해당 게시글의 모든 댓글을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "OK",
-            content = @Content(schema = @Schema(implementation = CommentDto.class),
-                    examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"content\":\"댓글 리스트\"}, \"pageable\":\"페이징 내용\"}")
-            ))
-    })
-    @GetMapping("/api/comments")
-    public ResponseEntity<?> comment_Page(@PageableDefault Pageable pageable,
-                                          @Parameter(description = "게시글 Id")@RequestParam(value = "posts",required = false)String postid){
-        try {
-            Page<CommentDto> comments = commentService.commentPage(Long.parseLong(postid), pageable);
-
-            return ResponseEntity.ok(new ControllerApiResponse<>(true, "조회 성공", comments));
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException(e.getMessage());
-        }
-    }
-
     @Operation(summary = "댓글 수정 API",description = "로그인, 작성자만 수정가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
-                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 수정 성공\" , \"data\" : {\"commentContent\": \"[수정한 댓글]\", \"memberId\": \"[사용자 ID]\", \"postId\": \"[게시글 ID]\", \"update_At\": \"LocalDateTime\"}}"))),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\":\"댓글 수정 성공\"}"))),
             @ApiResponse(responseCode = "400",description = "BAD REQUEST",
-
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "[{\"success\":false,\"message\":\"수정할 댓글을 입력해주세요\"}, {\"success\":false,\"message\":\"[오류내용]\"}]")))
+                            examples = @ExampleObject(value = "{\"success\":false,\"message\":\"실패\",\"data\":{\"필드명\" : \"필드 오류 내용\"}}"))),
+            @ApiResponse(responseCode = "403", description = "FORBIDDEN",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"success\": true, \"message\" : \"작성자만 삭제할수 있습니다.\"}")))
     })
-    @PutMapping("/api/user/comments")
-    public ResponseEntity<?> comment_update(@Valid @RequestBody UserUpdateCommentDto updateCommentDto, BindingResult bindingResult){
-        try {
-            if (bindingResult.hasErrors()){
-                return ResponseEntity.badRequest().body(new ErrorResponse<>(false,bindingResult.getFieldError().getDefaultMessage()));
-            }
+    @PutMapping("/comments")
+    public ResponseEntity<?> comment_update(@Valid @RequestBody UserUpdateCommentRequest userUpdateCommentRequest, BindingResult bindingResult,
+                                            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
+        MemberDto memberDto = getMemberDto(principalDetails);
+        commentService.update(userUpdateCommentRequest.getCommentId(), userUpdateCommentRequest.getCommentContent(), memberDto.getId());
 
-            commentService.update(updateCommentDto.getMemberId(),updateCommentDto.getCommentId(),updateCommentDto.getCommentContent());
-            Comment comment = commentService.findById(updateCommentDto.getCommentId());
-            UserUpdateCommentDto userUpdateCommentDto = new UserUpdateCommentDto(comment.getCommentContent(), comment.getMember().getId(), comment.getId(), comment.getUpdated_at());
+        return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공"));
+    }
 
-            return ResponseEntity.ok(new ControllerApiResponse(true,"댓글 수정 성공",userUpdateCommentDto));
-        }catch (NoSuchElementException e){
-            throw new CommentException(e.getMessage());
-        }
-        catch (CommentException e){
-            throw new CommentException(e.getMessage());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new ServerErrorException("서버 오류 발생");
-        }
+    @Operation(summary = "게시글의 작성된 댓글 조회", description = "게시글의 작성된 댓글을 조회하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = ControllerApiResponse.class),
+                            examples = @ExampleObject(value =  "{\"success\":true,\"message\":\"조회 성공\",\"data\":{\"nextPage\":false,\"comments\":[{\"id\":16,\"commentContent\":\"댓글 내용 1\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}},{\"id\":17,\"commentContent\":\"댓글 내용 2\",\"createdAt\":\"2024-05-23T17:37:53\",\"member\":{\"nickname\":\"User2\",\"loginId\":\"user1\",\"username\":\"실명\"}}]}}"))),
+    })
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<?> getPostsContainsComments(@PathVariable("postId") Long postId,@RequestParam(value = "lastId",required = false)Long lastId,
+                                                      @Parameter(example = "{\"size\":10}") Pageable pageable){
+        PostsCommentResponse postsComments = commentService.getPostsComments(postId, lastId, pageable);
+        return ResponseEntity.ok(new ControllerApiResponse<>(true,"조회 성공",postsComments));
+    }
+
+    private static MemberDto getMemberDto(PrincipalDetails principalDetails) {
+        MemberDto memberDto = principalDetails.getMemberDto(principalDetails.getMember());
+        return memberDto;
     }
 }

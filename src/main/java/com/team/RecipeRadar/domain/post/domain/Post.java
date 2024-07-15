@@ -1,26 +1,28 @@
 package com.team.RecipeRadar.domain.post.domain;
 
+import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.domain.Member;
-import com.team.RecipeRadar.domain.member.dto.MemberDto;
-import com.team.RecipeRadar.domain.post.dto.PostDto;
+import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "post_title"),
+        @Index(columnList = "member_id"),
+})
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "member")
-public class Post {
+public class Post extends BaseTimeUtils {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -31,10 +33,6 @@ public class Post {
 
     @Column(name = "post_content",length = 1000)
     private String postContent;
-
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
 
     private String postPassword;
 
@@ -49,20 +47,19 @@ public class Post {
 
     private Integer postLikeCount;
 
-    @Column(name = "post_image_url")
-    private String postImageUrl;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @Schema(hidden = true)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "recipe_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id",foreignKey = @ForeignKey (ConstraintMode.NO_CONSTRAINT))
     private Recipe recipe;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
-    private List<Comment> comments;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<UploadFile> uploadFiles = new ArrayList<>();
 
     public void update(String postTitle, String postContent, String postServing, String postCookingTime, String postCookingLevel,String postPassword) {
         this.postTitle = postTitle;
@@ -71,25 +68,11 @@ public class Post {
         this.postCookingTime = postCookingTime;
         this.postCookingLevel = postCookingLevel;
         this.postPassword= postPassword;
-        this.updated_at= LocalDateTime.now().withNano(0).withSecond(0);
     }
 
-    public void updateTime(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
-    }
-
-    static public PostDto of(Post post){
-
-        return PostDto.builder()
-                .id(post.getId())
-                .postTitle(post.getPostTitle())
-                .postContent(post.getPostContent())
-                .postServing(post.getPostServing())
-                .postCookingTime(post.getPostCookingTime())
-                .postCookingLevel(post.getPostCookingLevel())
-                .postImageUrl(post.getPostImageUrl())
-                .postLikeCount(post.postLikeCount)
-                .member(MemberDto.builder().nickname(post.getMember().getNickName()).build())
-                .build();
+    public static Post createPost(String postTitle,String postContent,String postServing,String postCookingTime,
+                                  String postCookingLevel,Member member,Recipe recipe,String password){
+        return Post.builder().postTitle(postTitle).postContent(postContent).postServing(postServing).postCookingTime(postCookingTime)
+                .postCookingLevel(postCookingLevel).postLikeCount(0).member(member).recipe(recipe).postPassword(password).build();
     }
 }

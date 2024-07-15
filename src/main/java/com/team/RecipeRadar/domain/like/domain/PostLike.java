@@ -3,12 +3,14 @@ package com.team.RecipeRadar.domain.like.domain;
 import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 
 @Entity
-@Slf4j
+@Table(indexes = {
+        @Index(columnList = "post_id"),
+        @Index(columnList = "member_id"),
+})
 @Data
 @Builder
 @AllArgsConstructor
@@ -28,5 +30,8 @@ public class PostLike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-    
+
+    public static PostLike createPostLIke(Post post, Member member){
+        return PostLike.builder().post(post).member(member).build();
+    }
 }

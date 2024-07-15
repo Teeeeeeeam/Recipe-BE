@@ -1,5 +1,6 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,8 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class CookingStep {
 
@@ -28,5 +29,9 @@ public class CookingStep {
 
     public void update(String steps){
         this.steps = steps;
+    }
+
+    public static CookingStep createCookingStep(Recipe recipe,String steps){
+        return CookingStep.builder().recipe(recipe).steps(steps).build();
     }
 }

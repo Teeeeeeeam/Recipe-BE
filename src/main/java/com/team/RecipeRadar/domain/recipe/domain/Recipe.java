@@ -1,26 +1,26 @@
 package com.team.RecipeRadar.domain.recipe.domain;
 
-import com.team.RecipeRadar.domain.recipe.dto.RecipeSaveRequest;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
+import com.team.RecipeRadar.global.utils.BaseTimeUtils;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "like_count"),
+        @Index(columnList = "recipe_title"),
+})
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@OnDelete(action = OnDeleteAction.CASCADE)
+@AllArgsConstructor
 @ToString(includeFieldNames = false, of = {"title", "cookingTime", "cookingLevel"})
-@Table(indexes = {
-        @Index(columnList = "likeCount"),
-        @Index(columnList = "recipe_title")
-})
-public class Recipe {
+public class Recipe extends BaseTimeUtils {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
@@ -36,7 +36,17 @@ public class Recipe {
 
     private String cookingTime;     // 요리시간
 
+    @Column(name = "like_count")
     private Integer likeCount;      // 좋아요 수
+
+    @Enumerated(EnumType.STRING)
+    private CookMethods cookMethods; // 요리 방법
+
+    @Enumerated(EnumType.STRING)
+    private CookIngredients cookingIngredients; // 요리재료 별명
+
+    @Enumerated(EnumType.STRING)
+    private DishTypes types; // 요리 종류 별명
 
 
     @OneToMany(mappedBy = "recipe",cascade = CascadeType.ALL)
@@ -46,34 +56,24 @@ public class Recipe {
         this.likeCount = count;
     }
 
-    public void update_recipe(String title, String cookingLevel, String people, String cookingTime){
+    public void updateRecipe(String title, String cookingLevel, String people, String cookingTime,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes){
         this.title=title;
         this.cookingLevel=cookingLevel;
         this.people=people;
         this.cookingTime=cookingTime;
+        this.cookingIngredients = cookIngredients;
+        this.cookMethods = cookMethods;
+        this.types = dishTypes;
     }
-
-    public void s3_update_recipe(String title, String cookingLevel, String people, String cookingTime){
-        this.title=title;
-        this.cookingLevel=cookingLevel;
-        this.people=people;
-        this.cookingTime=cookingTime;
-    }
-    public static Recipe toEntity(RecipeSaveRequest recipeSaveRequest){
+    public static Recipe createRecipe(String title,String cookingTime, String cookingLevel, String people,CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes){
         return  Recipe.builder()
-                .title(recipeSaveRequest.getTitle())
-                .cookingTime(recipeSaveRequest.getCookTime())
-                .cookingLevel(recipeSaveRequest.getCookLevel())
+                .title(title)
+                .cookingTime(cookingTime)
+                .cookingLevel(cookingLevel)
+                .cookingIngredients(cookIngredients)
+                .cookMethods(cookMethods)
+                .types(dishTypes)
                 .likeCount(0)
-                .people(recipeSaveRequest.getPeople()).build();
-    }
-
-    public static Recipe toEntity_s3(RecipeSaveRequest recipeSaveRequest){
-        return  Recipe.builder()
-                .title(recipeSaveRequest.getTitle())
-                .cookingTime(recipeSaveRequest.getCookTime())
-                .cookingLevel(recipeSaveRequest.getCookLevel())
-                .likeCount(0)
-                .people(recipeSaveRequest.getPeople()).build();
+                .people(people).build();
     }
 }

@@ -2,15 +2,20 @@ package com.team.RecipeRadar.domain.post.dao;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
+import com.team.RecipeRadar.domain.comment.domain.QComment;
 import com.team.RecipeRadar.domain.comment.dto.CommentDto;
 import com.team.RecipeRadar.domain.post.domain.Post;
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
-import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
+import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
+import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -18,16 +23,14 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.team.RecipeRadar.domain.comment.domain.QComment.*;
 import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.global.Image.domain.QUploadFile.*;
+import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
@@ -36,6 +39,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     @Value("${S3.URL}")
     private String S3URL;
+
+    private final String FULL_TEXT_INDEX ="function('match',{0},{1})";
 
     @Override
     public Slice<UserInfoPostRequest> userInfoPost(Long memberId,Long lastId, Pageable pageable) {
@@ -74,16 +79,16 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         if(postId!=null){
             builder.and(post.id.lt(postId));
         }
-        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
+        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.createdAt)
                 .from(post)
                 .join(uploadFile).on(post.id.eq(uploadFile.post.id))
                 .where(builder.and(uploadFile.notice.isNull().and(uploadFile.post.id.isNotNull())))
-                .orderBy(post.id.desc())
+                .orderBy(uploadFile.post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
-                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
+                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.createdAt))).collect(Collectors.toList());
 
         boolean hasNextSize = isHasNextSize(pageable, postDtoList);
 
@@ -94,7 +99,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
      * 게시글의 상세 정보를 위해 게시글의 id를 통해서 해당 게시글의 포함된 댓글까지도 모두 조회
      */
     @Override
-    public PostDetailResponse postDetails(Long postId) {
+    public PostDto postDetails(Long postId) {
 
         List<Tuple> list = jpaQueryFactory.select(post,uploadFile.storeFileName,comment, post.recipe)
                 .from(post)
@@ -103,20 +108,10 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .where(post.id.eq(postId)).fetch();
 
         if (list.isEmpty()) {
-            throw new NoSuchElementException("해당하는 게시물이 없습니다.");
+            throw new NoSuchDataException(NoSuchErrorType.NO_SUCH_POST);
         }
 
-        PostDto postDto = list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple),tuple.get(post.recipe))).findFirst().get();
-
-        //최초 등록시에는 댓글이 없을수도 있어서 없을때는 빅 베열이 생성
-        List<CommentDto> collect1 = list.stream().map(tuple -> {
-            Comment comment_entity = tuple.get(comment);
-            if (comment_entity != null) {
-                return CommentDto.of(comment_entity);
-            } else return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        return new PostDetailResponse(postDto,collect1);
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post),getImg(tuple),tuple.get(post.recipe))).findFirst().get();
     }
 
     /**
@@ -131,35 +126,108 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     @Override
     public Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
-        if(loginId!=null){
-            builder.and(post.member.loginId.eq(loginId));
-        }
-        if(recipeTitle!=null){
-            builder.and(post.recipe.title.like("%"+recipeTitle+"%"));
-        }
-        if(postTitle!=null){
-            builder.and(post.postTitle.like("%"+postTitle+"%"));
-        }
+
         if(lastPostId !=null){
             builder.and(post.id.lt(lastPostId));
         }
+        if(recipeTitle!=null){
+            NumberTemplate recipe_boolean = Expressions.numberTemplate(Double.class,
+                    FULL_TEXT_INDEX , post.recipe.title, recipeTitle);
+            builder.and(recipe_boolean.gt(0));
+        }
+        if(postTitle!=null){
+            NumberTemplate post_boolean = Expressions.numberTemplate(Double.class,
+                    FULL_TEXT_INDEX , post.postTitle, postTitle);
+            builder.and(post_boolean.gt(0));
+        }
+        if (loginId != null) {
+            builder.and(post.member.loginId.eq(loginId));
+        }
 
-        List<Tuple> list = jpaQueryFactory.select(post.id, post.member.loginId,post.postTitle, uploadFile.storeFileName, post.member.nickName, post.recipe.title,post.recipe.id,post.created_at)
+        List<Tuple> list = jpaQueryFactory
+                .select(post.id, post.member.loginId, post.postTitle, uploadFile.storeFileName,
+                        post.member.nickName, post.recipe.title, post.recipe.id, post.createdAt)
                 .from(post)
-                .join(uploadFile).on(post.recipe.id.eq(uploadFile.recipe.id).and(post.id.eq(uploadFile.post.id)))
+                .join(uploadFile).on(post.id.eq(uploadFile.post.id).and(post.recipe.id.eq(uploadFile.recipe.id)))
                 .where(builder)
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-
         List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post.id),tuple.get(post.member.loginId), tuple.get(post.postTitle),
-                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.created_at))).collect(Collectors.toList());
+                getImg(tuple), tuple.get(post.member.nickName),tuple.get(post.recipe.title),tuple.get(post.recipe.id),tuple.get(post.createdAt))).collect(Collectors.toList());
 
         boolean hasNextSize = isHasNextSize(pageable, postDtoList);
 
         return new SliceImpl(postDtoList,pageable,hasNextSize);
     }
+    @Override
+    public void deletePostByRecipeId(Long recipeId) {
+        jpaQueryFactory.delete(post)
+                .where(post.recipe.id.in(recipeId)).execute();
+    }
+
+    @Override
+    public List<PostDto> getTopRecipesByLikes(Long recipeId) {
+        List<Tuple> list = jpaQueryFactory
+                .select(post,uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .where(post.recipe.id.in(recipeId))
+                .orderBy(post.postLikeCount.desc())
+                .limit(4)
+                .fetch();
+
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostDto> getTopMainByLikes() {
+        List<Tuple> list = jpaQueryFactory
+                .select(post, uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .orderBy(post.postLikeCount.desc())
+                .limit(3)
+                .fetch();
+        return list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+    }
+
+    @Override
+    public Slice<PostDto> getPostsByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if(lastCount!=null){
+            if(lastCount==0){
+                builder.and(post.postLikeCount.eq(0).and(post.id.lt(lastId)));
+            }else
+                builder.and(post.postLikeCount.lt(lastCount));
+        }
+
+        OrderSpecifier<Integer> orderByLikeCount = new CaseBuilder()
+                .when(post.postLikeCount.gt(0)).then(post.postLikeCount)
+                .otherwise(Expressions.constant(0))
+                .desc();
+
+        OrderSpecifier<Long> orderByPostId = new CaseBuilder()
+                .when(post.postLikeCount.eq(0)).then(post.id)
+                .otherwise(Expressions.constant(Long.MAX_VALUE))
+                .desc();
+
+        List<Tuple> list = jpaQueryFactory.select(post, uploadFile.storeFileName)
+                .from(post)
+                .join(uploadFile).on(uploadFile.post.id.eq(post.id))
+                .where(builder,post.recipe.id.eq(recipeId))
+                .orderBy(orderByLikeCount,orderByPostId)
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        List<PostDto> postDtoList = list.stream().map(tuple -> PostDto.of(tuple.get(post), getImg(tuple))).collect(Collectors.toList());
+        boolean nextSize = isHasNextSize(pageable, postDtoList);
+
+        return new SliceImpl<>(postDtoList,pageable,nextSize);
+    }
+
     private String getImg(Tuple tuple) {
         return S3URL+tuple.get(uploadFile.storeFileName);
     }

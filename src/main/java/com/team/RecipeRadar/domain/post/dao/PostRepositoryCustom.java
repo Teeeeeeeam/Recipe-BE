@@ -1,10 +1,11 @@
 package com.team.RecipeRadar.domain.post.dao;
 
 import com.team.RecipeRadar.domain.post.dto.PostDto;
-import com.team.RecipeRadar.domain.post.dto.info.UserInfoPostRequest;
-import com.team.RecipeRadar.domain.post.dto.user.PostDetailResponse;
+import com.team.RecipeRadar.domain.post.dto.request.UserInfoPostRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+
+import java.util.List;
 
 public interface PostRepositoryCustom {
 
@@ -12,7 +13,15 @@ public interface PostRepositoryCustom {
 
     Slice<PostDto> getAllPost(Long post_Id,Pageable pageable);
 
-    PostDetailResponse postDetails(Long postId);
+    PostDto postDetails(Long postId);
 
     Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable);
+
+    void deletePostByRecipeId(Long recipeId);
+
+    List<PostDto> getTopRecipesByLikes(Long recipeId);
+
+    List<PostDto> getTopMainByLikes();
+
+    Slice<PostDto> getPostsByRecipeId(Long recipeId, Integer lastCount,Long lastId,Pageable pageable);
 }

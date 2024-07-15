@@ -15,4 +15,6 @@ public interface CustomNotificationRepository {
     void deletePostLike(Long toId ,Long fromId,Long postId);
 
     void deleteComment(Long toId, Long fromId,Long commentId);
+
+    void deleteMember(Long memberId);
 }

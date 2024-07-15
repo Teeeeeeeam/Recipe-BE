@@ -1,24 +1,12 @@
 package com.team.RecipeRadar.domain.comment.application;
 
 
-import com.team.RecipeRadar.domain.comment.dto.CommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserAddCommentDto;
-import com.team.RecipeRadar.domain.comment.dto.user.UserDeleteCommentDto;
-import org.springframework.data.domain.Page;
+import com.team.RecipeRadar.domain.blackList.dto.response.PostsCommentResponse;
 import org.springframework.data.domain.Pageable;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
-
-import java.util.List;
 
 public interface CommentService {
-    Comment save(UserAddCommentDto userAddCommentDto);
-
-
-    void delete_comment(UserDeleteCommentDto userDeleteCommentDto);
-
-    Page<CommentDto> commentPage(Long id, Pageable pageable);
-
-    void update(Long member_id,Long comment_id,String Content);
-
-    Comment findById(long id);
+    void save(Long postId, String comment,Long memberId);
+    void deleteComment(Long commentId, Long memberId);
+    void update(Long commentId,String newComment ,Long memberId);
+    PostsCommentResponse getPostsComments(Long postId, Long lastId, Pageable pageable);
 }

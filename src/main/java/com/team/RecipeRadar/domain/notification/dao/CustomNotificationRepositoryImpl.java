@@ -1,18 +1,16 @@
 package com.team.RecipeRadar.domain.notification.dao;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.dao.CommentRepository;
-import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.member.dao.MemberRepository;
 import com.team.RecipeRadar.domain.notification.domain.Notification;
 import com.team.RecipeRadar.domain.notification.domain.NotificationType;
 import com.team.RecipeRadar.domain.notification.domain.QNotification;
 import com.team.RecipeRadar.domain.notification.dto.NotificationDto;
-import com.team.RecipeRadar.domain.questions.domain.QQuestion;
-import com.team.RecipeRadar.domain.questions.domain.QuestionType;
+import com.team.RecipeRadar.domain.qna.domain.QuestionType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -21,14 +19,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.notification.domain.NotificationType.*;
-import static com.team.RecipeRadar.domain.notification.domain.QNotification.*;
 import static com.team.RecipeRadar.domain.notification.domain.QNotification.notification;
 import static com.team.RecipeRadar.domain.post.domain.QPost.*;
-import static com.team.RecipeRadar.domain.questions.domain.QQuestion.*;
+import static com.team.RecipeRadar.domain.qna.domain.QQuestion.*;
 
 @Repository
-@Slf4j
 @RequiredArgsConstructor
 public class CustomNotificationRepositoryImpl implements CustomNotificationRepository{
 
@@ -36,9 +33,9 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
 
-    private final String POST_URL ="/api/user/posts/";
-    private final String QUESTION_USER_URL = "/api/user/question/";
-    private final String QUESTION_ADMIN_URL = "/api/admin/question/";
+    private final String POST_URL ="/list-page/user-recipes/";
+    private final String QUESTION_USER_URL = "/my-page/success/answer/";
+    private final String QUESTION_ADMIN_URL = "/admin/questions/";
 
     @Override
     public Slice<NotificationDto> notificationPage(Long memberId, Pageable pageable, Long lastId) {
@@ -93,112 +90,124 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     public void deletePostLike(Long toId, Long fromId,Long postId) {    //좋아요 한사람, 게시글 작성자
         List<Notification> notificationList = getNotificationList(fromId);
         String nickName = memberRepository.findById(toId).get().getNickName();
-        log.info("닉네임={}",nickName);
-        for(Notification notification : notificationList){
-            if(notification.getNotificationType().equals(POSTLIKE)){        //좋아여 타입인지 확인
-                Long replace = getReplace(notification.getUrl(), POST_URL);        // post ID 추출
-                if(replace == postId && notification.getToName().equals(nickName)){                                  // 넘어온 ID와 추출한 아이디 비교
-                        jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
-                        break;
-                }
-            }
 
-        }
-
+        notificationList.stream()
+                .filter(notification -> notification.getNotificationType().equals(POSTLIKE)) // 좋아요 타입인지 확인
+                .filter(notification-> {
+                    Long replace = getReplace(notification.getUrl(), POST_URL);  // post ID 추출
+                    return replace.equals(postId) && notification.getToName().equals(nickName);      // 넘어온 ID와 추출한 아이디 비교
+                })
+                .findFirst()//첫 번째 알림
+                .ifPresent(
+                        notification -> jpaQueryFactory.delete(QNotification.notification).
+                                where(QNotification.notification.id.eq(notification.getId())).execute()
+                );
     }
 
     /**
      * 알람에서 댓글 삭제
-     * @param toId
-     * @param fromId
-     * @param commentId
      */
     public void deleteComment(Long toId, Long fromId,Long commentId) {    //좋아요 한사람, 게시글 작성자
         List<Notification> notificationList = getNotificationList(fromId);
         String nickName = memberRepository.findById(toId).get().getNickName();
 
-        boolean delete = false;
-        for (Notification notification : notificationList) {
-            if(delete) break;
-            if (notification.getNotificationType().equals(COMMENT)) {
-                Long replace_postId = getReplace(notification.getUrl(), POST_URL);        // post ID 추출
-                List<Comment> allWithPostId = commentRepository.findAllByPostId(replace_postId);
-                for (Comment comment : allWithPostId) {
-                    if(comment.getId() == commentId &&  notification.getToName().equals(nickName)) {
-//                        boolean existsByReceiverIdAndToName = existsByReceiverIdAndToName(notification.getReceiver().getId(), nickName); // 일치한다면 해당 레코드에서 사용자 비교
-//                        if(!existsByReceiverIdAndToName){        //존재했을때 ID획득
-//                            id= notification.getId();
-//                            break;
-//                        }
-//                    }
-                        jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
-                        delete= true;
-                        break;
-                    }
-                }
-            }
-        }
+        notificationList.stream()
+                .filter( notification ->  notification.getNotificationType().equals(COMMENT))   //댓글인지 확인
+                .filter(notification -> {
+                    Long replace = getReplace(notification.getUrl(), POST_URL); // post ID 추출
+                     return commentRepository.findAllByPostId(replace).stream()
+                            .anyMatch(comment -> comment.getId() == commentId && notification.getToName().equals(nickName)); // 조건 일치 확인
+                })
+                .findFirst()
+                .ifPresent(notification -> {
+                    deleteCommentNotification(notification);
+                });
+    }
 
+    private void deleteCommentNotification(Notification notification) {
+        jpaQueryFactory.delete(QNotification.notification).where(QNotification.notification.id.eq(notification.getId())).execute();
+    }
+
+    /**
+     * 사용자 탈퇴사 관련된 알림 객체 삭제
+     */
+    @Override
+    public void deleteMember(Long memberId) {
+        jpaQueryFactory.delete(notification)
+                .where(notification.receiver.id.in(
+                        JPAExpressions.select(member.id)
+                                .from(member).where(member.id.eq(memberId))
+                )).execute();
     }
 
     private List<Notification> getNotificationList(Long fromId) {
         return jpaQueryFactory.select(notification).from(notification).where(notification.receiver.id.eq(fromId)).fetch();
     }
 
-
-    // 좋아요 해제시 알림 엔티티에서도 삭제하기 위해서 좋아요한 사용자의 id와 게시글 작성자의 id가 존재하는지 확인
-    private boolean existsByReceiverIdAndToName(Long memberId, String toName) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(notification.receiver.id.eq(memberId).and(notification.toName.eq(toName)));
-        log.info("buuasd={}",builder.toString());
-
-        return jpaQueryFactory
-                .selectFrom(notification)
-                .where(builder)
-                .fetchFirst() != null;
-    }
-    
     // 알림의 표시될 제목획득
-    private String getContent(Notification notification){
-
-        String content ="";
-
+    private String getContent(Notification notification) {
+        String content = "";
         NotificationType notificationType = notification.getNotificationType();
-
         String toName = notification.getToName();
 
-        if(notificationType.equals(POSTLIKE)){      //좋아요시 URL id 획득
-            Long postId = getReplace(notification.getUrl(), POST_URL);
-            String postTitle = jpaQueryFactory.select(post.postTitle)
-                    .from(post)
-                    .where(post.id.eq(postId)).fetchFirst();
-            content = toName+"님이 "+postTitle+" 게시글에 좋아요를 했습니다.";
+        switch (notificationType) {
+            case POSTLIKE:
+                content = getPostLikeContent(notification, toName);
+                break;
+            case COMMENT:
+                content = getCommentContent(notification, toName);
+                break;
+            case QUESTION:
+                content = getQuestionContent(notification, toName);
+                break;
+            default:
+                break;
         }
-        else if(notificationType.equals(COMMENT)){      // 댓글등록시 id획득
-            Long postId = getReplace(notification.getUrl(), POST_URL);
-            String postTitle = jpaQueryFactory.select(post.postTitle)
-                    .from(post)
-                    .where(post.id.eq(postId)).fetchFirst();
-            content = toName+"님이 "+ postTitle+" 게시글에 댓글을 달았습니다.";
-        }
-        else if(notificationType.equals(QUESTION)){
-            String roles = notification.getReceiver().getRoles();
-            content = null;
-            if(roles.equals("ROLE_ADMIN")){
-                Long questionId = getReplace(notification.getUrl(), QUESTION_ADMIN_URL);
-                QuestionType questionType = jpaQueryFactory.select(question.questionType)
-                        .from(question)
-                        .where(question.id.eq(questionId)).fetchFirst();
-                String body= questionType==QuestionType.ACCOUNT_INQUIRY ?"계정 문의" : "일반 문의";
-                content = toName+"님이 "+ body+" 사항을 등록했습니다.";
-            }else {
-            }
-        }
-        return content;
 
+        return content;
     }
 
-    //url에서 postId획득
+    /* 게시글 좋아요 알림 내용 */
+    private String getPostLikeContent(Notification notification, String toName) {
+        Long postId = getReplace(notification.getUrl(), POST_URL);
+        String postTitle = jpaQueryFactory.select(post.postTitle)
+                .from(post)
+                .where(post.id.eq(postId)).fetchFirst();
+        return toName + "님이 " + postTitle + " 게시글에 좋아요를 했습니다.";
+    }
+
+    /* 댓글 작성 알림 내용 */
+    private String getCommentContent(Notification notification, String toName) {
+        Long postId = getReplace(notification.getUrl(), POST_URL);
+        String postTitle = jpaQueryFactory.select(post.postTitle)
+                .from(post)
+                .where(post.id.eq(postId)).fetchFirst();
+        return toName + "님이 " + postTitle + " 게시글에 댓글을 달았습니다.";
+    }
+
+    /* 질문 알림 내용 */
+    private String getQuestionContent(Notification notification, String toName) {
+        String content = "";
+        String roles = notification.getReceiver().getRoles();
+
+        if ("ROLE_ADMIN".equals(roles)) {           // 어드민 사용자일떄 가는 알림
+            Long questionId = getReplace(notification.getUrl(), QUESTION_ADMIN_URL);
+            QuestionType questionType = jpaQueryFactory.select(question.questionType)
+                    .from(question)
+                    .where(question.id.eq(questionId)).fetchFirst();
+            String body = (questionType == QuestionType.ACCOUNT_INQUIRY) ? "계정 문의" : "일반 문의";
+            content = toName + "님이 " + body + " 사항을 등록했습니다.";
+        } else {                                    // 일반 사용자에게 답변이 작성되었을때
+            Long replaceUrl = getReplace(notification.getUrl(), QUESTION_USER_URL);
+            String questionTitle = jpaQueryFactory.select(question.title)
+                    .from(question)
+                    .where(question.id.eq(replaceUrl)).fetchFirst();
+            content = toName + "님이 " + questionTitle + " 의 답변이 작성되었습니다.";
+        }
+
+        return content;
+    }
+    /* 저장된 url에서 Id값 획득 */
     private Long getReplace(String url,String replace){
         return Long.parseLong(url.replace(replace,""));
     }

@@ -2,10 +2,15 @@ package com.team.RecipeRadar.domain.recipe.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.team.RecipeRadar.domain.recipe.domain.CookingStep;
 import com.team.RecipeRadar.domain.recipe.domain.Recipe;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookIngredients;
+import com.team.RecipeRadar.domain.recipe.domain.type.CookMethods;
+import com.team.RecipeRadar.domain.recipe.domain.type.DishTypes;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,6 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(name = "레시피 DTO")
 public class RecipeDto {
 
     private Long id;              // 요리 값
@@ -29,14 +35,19 @@ public class RecipeDto {
 
     private Integer likeCount;      // 좋아요 수
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<CookingStep> cookingSteps;         // 조리순서
+    private List<CookStepDto> cookSteps;         // 조리순서
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String ingredient;          // 재료
 
+    private LocalDate createdAt;
 
-    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount) {
+    private CookIngredients cookIngredients;
+
+    private CookMethods cookMethods;
+
+    private DishTypes dishTypes;
+
+    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount,LocalDateTime createdAt) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.title = title;
@@ -44,18 +55,37 @@ public class RecipeDto {
         this.people = people;
         this.cookingTime = cookingTime;
         this.likeCount = likeCount;
+        this.createdAt =createdAt.toLocalDate();
+    }
+    public RecipeDto(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, LocalDateTime localDateTime, CookIngredients cookIngredients, CookMethods cookMethods, DishTypes dishTypes) {
+        this.id = id;
+        this.imageUrl=imageUrl;
+        this.title=title;
+        this.cookingLevel= cookingLevel;
+        this.people = people;
+        this.cookingTime = cookingTime;
+        this.likeCount= likeCount;
+        this.createdAt =localDateTime.toLocalDate();
+        this.cookIngredients = cookIngredients;
+        this.cookMethods = cookMethods;
+        this.dishTypes = dishTypes;
     }
 
     public RecipeDto toDto(){
-        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
+        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount, createdAt.atStartOfDay(),cookIngredients,cookMethods,dishTypes);
     }
 
-    public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount){
-        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount);
+    public static RecipeDto from(Long id, String imageUrl, String title, String cookingLevel, String people, String cookingTime, Integer likeCount, LocalDateTime createdAt){
+        return new RecipeDto(id,imageUrl,title,cookingLevel,people,cookingTime,likeCount,createdAt);
     }
 
-    public static RecipeDto of(Recipe recipe,String imageUrl,List<CookingStep> cookStep,String ingredient){
+    public static RecipeDto of(Recipe recipe,String imageUrl,List<CookStepDto> cookStep,String ingredient){
         return new RecipeDto(recipe.getId(), imageUrl, recipe.getTitle(), recipe.getCookingLevel(), recipe.getPeople(), recipe.getCookingTime(), recipe.getLikeCount()
-        ,cookStep,ingredient);
+        ,cookStep,ingredient,recipe.getCreatedAt().toLocalDate(),recipe.getCookingIngredients(),recipe.getCookMethods(),recipe.getTypes());
+    }
+
+    public static RecipeDto categoryOf(Recipe recipe, String imageUrl){
+        return RecipeDto.builder().id(recipe.getId()).title(recipe.getTitle()).people(recipe.getPeople()).cookingLevel(recipe.getCookingLevel()).
+                likeCount(recipe.getLikeCount()).imageUrl(imageUrl).build();
     }
 }

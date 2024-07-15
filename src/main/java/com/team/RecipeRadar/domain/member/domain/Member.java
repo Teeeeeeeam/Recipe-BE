@@ -1,11 +1,10 @@
 package com.team.RecipeRadar.domain.member.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.like.domain.PostLike;
 import com.team.RecipeRadar.domain.like.domain.RecipeLike;
 import com.team.RecipeRadar.domain.post.domain.Post;
+import com.team.RecipeRadar.domain.bookmark.domain.RecipeBookmark;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,27 +14,40 @@ import java.util.Arrays;
 import java.util.List;
 
 @Entity
+@Table(indexes = {
+        @Index(columnList = "nick_name"),
+        @Index(columnList = "email"),
+        @Index(name = "idx_member_login_id",columnList = "login_id")
+})
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "posts")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Member {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    Long id;
+    private Long id;
 
-    String username;
-    String nickName;
-    String password;
-    String loginId;
-    String email;
-    @JsonIgnore
-    String roles;
-    LocalDate join_date;
-    String login_type;
+    private String username;
+
+    @Column(name = "nick_name")
+    private String nickName;
+
+    private String password;
+
+    @Column(name = "login_id")
+    private String loginId;
+
+    private String email;
+
+    private String roles;
+
+    private LocalDate createAt;
+
+    private String login_type;
+
     private boolean verified;
 
 
@@ -54,6 +66,10 @@ public class Member {
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)
     List<RecipeLike> recipeLikes = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)
+    List<RecipeBookmark> recipeBookmarks = new ArrayList<>();
 
     public List<String> getRoleList(){
         if(this.roles != null && this.roles.length() > 0){
