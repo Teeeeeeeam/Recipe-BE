@@ -85,7 +85,7 @@ public class NaverUserDisConnectServiceImpl implements UserDisConnectService {
             RestTemplate restTemplate = new RestTemplate();
 
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("grant_type","delete ");
+            requestBody.add("grant_type","delete");
             requestBody.add("client_id",oauth2UrlProvider.getNaverClientId());
             requestBody.add("client_secret",oauth2UrlProvider.getNaverSecretId());
             requestBody.add("access_token",accessToken);
