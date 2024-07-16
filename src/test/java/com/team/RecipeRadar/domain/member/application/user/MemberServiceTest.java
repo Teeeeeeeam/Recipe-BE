@@ -9,6 +9,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.member.dto.response.UserInfoResponse;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
+import com.team.RecipeRadar.domain.qna.dao.answer.AnswerRepository;
 import com.team.RecipeRadar.domain.qna.dao.question.QuestionRepository;
 import com.team.RecipeRadar.global.auth.dao.RefreshTokenRepository;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
@@ -43,6 +44,7 @@ public class MemberServiceTest {
     @Mock AccountRetrievalRepository accountRetrievalRepository;
     @Mock NoticeRepository noticeRepository;
     @Mock NotificationRepository notificationRepository;
+    @Mock AnswerRepository answerRepository;
     @Mock SinUpService sinUpService;
     @Mock PasswordEncoder passwordEncoder;
     @Mock QuestionRepository questionRepository;
