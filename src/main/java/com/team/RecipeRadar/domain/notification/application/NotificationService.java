@@ -72,6 +72,8 @@ public class NotificationService {
         Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(memberId);
         sseEmitters.forEach(
                 (key, emitter) -> {
+                    log.info("key={}",key);
+                    log.info("emitter={}",emitter);
                     emitterRepository.saveEventCache(key, notification);
                     sendToClient(emitter, key, new ControllerApiResponse<>(true,"새로운 알림", NotificationResponse.from(notification)));
                 }
@@ -165,6 +167,7 @@ public class NotificationService {
         try {
             emitter.send(SseEmitter.event().id(emitterId).data(data));
         } catch (IOException exception) {
+            exception.printStackTrace();
             emitterRepository.deleteById(emitterId);
             throw new IllegalStateException("알림 전송에 실패했습니다.");
         }
