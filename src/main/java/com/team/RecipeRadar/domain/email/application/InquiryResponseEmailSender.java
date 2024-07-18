@@ -34,7 +34,7 @@ public class InquiryResponseEmailSender implements MailService {
      * 메일 전송 메서드
      */
     private void sendEmailVerification(String email, SimpleMailMessage message) {
-        message.setSubject("나만의 냉장고 문의사항 답변 알림");
+        message.setSubject("요리 공유소 문의사항 답변 알림");
         message.setText(getText());
         message.setFrom(emailFrom);
         message.setTo(email);
@@ -47,7 +47,7 @@ public class InquiryResponseEmailSender implements MailService {
      */
     private String getText() {
         StringBuilder sb = new StringBuilder();
-        sb.append("안녕하세요 나만의 냉장고 회원님").append("\n");
+        sb.append("안녕하세요 요리 공유소 회원님").append("\n");
         sb.append(LocalDate.now()).append(" 문의사항에 대한 답변이 도착했습니다.").append("\n");
         sb.append("마이 페이지에서 문의사항을 확인해주세요.").append("\n");
         sb.append("감사합니다.");

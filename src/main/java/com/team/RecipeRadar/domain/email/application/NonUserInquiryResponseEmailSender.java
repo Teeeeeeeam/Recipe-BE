@@ -33,7 +33,7 @@ public class NonUserInquiryResponseEmailSender implements MailService {
      */
     private void sendEmailVerification(String email, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("나만의 냉장고 이용 제한");
+        message.setSubject("요리 공유소 이용 제한");
         message.setText(createText(subject, body));
         message.setFrom(emailFrom);
         message.setTo(email);

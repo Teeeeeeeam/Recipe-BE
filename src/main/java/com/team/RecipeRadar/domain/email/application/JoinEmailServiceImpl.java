@@ -88,7 +88,7 @@ public class JoinEmailServiceImpl implements MailService{
      */
     private void sendEmailVerification(String email) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("나만의 냉장고 회원가입 인증번호 안내."); // 이메일 제목 설정
+        message.setSubject("요리 공유소 회원가입 인증번호 안내."); // 이메일 제목 설정
         message.setText(getText()); // 이메일 내용 설정
         message.setFrom(emailFrom); // 발신자 이메일 주소 설정
         message.setTo(email); // 수신자 이메일 주소 설정
@@ -105,7 +105,7 @@ public class JoinEmailServiceImpl implements MailService{
         buffer.append("아래의 코드를 인증번호 칸에 입력해주세요. "); // 회원 가입 안내 메시지 추가
         buffer.append(code);
         buffer.append(System.lineSeparator()).append(System.lineSeparator()); // 공백 라인 추가
-        buffer.append("Regards,").append(System.lineSeparator()).append("나만의 냉장고"); // 문서 마무리 부분 추가
+        buffer.append("Regards,").append(System.lineSeparator()).append("요리 공유소"); // 문서 마무리 부분 추가
         return buffer.toString(); // 완성된 이메일 내용 반환
     }
 }
