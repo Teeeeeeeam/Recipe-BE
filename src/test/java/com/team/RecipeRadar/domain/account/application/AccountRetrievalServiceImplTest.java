@@ -172,7 +172,7 @@ class AccountRetrievalServiceImplTest {
         when(memberService.duplicatePassword(anyString(),anyString())).thenReturn(duplicatePasswordMap);
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
-        accountRetrievalService.updatePassword(updatePasswordDto, token);
+        accountRetrievalService.updatePassword(updatePasswordDto, token,"account-token");
 
     }
 
@@ -200,7 +200,7 @@ class AccountRetrievalServiceImplTest {
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            accountRetrievalService.updatePassword(updatePasswordDto, token);
+            accountRetrievalService.updatePassword(updatePasswordDto, token,"account-token");
         });
 
         // 예외 메시지가 일치하는지 확인
@@ -231,7 +231,7 @@ class AccountRetrievalServiceImplTest {
         when(memberService.checkPasswordStrength(any())).thenReturn(passwordStrengthMap);
 
         IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> {
-            accountRetrievalService.updatePassword(updatePasswordDto, token);
+            accountRetrievalService.updatePassword(updatePasswordDto, token,"account-token");
         });
 
         // 예외 메시지가 일치하는지 확인

@@ -104,7 +104,7 @@ class AccountRetrievalControllerTest {
         String token = new String(Base64.getEncoder().encode("token".getBytes()));
 
         UpdatePasswordRequest updatePasswordRequest = new UpdatePasswordRequest(loginId, "asdQWE123!@", "asdQWE123!@");
-        doNothing().when(accountRetrievalService).updatePassword(updatePasswordRequest,token);
+        doNothing().when(accountRetrievalService).updatePassword(updatePasswordRequest,token,"account-token");
 
         Cookie cookie = new Cookie("account-token", token);
 
