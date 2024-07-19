@@ -18,11 +18,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,8 +36,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Import(SecurityTestConfig.class)
 @WebMvcTest(MemberController.class)
@@ -184,24 +186,27 @@ public class MemberControllerTest {
     @Test
     @CustomMockUser
     @DisplayName("회원 탈퇴 성공 테스트")
-    void Delete_Member_Site_SUCCESS() throws Exception {
+    void deleteMember_Success() throws Exception {
 
         UserDeleteIdRequest userDeleteIdRequest = new UserDeleteIdRequest(true);
-        Cookie cookie = new Cookie("login-id", "fakeCookie");
 
-        doNothing().when(memberService).deleteMember(anyLong(),eq(true)); // username 값 설정
+        ResponseCookie loginId = ResponseCookie.from("login-id", "fakeToken").build();
+        ResponseCookie RefreshToken = ResponseCookie.from("RefreshToken", "fakeToken").build();
+
+        when(cookieUtils.deleteCookie(eq("login-id"))).thenReturn(loginId);
+        when(cookieUtils.deleteCookie(eq("RefreshToken"))).thenReturn(RefreshToken);
+        doNothing().when(memberService).deleteMember(anyLong(), eq(true));
 
         mockMvc.perform(delete("/api/user/info/disconnect")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .cookie(cookie)
                         .content(objectMapper.writeValueAsString(userDeleteIdRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("탈퇴 성공"));
 
-        //void 반환타입 1회 실행되었는지 확인
-        verify(memberService, times(1)).deleteMember(anyLong(), anyBoolean());
+
+        verify(memberService, times(1)).deleteMember(anyLong(), eq(true));
     }
 
 
