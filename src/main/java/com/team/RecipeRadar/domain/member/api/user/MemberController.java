@@ -19,9 +19,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -123,8 +129,14 @@ public class MemberController {
                                           @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails){
         validCookie(cookieLoginId,principalDetails);
         memberService.deleteMember(principalDetails.getMemberId(), userDeleteIdRequest.isCheckBox());
-        return ResponseEntity.ok(new ControllerApiResponse<>(true,"탈퇴 성공"));
 
+        ResponseCookie loginId = cookieUtils.deleteCookie("login-id");
+        ResponseCookie refreshToken = cookieUtils.deleteCookie("RefreshToken");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,loginId.toString())
+                .header(HttpHeaders.SET_COOKIE,refreshToken.toString())
+                .body(new ControllerApiResponse<>(true,"탈퇴 성공"));
     }
     private void validCookie(String cookieLoginId, PrincipalDetails principalDetails) {
         cookieUtils.validCookie(cookieLoginId, principalDetails.getName());
