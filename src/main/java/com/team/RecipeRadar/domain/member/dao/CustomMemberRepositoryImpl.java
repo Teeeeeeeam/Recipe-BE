@@ -98,14 +98,17 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository{
 
     /* 동적 회원 게시글 검색 where 문 */
     private void addSearchCondition(BooleanBuilder builder, String searchValue, StringPath searchField) {
-
         if (searchValue != null) {
             long count  = dataCount(searchValue, searchField);      // 총 데이터 수 조회
-            if(count<1000) {
+            if(count == 1){                                         // 중복된 토큰이 존재할수 있어서 최적화
+                builder.and(searchField.like("%"+searchValue).or(searchField.like(searchValue+"%")));
+            }
+            else if (count<1000) {
                 NumberTemplate<Double> searchTemplate = Expressions.numberTemplate(Double.class,
-                        FULL_TEXT_INDEX, searchField, searchValue);
+                        FULL_TEXT_INDEX, searchField, "+"+searchValue);
                 builder.and(searchTemplate.gt(0));
-            }else{
+            }
+            else{
                 builder.and(searchField.like("%"+searchValue+"%"));
             }
         }
