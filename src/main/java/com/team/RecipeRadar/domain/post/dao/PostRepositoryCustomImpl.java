@@ -6,6 +6,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team.RecipeRadar.domain.comment.domain.Comment;
 import com.team.RecipeRadar.domain.comment.domain.QComment;
@@ -127,18 +128,11 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
     public Slice<PostDto> searchPosts(String loginId, String recipeTitle, String postTitle ,Long lastPostId, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
+        addSearchCondition(builder, recipeTitle, post.recipe.title);
+        addSearchCondition(builder, postTitle, post.postTitle);
+
         if(lastPostId !=null){
             builder.and(post.id.lt(lastPostId));
-        }
-        if(recipeTitle!=null){
-            NumberTemplate recipe_boolean = Expressions.numberTemplate(Double.class,
-                    FULL_TEXT_INDEX , post.recipe.title, recipeTitle);
-            builder.and(recipe_boolean.gt(0));
-        }
-        if(postTitle!=null){
-            NumberTemplate post_boolean = Expressions.numberTemplate(Double.class,
-                    FULL_TEXT_INDEX , post.postTitle, postTitle);
-            builder.and(post_boolean.gt(0));
         }
         if (loginId != null) {
             builder.and(post.member.loginId.eq(loginId));
@@ -240,4 +234,28 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
         }
         return hasNextSize;
     }
+
+    private void addSearchCondition(BooleanBuilder builder, String searchValue, StringPath searchField) {
+        if (searchValue != null) {
+            long count  = dataCount(searchValue, searchField);      // 총 데이터 수 조회
+            if(count == 1){                                         // 중복된 토큰이 존재할수 있어서 최적화
+                builder.and(searchField.like("%"+searchValue).or(searchField.like(searchValue+"%")));
+            }
+            else if (count<1000) {
+                NumberTemplate<Double> searchTemplate = Expressions.numberTemplate(Double.class,
+                        FULL_TEXT_INDEX, searchField, "+"+searchValue);
+                builder.and(searchTemplate.gt(0));
+            }
+            else{
+                builder.and(searchField.like("%"+searchValue+"%"));
+            }
+        }
+    }
+
+    private long dataCount(String searchValue,StringPath searchField) {
+        return jpaQueryFactory.select(post.count())
+                .from(post)
+                .where(searchField.like("%"+searchValue+"%")).fetchOne();
+    }
+
 }
