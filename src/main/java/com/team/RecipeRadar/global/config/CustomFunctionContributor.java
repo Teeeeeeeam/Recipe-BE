@@ -10,6 +10,6 @@ public class CustomFunctionContributor implements MetadataBuilderContributor {
     @Override
     public void contribute(MetadataBuilder metadataBuilder) {
         metadataBuilder.applySqlFunction("match",
-                new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "match (?1) against (?2)"));
+                new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "match(?1) against (?2 in boolean mode)"));
     }
 }
