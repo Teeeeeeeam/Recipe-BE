@@ -128,7 +128,7 @@ public class MemberServiceImpl implements MemberService {
         validateNormalUser(member);
 
         if (!checkType)
-            throw new InvalidIdException("약관 동의를 주세요.");
+            throw new InvalidIdException("약관 동의를 해주세요.");
 
        deleteMemberId(member);
     }
