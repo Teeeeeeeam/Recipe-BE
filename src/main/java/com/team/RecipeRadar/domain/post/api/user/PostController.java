@@ -50,7 +50,7 @@ public class PostController {
     })
     @PostMapping(value = "/user/posts",consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postAdd(@Valid @RequestPart UserAddRequest userAddPostRequest, BindingResult bindingResult,
-                                     @RequestPart MultipartFile file,
+                                     @RequestPart(required = false) MultipartFile file,
                                      @Parameter(hidden = true)@AuthenticationPrincipal PrincipalDetails principalDetails) {
         postService.save(userAddPostRequest,principalDetails.getMemberId(),file);
         return ResponseEntity.ok(new ControllerApiResponse(true,"작성 성공"));

@@ -44,7 +44,7 @@ public class S3UploadService{
      */
     public <T>String uploadFile(MultipartFile file,List<T> entities){
 
-        if (file.isEmpty()|| file==null){
+        if (file==null){
             throw new ImageException(MISSING_PRIMARY_IMAGE);
         }
 
