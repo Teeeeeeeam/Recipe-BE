@@ -76,7 +76,7 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
      * 비밀번호를 새로 변경하는 메서드
      * 비밀번호 찾기 검증시에 발급된 토큰 값을 통해 비밀번호를 새롭게 변경 (DB -> 10분마다 현재 시간기준으로 토큰을 삭제)
      */
-    public void updatePassword(UpdatePasswordRequest updatePasswordRequest, String token){
+    public void updatePassword(UpdatePasswordRequest updatePasswordRequest, String token,String cookieType){
 
         String validId = new String(Base64.getDecoder().decode(token.getBytes()));
 
@@ -93,8 +93,9 @@ public class AccountRetrievalServiceImpl implements AccountRetrievalService{
         //비밀번호 저장
         member.update(passwordEncoder.encode(updatePasswordRequest.getPassword()));
         
-        //비밀번호 성공시 인증 DB 에서 삭제
-        accountRetrievalRepository.deleteByVerificationId(validId);
+        //비밀번호 성공시 account-token 쿠키일 때만 인증 DB 에서 삭제
+        if(cookieType.equals("account-token"))
+            accountRetrievalRepository.deleteByVerificationId(validId);
     }
 
     /**

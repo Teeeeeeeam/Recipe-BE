@@ -11,7 +11,6 @@ import com.team.RecipeRadar.domain.recipe.domain.Recipe;
 import com.team.RecipeRadar.domain.Image.dao.ImgRepository;
 import com.team.RecipeRadar.domain.Image.domain.UploadFile;
 import com.team.RecipeRadar.global.config.QueryDslConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -30,7 +29,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Slf4j
 @EnableJpaAuditing
 @Import(QueryDslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -102,7 +100,6 @@ class PostRepositoryTest {
     @DisplayName("게시글 검색 페이징 테스트 진행")
     void post_search() {
         Long id = recipeRepository.findAll().get(0).getId();
-        log.info("현재 모든 게시글 ={}",id);
         Pageable request = PageRequest.of(0, 2);
         String loginId = "testId";
 

@@ -60,7 +60,7 @@ public class S3UploadServiceTest {
     @Test
     @DisplayName("이미지 업로드 실패 테스트 - 빈 파일")
     void testUploadFileEmptyFile() {
-        MockMultipartFile file = new MockMultipartFile("empty", new byte[0]);
+        MockMultipartFile file = null;
 
         assertThatThrownBy(() -> s3UploadService.uploadFile(file, List.of()))
                 .isInstanceOf(ImageException.class)

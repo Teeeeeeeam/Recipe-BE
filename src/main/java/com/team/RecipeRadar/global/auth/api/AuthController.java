@@ -126,7 +126,12 @@ public class AuthController {
     public ResponseEntity<?> kakaoUnlink(@RequestParam("code")String auth2Code){
         String accessToken = kakaoDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = kakaoDisConnectService.disconnect(accessToken);
-            return ResponseEntity.status(HttpStatus.FOUND)
+
+        DeleteCookie result = getDeleteCookie();
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.SET_COOKIE, result.refreshToken().toString())
+                .header(HttpHeaders.SET_COOKIE, result.loginId().toString())
                     .location(URI.create(redirectUrl+disconnected)).build();
     }
 
@@ -135,7 +140,11 @@ public class AuthController {
     public ResponseEntity<?> naverUnlink(@RequestParam("code")String auth2Code){
         String accessToken = naverDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = naverDisConnectService.disconnect(accessToken);
+        DeleteCookie result = getDeleteCookie();
+
         return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.SET_COOKIE, result.refreshToken().toString())
+                .header(HttpHeaders.SET_COOKIE, result.loginId().toString())
                 .location(URI.create(redirectUrl+disconnected)).build();
     }
 
@@ -144,7 +153,21 @@ public class AuthController {
     public ResponseEntity<?>  googleUnlink(@RequestParam("code")String auth2Code) {
         String accessToken = googleUserDisConnectService.getAccessToken(auth2Code);
         Boolean disconnected = googleUserDisConnectService.disconnect(accessToken);
+        DeleteCookie result = getDeleteCookie();
+
         return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.SET_COOKIE, result.refreshToken().toString())
+                .header(HttpHeaders.SET_COOKIE, result.loginId().toString())
                 .location(URI.create(redirectUrl+disconnected)).build();
+    }
+
+    private DeleteCookie getDeleteCookie() {
+        ResponseCookie refreshToken = cookieUtils.deleteCookie("RefreshToken");
+        ResponseCookie loginId = cookieUtils.deleteCookie("login-id");
+        DeleteCookie result = new DeleteCookie(refreshToken, loginId);
+        return result;
+    }
+
+    private record DeleteCookie(ResponseCookie refreshToken, ResponseCookie loginId) {
     }
 }

@@ -9,7 +9,6 @@ import com.team.RecipeRadar.domain.notice.dto.NoticeDto;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchDataException;
 import com.team.RecipeRadar.global.exception.ex.nosuch.NoSuchErrorType;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -23,7 +22,6 @@ import static com.team.RecipeRadar.domain.member.domain.QMember.*;
 import static com.team.RecipeRadar.domain.notice.domain.QNotice.*;
 import static com.team.RecipeRadar.domain.Image.domain.QUploadFile.*;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
@@ -33,6 +31,9 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
     @Value("${S3.URL}")
     private  String s3URL;
 
+    /**
+     * 메인페이지에서 나오는 공지사항
+     */
     public List<NoticeDto> mainNotice(){
         List<Tuple> list = jpaQueryFactory.select(notice.id, notice.noticeTitle, uploadFile.storeFileName)
                 .from(notice)
@@ -45,6 +46,9 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 어드민 페이지에서 사용 되는 공지 사항
+     */
     public Slice<NoticeDto> adminNotice(Long noticeId,Pageable pageable){
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -65,6 +69,9 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         return new SliceImpl<>(noticeDtoList,pageable,isHasNext);
     }
 
+    /**
+     * 공지사항 상세보기 메서드
+     */
     @Override
     public NoticeDto detailsPage(Long noticeId) {
 
@@ -79,6 +86,9 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .orElseThrow(() -> new NoSuchDataException(NoSuchErrorType.NO_SUCH_NOTICE));
     }
 
+    /**
+     * 공지사항 삭제
+     */
     @Override
     public void deleteMemberId(Long memberId) {
         jpaQueryFactory.delete(notice)
@@ -88,12 +98,17 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 )).execute();
     }
 
+    /**
+     * 공지사항 검색
+     * 공지사항은 데이터가 많이 쌓이지 않는다고 판단해 like문을 사용
+     */
     @Override
     public Slice<NoticeDto> searchNotice(String title, Long lastId, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
         if(title != null){
             builder.and(notice.noticeTitle.like("%"+title+"%"));
         }
+        
         lastId(lastId, builder);
 
         List<Notice> notices = jpaQueryFactory.select(notice)

@@ -11,5 +11,5 @@ public interface AccountRetrievalService {
 
     String findPwd(String username, String loginId, String email,int code);
 
-    void updatePassword(UpdatePasswordRequest updatePasswordRequest, String uuid);
+    void updatePassword(UpdatePasswordRequest updatePasswordRequest, String uuid,String cookieType);
 }

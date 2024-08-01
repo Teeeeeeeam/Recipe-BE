@@ -7,6 +7,7 @@ import com.team.RecipeRadar.domain.member.domain.Member;
 import com.team.RecipeRadar.domain.email.application.MailService;
 import com.team.RecipeRadar.domain.notice.dao.NoticeRepository;
 import com.team.RecipeRadar.domain.notification.dao.NotificationRepository;
+import com.team.RecipeRadar.domain.qna.dao.answer.AnswerRepository;
 import com.team.RecipeRadar.domain.qna.dao.question.QuestionRepository;
 import com.team.RecipeRadar.domain.member.dto.response.UserInfoResponse;
 import com.team.RecipeRadar.global.exception.ex.InvalidIdException;
@@ -35,6 +36,7 @@ public class MemberServiceImpl implements MemberService {
     private final NoticeRepository noticeRepository;
     private final NotificationRepository notificationRepository;
     private final SinUpService sinUpService;
+    private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
 
     @Qualifier("AccountEmail")
@@ -126,7 +128,7 @@ public class MemberServiceImpl implements MemberService {
         validateNormalUser(member);
 
         if (!checkType)
-            throw new InvalidIdException("약관 동의를 주세요.");
+            throw new InvalidIdException("약관 동의를 해주세요.");
 
        deleteMemberId(member);
     }
@@ -146,6 +148,7 @@ public class MemberServiceImpl implements MemberService {
         noticeRepository.deleteMemberId(member.getId());
         notificationRepository.deleteMember(member.getId());
         jwtRefreshTokenRepository.DeleteByMemberId(member.getId());
+        answerRepository.deleteByQuestionIdWithMember(member.getId());
         questionRepository.deleteAllByMemberId(member.getId());
         memberRepository.delete(member);
     }

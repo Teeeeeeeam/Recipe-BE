@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -84,22 +85,21 @@ public class NaverUserDisConnectServiceImpl implements UserDisConnectService {
             
             RestTemplate restTemplate = new RestTemplate();
 
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("grant_type","delete ");
-            requestBody.add("client_id",oauth2UrlProvider.getNaverClientId());
-            requestBody.add("client_secret",oauth2UrlProvider.getNaverSecretId());
-            requestBody.add("access_token",accessToken);
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(requestUrl)
+                    .queryParam("grant_type", "delete")
+                    .queryParam("client_id", oauth2UrlProvider.getNaverClientId())
+                    .queryParam("client_secret", oauth2UrlProvider.getNaverSecretId())
+                    .queryParam("access_token", accessToken);
 
-            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody);
+            HttpEntity<String> requestEntity = new HttpEntity<>(new HttpHeaders());
             ResponseEntity<String> responseEntity = restTemplate.exchange(
-                    requestUrl,
+                    uriBuilder.toUriString(),
                     HttpMethod.POST,
                     requestEntity,
                     String.class
             );
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-
                 return true;
             } else {
                 return false;

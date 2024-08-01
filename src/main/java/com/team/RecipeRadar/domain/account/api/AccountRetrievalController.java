@@ -100,9 +100,13 @@ public class AccountRetrievalController {
             }
         }
 
-        accountRetrievalService.updatePassword(updatePasswordRequest,accountId);
-
-        ResponseCookie deleteCookie = cookieUtils.deleteCookie(cookieId);
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
+        accountRetrievalService.updatePassword(updatePasswordRequest,accountId,cookieId);
+        
+        // 로그인 페이지에서 비밀번호 찾기시에만 쿠키삭제
+        if(cookieId.equals(ACCOUNT)) {
+            ResponseCookie deleteCookie = cookieUtils.deleteCookie(cookieId);
+           return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,deleteCookie.toString()).body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
+        }
+        return ResponseEntity.ok().body(new ControllerApiResponse<>(true,"비밀번호 변경 성공"));
     }
 }

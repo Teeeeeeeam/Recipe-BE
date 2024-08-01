@@ -15,18 +15,17 @@ import java.util.List;
 
 @Entity
 @Table(indexes = {
-        @Index(columnList = "nick_name"),
-        @Index(columnList = "email"),
         @Index(name = "idx_member_login_id",columnList = "login_id")
 })
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "posts")
+@ToString(exclude = {"posts","comments","postLikes","recipeLikes","recipeBookmarks"})
 public class Member {
 
-    @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
@@ -52,8 +51,8 @@ public class Member {
 
 
     @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)
-    List<Comment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,orphanRemoval = true)

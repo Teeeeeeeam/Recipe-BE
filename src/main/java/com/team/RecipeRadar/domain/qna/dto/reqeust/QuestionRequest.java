@@ -24,7 +24,7 @@ public class QuestionRequest {
     private String title;
 
     @Schema(example = "문의 사항 내용")
-    @NotEmpty(message = "문의사항 종류를 선택해주세요")
+    @NotEmpty(message = "문의사항 내용을 작성해주세요")
     private String questionContent;
 
     @Schema(example = "EMAIL", description = "문의 사항 작성시 알림 받기 서비스")
