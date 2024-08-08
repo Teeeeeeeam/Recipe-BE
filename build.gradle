@@ -41,6 +41,11 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'		//aop 적용
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	//xss
+	implementation 'com.navercorp.lucy:lucy-xss-servlet:2.0.1'
+	implementation 'com.navercorp.lucy:lucy-xss:1.6.3'
+	//StringEscapeUtils
+	implementation 'org.apache.commons:commons-text:1.8'
 	implementation group: 'com.auth0', name: 'java-jwt', version: '3.10.2'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
